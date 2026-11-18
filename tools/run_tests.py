@@ -3,7 +3,7 @@
 from pathlib import Path
 import argparse,subprocess,sys
 p=argparse.ArgumentParser();p.add_argument('--ecj',type=Path);a=p.parse_args()
-root=Path(__file__).resolve().parent;src=root/'app/src/main/java/mz/bam/seeky/android';out=root/'build/test-classes';out.mkdir(parents=True,exist_ok=True)
+root=Path(__file__).resolve().parents[1];src=root/'app/src/main/java/mz/bam/seeky/android';out=root/'build/test-classes';out.mkdir(parents=True,exist_ok=True)
 names=['BibleEpubText','StudyEvidence','StudyCards','WorkspaceEpoch','BibleHtml','WavCues','PronunciationRules','BiblePlainText','BibleEncoding','BibleText','BibleReferences','SpeechLayout','SpeechSeek','EpubLayout','BackgroundWave','CheckpointWave','BackgroundMixer','AudioTitles','WavInfo','SpeechText','WaveJoiner','DiagnosticTrace','SpeechCursor','SpeechChunks','SpeechPolicy','ReaderAppearance','ThemeColors','FileVisual','FocusClock','ImageBudget','FlashQuery','Translations','Rules','ContentText','DiskWalker','LatestWork','ChangeQueue','FolderSnapshot','GenerationWindow','FileTransfer','ExplorerOrder','FileRecord','FileOrder','MediaFormats','BookArchive','OverlayRecovery','SafeTrash','ReaderLayout','CsvFields','StudyText','StudySchedule','StudyFiles','CloudProtocol','CloudChunks','TextSearch','JsonBudget']
 sources=[src/(n+'.java') for n in names]+sorted((root/'tests').glob('*Test.java'))
 compiler=['java','-jar',str(a.ecj.resolve()),'-8','-proc:none','-warn:none'] if a.ecj else ['javac','-source','8','-target','8']

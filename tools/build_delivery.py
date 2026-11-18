@@ -3,7 +3,9 @@
 No downloads or credentials. The original certificate is still required for an in-place update.
 """
 from pathlib import Path
-import argparse, re, shutil, subprocess, tempfile, zipfile
+import argparse, os, re, shutil, subprocess, sys, tempfile, zipfile
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import app_manifest
 
 p=argparse.ArgumentParser()
 p.add_argument('--compiled-apk',required=True,type=Path)
@@ -14,13 +16,13 @@ p.add_argument('--label',default='Seeky')
 p.add_argument('--output',required=True,type=Path)
 a=p.parse_args()
 if not re.fullmatch(r'[A-Za-z]\w*(?:\.[A-Za-z]\w*)+',a.application_id):p.error('Invalid application ID')
-root=Path(__file__).resolve().parent;bt=a.build_tools.resolve()
+root=Path(__file__).resolve().parents[1];bt=a.build_tools.resolve()
 def run(args):subprocess.run(list(map(str,args)),check=True)
 with tempfile.TemporaryDirectory(prefix='seeky-delivery-') as temp:
     work=Path(temp)
     import xml.etree.ElementTree as ET
     android='http://schemas.android.com/apk/res/android';ET.register_namespace('android',android)
-    manifest=ET.fromstring((root/'app/src/main/AndroidManifest.xml').read_text().replace('mz.bam.seeky.estudos',a.application_id))
+    manifest=ET.fromstring(app_manifest.render(a.application_id))
     manifest.find('application').set('{'+android+'}label',a.label)
     for activity in manifest.findall('./application/activity'):
         if activity.get('{'+android+'}name','').endswith('.FlashActivity'):activity.set('{'+android+'}label','Seeky Flash')

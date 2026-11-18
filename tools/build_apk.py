@@ -3,6 +3,8 @@
 No downloads, dependency install, executable wrappers or remote execution.
 """
 import argparse, os, shutil, subprocess, sys, zipfile
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import app_manifest
 from pathlib import Path
 
 p=argparse.ArgumentParser()
@@ -14,9 +16,9 @@ signing.add_argument('--keystore',type=Path,help='Private signing file outside t
 signing.add_argument('--unsigned',action='store_true',help='Build an aligned APK for later signing; cannot be installed yet')
 p.add_argument('--key-alias')
 p.add_argument('--password-env',default='SEEKY_SIGN_PASSWORD',help='Environment variable containing keystore password')
-p.add_argument('--output', type=Path, default=Path('Seeky_5_0_Alpha15_Android_Teste.apk'))
+p.add_argument('--output', type=Path, default=Path('build/Seeky.apk'))
 a=p.parse_args()
-root=Path(__file__).resolve().parent
+root=Path(__file__).resolve().parents[1]
 if not a.unsigned and (not a.keystore.is_file() or not a.key_alias or not os.environ.get(a.password_env)):
  p.error("Supply an existing external keystore, key alias and password environment variable")
 build=root/'build'
@@ -32,7 +34,8 @@ def run(args):
  print('Running',Path(str(args[0])).name,flush=True)
  subprocess.run([str(x) for x in args],check=True,cwd=root)
 tools=a.build_tools.resolve(); jar=a.android_jar.resolve()
-run([tools/'aapt','package','-f','-m','--custom-package','mz.bam.seeky.android','-J',build/'generated','-M',root/'app/src/main/AndroidManifest.xml','-S',root/'app/src/main/res','-A',root/'app/src/main/assets','-I',jar,'-F',build/'resources.apk'])
+manifest=app_manifest.write(build/'generated-manifest/AndroidManifest.xml')
+run([tools/'aapt','package','-f','-m','--custom-package','mz.bam.seeky.android','-J',build/'generated','-M',manifest,'-S',root/'app/src/main/res','-A',root/'app/src/main/assets','-I',jar,'-F',build/'resources.apk'])
 with zipfile.ZipFile(build/'resources.apk') as resources:
  if 'AndroidManifest.xml' not in resources.namelist() or resources.testzip() is not None:
   raise RuntimeError('Resource APK is incomplete; final APK was not replaced')

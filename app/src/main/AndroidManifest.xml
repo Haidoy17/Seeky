@@ -1,10 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="mz.bam.seeky.estudos" android:versionCode="5004200" android:versionName="5.18.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
  <uses-permission android:name="android.permission.INTERNET"/>
  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
- <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="36"/>
  <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
@@ -34,8 +33,8 @@
   <activity android:name="mz.bam.seeky.android.SummaryActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.StorageActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.TaskActivity" android:exported="false"/>
-  <provider android:name="mz.bam.seeky.android.FileShareProvider" android:authorities="mz.bam.seeky.estudos.files" android:exported="false" android:grantUriPermissions="true"/>
-  <provider android:name="mz.bam.seeky.android.StudyFileProvider" android:authorities="mz.bam.seeky.estudos.study" android:exported="false" android:grantUriPermissions="true"/>
+  <provider android:name="mz.bam.seeky.android.FileShareProvider" android:authorities="${applicationId}.files" android:exported="false" android:grantUriPermissions="true"/>
+  <provider android:name="mz.bam.seeky.android.StudyFileProvider" android:authorities="${applicationId}.study" android:exported="false" android:grantUriPermissions="true"/>
   <receiver android:name="mz.bam.seeky.android.ResumeReceiver" android:exported="false"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>
   <service android:name="mz.bam.seeky.android.QuickSearchService" android:stopWithTask="false" android:exported="false" android:foregroundServiceType="specialUse">
    <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User-enabled continuous on-device file change observation and floating file search, with visible notification and stop controls"/>
@@ -53,7 +52,7 @@
   <activity android:name="mz.bam.seeky.android.MediaActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.StudyAssistantActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.ToolsActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
-  <provider android:name="mz.bam.seeky.android.PlusFileProvider" android:authorities="mz.bam.seeky.estudos.reading" android:exported="false" android:grantUriPermissions="true"/>
+  <provider android:name="mz.bam.seeky.android.PlusFileProvider" android:authorities="${applicationId}.reading" android:exported="false" android:grantUriPermissions="true"/>
   <activity android:name="mz.bam.seeky.android.ReaderActivity" android:exported="false" android:theme="@style/ReaderTheme" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.MainActivity" android:exported="true" android:configChanges="orientation|screenSize|uiMode" android:windowSoftInputMode="adjustResize">
    <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
