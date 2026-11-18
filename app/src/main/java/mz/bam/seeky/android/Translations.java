@@ -3,6 +3,12 @@ import java.util.*;
 /** Presentation-only dictionary. Stored identifiers and user data stay in their original language. */
 final class Translations {
  static final Map<String,String> EN=new HashMap<>();static {
+// 5.19.0: botão Flash, mosaico, tema Sistema e entrada de ficheiros.
+ EN.put("Sistema","System");EN.put("Botão visível","Button visible");EN.put("Desligado","Off");
+ EN.put("Seeky Flash activo. Toque para esconder o botão.","Seeky Flash is on. Tap to hide the button.");EN.put("Seeky Flash desligado. Toque para mostrar o botão de pesquisa.","Seeky Flash is off. Tap to show the search button.");
+ EN.put("Abrir pesquisa rápida Seeky. Arraste para mover. Toque longo para ajustes.","Open Seeky quick search. Drag to move. Long press for settings.");
+ EN.put("Abra o Seeky para ajustar o botão Flash.","Open Seeky to adjust the Flash button.");
+ EN.put("ficheiro(s) recusado(s): localização privada ou sem autorização de acesso.","file(s) refused: private location or no access permission.");
  EN.put("Catálogo local","Local catalog");EN.put("Outros formatos","Other formats");EN.put("Todos os ficheiros","All files");EN.put("Exibir ficheiros e categorias","File and category layout");
 
  EN.put("Pequeno","Small");EN.put("Médio","Medium");EN.put("Grande","Large");EN.put("Ícones","Icons");EN.put("Botão Flash","Flash button");EN.put("Tamanhos","Sizes");EN.put("Aumentar","Increase");EN.put("Diminuir","Decrease");EN.put("Aumentar ícones","Increase icon size");EN.put("Diminuir ícones","Decrease icon size");EN.put("Ícones e botão Flash","Icons and Flash button");EN.put("Capas","Covers");EN.put("Explorar armazenamentos","Explore storage");EN.put("Armazenamento interno","Internal storage");EN.put("Cartão / USB","SD card / USB");EN.put("O SEU ARQUIVO","YOUR FILES");EN.put("Os seus ficheiros guardados","Your saved files");EN.put("Consulta durante a leitura","Look up while reading");EN.put("Biblioteca e leitura","Library and reading");EN.put("Cores, ícones e tamanhos","Colors, icons and sizes");EN.put("Preferências dos estudos","Study preferences");
