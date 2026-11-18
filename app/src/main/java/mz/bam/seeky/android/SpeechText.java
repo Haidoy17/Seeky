@@ -36,6 +36,9 @@ final class SpeechText {
         }
         return new Prepared(out.toString(),java.util.Arrays.copyOf(map,size),source.length());
     }
-    static Prepared forVoice(String source,String language){return BibleReferences.expand(prepare(source),language);}
+    static Prepared forVoice(String source,String language){return forVoice(source,language,java.util.Collections.<PronunciationRules.Rule>emptyList());}
+    /** Texto pronto para a voz: referências bíblicas por extenso e normalização de leitura;
+     *  as palavras do dicionário pessoal ficam intactas para a regra do utilizador. */
+    static Prepared forVoice(String source,String language,java.util.List<PronunciationRules.Rule> personal){return SpeechNormalizer.apply(BibleReferences.expand(prepare(source),language),language,personal);}
     private SpeechText(){}
 }

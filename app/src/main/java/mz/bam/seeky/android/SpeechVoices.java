@@ -11,7 +11,9 @@ final class SpeechVoices {
         Map<String,Voice> unique=new LinkedHashMap<>();
         if(available!=null)for(Voice voice:available)if(voice.isNetworkConnectionRequired()==online&&voice.getLocale().getLanguage().equalsIgnoreCase(language)){Voice prior=unique.get(voice.getName());if(prior==null||missing(prior)&&!missing(voice)||missing(prior)==missing(voice)&&voice.getQuality()>prior.getQuality())unique.put(voice.getName(),voice);}
         List<Voice> voices=new ArrayList<>(unique.values());
-        voices.sort((x,y)->missing(x)!=missing(y)?missing(x)?1:-1:x.getQuality()!=y.getQuality()?Integer.compare(y.getQuality(),x.getQuality()):x.getLatency()!=y.getLatency()?Integer.compare(x.getLatency(),y.getLatency()):x.getName().compareTo(y.getName()));
+        String device=Locale.getDefault().getCountry();
+        // Qualidade primeiro; em empate, a variante regional do aparelho (pt-PT em Moçambique) e depois a menor latência.
+        voices.sort((x,y)->{if(missing(x)!=missing(y))return missing(x)?1:-1;if(x.getQuality()!=y.getQuality())return Integer.compare(y.getQuality(),x.getQuality());int region=Integer.compare(SpeechPolicy.regionScore(y.getLocale().getCountry(),device,language),SpeechPolicy.regionScore(x.getLocale().getCountry(),device,language));if(region!=0)return region;if(x.getLatency()!=y.getLatency())return Integer.compare(x.getLatency(),y.getLatency());return x.getName().compareTo(y.getName());});
         return voices;
     }
     static Voice resolve(Set<Voice> available,boolean online,String language,String selected){
