@@ -1,0 +1,43 @@
+{
+  "product": "Seeky",
+  "version": "5.4.1",
+  "version_code": 5001901,
+  "date": "2026-10-29",
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_upgrades_5_4": true,
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "min_sdk": 26,
+  "compile_sdk": 36,
+  "target_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "local_suite_passed": true,
+  "diagnostic_checks": 7,
+  "robolectric_version": "4.14.1",
+  "robolectric_sdk": 33,
+  "robolectric_lifecycle_layout_checks": 3,
+  "baseline_5_4_failures_in_same_checks": 3,
+  "test_pdf_renderer": "deterministic double; Robolectric 4.14 does not implement PDFium",
+  "native_pdfium_tested_on_device": false,
+  "physical_device_tested": false,
+  "itel_a17_tested": false,
+  "heap_128_mb_tested_on_android": false,
+  "backend_modified": false,
+  "apks": [
+    {
+      "file": "Seeky_5_4_1_Correcao_PDF.apk",
+      "signed": true,
+      "bytes": 5455956,
+      "sha256": "7d092920938f640da4c678963264d14c9d86b70a6470f3f53e872e5df4bee2fe"
+    },
+    {
+      "file": "Seeky_5_4_1_sem_assinatura.apk",
+      "signed": false,
+      "bytes": 5439193,
+      "sha256": "1396d93fd9a314f9f65fa4b09a8c65b03100907855546ea5f9e2963ca0690b25"
+    }
+  ]
+}

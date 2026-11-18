@@ -1,0 +1,11 @@
+{
+  "voice": "en-us-ljspeech",
+  "sample_rate": 22050,
+  "model_load_seconds": 1.181066205,
+  "android_device_test": false,
+  "rms": 0.06092597823346934,
+  "synthesis_seconds": 0.221361799,
+  "samples": 119808,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

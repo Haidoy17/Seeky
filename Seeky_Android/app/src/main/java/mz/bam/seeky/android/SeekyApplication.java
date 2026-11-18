@@ -1,0 +1,6 @@
+package mz.bam.seeky.android;
+import android.app.*;import android.content.*;
+/** Small-device defaults; capture safe crash locations without swallowing fatal exceptions. */
+public final class SeekyApplication extends Application {
+ public void onCreate(){super.onCreate();getSharedPreferences("cloud",0).edit().putBoolean("auto",false).putBoolean("login_seen",true).apply();CloudJobs.cancel(this);UiSpacing.install(this);WorkspaceBackup.finishPending(this);try(TaskStore work=new TaskStore(this)){work.recover();}SharedPreferences p=getSharedPreferences("seeky",0);GoogleVoiceSetup.migrate(p);if(!p.getBoolean("performance_v51",false)){ActivityManager am=(ActivityManager)getSystemService(ACTIVITY_SERVICE);SharedPreferences.Editor e=p.edit().putBoolean("performance_v51",true);if(!p.contains("compact"))e.putBoolean("compact",PerformanceMode.light(this));if(!p.contains("motion"))e.putBoolean("motion",!PerformanceMode.light(this));e.apply();}Thread.UncaughtExceptionHandler original=Thread.getDefaultUncaughtExceptionHandler();Thread.setDefaultUncaughtExceptionHandler((thread,error)->{try{if(!(error instanceof OutOfMemoryError))AppDiagnostics.record(this,"uncaught",error);}catch(Throwable ignored){}if(original!=null)original.uncaughtException(thread,error);else android.os.Process.killProcess(android.os.Process.myPid());});}
+}

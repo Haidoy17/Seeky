@@ -1,0 +1,49 @@
+{
+  "product": "Seeky",
+  "version": "5.7.0",
+  "version_code": 5002200,
+  "date": "2026-10-29",
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_upgrades_5_6": true,
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "local_suite_passed": true,
+  "gesture_policy_checks": 19,
+  "robolectric_sdk": 33,
+  "robolectric_total_tests": 31,
+  "robolectric_gesture_tests": 5,
+  "physical_device_tested": false,
+  "audible_voice_quality_tested": false,
+  "google_or_rhvoice_installation_tested_on_device": false,
+  "native_pdfium_tested_on_device": false,
+  "backend_modified": false,
+  "edge_removed": true,
+  "paid_tts_api_added": false,
+  "second_engine": "optional RHVoice Android app installed separately by user; engine data and quality depend on voice packs",
+  "voice_gender": "explicit metadata or user identification; no inference from opaque IDs",
+  "additional_google_models_bundled": false,
+  "books_page_size": 12,
+  "offline_audio": "existing Android TTS WAV chapter/range/whole book export preserved",
+  "max_narration_pcm_bytes_per_file": 134217728,
+  "apks": [
+    {
+      "file": "Seeky_5_7_Leitura.apk",
+      "signed": true,
+      "bytes": 5501012,
+      "sha256": "0a66b396da0dfc08f169ecc2d355a830bf9a972c164916773956f552177c93db"
+    },
+    {
+      "file": "Seeky_5_7_sem_assinatura.apk",
+      "signed": false,
+      "bytes": 5483801,
+      "sha256": "f632175c5c5eeebe2dd75220e001ca5f16102a0ac38cacf6402bf58ba20c7871"
+    }
+  ]
+}

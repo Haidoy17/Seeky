@@ -1,0 +1,1 @@
+package android.database.sqlite;public class SQLiteException extends RuntimeException {public SQLiteException(String m){super(m);}public SQLiteException(Throwable e){super(e);}}

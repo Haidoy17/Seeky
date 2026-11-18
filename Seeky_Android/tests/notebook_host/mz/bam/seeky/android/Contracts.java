@@ -1,0 +1,4 @@
+package mz.bam.seeky.android;class StudyState {static void schema(android.database.sqlite.SQLiteDatabase d){
+ d.execSQL("CREATE TABLE practice(id INTEGER PRIMARY KEY,payload TEXT NOT NULL,updated INTEGER NOT NULL)");
+ d.execSQL("CREATE TABLE study_trash(id INTEGER PRIMARY KEY,table_name TEXT NOT NULL,payload TEXT NOT NULL,deleted INTEGER NOT NULL)");
+ }static boolean fail;static void bump(android.content.Context c){if(fail)throw new IllegalStateException("injected dirty failure");}}class AppDiagnostics {static int errors;static void record(android.content.Context c,String op,Throwable e){errors++;}}

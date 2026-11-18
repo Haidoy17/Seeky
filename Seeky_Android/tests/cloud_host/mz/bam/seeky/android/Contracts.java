@@ -1,0 +1,9 @@
+package mz.bam.seeky.android;import android.content.*;import org.json.*;import java.io.*;
+class StudyStore implements AutoCloseable{StudyStore(Context c){}public void close(){}android.database.sqlite.SQLiteDatabase getReadableDatabase(){return new android.database.sqlite.SQLiteDatabase();}}
+class StudyState {static long revision=1,remote=0;static String owner="";static long revision(StudyStore s){return revision;}static long remote(StudyStore s){return remote;}static String owner(StudyStore s){return owner;}static void bind(StudyStore s,String uid,long n,String head){owner=uid;remote=n;}static void reset(){revision=1;remote=0;owner="";}}
+class StudyBackup {static final long MAX=536870912;static int size=1000,writes;static void write(Context c,StudyStore db,OutputStream out)throws IOException{writes++;byte[] block=new byte[65536];for(int i=0;i<block.length;i++)block[i]=(byte)(i*37);for(int n=0;n<size;){int count=Math.min(block.length,size-n);out.write(block,0,count);n+=count;}}}
+class StudySnapshot{static void restore(Context c,StudyStore d,File f,long before,String u,long rev,String head){throw new UnsupportedOperationException("Host restore is not under test");}}
+class CloudVault {boolean fail;int clears;JSONObject state=new JSONObject();CloudVault(Context c){}JSONObject read()throws java.security.GeneralSecurityException,JSONException{if(fail)throw new java.security.GeneralSecurityException("simulated transient vault error");return state;}void write(JSONObject s){state=s;}void clear(){clears++;state=new JSONObject();}}
+class StudyCloudJob {}
+class AppDiagnostics{static void record(Context c,String op,Throwable e){}}
+class ContentText {static byte[] read(InputStream in,int max)throws IOException{ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[1024];int n;while((n=in.read(b,0,Math.min(b.length,max-out.size())))>0)out.write(b,0,n);return out.toByteArray();}}

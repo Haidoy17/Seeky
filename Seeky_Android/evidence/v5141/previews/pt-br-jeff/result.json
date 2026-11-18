@@ -1,0 +1,11 @@
+{
+  "voice": "pt-br-jeff",
+  "sample_rate": 22050,
+  "model_load_seconds": 1.75968204,
+  "android_device_test": false,
+  "rms": 0.07374145420887468,
+  "synthesis_seconds": 0.259499362,
+  "samples": 96661,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

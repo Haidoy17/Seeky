@@ -1,0 +1,11 @@
+{
+  "voice": "en-gb-alba",
+  "sample_rate": 22050,
+  "model_load_seconds": 1.131310242,
+  "android_device_test": false,
+  "rms": 0.0499351878936695,
+  "synthesis_seconds": 0.209331071,
+  "samples": 98950,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

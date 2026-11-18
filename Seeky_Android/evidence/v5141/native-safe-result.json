@@ -1,0 +1,13 @@
+{
+  "voice": "pt-pt-tugao",
+  "maximum_part_characters": 46,
+  "sample_rate": 22050,
+  "model_load_seconds": 4.45896456,
+  "native_callbacks": false,
+  "android_device_test": false,
+  "parts": 3,
+  "rms": 0.16478972031838995,
+  "synthesis_seconds": 1.181432092,
+  "samples": 92672,
+  "host_native_inference": true
+}

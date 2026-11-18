@@ -1,0 +1,24 @@
+{
+  "verified_on": "2026-10-30",
+  "transport": "HTTPS, fixed host, non-streaming, no automatic retries or fallback",
+  "personal_key_required": true,
+  "shared_key_bundled": false,
+  "billing_or_credit_balance_verified_by_app": false,
+  "real_provider_calls_during_verification": false,
+  "default": "gemini",
+  "providers": [
+    {
+      "id": "gemini",
+      "model": "gemini-2.5-flash-lite",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
+      "eligibility": "Documented free tier for eligible project/account; user must use project without billing",
+      "data_note": "Free-tier content may be used to improve provider products",
+      "references": [
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://ai.google.dev/api/generate-content",
+        "https://ai.google.dev/gemini-api/docs/api-key"
+      ]
+    }
+  ],
+  "connection_test": "POST generateContent: fixed OK prompt, no documents; bounded to 128 output tokens; validates generated text"
+}

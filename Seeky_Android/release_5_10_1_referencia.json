@@ -1,0 +1,23 @@
+{
+  "product": "Seeky",
+  "version": "5.10.1",
+  "version_code": 5002501,
+  "base": "5.10.0",
+  "application_id": "mz.bam.seeky.v51",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "signing_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "providers": [
+    "gemini"
+  ],
+  "model": "gemini-2.5-flash-lite",
+  "connection_test": "GET model metadata; no generation",
+  "personal_key_required": true,
+  "shared_key_bundled": false,
+  "real_api_call_tested": false,
+  "physical_device_tested": false,
+  "reported_key_used": false,
+  "robolectric_tests": 62,
+  "ai_host_checks": 31,
+  "credential_corruption_replacement_tested": true,
+  "apk_sha256": "f3e984f51cf9806062967aebc1a4f5f6c12fc557170c56808565ef41f61f5565"
+}

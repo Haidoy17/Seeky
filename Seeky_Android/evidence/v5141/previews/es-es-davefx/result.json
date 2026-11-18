@@ -1,0 +1,11 @@
+{
+  "voice": "es-es-davefx",
+  "sample_rate": 22050,
+  "model_load_seconds": 1.127245192,
+  "android_device_test": false,
+  "rms": 0.18173883564616553,
+  "synthesis_seconds": 0.227155332,
+  "samples": 102740,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

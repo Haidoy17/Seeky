@@ -1,0 +1,8 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="14dp" android:orientation="vertical">
+ <TextView android:id="@+id/widget_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Seeky" android:textSize="17sp" android:textStyle="bold" android:maxLines="2" android:ellipsize="end"/>
+ <TextView android:id="@+id/widget_detail" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textSize="12sp"/>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="10dp">
+  <ImageView android:layout_width="28dp" android:layout_height="28dp" android:src="@drawable/seeky" android:contentDescription="Seeky"/>
+  <TextView android:id="@+id/widget_continue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:textSize="14sp" android:textStyle="bold"/>
+ </LinearLayout>
+</LinearLayout>

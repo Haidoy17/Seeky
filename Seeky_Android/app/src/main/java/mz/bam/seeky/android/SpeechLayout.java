@@ -1,0 +1,26 @@
+package mz.bam.seeky.android;
+import java.util.*;
+
+/** Keeps source offsets intact while separating headings from prose. No text is rewritten. */
+final class SpeechLayout {
+ static final int TITLE_PAUSE=2000;
+ static final class Title {final int start,end;Title(int start,int end){this.start=start;this.end=end;}}
+ static final class Plan {
+  final String text;final List<Title> titles;
+  Plan(String text,List<Title> titles){this.text=text;this.titles=titles;}
+  int nextTitle(int at){int low=0,high=titles.size();while(low<high){int mid=(low+high)/2;if(titles.get(mid).end<=at)low=mid+1;else high=mid;}return low;}
+  int end(int start,int limit){int hard=Math.min(text.length(),start+limit);int index=nextTitle(start);boolean title=false;if(index<titles.size()){Title t=titles.get(index);boolean whitespace=true;for(int p=start;p<t.start;p++)if(!Character.isWhitespace(text.charAt(p))&&!Character.isSpaceChar(text.charAt(p))){whitespace=false;break;}if(t.start>start&&!whitespace)hard=Math.min(hard,t.start);else{hard=Math.min(hard,t.end);title=true;}}
+   if(hard-start<=1)return hard;if(hard<text.length()&&Character.isHighSurrogate(text.charAt(hard-1))&&Character.isLowSurrogate(text.charAt(hard)))hard--;if(title){if(index<titles.size()&&hard==titles.get(index).end)return Math.min(hard,BibleReferences.safeEnd(text,start,hard,limit));for(int at=hard-1;at>start;at--)if(Character.isWhitespace(text.charAt(at)))return Math.min(hard,BibleReferences.safeEnd(text,start,at+1,limit));return Math.min(hard,BibleReferences.safeEnd(text,start,hard,limit));}return Math.min(hard,BibleReferences.safeEnd(text,start,SpeechChunks.naturalBoundary(text,start,Math.max(2,hard-start)),limit));}
+  int pauseAfter(int end){int low=0,high=titles.size();while(low<high){int mid=(low+high)/2;if(titles.get(mid).end<end)low=mid+1;else high=mid;}return low<titles.size()&&titles.get(low).end==end?TITLE_PAUSE:0;}
+ }
+ static String clean(String value){return value.replaceAll("[\\s\\p{Zs}]+"," ").trim();}
+ static boolean isolated(String value){String text=clean(value);if(text.isEmpty()||text.length()>180||text.split("\\s+").length>24)return false;boolean explicit=text.matches("(?iu)^(?:#{1,6}\\s+|cap[íi]tulo\\s+|chapter\\s+|parte\\s+|part\\s+|m[óo]dulo\\s+|section\\s+|sec[çc][ãa]o\\s+).*"),upper=false;int letters=0,capitals=0;for(int i=0;i<text.length();i++)if(Character.isLetter(text.charAt(i))){letters++;if(Character.isUpperCase(text.charAt(i)))capitals++;}upper=letters>=3&&capitals==letters;char last=text.charAt(text.length()-1);if(value.indexOf('\n')>=0||value.indexOf('\r')>=0)return upper;return explicit||upper||".!?;:,".indexOf(last)<0;}
+ static Plan of(String text){return of(text,Collections.emptyList());}
+ static boolean strong(String value){String text=clean(value);if(text.isEmpty()||text.length()>180)return false;return text.matches("(?iu)^(?:#{1,6}\\s+|cap[íi]tulo\\s+|chapter\\s+|parte\\s+|part\\s+|m[óo]dulo\\s+|section\\s+|sec[çc][ãa]o\\s+).*")||text.chars().filter(Character::isLetter).count()>=3&&text.chars().filter(Character::isLetter).allMatch(Character::isUpperCase);}
+ static void paragraph(String text,int start,int end,List<Title> found,boolean line){while(start<end&&(Character.isWhitespace(text.charAt(start))||Character.isSpaceChar(text.charAt(start))))start++;while(end>start&&(Character.isWhitespace(text.charAt(end-1))||Character.isSpaceChar(text.charAt(end-1))))end--;if(end>start&&(line?strong(text.substring(start,end)):isolated(text.substring(start,end))))found.add(new Title(start,end));}
+ static Plan of(String text,List<String> headings){List<Title> found=new ArrayList<>();int start=0;for(int at=0;at<text.length();at++){char c=text.charAt(at);if(c!='\n'&&c!='\r'&&c!='\f'&&c!='\u2029')continue;int next=at,lines=0;while(next<text.length()&&(Character.isWhitespace(text.charAt(next))||Character.isSpaceChar(text.charAt(next)))){char w=text.charAt(next++);if(w=='\r'){lines++;if(next<text.length()&&text.charAt(next)=='\n')next++;}else if(w=='\n'||w=='\u2028')lines++;else if(w=='\f'||w=='\u2029')lines+=2;}if(lines>=2){paragraph(text,start,at,found,false);start=next;at=next-1;}}paragraph(text,start,text.length(),found,false);start=0;for(int at=0;at<=text.length();at++)if(at==text.length()||text.charAt(at)=='\n'||text.charAt(at)=='\r'){paragraph(text,start,at,found,true);start=at+1;}
+  if(headings!=null&&!headings.isEmpty()){SpeechText.Prepared normal=SpeechText.prepare(text);for(String heading:headings){String title=clean(heading);if(title.isEmpty())continue;int from=0,seen=0;for(int at;(at=normal.text.indexOf(title,from))>=0&&seen++<256;){int end=at+title.length();from=end;if(at>0&&Character.isLetterOrDigit(normal.text.charAt(at-1)))continue;int after=end;while(after<normal.text.length()&&(normal.text.charAt(after)==' '||normal.text.charAt(after)=='\t'))after++;if(after<normal.text.length()&&normal.text.charAt(after)!='\n')continue;found.add(new Title(normal.sourceOffset(at),normal.sourceOffset(end)));}}}
+  found.sort(Comparator.comparingInt(a->a.start));List<Title> merged=new ArrayList<>();for(Title t:found){if(t.end<=t.start)continue;if(!merged.isEmpty()&&t.start<merged.get(merged.size()-1).end){Title prior=merged.remove(merged.size()-1);merged.add(new Title(prior.start,Math.max(prior.end,t.end)));}else merged.add(t);}return new Plan(text,merged);
+ }
+ private SpeechLayout(){}
+}

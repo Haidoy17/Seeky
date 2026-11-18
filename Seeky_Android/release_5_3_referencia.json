@@ -1,0 +1,42 @@
+{
+  "product": "Seeky",
+  "version": "5.3.0",
+  "version_code": 5001800,
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_upgrades_5_2": true,
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "date": "2026-10-27",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "min_sdk": 26,
+  "compile_sdk": 36,
+  "target_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "timer_persistence_checks": 25,
+  "visual_policy_checks": 14,
+  "course_checks": 38,
+  "notebook_checks": 40,
+  "persistence_checks": 17,
+  "local_suite_passed": true,
+  "android_runtime_tested": false,
+  "itel_a17_tested": false,
+  "preview_rendering_tested_on_android": false,
+  "timer_notification_tested_on_android": false,
+  "backend_modified": false,
+  "apks": [
+    {
+      "file": "Seeky_5_3_Visual.apk",
+      "signed": true,
+      "bytes": 5423188,
+      "sha256": "2af24df798b3d1bfc042cd817750c0f0df3fca82233083820a9f6315249d2f90"
+    },
+    {
+      "file": "Seeky_5_3_sem_assinatura.apk",
+      "signed": false,
+      "bytes": 5403954,
+      "sha256": "725e6718d367af1f02c3155ee9635c84dd8b70558018aa2c44c43ee8f7a394e3"
+    }
+  ]
+}

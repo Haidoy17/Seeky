@@ -1,0 +1,33 @@
+Seeky 5.18.0 — importação bíblica MyBible e USX
+
+Extraia este ZIP e instale Seeky_5_18_0.apk sobre o Seeky actual, sem desinstalar.
+
+ONDE IMPORTAR
+Abra Mais > Ferramentas > Bíblias importadas.
+
+MYBIBLE
+- Toque em Importar ficheiro bíblico, escreva o nome da versão e escolha ARAi+.SQLite3, ARM'67.SQLite3 ou outro módulo bíblico MyBible.
+- Pode aparecer como BIN no Android. A extensão SQLite3 é aceite, e bases de dados .bin também são reconhecidas pelo cabeçalho.
+- Escolha o ficheiro principal, sem .search. Este último é apenas o índice de pesquisa.
+- Módulos de comentários, dicionários e planos não contêm os versículos da Bíblia e não são importados como tradução.
+- O formato suportado é a tabela MyBible verses(book_number, chapter, verse, text), com texto não comprimido.
+
+USX
+- Para uma Bíblia completa, use Importar pasta USX e escolha a pasta de uma só versão, como nbv_usx, ntlh_usx, rc69_usx ou release/USX_1.
+- A procura inclui subpastas. Pode escolher release se os livros estiverem dentro de USX_1.
+- Também pode importar um ficheiro .usx, um XML com estrutura USX ou um ZIP que contenha os livros de uma só versão.
+- Capas JPG, ficheiros LDML, VRS e styles.xml são auxiliares. Não contêm os versículos.
+- USX 2 e 3 são aceites. Notas e títulos editoriais ficam fora do texto dos versículos.
+- Quando o original tem um intervalo combinado, como 3-4, o mesmo texto conjunto fica disponível em ambas as referências. Partes 3a/3b são reunidas no versículo 3.
+
+TAREFAS E SEGURANÇA DOS DADOS
+- Acompanhe a operação em Ferramentas > Tarefas em segundo plano.
+- Pastas e ZIPs guardam o progresso por livro/ficheiro. Um livro interrompido é repetido; os anteriores mantêm-se. Um módulo SQLite individual é repetido se a sua leitura ainda não tinha terminado.
+- A tradução só aparece para consulta quando a importação inteira termina. As outras Bíblias continuam disponíveis em caso de erro.
+- Não junte versões diferentes na mesma importação. Referências repetidas são recusadas.
+- Os ficheiros originais são conservados. Limites: 256 MB por módulo/cópias de pasta, 1000 ficheiros candidatos USX/XML, 200 mil versículos por tradução.
+
+A gravação continua em WAV. Não precisa de reimportar livros nem de reinstalar as vozes.
+Testes com módulos e pastas de ensaio; os ficheiros reais das imagens e o telemóvel ITEL não foram testados.
+
+Haidoy Carlos Mautempo

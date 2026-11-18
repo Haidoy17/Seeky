@@ -1,0 +1,11 @@
+{
+  "voice": "fr-fr-siwis",
+  "sample_rate": 22050,
+  "model_load_seconds": 1.185377494,
+  "android_device_test": false,
+  "rms": 0.08703312803987995,
+  "synthesis_seconds": 0.241391857,
+  "samples": 111360,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

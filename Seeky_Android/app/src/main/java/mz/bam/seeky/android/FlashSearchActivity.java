@@ -1,0 +1,30 @@
+package mz.bam.seeky.android;
+import android.app.*;import android.content.*;import android.net.Uri;import android.os.*;import android.view.*;import android.widget.*;import android.text.*;import java.util.*;
+/** The same compact search remains usable when Android Go denies overlays. */
+public final class FlashSearchActivity extends Activity {
+ final Handler main=new Handler(Looper.getMainLooper());final LatestWork work=new LatestWork();Catalog db;EditText input;TextView status;ListView list;FlashPanelView panel;CancellationSignal cancel;List<Catalog.Entry> entries=new ArrayList<>();boolean dead;int serial;String category="Tudo";
+ final Runnable search=this::search;final CatalogEvents.Listener changes=s->{main.removeCallbacks(search);main.postDelayed(search,300);};
+ protected void attachBaseContext(Context c){super.attachBaseContext(AppLanguage.wrap(c));}
+ void openApp(boolean folders){startActivity(new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra("open_explorer",folders));finish();}
+ public void onCreate(Bundle b){
+  super.onCreate(b);AppPalette p=AppPalette.of(this);db=new Catalog(getApplicationContext());getWindow().setStatusBarColor(p.surface);getWindow().setNavigationBarColor(p.surface);getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);getWindow().getDecorView().setSystemUiVisibility(p.light?View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR:0);
+  panel=new FlashPanelView(this,new FlashPanelView.Actions(){
+   public void close(){finish();}public void open(){openApp(false);}public void stop(){getSharedPreferences("seeky",0).edit().putBoolean("float_enabled",false).apply();if(QuickSearchService.running)startService(new Intent(FlashSearchActivity.this,QuickSearchService.class).setAction(QuickSearchService.STOP));finish();}
+   public void sizesChanged(){if(list!=null)((BaseAdapter)list.getAdapter()).notifyDataSetChanged();}
+   public void folders(){openApp(true);}public void mode(boolean flash){getSharedPreferences("seeky",0).edit().putBoolean("flash_mode",flash).apply();panel.setMode(flash,false);search();}
+   public void category(String name){category=name;panel.setCategory(name);search();}
+  });
+  panel.setFitsSystemWindows(true);panel.setMode(getSharedPreferences("seeky",0).getBoolean("flash_mode",true),false);input=panel.input;status=panel.status;list=new ListView(this);list.setDivider(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));list.setDividerHeight(PlusUi.dp(this,8));
+  list.setAdapter(new BaseAdapter(){public int getCount(){return entries.size();}public Object getItem(int n){return entries.get(n);}public long getItemId(int n){return n;}public View getView(int n,View old,ViewGroup group){FileRowView row=old instanceof FileRowView?(FileRowView)old:new FileRowView(FlashSearchActivity.this,(e,v)->{});row.bind(entries.get(n),p.tint,p.ink,p.muted,p.accent,true,input.getText().toString());row.star.setVisibility(View.GONE);return row;}});
+  list.setOnItemClickListener((parent,v,n,id)->{Catalog.Entry e=entries.get(n);try{startActivity(new Intent(this,ReaderActivity.class).setDataAndType(Uri.parse(e.uri),MediaFormats.mime(e.name,e.mime)).putExtra("name",e.name));}catch(Exception error){AppDiagnostics.record(this,"flash-open",error);}});
+  int position=panel.indexOfChild(panel.scroll);panel.removeView(panel.scroll);panel.addView(list,position,new android.widget.LinearLayout.LayoutParams(-1,0,1));
+  TextView signature=new TextView(this);signature.setText("Haidoy Carlos Mautempo");signature.setTextColor(p.muted);signature.setTextSize(10);signature.setGravity(Gravity.CENTER);panel.addView(signature);setContentView(panel);panel.addOnLayoutChangeListener((v,left,top,right,bottom,oldLeft,oldTop,oldRight,oldBottom)->panel.compact(bottom-top<PlusUi.dp(this,410)));
+  if(Build.VERSION.SDK_INT>=35)panel.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets bars=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());panel.setPadding(PlusUi.dp(this,16)+bars.left,PlusUi.dp(this,12)+bars.top,PlusUi.dp(this,16)+bars.right,PlusUi.dp(this,10)+bars.bottom);return insets;});
+  input.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int f){}public void onTextChanged(CharSequence s,int a,int b,int c){serial++;if(cancel!=null)cancel.cancel();work.cancel();main.removeCallbacks(search);main.postDelayed(search,80);}public void afterTextChanged(Editable e){}});
+  input.setOnEditorActionListener((v,action,event)->{if(action==android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH){main.removeCallbacks(search);search();((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(input.getWindowToken(),0);return true;}return false;});
+ }
+ protected void onStart(){super.onStart();CatalogEvents.add(changes);search();}
+ protected void onStop(){CatalogEvents.remove(changes);serial++;main.removeCallbacks(search);if(cancel!=null)cancel.cancel();work.cancel();super.onStop();}
+ void search(){if(dead)return;String query=input.getText().toString(),filter=category;boolean quick=getSharedPreferences("seeky",0).getBoolean("flash_mode",true);int id=++serial;if(cancel!=null)cancel.cancel();CancellationSignal token=new CancellationSignal();cancel=token;work.submit(g->{try{List<Catalog.Entry> found=quick?db.flash(query,filter,token):db.query(query,filter,false,false,0,30,0,0,"",token);main.post(()->{if(dead||id!=serial)return;entries=found;((BaseAdapter)list.getAdapter()).notifyDataSetChanged();status.setText(query.trim().isEmpty()?AppLanguage.text(this,"Recentes"):found.size()+" "+AppLanguage.text(this,found.size()==1?"resultado":"resultados"));});}catch(OperationCanceledException ignored){}catch(Exception e){main.post(()->{if(!dead&&id==serial)status.setText(AppLanguage.text(this,"Pasta indisponível"));});}});}
+ protected void onDestroy(){dead=true;main.removeCallbacksAndMessages(null);work.close(db::close);super.onDestroy();}
+}

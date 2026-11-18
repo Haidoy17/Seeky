@@ -1,0 +1,42 @@
+{
+  "product": "Seeky",
+  "version": "5.1.0",
+  "version_code": 5001600,
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "date": "2026-10-27",
+  "signature_visual": "Haidoy Carlos Mautempo",
+  "languages": [
+    "pt",
+    "en"
+  ],
+  "translation_scope": "menus and primary controls; legacy technical messages may remain Portuguese",
+  "palette_count": 8,
+  "android_runtime_tested": false,
+  "itel_a17_tested": false,
+  "commercial_acceptance_complete": false,
+  "new_core_checks": 16,
+  "notebook_checks": 40,
+  "persistence_checks": 17,
+  "fts_fixture_files": 100000,
+  "full_local_suite_passed": true,
+  "schema_changes": false,
+  "backend_changes": false,
+  "apks": [
+    {
+      "file": "Seeky_5_1_sem_assinatura.apk",
+      "bytes": 5385357,
+      "sha256": "f72d3012596500b26a03e6f31c705b09171653f92d7c71bcfeb4352571299a2b",
+      "signed": false
+    },
+    {
+      "file": "Seeky_5_1_Instalacao_Separada.apk",
+      "bytes": 5402624,
+      "sha256": "c2e57cf5509518591988bd3cc3561d178278ad39a7ec6592fbbcd7190267a652",
+      "signed": true
+    }
+  ]
+}

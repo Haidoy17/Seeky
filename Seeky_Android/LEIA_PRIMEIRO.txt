@@ -1,0 +1,18 @@
+Seeky 5.15.1 — categorias e cabeçalho da biblioteca corrigidos
+
+Extraia o ZIP e instale Seeky_5_15_1.apk sobre a versão actual, sem desinstalar.
+
+- Exibir ficheiros e categorias agora aplica o modo escolhido também ao Início: Lista, Detalhes, Conteúdos, Grelha, Blocos e Ícones.
+- As categorias têm cartões menores e nomes e quantidades centralizados. O cartão de armazenamento também está mais compacto.
+- Na biblioteca, o logótipo, título, pesquisa, filtros, menu, contagem e importação ficam fixos. Só a lista de livros desliza.
+- O cabeçalho da biblioteca ocupa toda a largura. Os três botões ficam separados e o título tem a sua própria linha para caber num ecrã estreito.
+- As ondas foram redesenhadas, com curvas e camadas distintas e sem um segundo cabeçalho sobreposto.
+- Os botões −/+ e os ajustes do Flash da versão anterior continuam disponíveis.
+
+Não precisa de reimportar livros nem de reinstalar as vozes. As contas Google/Facebook continuam retiradas e a gravação permanece WAV.
+
+As prévias usam dados e capas de ensaio. As contagens, capas e informações reais serão as da sua biblioteca e do seu aparelho.
+
+Validação automática em Robolectric e testes do núcleo. Não houve teste num ITEL físico neste ambiente.
+
+Haidoy Carlos Mautempo
