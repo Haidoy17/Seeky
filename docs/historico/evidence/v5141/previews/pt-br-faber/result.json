@@ -1,0 +1,11 @@
+{
+  "voice": "pt-br-faber",
+  "sample_rate": 22050,
+  "model_load_seconds": 2.193742376,
+  "android_device_test": false,
+  "rms": 0.07452788319726214,
+  "synthesis_seconds": 0.41709055,
+  "samples": 104448,
+  "host_native_inference": true,
+  "stream_callbacks": 3
+}

@@ -1,0 +1,58 @@
+plugins { id 'com.android.application' }
+
+// Fonte única da identidade e versão: tools/build_apk.py e tools/build_delivery.py
+// lêem estes valores, por isso mantenha o formato `chave valor` numa só linha.
+android {
+    namespace 'mz.bam.seeky.android'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'mz.bam.seeky.v51'
+        minSdk 26
+        targetSdk 36
+        versionCode 5004300
+        versionName '5.19.0'
+    }
+
+    signingConfigs {
+        // A chave privada nunca entra no repositório: forneça-a por variáveis de ambiente.
+        externalRelease {
+            if (System.getenv('SEEKY_SIGN_FILE')) {
+                storeFile file(System.getenv('SEEKY_SIGN_FILE'))
+                storePassword System.getenv('SEEKY_SIGN_PASSWORD')
+                keyAlias System.getenv('SEEKY_SIGN_ALIAS')
+                keyPassword System.getenv('SEEKY_SIGN_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            minifyEnabled false
+            if (System.getenv('SEEKY_SIGN_FILE')) signingConfig signingConfigs.externalRelease
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packaging {
+        jniLibs { useLegacyPackaging true }
+        // Os metadados META-INF dos JARs locais não são usados em tempo de execução
+        // (os recursos do PDFBox vivem em assets/), tal como no build offline.
+        resources { excludes += ['META-INF/**'] }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies { implementation fileTree(dir: 'libs', include: ['*.jar']) }

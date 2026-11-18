@@ -1,0 +1,9 @@
+package mz.bam.seeky.android;
+import java.util.*;import java.util.regex.*;
+final class StudyCards {
+ static final class Card{final String front,back,refs;Card(String front,String back,String refs){if(front.trim().isEmpty()||front.length()>5000||back.trim().isEmpty()||back.length()>20000)throw new IllegalArgumentException("Cartão demasiado longo ou vazio.");this.front=front.trim();this.back=back.trim();this.refs=refs.trim();}}
+ static final Pattern FRONT=Pattern.compile("(?iu)^(?:[-•]\\s*|[0-9]+[.)]\\s*)?(?:pergunta|questão|questao|question|frente|q)\\s*:\\s*(.*)$"),BACK=Pattern.compile("(?iu)^(?:resposta|answer|verso|a)\\s*:\\s*(.*)$"),REF=Pattern.compile("(?iu)^(?:fonte|source|referência|reference)\\s*:\\s*(.*)$");
+ static List<Card> parse(String answer){List<Card> cards=new ArrayList<>();StringBuilder front=new StringBuilder(),back=new StringBuilder(),refs=new StringBuilder();boolean answering=false;for(String raw:answer.split("\\r?\\n")){String line=raw.trim().replace("**","");Matcher q=FRONT.matcher(line),a=BACK.matcher(line),r=REF.matcher(line);if(q.matches()){add(cards,front,back,refs);front.setLength(0);back.setLength(0);refs.setLength(0);front.append(q.group(1));answering=false;}else if(a.matches()&&front.length()>0){back.append(a.group(1));answering=true;}else if(r.matches()&&front.length()>0)refs.append(r.group(1));else if(!line.isEmpty()&&front.length()>0){StringBuilder target=answering?back:front;if(target.length()>0)target.append('\n');target.append(raw.trim());}if(cards.size()>=20)break;}add(cards,front,back,refs);return cards.size()>20?new ArrayList<>(cards.subList(0,20)):cards;}
+ static void add(List<Card> cards,StringBuilder front,StringBuilder back,StringBuilder refs){if(front.length()>0&&back.length()>0)cards.add(new Card(front.toString(),back.toString(),refs.toString()));}
+ private StudyCards(){}
+}

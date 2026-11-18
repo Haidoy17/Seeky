@@ -1,0 +1,8 @@
+XZ for Java 1.9
+Project: https://tukaani.org/xz/java.html
+Author listed in the published Maven POM: Lasse Collin.
+
+The published artifact POM declares the license as Public Domain, with:
+"You can do whatever you want with this package."
+
+Source of this notice: org.tukaani:xz:1.9 artifact metadata supplied with the dependency.

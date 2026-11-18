@@ -1,0 +1,43 @@
+{
+  "product": "Seeky",
+  "version": "5.10.5",
+  "version_code": 5002505,
+  "base": "5.10.4",
+  "application_id": "mz.bam.seeky.v51",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "signing_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "providers": [
+    "gemini"
+  ],
+  "model": "gemini-2.5-flash-lite",
+  "connection_test": "POST generateContent, fixed OK prompt, no documents, 128 output tokens",
+  "personal_key_required": true,
+  "shared_key_bundled": false,
+  "real_api_call_tested": false,
+  "physical_device_tested": false,
+  "reported_key_used": false,
+  "robolectric_tests": 90,
+  "ai_host_checks_reference": {
+    "version": "5.10.2",
+    "count": 34
+  },
+  "book_import_selection_cap": null,
+  "book_import_large_fixture": 1205,
+  "book_import_report": true,
+  "book_import_test_methods": 6,
+  "book_import_requires_activity_alive": true,
+  "private_duplicate_cleanup": true,
+  "duplicate_identity": "SHA-256 and full byte comparison",
+  "course_records_and_reader_uris_preserved": true,
+  "pending_cleanup_journal": true,
+  "book_menu_gap_dp": 12,
+  "book_delete_scope": "all references of the selected shared file; external originals kept",
+  "nonreused_material_identity": true,
+  "tts_startup_chars_max": 1200,
+  "tts_ahead_chunks": 1,
+  "tts_prefetch_chars_max": 64000,
+  "tts_cache_edit_invalidation": true,
+  "tts_audible_quality_tested": false,
+  "credential_corruption_replacement_tested": true,
+  "apk_sha256": "cd2d4b2676ff56442f75bda5bd90423d5cedd065a105a35cdbc2fe915e1732d6"
+}

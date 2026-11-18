@@ -1,0 +1,40 @@
+{
+  "product": "Seeky",
+  "version": "5.2.0",
+  "version_code": 5001700,
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "standalone_upgrades_5_1": true,
+  "date": "2026-10-27",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "backup_format": "seeky-studies-2",
+  "legacy_backup_format_accepted": "seeky-studies-1",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "courses_checks": 38,
+  "notebook_checks": 40,
+  "persistence_checks": 17,
+  "local_suite_passed": true,
+  "android_runtime_tested": false,
+  "android_upgrade_tested": false,
+  "backend_modified": false,
+  "apks": [
+    {
+      "file": "Seeky_5_2_Cursos.apk",
+      "bytes": 5410816,
+      "sha256": "a24826ad89e32b2b4d5cdbcfa867d4f6473144dcab7d117528f81466d0957dd2",
+      "signed": true
+    },
+    {
+      "file": "Seeky_5_2_sem_assinatura.apk",
+      "bytes": 5390980,
+      "sha256": "68dc20163342994bf5cec4ce80fa654c24123a63dde266a59d68966a02d07ba4",
+      "signed": false
+    }
+  ]
+}

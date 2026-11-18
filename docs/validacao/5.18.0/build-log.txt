@@ -1,0 +1,6 @@
+Running aapt
+Running java
+Running d8
+Running zipalign
+UNSIGNED: APK requires the original signing key before installation or upgrade.
+/workspace/seeky-5180/main-unsigned.apk

@@ -1,0 +1,49 @@
+{
+  "product": "Seeky",
+  "version": "5.5.0",
+  "version_code": 5002000,
+  "date": "2026-10-29",
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_upgrades_5_4_1": true,
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "speech_natural_text_checks": 14,
+  "wave_preservation_safety_checks": 14,
+  "local_suite_passed": true,
+  "robolectric_sdk": 33,
+  "robolectric_total_checks": 13,
+  "robolectric_pdf_checks": 3,
+  "robolectric_voice_ui_export_checks": 9,
+  "robolectric_speech_service_checks": 1,
+  "tts_test_engine": "deterministic fixtures",
+  "physical_device_tested": false,
+  "audible_google_voice_quality_tested": false,
+  "google_voice_model_installation_tested_on_device": false,
+  "native_pdfium_tested_on_device": false,
+  "backend_modified": false,
+  "voice_model_downloads": "delegated to the selected Android TTS engine; online models may not be available offline",
+  "offline_audio": "selected-page/chapter/selection WAV rendering via Android TTS; not a voice model",
+  "max_narration_characters": 24000,
+  "max_narration_pcm_bytes": 134217728,
+  "apks": [
+    {
+      "file": "Seeky_5_5_Vozes.apk",
+      "signed": true,
+      "bytes": 5472340,
+      "sha256": "4c6d35647f5b164586c2442ed7dbf47dd6ec7a1df4dcffde4224e6c72aa8516d"
+    },
+    {
+      "file": "Seeky_5_5_sem_assinatura.apk",
+      "signed": false,
+      "bytes": 5455206,
+      "sha256": "25f4fd5ceecb5e1bfcf9efe7efc27326db2eeed9990fd9b9958d32a0d0427adb"
+    }
+  ]
+}

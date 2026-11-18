@@ -1,0 +1,18 @@
+{
+  "project_name": "Seeky",
+  "project_id": "wohwoyfhnfwotrzbaprx",
+  "organization": "bamservice's Org",
+  "region": "eu-west-1",
+  "url": "https://wohwoyfhnfwotrzbaprx.supabase.co",
+  "database_schema_applied": true,
+  "schema_applied_via": "execute_sql",
+  "migration_history_entry_created": false,
+  "private_bucket": "seeky-private",
+  "public_security_definer_functions": 0,
+  "google_enabled": false,
+  "facebook_enabled": false,
+  "oauth_callback_tested": false,
+  "live_sql_checks_passed": 6,
+  "live_http_checks_passed": 3,
+  "security_advisor_lints": []
+}

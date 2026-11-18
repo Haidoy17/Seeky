@@ -1,0 +1,62 @@
+{
+  "tesseract4android_version": "4.8.0",
+  "source": "https://github.com/adaptech-cz/Tesseract4Android",
+  "distribution": "https://jitpack.io/",
+  "models": "https://github.com/tesseract-ocr/tessdata_fast",
+  "abis": [
+    "armeabi-v7a",
+    "arm64-v8a"
+  ],
+  "elf_load_alignment": {
+    "arm64-v8a": 16384,
+    "armeabi-v7a": 4096
+  },
+  "files": {
+    "app/libs/tesseract4android-4.8.0.jar": {
+      "bytes": 49418,
+      "sha256": "b0c04b87a5b760fe449ba686071a859d275a4d806cbe6268700c5a117ff6106a"
+    },
+    "app/src/main/jniLibs/arm64-v8a/libjpeg.so": {
+      "bytes": 251888,
+      "sha256": "6add480209d2eaf049aaaaea5286ffe0f3b22f60a0efdfe54acc646b279673e3"
+    },
+    "app/src/main/jniLibs/arm64-v8a/libleptonica.so": {
+      "bytes": 2878240,
+      "sha256": "52dbf89fc2d66865e1705ca57c8c1be7df6ab6e26e8c86cac5f083e9f5bd2ab4"
+    },
+    "app/src/main/jniLibs/arm64-v8a/libpngx.so": {
+      "bytes": 231856,
+      "sha256": "8b9536ff4a59d9457bc2ec78c9b5356b795f50198b60b20df26fbc08addbd837"
+    },
+    "app/src/main/jniLibs/arm64-v8a/libtesseract.so": {
+      "bytes": 4152872,
+      "sha256": "427fadce222815b2ea9d93e16957e899ad960cfe79c5a05060c18007ad0842d5"
+    },
+    "app/src/main/jniLibs/armeabi-v7a/libjpeg.so": {
+      "bytes": 187096,
+      "sha256": "c8d539d61e4836866f0486ad402dfa9c65cb67ea55da98f87ed519f248c321c2"
+    },
+    "app/src/main/jniLibs/armeabi-v7a/libleptonica.so": {
+      "bytes": 2160740,
+      "sha256": "86f000fe22012a97fbb58803eec4ccc3d419517b40b79c9779023ca886705d3c"
+    },
+    "app/src/main/jniLibs/armeabi-v7a/libpngx.so": {
+      "bytes": 172204,
+      "sha256": "d5c0a6b68597c1da439a3e7f6e9c8cda96e91dc3c7fedae0bb6a1f14d474cc75"
+    },
+    "app/src/main/jniLibs/armeabi-v7a/libtesseract.so": {
+      "bytes": 3002448,
+      "sha256": "20c38126314970d70d68070ac3187054ae747732f0406b201dd56fd2b247a0a5"
+    },
+    "tests/ocr/models/eng.traineddata": {
+      "bytes": 4113088,
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    "tests/ocr/models/por.traineddata": {
+      "bytes": 1982756,
+      "sha256": "c4932b937207a9514b7514d518b931a99938c02a28a5a5a553f8599ed58b7deb"
+    }
+  },
+  "model_revision": "4.1.0",
+  "download_base": "https://cdn.jsdelivr.net/gh/tesseract-ocr/tessdata_fast@4.1.0/"
+}

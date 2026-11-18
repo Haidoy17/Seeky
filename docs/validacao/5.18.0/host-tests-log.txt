@@ -1,0 +1,618 @@
+PASS 7 EPUB Bible checks; 69 parts / 33000 synthetic verses in 3916 ms
+PASS 11 Bible import regressions
+PASS 35 optional reading, Bible import, evidence and WAV index checks
+PASS 100 Bible citation pronunciation and source mapping checks
+PASS isolated heading is detected without treating prose sentences as titles
+PASS body, title and following text are separate synthesis requests
+PASS exactly two seconds are scheduled after the title only
+PASS semantic heading metadata overrides terminal punctuation
+PASS uppercase PDF heading on a single line is not joined to body text
+PASS Windows paragraph separators retain isolated heading detection
+PASS all Unicode text reconstructs exactly across structured chunk boundaries
+PASS time skip lands on a word boundary
+PASS opposite time skips return near the original word
+PASS time skips account for selected speech speed
+PASS backward overflow is retained for previous-page traversal
+PASS forward overflow is retained for next-page traversal
+PASS time model includes explicit title silence
+PASS saved narration has precisely two seconds of 24 kHz mono PCM silence
+PASS PCM pause contains only silence samples
+PASS unsigned 8-bit PCM silence uses the correct midpoint
+PASS 16 title pause and TTS navigation checks
+PASS EPUB adaptation retains rich markup and complete text
+PASS EPUB author stylesheet, image and table remain in the reading document
+PASS reader viewport replaces conflicting book viewport
+PASS book scripts remain denied before document content
+PASS reader width stylesheet follows author stylesheet
+PASS fit does not conceal horizontal overflow as a clipping workaround
+PASS default mobile fit keeps author typography, alignment and line spacing
+PASS explicit margins, spacing and alignment are applied to presentation only
+PASS book-layout mode leaves author geometry available
+PASS EPUB without head receives a valid reader head before body
+PASS saved layout settings are bounded
+PASS 11 EPUB presentation and viewport checks
+PASS restart truncates uncommitted PCM tail
+PASS resumed audio has no missing or repeated chunk
+PASS resumed PCM remains a valid WAV
+PASS single output accepts more than one hour and more than 128 MB
+PASS large WAV uses correct unsigned data length
+PASS background volume zero preserves voice bytes exactly
+PASS background gain adds only the selected music volume
+PASS mix preserves voice PCM format
+PASS background alignment is continuous across generated chunks
+PASS resampling background never changes voice duration
+PASS WAV background decoding works without a device codec and preserves PCM16
+PASS 11 durable large WAV and background mixing checks
+PASS book and chapter precede track number
+PASS split chapter keeps original chapter and part numbers
+PASS split pieces keep first part before second in filename order
+PASS duplicate title is shown once
+PASS missing metadata has safe numbered fallback
+PASS unsafe filename delimiters removed
+PASS long Unicode titles preserve filename limits, number and extension
+PASS Unicode title truncation preserves code points
+PASS Markdown heading used as subtitle
+PASS ordinary sentence is not presented as a heading
+PASS generated generic chapter labels give way to actual headings
+PASS edited library title takes precedence
+PASS imported filename does not obscure book metadata
+PASS EPUB subtitle extracted from heading structure
+PASS DOCX heading style supplies audio subtitle
+PASS metadata leaves every PCM sample unchanged
+PASS tags do not change audio format
+PASS RIFF tags carry track title and book
+PASS author and track number are embedded
+PASS software credit retains requested signature
+PASS RIFF size includes appended metadata
+PASS odd PCM byte count stays aligned before tags
+PASS 22 audio naming and metadata checks
+PASS PDF line wrapping no longer creates pauses inside a sentence
+PASS engine word positions still map to original paragraph offsets
+PASS discretionary line-end hyphens do not break a spoken word
+PASS ordinary meaningful hyphens are retained
+PASS CRLF, indentation and trailing layout whitespace are normalised
+PASS normalisation preserves numbers, signs and decimal punctuation
+PASS multiple page separators cannot overflow the source map
+PASS emoji UTF16 units retain exact source offsets
+PASS engine offsets outside the text remain bounded
+PASS layout-only text never becomes a spoken request
+PASS chunk boundaries prefer complete sentences over single layout newlines
+PASS pausing normalised speech retains the original document position
+PASS speech uses longer sentence context with smaller requests at slow rates
+PASS natural voice requests are not cut off by the old one-minute timeout
+PASS chunking does not separate an abbreviation from its following name
+PASS titles and initials do not become artificial sentence pauses
+PASS online playback starts with a shorter request while offline keeps normal context
+PASS 17 natural speech and source mapping checks
+PASS incomplete narration is never published as a ready file
+PASS joined narration retains the selected engine PCM format
+PASS offline narration preserves every audio sample without recompression
+PASS existing audio files are never overwritten
+PASS voice format changes abort instead of changing pitch or speed
+PASS failed audio generation cleans its own partial output
+PASS audio generation respects cancellation before copying
+PASS cancelled narration is not published
+PASS non-WAV engine output fails clearly
+PASS truncated engine output cannot create a playable-looking file
+PASS odd PCM8 payloads receive a valid RIFF pad byte
+PASS another operation's partial file is not truncated
+PASS unowned partial audio is preserved
+PASS oversized engine files are rejected before allocation
+PASS 14 WAV preservation and file safety checks
+PASS launch wrappers retain the actual nested error type
+PASS launch wrappers expose the actual app location in their cause
+PASS exception messages and private document paths never enter diagnostics
+PASS cause traversal is bounded to eight entries
+PASS cyclic exception causes cannot loop forever
+PASS errors without app frames still report their type
+PASS missing error remains safe
+PASS 7 diagnostic cause and privacy checks
+PASS speech prefers a complete sentence within the engine limit
+PASS speech breaks at paragraph boundaries
+PASS speech never splits a surrogate pair at a hard boundary
+PASS mixed language punctuation and emoji are preserved
+PASS 400 varied Unicode documents reconstruct exactly without oversized chunks
+PASS one utterance is in flight at a time
+PASS pause saves the latest spoken position and prevents new speech
+PASS a late onDone after pause cannot skip unread text
+PASS resume creates a fresh utterance at the saved position
+PASS late range callbacks cannot move a resumed utterance
+PASS completion advances exactly to the end of the accepted chunk
+PASS duplicate completion cannot advance twice
+PASS changing documents invalidates callbacks from the previous text
+PASS the replacement document supplies the actual speech text
+PASS end of a part cannot enqueue an empty utterance
+PASS saved offsets beyond updated text are clamped
+PASS resuming inside a surrogate pair backs up to the whole character
+PASS blank prefixes never become empty engine requests
+PASS trailing whitespace completes without waiting for a speech callback
+PASS look-ahead prepares exactly the next text without marking it read
+PASS look-ahead holds only one additional request
+PASS completed utterance promotes queued text without a second start request
+PASS pause cancels queued speech and keeps the actual spoken position
+PASS late callbacks cannot complete cancelled queued speech
+PASS stop releases text and leaves the cursor paused
+PASS offline Portuguese accepts an installed local Portuguese voice
+PASS offline rejects every network voice
+PASS online does not silently substitute a local voice
+PASS voice selection cannot silently change language
+PASS offline rejects voice data that is not installed
+PASS online English matches language case independently
+PASS speech rate stays within supported limits
+PASS all four PDF themes map black and white to readable ink and paper
+PASS invalid saved theme values are clamped
+PASS page progress matches the supplied reader example and handles boundaries
+PASS 35 speech and reader policy checks
+PASS PDF has its own recognisable symbol
+PASS Word is distinguished from generic documents
+PASS APK has Android fallback while its icon loads
+PASS images keep an image symbol without thumbnail
+PASS folders cannot be treated as document covers
+PASS grid and large modes enable actual previews
+PASS small list mode avoids document cover decoding
+PASS EPUB and DOCX support bounded cover previews
+PASS storage card uses the selected Ocean accent
+PASS storage gradient changes with Coral theme
+PASS dark-theme card uses a readable darker accent
+PASS focus countdown computes remaining time
+PASS focus countdown never becomes negative
+PASS paused corrupt accumulation stays within duration
+PASS 14 format, cover policy, theme and timer checks
+PASS brand decodes at 1/8 dimensions without density scaling
+PASS brand bitmap remains below 400KB
+PASS 10000 random PDF dimensions respect pixel and edge budgets
+PASS thumbnail cache adapts to 32MB heap
+PASS thumbnail cache has a fixed upper cap
+PASS Flash normalizes accents and quotes every search token
+PASS operators and quotes cannot escape a Flash token
+PASS symbols-only query has no expression
+PASS Flash caps query complexity at twelve tokens
+PASS MP4 routes to native media player
+PASS WebM routes to native media player
+PASS audio routing is retained
+PASS English translates compound preference label
+PASS signature is preserved
+PASS unknown user text is preserved
+PASS search submitted after close is harmless
+PASS 16 performance, Flash, translation and routing checks
+PASS accents and case
+PASS PDF case
+PASS image MIME
+PASS Office category
+PASS LIKE metacharacters escaped
+PASS valid Portuguese filename
+PASS reject unsafe filename 
+PASS reject unsafe filename   
+PASS reject unsafe filename ..
+PASS reject unsafe filename .
+PASS reject unsafe filename a/b
+PASS reject unsafe filename a\b
+PASS reject unsafe filename a?b?c
+PASS reject unsafe filename a b
+PASS UTF8 text
+PASS HTML entities
+PASS DOCX extraction
+PASS XLSX extraction
+PASS PPTX extraction
+PASS only known Office parts
+PASS text extraction bounded
+PASS compressed expansion bounded
+PASS PDF content unsupported is explicit
+PASS size formatting
+Passed 24 checks
+PASS all accessible extensions, hidden files and Android/media
+PASS unknown binary extension is found
+PASS protected app directories excluded
+PASS symlink cannot escape volume
+PASS hidden preference
+PASS canonical containment allows child
+PASS canonical containment rejects external directory
+PASS result count bounded
+PASS cancellation stops real traversal
+PASS deadline reports partial traversal
+PASS disconnected or missing root fails explicitly
+PASS archive category
+PASS installer category
+PASS wildcard extension search
+PASS single-character wildcard
+PASS wildcard length remains exact
+PASS punctuation is literal
+PASS glob to bound SQL parameter
+Passed 18 filesystem checks
+PASS first search starts
+PASS 500 fast edits leave at most one pending search
+PASS latest request reaches the result
+PASS cancelled old request cannot publish stale result
+PASS current generation remains valid
+PASS explicit cancellation invalidates published generation
+PASS closing discards pending work
+Passed 7 scheduling checks
+PASS 1000 writes coalesce into one path
+PASS long write does not block independent file
+PASS settle time avoids premature open
+PASS closed file becomes ready
+PASS burst queue is bounded and requests reconciliation
+PASS overflow notification consumed once
+PASS drain uses bounded batches
+PASS shallow listing returns files and directories separately
+PASS 4 GiB document discovered without extracting its contents
+PASS shallow refresh avoids recursive rescan
+PASS hidden preference respected
+PASS OS reports real new-file event
+PASS new file appears after refreshing only its parent
+PASS rename detected by parent snapshot
+PASS deletion detected without reading other file contents
+PASS outside volume rejected
+PASS symlink excluded from metadata discovery
+Metadata-only shallow listing with 4 GiB sparse file: 1.863564 ms on host, not Android
+Passed 17 discovery checks
+PASS first system-catalog page starts from zero
+PASS pending pages keep a stable generation boundary
+PASS change arriving during page traversal is reserved for the next window
+PASS next delta includes all changes after the completed boundary
+PASS rebuilt MediaStore discards old generation and page cursor
+PASS unexpected generation rollback safely resets the checkpoint
+PASS unchanged generation needs no full metadata query
+Passed 7 generation checks
+PASS copy arbitrary extension and Unicode name preserves original and exact bytes
+PASS existing destination refused
+PASS conflict preserves destination
+PASS move onto itself refused
+PASS same-folder refusal preserves source
+PASS verified move publishes destination before removing original
+PASS same-volume direct movement retains inode and bytes without copying
+PASS cancellation after direct publish
+PASS direct cancellation keeps original and removes only matching alias
+PASS empty file copy
+PASS cancel while copying
+PASS cancel keeps source and cleans unpublished temporary file
+PASS source changed during copy refused
+PASS changed source preserved without publishing incomplete copy
+PASS cancel after publish during source verification
+PASS late cancellation retains both complete files
+PASS destination appearing during verification refused
+PASS concurrent destination never overwritten
+PASS revoked access refused
+PASS symbolic source refused
+PASS destination outside root refused
+PASS recursive folder transfer explicitly unsupported
+PASS discovery excludes staging files even with hidden files enabled
+PASS folders first and accent-aware name order
+PASS recent folder sort
+PASS size sort
+PASS only fixture staging file remains after failed operations
+Passed 27 checks
+PASS EPUB real OPF title and creator
+PASS EPUB spine order takes precedence over ZIP/manifest order
+PASS EPUB XHTML doctype/entity compatibility and paragraphs
+PASS EPUB scripts/styles/head not rendered or executed
+PASS EPUB navigation uses actual chapter labels and ignores remote links
+PASS URI-encoded chapter names resolve within archive
+PASS invalid chapter gives a clear failure
+PASS DOCX core properties read
+PASS DOCX runs concatenate with paragraph/break structure
+PASS external entity definition rejected before DOM parse
+PASS UTF16 entity declarations rejected
+PASS UTF16 book XML correctly decoded
+PASS EPUB traversal outside archive refused
+PASS remote EPUB resources refused
+PASS excessively deep document rejected before DOM recursion
+PASS safe relative archive path normalisation
+PASS missing EPUB package fails instead of showing invented content
+PASS compressed chapter expansion limit enforced
+PASS audio routing mp3
+PASS audio routing aac
+PASS audio routing flac
+PASS audio routing wav
+PASS audio routing ogg
+PASS audio routing opus
+PASS audio routing amr
+PASS audio routing m4a
+PASS audio routing m4b
+PASS audio routing wma
+PASS image routing with decoder fallback jpg
+PASS image routing with decoder fallback png
+PASS image routing with decoder fallback gif
+PASS image routing with decoder fallback webp
+PASS image routing with decoder fallback bmp
+PASS image routing with decoder fallback heic
+PASS image routing with decoder fallback avif
+PASS image routing with decoder fallback tiff
+PASS image routing with decoder fallback psd
+PASS image routing with decoder fallback raw
+PASS legacy DOC honestly routes to compatible external reader
+PASS EPUB reader and category routing
+PASS Word DOCX reader and MIME routing
+Passed 41 reader checks
+PASS ascending field Data de modificação
+PASS descending field Data de modificação
+PASS folders first regardless of descending field 0
+PASS ascending field Nome
+PASS descending field Nome
+PASS folders first regardless of descending field 1
+PASS ascending field Tamanho
+PASS descending field Tamanho
+PASS folders first regardless of descending field 2
+PASS ascending field Tipo de ficheiro
+PASS descending field Tipo de ficheiro
+PASS folders first regardless of descending field 3
+PASS ascending field Autor
+PASS descending field Autor
+PASS folders first regardless of descending field 4
+PASS ascending field Categoria
+PASS descending field Categoria
+PASS folders first regardless of descending field 5
+PASS ascending field Marcas
+PASS descending field Marcas
+PASS folders first regardless of descending field 6
+PASS ascending field Título
+PASS descending field Título
+PASS folders first regardless of descending field 7
+PASS ascending field Data personalizada
+PASS descending field Data personalizada
+PASS folders first regardless of descending field 8
+PASS ascending field Ordem personalizada
+PASS descending field Ordem personalizada
+PASS folders first regardless of descending field 9
+PASS missing author always last
+PASS unset personal date always last
+PASS unset personal order always last
+PASS strict leap date roundtrip
+PASS invalid date rejected
+PASS date format enforced
+PASS personal category/tag filters ignore accents and case
+PASS overlay initial retry available
+PASS overlay retry waits instead of looping
+PASS overlay backoff bounded attempt 0
+PASS overlay backoff bounded attempt 1
+PASS overlay backoff bounded attempt 2
+PASS overlay backoff bounded attempt 3
+PASS overlay backoff bounded attempt 4
+PASS overlay backoff bounded attempt 5
+PASS overlay backoff bounded attempt 6
+PASS overlay backoff bounded attempt 7
+PASS overlay backoff bounded attempt 8
+PASS overlay backoff bounded attempt 9
+PASS overlay backoff bounded attempt 10
+PASS overlay backoff bounded attempt 11
+PASS overlay backoff bounded attempt 12
+PASS overlay backoff bounded attempt 13
+PASS overlay backoff bounded attempt 14
+PASS overlay backoff bounded attempt 15
+PASS overlay backoff bounded attempt 16
+PASS overlay backoff bounded attempt 17
+PASS overlay backoff bounded attempt 18
+PASS overlay backoff bounded attempt 19
+PASS overlay recovery continues beyond three failures
+PASS successful overlay recovery clears failure history
+Passed 61 ordering/recovery checks
+PASS recoverable removal moves real file without changing bytes
+PASS durable original-path journal accompanies the removed file
+PASS fresh engine reconstructs recoverable item from disk
+PASS explorer hides recycle folder even with hidden files enabled
+PASS recursive discovery excludes recycle data and journal
+PASS restore after restart returns exact original and removes completed journal
+PASS same original name gets independent recycle entries
+PASS restore refuses an occupied original path
+PASS restore conflict preserves both files
+PASS source modified after confirmation is refused
+PASS changed source remains available
+PASS cancel before removal
+PASS cancel preserves original
+PASS access revoked after journal creation but before move
+PASS journal interruption preserves original and does not publish a false recycle item
+PASS symbolic source refused
+PASS directory deletion is not recursive or implicit
+PASS protected Android application area refused
+PASS recycle data cannot be recycled recursively
+PASS changed recycle payload is refused before permanent removal
+PASS changed recycle payload left untouched
+PASS tampered journal cannot restore outside allowed volume
+PASS tampered journal does not lose payload
+PASS missing original folder fails clearly
+PASS missing folder retains recoverable data
+PASS permanent delete only removes confirmed payload and leaves unknown extra file
+PASS permanent delete leaves other original/recycle entries untouched
+PASS unknown or incomplete recycle records are never auto-purged
+PASS cancelled restore
+PASS cancelled restore keeps recycle data
+PASS preview width remains within display 1 / 1.0
+PASS preview width remains within display 1 / 2.0
+PASS preview width remains within display 1 / 3.0
+PASS preview width remains within display 120 / 1.0
+PASS preview width remains within display 120 / 2.0
+PASS preview width remains within display 120 / 3.0
+PASS preview width remains within display 320 / 1.0
+PASS preview width remains within display 320 / 2.0
+PASS preview width remains within display 320 / 3.0
+PASS preview width remains within display 720 / 1.0
+PASS preview width remains within display 720 / 2.0
+PASS preview width remains within display 720 / 3.0
+PASS preview width remains within display 1080 / 1.0
+PASS preview width remains within display 1080 / 2.0
+PASS preview width remains within display 1080 / 3.0
+PASS preview width remains within display 2400 / 1.0
+PASS preview width remains within display 2400 / 2.0
+PASS preview width remains within display 2400 / 3.0
+PASS preview leaves surrounding space for rounded card
+Passed 49 trash/reader geometry checks
+PASS CSV preserves commas and Unicode in one field
+PASS CSV escapes embedded quotes
+PASS CSV neutralises formula/control prefix =1+1
+PASS CSV neutralises formula/control prefix +SUM(A1)
+PASS CSV neutralises formula/control prefix -1+2
+PASS CSV neutralises formula/control prefix @command
+PASS CSV neutralises formula/control prefix   =formula
+PASS CSV neutralises formula/control prefix ?unsafe
+PASS CSV neutralises formula/control prefix ?unsafe
+PASS CSV row has stable separators, quoted newlines and CRLF
+PASS CSV handles absent detail
+Passed 11 CSV checks
+PASS edit before preserves offset
+PASS insert shifts annotations
+PASS overlapping edit removes only touched annotation
+PASS unicode case search offsets
+PASS search cap
+PASS empty query
+PASS rich export escapes and formats
+PASS no markup injection
+PASS cut shifts later marks
+PASS reject invalid selection
+PASS append at end
+11 study checks
+PASS first remembered review scheduled one day later
+PASS second remembered review spaced three days
+PASS later successful review expands interval
+PASS forgotten card returns after one minute and increments lapse
+PASS hard first review minimum day
+PASS hard interval grows conservatively
+PASS easy first review four days
+PASS review interval capped at 180 days
+PASS reject invalid grading
+PASS focus uses elapsed monotonic time plus accumulated pauses
+PASS focus after reboot falls back to nonnegative wall time
+PASS focus cannot exceed planned duration
+PASS clock rollback cannot produce negative focus
+PASS subject trimming keeps Unicode
+PASS empty user field rejected
+PASS study query escapes wildcard characters
+16 study schedule checks
+PASS study import preserves source bytes
+PASS study import SHA256 matches committed file
+PASS study import leaves no partial after success
+PASS occupied study target is never overwritten
+PASS oversized import is rolled back
+PASS cancelled import leaves no partial material
+PASS source read failure leaves no material
+PASS only extension used from original filename
+PASS unsafe extension never enters storage path
+PASS unknown extension has safe fallback
+PASS already-cancelled empty stream is not published
+PASS cancellation signalled at EOF keeps import unpublished
+PASS another import's staging file is preserved
+PASS dangling staging symlink is refused without writing its target
+PASS dangling destination symlink is treated as occupied
+PASS portable study backup accepts exact manifest and material entries
+PASS empty material library backup accepted
+PASS backup path traversal rejected
+PASS backup absolute paths rejected
+PASS missing backup material rejected before database writes
+PASS unexpected backup material rejected
+PASS repeated manifest material ID rejected
+PASS negative manifest material ID rejected
+23 study import checks
+PASS PKCE SHA256 matches RFC7636 vector
+PASS PKCE verifier has cryptographic length and URL-safe alphabet
+PASS cloud endpoint canonicalizes HTTPS project host
+PASS cleartext cloud endpoint rejected
+PASS lookalike cloud host rejected
+PASS embedded endpoint credentials rejected
+PASS unexpected endpoint path rejected
+PASS OAuth URL sends challenge and never sends verifier
+PASS valid OAuth callback returns one authorization code
+PASS login state mismatch rejected
+PASS duplicate callback parameters rejected
+PASS unregistered callback scheme rejected
+PASS unregistered callback host rejected
+PASS implicit fragment credentials rejected
+PASS expired login initiation rejected
+PASS provider refusal does not create a session
+PASS different account cannot publish another local workspace
+PASS stale phone cannot overwrite newer remote revision
+PASS current same-account workspace may publish
+PASS chunk path is deterministic and namespaced
+PASS cloud object traversal rejected
+PASS chunk count cannot exceed snapshot bound
+22 cloud protocol checks
+PASS 3008 block-boundary and wildcard regression checks
+PASS Portuguese accent folding returns original composed ranges
+PASS accent-sensitive option remains available
+PASS decomposed marks retain exact selection end
+PASS whole-word match includes trailing combining marks
+PASS whole word excludes word interiors and underscores
+PASS emoji preceding match preserves UTF-16 offsets
+PASS result cap enforced
+PASS query containing only ignored marks cannot match empty text
+PASS empty query rejected
+PASS zero cap returns no matches
+PASS Unicode case-insensitive search preserved
+PASS punctuation is a word boundary
+PASS multiple folded accents do not shift offsets
+PASS JSON budget ignores structures inside quoted text
+PASS JSON nesting guard rejects deep imported structures
+PASS JSON guard rejects truncated containers
+PASS 16 mapped-text search and JSON-budget checks
+PASS exact schema, FTS insert/update/delete, name-only FTS, literal LIKE, body preservation and rollback
+PASS migration 1→6 preserves files/FTS/favorites/searches/roots/history and builds parent index
+PASS migration 2→6 preserves files/FTS/favorites/searches/roots/history and builds parent index
+PASS migration 3→6 preserves files/FTS/favorites/searches/roots/history and builds parent index
+PASS migration 4→6 preserves files/FTS/favorites/searches/roots/history and builds parent index
+PASS migration 5→6 preserves files/FTS/favorites/searches/roots/history and builds parent index
+PASS committed names visible to a second connection before subsequent batches complete
+PASS catalog integrity and directory-local index lookups
+PASS move metadata preserves favorites/recent with both filesystem-observer orderings (host SQL, not Android)
+PASS new schema stores independent title/author/tags/custom category/date/order
+PASS all 20 exact Java SQL orderings execute and order globally before LIMIT 100
+PASS accent-normalized category/tag filters and metadata search
+PASS exact metadata copy SQL preserves original and classifies new destination
+PASS metadata move/rename identity update and SQLite integrity
+PASS collection membership deduplicates one file and permits separate virtual collections without changing files
+PASS catalogue removal/trash keeps virtual membership and restoration of the URI makes it available again
+PASS exact move/rename membership SQL follows URI identity for every collection
+PASS unlinking one reference preserves other collections, file rows and metadata
+PASS collection removal rolls back both link and container rows together
+PASS removing a collection leaves original catalogue and personal metadata untouched
+PASS exact pruning SQL keeps the latest 500 events with deterministic ordering for equal timestamps
+PASS clearing activity affects no file or collection records and keeps SQLite integrity
+PASS notebook text, Unicode notes and ranges survive database reopen
+PASS source digest isolates stale annotations after source content changes
+PASS updating one draft leaves other chapters intact
+PASS resetting one part removes only its draft and retains bookmarks
+PASS removing a bookmark retains other positions
+PASS reader notebook SQLite integrity
+PASS bundled PDF engine extracts real page text using bundled assets (host shims only)
+PASS per-page extraction separates search offsets and pages
+PASS page without text has no invented text or OCR
+PASS actual bounded PDF index extracts all fixture pages
+PASS PDF indexing cancellation before extraction
+PASS long PDF returns explicit partial-index status at 80 pages
+PASS extraction output cannot exceed 256K characters
+PASS reader text source reports the actual PDF page count
+PASS reader extracts the first page for TTS without marking complete text partial
+PASS TTS can load the next page independently
+PASS a blank PDF page remains blank and never receives invented narration
+PASS page requests outside the document fail clearly
+PASS PDFs without an embedded outline keep page navigation available
+PASS reader index excludes entries without a real page destination
+PASS nested PDF headings retain their hierarchy and page
+PASS PDF text extraction stops at 512K characters per page
+PASS 9 actual PDF reading checks
+PASS study schema v3 retains study tables and adds courses
+PASS study material and Cornell fields persist through database reopen
+PASS duplicate content is constrained within one discipline
+PASS identical source can belong to a different discipline
+PASS due review queue excludes suspended, future and other-discipline cards
+PASS graded review commits next due date and history together
+PASS repeated review token cannot apply a second schedule update
+PASS planner orders pending deadlines before undated and completed tasks
+PASS focus session token prevents duplicate time after process recovery
+PASS practice stores automatic and self-assessed counts distinctly
+PASS removing a private material copy retains notes cards and questions
+PASS removing only a discipline moves its study records to General
+PASS failed restore transaction rolls back records and relationships
+PASS literal study search escapes percent and underscore
+PASS removing a reviewed card retains history without a broken backup relationship
+PASS study SQLite integrity after all lifecycle operations
+PASS study v1 to v2 adds cloud state without changing prior study records
+PASS a committed study write marks workspace revision dirty
+PASS rolled-back edits do not advance committed local revision
+PASS paused test position and partial response survive a database reopen
+PASS attached-database restore rollback retains study records and reader marks together
+PASS exact cloud restore replaces records once and preserves original IDs without appending duplicates
+PASS reading page offset, chapter scroll and preferences are durably staged for recovery
+PASS restored workspace records the authenticated owner and known remote revision
+PASS edit after download is detected before destructive cloud application
+PASS recoverable study trash is part of the portable workspace
+PASS both workspace databases retain SQLite integrity after restore and rollback
+PASS cloud restore clears only study-material journal/cut clips and rolls cleanup back on failure
+ALL CHECKS COMPLETED

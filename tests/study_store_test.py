@@ -1,0 +1,40 @@
+"""Study schema and key state transitions on host SQLite; no Android runtime emulation."""
+from pathlib import Path
+import json,re,sqlite3,tempfile
+r=Path(__file__).parents[1];s=(r/'app/src/main/java/mz/bam/seeky/android/StudyStore.java').read_text();ddl=[json.loads(v) for v in re.findall(r'd\.execSQL\(("CREATE[^;]+?")\)',s)]
+def fresh(path=':memory:'):
+ d=sqlite3.connect(path)
+ for sql in sorted(ddl,key=lambda sql:not sql.startswith("CREATE TABLE")):d.execute(sql)
+ state=(r/'app/src/main/java/mz/bam/seeky/android/StudyState.java').read_text()
+ for encoded in re.findall(r'd\.execSQL\(("(?:CREATE TABLE|INSERT OR IGNORE)[^;]+?")\)',state):d.execute(json.loads(encoded))
+ return d
+with tempfile.TemporaryDirectory() as folder:
+ path=Path(folder)/'studies.db';d=fresh(path)
+ tables={x[0] for x in d.execute("SELECT name FROM sqlite_master WHERE type='table'")};assert tables=={'courses','subjects','materials','notes','cards','questions','tasks','sessions','quiz_runs','reviews','study_meta','study_trash','practice','material_identity','sqlite_sequence'};print('PASS study schema v3 retains study tables and adds courses')
+ d.execute("INSERT INTO subjects(id,title,color,created) VALUES(1,'Geografia',123,100)");d.execute("INSERT INTO materials(id,subject,title,name,mime,path,hash,bytes,created,updated) VALUES(1,1,'Livro','book.pdf','application/pdf','/private/book.pdf','abc',20,100,100)");d.execute("INSERT INTO notes(id,subject,material,title,body,cues,summary,tags,created,updated) VALUES(1,1,1,'Atmosfera','Apontamento','Porquê?','Síntese','exame',100,100)");d.commit();d.close();d=sqlite3.connect(path);assert d.execute('SELECT body,cues,summary FROM notes').fetchone()==('Apontamento','Porquê?','Síntese');print('PASS study material and Cornell fields persist through database reopen')
+ try:d.execute("INSERT INTO materials(subject,title,name,mime,path,hash,bytes,created,updated) VALUES(1,'Copy','copy.pdf','application/pdf','/copy','abc',20,100,100)");raise AssertionError()
+ except sqlite3.IntegrityError:d.rollback()
+ assert d.execute('SELECT count(*) FROM materials').fetchone()[0]==1;print('PASS duplicate content is constrained within one discipline')
+ d.execute("INSERT INTO materials(subject,title,name,mime,path,hash,bytes,created,updated) VALUES(0,'Other','other.pdf','application/pdf','/other','abc',20,100,100)");d.execute("INSERT INTO cards(id,subject,material,front,back,due,updated) VALUES(1,1,1,'Pergunta','Resposta',100,100)");d.execute("INSERT INTO cards(id,subject,front,back,due,suspended,updated) VALUES(2,1,'Suspended','Answer',50,1,100)");d.execute("INSERT INTO cards(id,subject,front,back,due,updated) VALUES(3,0,'General','Answer',200,100)");d.commit();assert d.execute('SELECT count(*) FROM materials').fetchone()[0]==2;print('PASS identical source can belong to a different discipline')
+ assert d.execute('SELECT id FROM cards WHERE subject=1 AND suspended=0 AND due<=? ORDER BY due,id LIMIT 30',(100,)).fetchall()==[(1,)];print('PASS due review queue excludes suspended, future and other-discipline cards')
+ d.execute('BEGIN');d.execute('UPDATE cards SET due=86400100,interval=1,reps=1 WHERE id=1');d.execute("INSERT INTO reviews(card,grade,reviewed,token) VALUES(1,2,100,'review-token')");d.commit();assert d.execute('SELECT reps,interval FROM cards WHERE id=1').fetchone()==(1,1);print('PASS graded review commits next due date and history together')
+ d.execute('BEGIN')
+ try:d.execute('UPDATE cards SET reps=99 WHERE id=1');d.execute("INSERT INTO reviews(card,grade,reviewed,token) VALUES(1,2,100,'review-token')");d.commit();raise AssertionError()
+ except sqlite3.IntegrityError:d.rollback()
+ assert d.execute('SELECT reps FROM cards WHERE id=1').fetchone()[0]==1;print('PASS repeated review token cannot apply a second schedule update')
+ d.execute("INSERT INTO tasks(id,subject,title,due,priority,updated) VALUES(1,1,'No date',0,2,100)");d.execute("INSERT INTO tasks(id,subject,title,due,priority,updated) VALUES(2,1,'Due',200,1,100)");d.execute("INSERT INTO tasks(id,subject,title,due,done,updated) VALUES(3,1,'Done',100,1,100)");assert [v[0] for v in d.execute('SELECT id FROM tasks ORDER BY done,CASE WHEN due=0 THEN 1 ELSE 0 END,due,priority DESC,id')]==[2,1,3];print('PASS planner orders pending deadlines before undated and completed tasks')
+ d.execute("INSERT INTO sessions(subject,started,seconds,goal,type,token) VALUES(1,100,1500,'Chapter 2','Foco','focus-token')");d.commit()
+ try:d.execute("INSERT INTO sessions(subject,started,seconds,goal,type,token) VALUES(1,100,1500,'Chapter 2','Foco','focus-token')");raise AssertionError()
+ except sqlite3.IntegrityError:d.rollback()
+ assert d.execute('SELECT SUM(seconds) FROM sessions').fetchone()[0]==1500;print('PASS focus session token prevents duplicate time after process recovery')
+ d.execute("INSERT INTO questions(subject,prompt,answer,choices,correct,kind,updated) VALUES(1,'Capital?','Maputo','[\"Beira\",\"Maputo\",\"Tete\",\"Pemba\"]',1,1,100)");d.execute("INSERT INTO quiz_runs(subject,total,correct,self_count,created,details) VALUES(1,5,3,2,100,'[]')");d.commit();assert d.execute('SELECT correct,self_count FROM quiz_runs').fetchone()==(3,2);print('PASS practice stores automatic and self-assessed counts distinctly')
+ d.execute('BEGIN')
+ for table in ['notes','cards','questions']:d.execute(f'UPDATE {table} SET material=0 WHERE material=1')
+ d.execute('DELETE FROM materials WHERE id=1');d.commit();assert d.execute('SELECT material,body FROM notes').fetchone()==(0,'Apontamento');print('PASS removing a private material copy retains notes cards and questions')
+ d.execute('BEGIN')
+ for table in ['materials','notes','cards','questions','tasks','sessions','quiz_runs']:d.execute(f'UPDATE {table} SET subject=0 WHERE subject=1')
+ d.execute('DELETE FROM subjects WHERE id=1');d.commit();assert d.execute('SELECT count(*) FROM subjects').fetchone()[0]==0;assert d.execute('SELECT body,subject FROM notes').fetchone()==('Apontamento',0);print('PASS removing only a discipline moves its study records to General')
+ d.execute('BEGIN');d.execute("INSERT INTO subjects(id,title,color,created) VALUES(10,'Restored',123,100)");d.execute("INSERT INTO cards(id,subject,front,back,due,updated) VALUES(10,10,'Imported','Imported answer',100,100)");d.rollback();assert not d.execute('SELECT * FROM subjects WHERE id=10').fetchall() and not d.execute('SELECT * FROM cards WHERE id=10').fetchall();print('PASS failed restore transaction rolls back records and relationships')
+ d.execute("UPDATE notes SET title='Taxa 100%_literal' WHERE id=1");assert d.execute("SELECT id FROM notes WHERE title LIKE ? ESCAPE '\\'",('%100\\%\\_literal%',)).fetchall()==[(1,)];print('PASS literal study search escapes percent and underscore')
+ d.commit();d.execute('BEGIN');d.execute('UPDATE reviews SET card=0 WHERE card=1');d.execute('DELETE FROM cards WHERE id=1');d.commit();assert d.execute('SELECT card FROM reviews').fetchone()[0]==0;print('PASS removing a reviewed card retains history without a broken backup relationship')
+ assert d.execute('PRAGMA integrity_check').fetchone()[0]=='ok';print('PASS study SQLite integrity after all lifecycle operations')

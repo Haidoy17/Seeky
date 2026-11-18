@@ -1,0 +1,1 @@
+package android.database.sqlite;public class SQLiteDatabase {public android.database.Cursor rawQuery(String q,String[] p){throw new UnsupportedOperationException("Host restore is not under test");}}

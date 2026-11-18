@@ -1,0 +1,51 @@
+{
+  "product": "Seeky",
+  "version": "5.6.0",
+  "version_code": 5002100,
+  "date": "2026-10-29",
+  "application_id": "mz.bam.seeky.estudos",
+  "standalone_application_id": "mz.bam.seeky.v51",
+  "standalone_upgrades_5_5": true,
+  "standalone_certificate_sha256": "a96f8caec94509f4aeb9abe560f23a09bc416d44e5f06d1e93e4e1cdcdc974fe",
+  "visual_signature": "Haidoy Carlos Mautempo",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "study_schema": 3,
+  "reader_schema": 2,
+  "catalog_schema": 6,
+  "local_suite_passed": true,
+  "course_host_checks": 76,
+  "timer_host_checks": 25,
+  "book_host_checks": 59,
+  "edge_loopback_checks": 11,
+  "robolectric_sdk": 33,
+  "robolectric_total_tests": 23,
+  "physical_device_tested": false,
+  "audible_voice_quality_tested": false,
+  "edge_browser_ui_tested": false,
+  "native_pdfium_tested_on_device": false,
+  "backend_modified": false,
+  "books_page_size": 12,
+  "microsoft": "external Edge, user controls Read aloud and voices in browser",
+  "offline_voice_models": "provided only by installed Android TTS engine; no Edge model downloads",
+  "offline_audio": "Android TTS WAV generation of a selected range or whole book into a chosen directory",
+  "max_narration_pcm_bytes_per_file": 134217728,
+  "max_selection_characters": 24000,
+  "multi_chapter_global_text_limit": null,
+  "extraction_limits_preserved": true,
+  "apks": [
+    {
+      "file": "Seeky_5_6_Livros.apk",
+      "signed": true,
+      "bytes": 5501012,
+      "sha256": "f8c738751327b02706ecd2fc8a8c8c95c8e507a425b6afc59fc2a7bcea8194dd"
+    },
+    {
+      "file": "Seeky_5_6_sem_assinatura.apk",
+      "signed": false,
+      "bytes": 5482614,
+      "sha256": "cefa1ef2da3a28900173f9357f3e6652bc694c9a13b5ad6e6af09df622eb69e4"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+package mz.bam.seeky.android;
+import android.content.*;import android.security.keystore.*;import android.util.Base64;import javax.crypto.*;import javax.crypto.spec.GCMParameterSpec;import java.security.*;import org.json.*;
+/** Session and PKCE verifier encrypted with a non-exportable Android Keystore key. */
+final class CloudVault {
+ final SharedPreferences prefs;static final String ALIAS="seeky-cloud-session-v1";
+ CloudVault(Context c){prefs=c.getSharedPreferences("cloud_vault",0);}
+ javax.crypto.SecretKey key()throws Exception{KeyStore store=KeyStore.getInstance("AndroidKeyStore");store.load(null);if(!store.containsAlias(ALIAS)){KeyGenerator generator=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");generator.init(new KeyGenParameterSpec.Builder(ALIAS,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());generator.generateKey();}return (javax.crypto.SecretKey)store.getKey(ALIAS,null);}
+ synchronized JSONObject read()throws Exception{String value=prefs.getString("session","");if(value.isEmpty())return new JSONObject();byte[] data=Base64.decode(value,Base64.NO_WRAP);if(data.length<28)throw new GeneralSecurityException("Sessão inválida; entre novamente.");Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.DECRYPT_MODE,key(),new GCMParameterSpec(128,java.util.Arrays.copyOfRange(data,0,12)));cipher.updateAAD(ALIAS.getBytes("UTF-8"));return new JSONObject(new String(cipher.doFinal(java.util.Arrays.copyOfRange(data,12,data.length)),"UTF-8"));}
+ synchronized void write(JSONObject json)throws Exception{Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.ENCRYPT_MODE,key());cipher.updateAAD(ALIAS.getBytes("UTF-8"));byte[] encrypted=cipher.doFinal(json.toString().getBytes("UTF-8")),iv=cipher.getIV(),all=new byte[iv.length+encrypted.length];System.arraycopy(iv,0,all,0,iv.length);System.arraycopy(encrypted,0,all,iv.length,encrypted.length);if(!prefs.edit().putString("session",Base64.encodeToString(all,Base64.NO_WRAP)).commit())throw new java.io.IOException("Não foi possível guardar a sessão.");}
+ void clear(){prefs.edit().remove("session").commit();}
+}

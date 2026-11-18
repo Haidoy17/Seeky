@@ -1,0 +1,77 @@
+package mz.bam.seeky.android;
+
+import android.content.Context;
+import android.graphics.*;
+import android.view.View;
+
+/** Crisp native vector icons; original Seeky wordmark is left untouched. */
+final class Icons extends View {
+    String name; int color; final Paint p=new Paint(3);
+    Icons(Context c,String name,int color){super(c);this.name=name;this.color=color;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
+    void setSymbol(String name,int color){if(!this.name.equals(name)||this.color!=color){this.name=name;this.color=color;invalidate();}}
+    void line(Canvas c,float... points){for(int i=0;i+3<points.length;i+=2)c.drawLine(points[i],points[i+1],points[i+2],points[i+3],p);}
+    @Override protected void onDraw(Canvas canvas){
+        super.onDraw(canvas);canvas.save();float s=Math.min(getWidth(),getHeight())/24f;canvas.translate((getWidth()-24*s)/2,(getHeight()-24*s)/2);canvas.scale(s,s);p.setColor(color);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.8f);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
+        switch(name){
+            case "chevron":line(canvas,9,5,16,12,9,19);break;
+            case "minus":line(canvas,5,12,19,12);break;
+            case "phone":canvas.drawRoundRect(6,2,18,22,3,3,p);line(canvas,10,18,14,18);break;
+            case "usb":canvas.drawRoundRect(5,9,19,22,3,3,p);line(canvas,8,9,8,2,16,2,16,9);line(canvas,11,4,11,6);line(canvas,14,4,14,6);break;
+
+            case "power":canvas.drawArc(4,4,20,21,-50,280,false,p);line(canvas,12,2,12,11);break;
+            case "more":p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,5,1.7f,p);canvas.drawCircle(12,12,1.7f,p);canvas.drawCircle(12,19,1.7f,p);break;
+            case "speaker":line(canvas,3,9,7,9,12,5,12,19,7,15,3,15,3,9);canvas.drawArc(9,5,22,19,-65,130,false,p);canvas.drawArc(12,8,19,16,-65,130,false,p);break;
+            case "bookmark":line(canvas,6,3,18,3,18,21,12,17,6,21,6,3);break;
+            case "contents":line(canvas,8,5,21,5);line(canvas,8,12,21,12);line(canvas,8,19,21,19);canvas.drawCircle(3,5,.8f,p);canvas.drawCircle(3,12,.8f,p);canvas.drawCircle(3,19,.8f,p);break;
+            case "rotate":canvas.drawRoundRect(5,5,19,19,2,2,p);canvas.drawArc(1,1,23,23,190,100,false,p);line(canvas,16,1,21,3,18,7);break;
+            case "note":canvas.drawRoundRect(3,3,21,18,3,3,p);line(canvas,4,18,4,22,9,18);line(canvas,12,6,12,14);line(canvas,8,10,16,10);break;
+            case "type":line(canvas,3,20,9,4,15,20);line(canvas,5,14,13,14);canvas.drawArc(16,11,23,21,0,360,false,p);line(canvas,23,11,23,21);break;
+            case "stop":canvas.drawRoundRect(5,5,19,19,2,2,p);break;
+            case "pdf":case "word":case "excel":case "slides":
+                canvas.drawRoundRect(3,2,21,22,3,3,p);line(canvas,15,2,15,8,21,8);p.setStyle(Paint.Style.FILL);p.setTypeface(Typeface.create("sans-serif-medium",Typeface.BOLD));p.setTextAlign(Paint.Align.CENTER);p.setTextSize(name.equals("pdf")?7:11);canvas.drawText(name.equals("pdf")?"PDF":name.equals("word")?"W":name.equals("excel")?"X":"P",12,17,p);break;
+            case "android":line(canvas,8,3,6,1);line(canvas,16,3,18,1);canvas.drawArc(5,2,19,14,180,180,false,p);line(canvas,5,8,19,8,19,18,5,18,5,8);line(canvas,8,18,8,22);line(canvas,16,18,16,22);line(canvas,2,9,2,16);line(canvas,22,9,22,16);p.setStyle(Paint.Style.FILL);canvas.drawCircle(9,6,.8f,p);canvas.drawCircle(15,6,.8f,p);break;
+            case "course":line(canvas,2,9,12,4,22,9,12,14,2,9);line(canvas,6,11,6,17,12,20,18,17,18,11);line(canvas,22,9,22,17);break;
+            case "flash":line(canvas,14,2,5,14,11,14,10,22,20,9,14,9,14,2);break;
+            case "play":line(canvas,8,4,20,12,8,20,8,4);break;
+            case "pause":line(canvas,8,5,8,19);line(canvas,16,5,16,19);break;
+            case "globe":canvas.drawCircle(12,12,9,p);canvas.drawOval(8,3,16,21,p);line(canvas,3,12,21,12);break;
+            case "palette":canvas.drawCircle(12,12,9,p);canvas.drawCircle(8,8,1,p);canvas.drawCircle(15,7,1,p);canvas.drawCircle(17,13,1,p);canvas.drawCircle(8,15,1,p);break;
+            case "account":canvas.drawCircle(12,8,4,p);canvas.drawArc(3,13,21,27,180,180,false,p);break;
+            case "book":line(canvas,12,5,12,21);line(canvas,12,6,8,3,2,3,2,18,8,18,12,21,16,18,22,18,22,3,16,3,12,6);break;
+            case "add":line(canvas,12,4,12,20);line(canvas,4,12,20,12);break;
+            case "cards":canvas.drawRoundRect(6,5,21,21,3,3,p);line(canvas,16,2,3,2,3,16);line(canvas,10,11,17,11);line(canvas,10,15,15,15);break;
+            case "quiz":canvas.drawCircle(12,12,9,p);canvas.drawArc(8,6,16,13,190,280,false,p);line(canvas,12,13,12,15);canvas.drawCircle(12,18,.5f,p);break;
+            case "calendar":canvas.drawRoundRect(3,5,21,21,3,3,p);line(canvas,3,10,21,10);line(canvas,8,2,8,7);line(canvas,16,2,16,7);line(canvas,7,14,10,14);line(canvas,14,14,17,14);break;
+            case "check":line(canvas,4,12,10,18,21,5);break;
+            case "search":canvas.drawCircle(10.5f,10.5f,6.5f,p);line(canvas,15.5f,15.5f,21,21);break;
+            case "home":line(canvas,3,10,12,3,21,10,21,21,15,21,15,14,9,14,9,21,3,21,3,10);break;
+            case "folder":line(canvas,3,7,3,5,9,5,11,8,21,8,21,20,3,20,3,7);break;
+            case "star":Path star=new Path();for(int i=0;i<10;i++){double a=-Math.PI/2+i*Math.PI/5;float r=i%2==0?9:4;float x=12+(float)Math.cos(a)*r,y=12+(float)Math.sin(a)*r;if(i==0)star.moveTo(x,y);else star.lineTo(x,y);}star.close();canvas.drawPath(star,p);break;
+            case "tools":case "grid":for(int x=4;x<17;x+=10)for(int y=4;y<17;y+=10)canvas.drawRoundRect(x,y,x+6,y+6,1.5f,1.5f,p);break;
+            case "settings":canvas.drawCircle(12,12,3,p);Path gear=new Path();for(int j=0;j<32;j++){double a=j*Math.PI/16;float r=(j%4==0||j%4==3)?10:8;float x=12+(float)Math.cos(a)*r,y=12+(float)Math.sin(a)*r;if(j==0)gear.moveTo(x,y);else gear.lineTo(x,y);}gear.close();canvas.drawPath(gear,p);break;
+            case "image":canvas.drawRoundRect(3,4,21,20,3,3,p);canvas.drawCircle(8,9,1.6f,p);line(canvas,4,18,10,12,14,16,17,13,21,17);break;
+            case "video":canvas.drawRoundRect(3,5,21,19,3,3,p);line(canvas,10,9,16,12,10,15,10,9);break;
+            case "audio":line(canvas,9,17,9,5,19,3,19,15);canvas.drawOval(3,16,9,21,p);canvas.drawOval(13,14,19,19,p);break;
+            case "clock":canvas.drawCircle(12,12,9,p);line(canvas,12,6,12,12,16,14);break;
+            case "float":canvas.drawRoundRect(3,3,21,21,4,4,p);canvas.drawRoundRect(11,11,22,21,3,3,p);line(canvas,7,8,15,8);break;
+            case "copy":canvas.drawRoundRect(8,8,21,21,3,3,p);line(canvas,16,4,16,3,3,3,3,16,4,16);break;
+            case "filters":line(canvas,4,6,20,6);line(canvas,4,12,20,12);line(canvas,4,18,20,18);canvas.drawCircle(9,6,2,p);canvas.drawCircle(16,12,2,p);canvas.drawCircle(8,18,2,p);break;
+            case "arrow":line(canvas,4,12,20,12,14,6);line(canvas,20,12,14,18);break;
+            case "back":line(canvas,20,12,4,12,10,6);line(canvas,4,12,10,18);break;
+            case "trash":line(canvas,4,6,20,6);line(canvas,9,3,15,3,16,6);line(canvas,6,6,7,21,17,21,18,6);line(canvas,10,10,10,17);line(canvas,14,10,14,17);break;
+            case "edit":line(canvas,4,16,16,4,20,8,8,20,4,20,4,16);line(canvas,13,7,17,11);break;
+            case "collapse":line(canvas,3,9,9,9,9,3);line(canvas,15,3,15,9,21,9);line(canvas,21,15,15,15,15,21);line(canvas,9,21,9,15,3,15);break;
+            case "expand":line(canvas,9,3,3,3,3,9);line(canvas,15,3,21,3,21,9);line(canvas,21,15,21,21,15,21);line(canvas,9,21,3,21,3,15);break;
+            case "close":line(canvas,6,6,18,18);line(canvas,18,6,6,18);break;
+            case "refresh":canvas.drawArc(4,4,20,20,35,290,false,p);line(canvas,20,4,20,10,14,10);break;
+            case "scan":line(canvas,3,8,3,3,8,3);line(canvas,16,3,21,3,21,8);line(canvas,21,16,21,21,16,21);line(canvas,8,21,3,21,3,16);line(canvas,7,8,17,8);line(canvas,12,8,12,17);break;
+            case "restore":canvas.drawArc(4,4,20,20,150,300,false,p);line(canvas,3,4,3,10,9,10);line(canvas,12,7,12,12,16,14);break;
+            case "mic":canvas.drawRoundRect(9,3,15,15,3,3,p);canvas.drawArc(6,7,18,19,0,180,false,p);line(canvas,12,19,12,22);line(canvas,8,22,16,22);break;
+            case "share":line(canvas,7,11,16,6);line(canvas,7,13,16,18);canvas.drawCircle(5,12,2.5f,p);canvas.drawCircle(18,5,2.5f,p);canvas.drawCircle(18,19,2.5f,p);break;
+            case "storage":canvas.drawRoundRect(3,4,21,20,4,4,p);line(canvas,3,14,21,14);canvas.drawCircle(17,17,0.5f,p);break;
+            default:line(canvas,5,3,14,3,20,9,20,21,5,21,5,3);line(canvas,14,3,14,9,20,9);line(canvas,9,13,16,13);line(canvas,9,17,14,17);break;
+        }
+        canvas.restore();
+    }
+    static String category(String c){return c.equals("PDF")?"pdf":c.equals("Aplicações")?"android":c.equals("Imagens")?"image":c.equals("Vídeos")?"video":c.equals("Áudio")?"audio":c.equals("Pastas")?"folder":"document";}
+}

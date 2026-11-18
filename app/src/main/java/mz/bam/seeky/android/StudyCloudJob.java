@@ -1,0 +1,7 @@
+package mz.bam.seeky.android;
+import android.app.job.*;import java.util.concurrent.*;import java.util.concurrent.atomic.AtomicBoolean;
+public final class StudyCloudJob extends JobService {
+ final AtomicBoolean stopped=new AtomicBoolean();ExecutorService worker;
+ public boolean onStartJob(JobParameters params){stopped.set(false);worker=Executors.newSingleThreadExecutor();worker.execute(()->{boolean retry=false;try{CloudClient client=new CloudClient(this);if(client.configured()&&client.signedIn())try(StudyStore db=new StudyStore(this)){long uploaded=getSharedPreferences("cloud",0).getLong("uploaded_revision",-1);if(StudyState.revision(db)!=uploaded)client.upload(stopped::get,(phase,n,total)->getSharedPreferences("cloud",0).edit().putString("status",phase+" · "+n+" / "+total).apply());}}catch(Exception e){AppDiagnostics.record(this,"cloud-job",e);if(e instanceof CloudClient.Failure&&((CloudClient.Failure)e).status==401){new CloudVault(this).clear();getSharedPreferences("cloud",0).edit().putBoolean("auto",false).apply();}getSharedPreferences("cloud",0).edit().putString("status",e.getMessage()==null?"Backup pendente; abra Conta para verificar.":e.getMessage()).apply();retry=!(e instanceof CloudClient.Failure&&(((CloudClient.Failure)e).code.equals("40001")||((CloudClient.Failure)e).status==401));}finally{if(!stopped.get())jobFinished(params,retry);worker.shutdown();}});return true;}
+ public boolean onStopJob(JobParameters params){stopped.set(true);return true;}
+}

@@ -1,0 +1,1 @@
+package android.app.job;public class JobScheduler {public int calls;public JobInfo job;public JobInfo getPendingJob(int id){return job;}public int schedule(JobInfo next){calls++;job=next;return 1;}public void cancel(int id){job=null;}}

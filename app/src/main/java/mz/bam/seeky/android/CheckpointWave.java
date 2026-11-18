@@ -1,0 +1,16 @@
+package mz.bam.seeky.android;
+
+import java.io.*;
+
+/** RIFF PCM up to its 32-bit container limit; all operations stream bounded buffers. */
+final class CheckpointWave implements AutoCloseable {
+ static final long MAX=0xffffffffL-4194304;
+ final File file;RandomAccessFile out;long bytes;int codec,channels,rate,bits,align;
+ CheckpointWave(File file,long committed,int codec,int channels,int rate,int bits)throws IOException{this.file=file;this.bytes=committed;this.codec=codec;this.channels=channels;this.rate=rate;this.bits=bits;this.align=channels*bits/8;if(committed>0&&(!file.isFile()||file.length()<44+committed))throw new IOException("O áudio parcial não está disponível para retomar.");out=new RandomAccessFile(file,"rw");out.setLength(44+committed);if(committed>0)header(36+bytes);else out.write(new byte[44]);out.seek(44+committed);}
+ void append(File source,WaveJoiner.Cancel cancel)throws IOException{WaveJoiner.Format f=WaveJoiner.inspect(source);if(bytes==0&&rate==0){codec=f.codec;channels=f.channels;rate=f.rate;bits=f.bits;align=f.align;}if(codec!=f.codec||channels!=f.channels||rate!=f.rate||bits!=f.bits)throw new IOException("A voz mudou o formato do áudio. Retome com a mesma voz.");if(bytes+f.length>MAX)throw new IOException("O WAV atingiu o limite de 4 GB. Escolha guardar em partes.");out.seek(44+bytes);try(RandomAccessFile input=new RandomAccessFile(source,"r")){input.seek(f.offset);byte[] buf=new byte[65536];long left=f.length;while(left>0){if(cancel.cancelled())throw new InterruptedIOException();int count=input.read(buf,0,(int)Math.min(left,buf.length));if(count<0)throw new EOFException();out.write(buf,0,count);bytes+=count;left-=count;}}}
+ void silence(int milliseconds,WaveJoiner.Cancel cancel)throws IOException{if(milliseconds<0||milliseconds>60000||rate<=0||align<=0)throw new IOException("Pausa de áudio inválida.");long count=(long)rate*milliseconds/1000*align;if(bytes+count>MAX)throw new IOException("O WAV atingiu o limite de 4 GB. Escolha guardar em partes.");byte[] buffer=new byte[65536];if(codec==1&&bits==8)java.util.Arrays.fill(buffer,(byte)128);out.seek(44+bytes);while(count>0){if(cancel.cancelled())throw new InterruptedIOException();int n=(int)Math.min(count,buffer.length);out.write(buffer,0,n);bytes+=n;count-=n;}}
+ void header(long size)throws IOException{out.seek(0);out.writeInt(0x52494646);WaveJoiner.write32(out,size);out.writeInt(0x57415645);out.writeInt(0x666d7420);WaveJoiner.write32(out,16);WaveJoiner.write16(out,codec);WaveJoiner.write16(out,channels);WaveJoiner.write32(out,rate);WaveJoiner.write32(out,(long)rate*align);WaveJoiner.write16(out,align);WaveJoiner.write16(out,bits);out.writeInt(0x64617461);WaveJoiner.write32(out,bytes);}
+ void checkpoint()throws IOException{header(36+bytes);out.getFD().sync();out.seek(44+bytes);}
+ void finish(WavInfo info)throws IOException{if(bytes==0)throw new IOException("Não há texto narrado para guardar.");out.seek(44+bytes);if((bytes&1)!=0)out.write(0);byte[] tags=info.chunk(),cues=WavCues.chunk(info.cues,info.rate);out.write(tags);out.write(cues);header(36+bytes+(bytes&1)+tags.length+cues.length);out.getFD().sync();close();}
+ public void close(){if(out!=null)try{out.close();}catch(IOException ignored){}out=null;}
+}
