@@ -1,0 +1,30 @@
+name: Android
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compilar APK de depuração (Gradle)
+        run: ./gradlew --no-daemon assembleDebug
+      - name: Testes do núcleo (JVM)
+        run: python3 tools/run_tests.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seeky-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14

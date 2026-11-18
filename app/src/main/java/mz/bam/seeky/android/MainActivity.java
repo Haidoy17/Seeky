@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
  final Map<String,Parcelable> listPositions=new HashMap<>();final Map<String,Integer> scrollPositions=new HashMap<>();
  long[] homeTotals={0,0};List<String[]> homeStats=new ArrayList<>();List<Catalog.Entry> homeRecent=new ArrayList<>();boolean dashboardLoading=false,dashboardLoaded=false;
  final Map<String,TextView> categoryCounts=new HashMap<>();TextView homeCatalogue;LinearLayout recentArea;
- final long workspaceEpoch=WorkspaceEpoch.value;static final String VERSION="Seeky 5.18.0";
+ final long workspaceEpoch=WorkspaceEpoch.value;static final String VERSION="Seeky 5.19.0";
  HomeCategories homeCategories;Thumbnails thumbnails;int viewMode=3,iconSize=1;boolean descending=true;String personalCategory="",tagFilter="";
 
  String folderQuery="";int folderSort=0;EditText folderSearch;LinearLayout transferBar;
