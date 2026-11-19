@@ -5,6 +5,8 @@ final class SpeechPolicy {
     static boolean accepts(boolean online, String language, boolean network, String voiceLanguage, boolean missing) {
         return !missing && online == network && language != null && language.equalsIgnoreCase(voiceLanguage);
     }
+    /** Tom da voz: percentagem 50–150 (100 = natural do motor). */
+    static float pitch(int percent) { return Math.max(.5f, Math.min(1.5f, percent / 100f)); }
     static float rate(int progress) { return Math.max(.5f, Math.min(2f, .5f + progress / 100f)); }
     static int chunkLimit(float rate){return Math.max(600,Math.min(2200,Math.round(2200*Math.max(.5f,Math.min(1f,rate)))));}
     static int chunkLimit(float rate,boolean online){return online?Math.max(1200,Math.min(3400,Math.round(3400*Math.max(.5f,Math.min(1f,rate))))):chunkLimit(rate);}

@@ -28,7 +28,7 @@ def render(application_id=None):
     app_id = application_id or c['applicationId']
     if not re.fullmatch(r'[A-Za-z]\w*(?:\.[A-Za-z]\w*)+', app_id):
         raise ValueError('applicationId inválido: ' + app_id)
-    text = MANIFEST.read_text(encoding='utf-8').replace('${applicationId}', app_id)
+    text = MANIFEST.read_text(encoding='utf-8').replace('${applicationId}', app_id).replace('${appLabel}', 'Seeky')
     head = ('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="%s" '
             'android:versionCode="%s" android:versionName="%s">\n <uses-sdk android:minSdkVersion="%s" '
             'android:targetSdkVersion="%s"/>') % (app_id, c['versionCode'], c['versionName'], c['minSdk'], c['targetSdk'])

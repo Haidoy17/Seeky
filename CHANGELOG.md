@@ -1,6 +1,26 @@
 # Registo de alterações
 
-## 5.19.0 — 2026-11-18
+## 5.19.0 — 2026-11-19
+
+### Novas funcionalidades
+- **Bloqueio da aplicação** (Mais → Bloqueio da aplicação): impressão digital, rosto, PIN ou
+  padrão do Android, sem o Seeky guardar códigos. Pede autenticação ao abrir e ao voltar
+  após 30 s, 1, 5 ou 15 min em segundo plano; protege também o painel do botão Flash e oculta
+  a pré-visualização nas aplicações recentes (Android 13+).
+- **Cópia automática** (Mais → Cópia automática): estudos, notas, marcadores, leitura e
+  preferências guardados diária ou semanalmente numa pasta à escolha (cartão SD, Download,
+  Google Drive…), mantendo as últimas 3 cópias automáticas. "Fazer cópia agora" com
+  resultado nas notificações.
+- **Tom de voz** ajustável em Ler em voz alta, aplicado à leitura, amostras e gravação WAV.
+- **Novidades**: painel mostrado uma vez após a actualização e disponível em Mais.
+- A versão de depuração chama-se **"Seeky (teste)"** para não se confundir com a instalada.
+- **Botão Flash recolhe-se sozinho**: após 10 s sem uso fica meio escondido na margem, com a
+  lupa deslocada para a parte visível e ligeiramente translúcido. Ligado por omissão; o tempo
+  (3–30 s) e a posição continuam ajustáveis em Ícones e botão Flash.
+- **Vozes naturais**: quando o módulo Seeky Vozes Naturais recusa a ligação por o Seeky estar
+  assinado com outro certificado (ex.: versão de teste), o ecrã de vozes explica a causa.
+- **APK assinado no GitHub Actions** quando os segredos da chave estão configurados.
+
 
 ### Segurança
 - **Recepção de ficheiros (corrigido).** A actividade de partilha/abertura é exportada e

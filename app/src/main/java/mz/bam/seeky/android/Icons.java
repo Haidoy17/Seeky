@@ -18,6 +18,7 @@ final class Icons extends View {
             case "phone":canvas.drawRoundRect(6,2,18,22,3,3,p);line(canvas,10,18,14,18);break;
             case "usb":canvas.drawRoundRect(5,9,19,22,3,3,p);line(canvas,8,9,8,2,16,2,16,9);line(canvas,11,4,11,6);line(canvas,14,4,14,6);break;
 
+            case "lock":canvas.drawRoundRect(5,10.5f,19,21,3,3,p);canvas.drawArc(8,3,16,15,180,180,false,p);line(canvas,8,9,8,10.5f);line(canvas,16,9,16,10.5f);line(canvas,12,14.5f,12,17);break;
             case "power":canvas.drawArc(4,4,20,21,-50,280,false,p);line(canvas,12,2,12,11);break;
             case "more":p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,5,1.7f,p);canvas.drawCircle(12,12,1.7f,p);canvas.drawCircle(12,19,1.7f,p);break;
             case "speaker":line(canvas,3,9,7,9,12,5,12,19,7,15,3,15,3,9);canvas.drawArc(9,5,22,19,-65,130,false,p);canvas.drawArc(12,8,19,16,-65,130,false,p);break;
