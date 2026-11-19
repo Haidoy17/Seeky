@@ -1,5 +1,18 @@
 # Registo de alterações
 
+## 5.19.1 — 2026-11-19
+
+- **Ícone da aplicação** adaptativo e vectorial (lupa sobre texto), com versão monocromática;
+  ícone próprio para o Seeky Flash (lupa com relâmpago) e para o atalho das Definições Rápidas.
+- **Leitor de música/vídeo** redesenhado: capa e metadados incorporados (título, artista, álbum),
+  fundo tingido pela cor da capa, controlos com ícones (recuar/avançar 10 s, reproduzir circular),
+  velocidade, repetir, temporizador de sono, capítulos e tempo restante.
+- **Visualizador de imagens**: fundo escuro, descodificação até 3584 px conforme a memória,
+  detalhes (formato, píxeis, megapíxeis, tamanho), controlos com ícones e partilha.
+- **Vozes**: 15 idiomas na leitura em voz alta, frase de amostra em cada um, vozes da mesma
+  região numeradas ("Voz 1", "Voz 2"…). Etiqueta "TTS" passa a "Ouvir".
+- Versão 5.19.1 (5004301), assinada com a chave do autor.
+
 ## 5.19.0 — 2026-11-19
 
 ### Novas funcionalidades

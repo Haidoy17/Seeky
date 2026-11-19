@@ -18,6 +18,14 @@ final class Icons extends View {
             case "phone":canvas.drawRoundRect(6,2,18,22,3,3,p);line(canvas,10,18,14,18);break;
             case "usb":canvas.drawRoundRect(5,9,19,22,3,3,p);line(canvas,8,9,8,2,16,2,16,9);line(canvas,11,4,11,6);line(canvas,14,4,14,6);break;
 
+            case "info":canvas.drawCircle(12,12,9,p);line(canvas,12,11,12,17);p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,7.6f,1.2f,p);break;
+            case "playfill":p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(8.5f,4.5f);t.lineTo(19.5f,12);t.lineTo(8.5f,19.5f);t.close();canvas.drawPath(t,p);}break;
+            case "pausefill":p.setStyle(Paint.Style.FILL);canvas.drawRoundRect(6.5f,4.5f,10.5f,19.5f,1.5f,1.5f,p);canvas.drawRoundRect(13.5f,4.5f,17.5f,19.5f,1.5f,1.5f,p);break;
+            case "replay10":canvas.drawArc(3,3,21,21,200,250,false,p);line(canvas,3.6f,4.5f,3.6f,9.2f,8.3f,9.2f);p.setStrokeWidth(1.4f);line(canvas,9.5f,10,9.5f,15.5f);canvas.drawOval(11.6f,10,15,15.5f,p);break;
+            case "forward10":canvas.drawArc(3,3,21,21,-90,250,false,p);line(canvas,20.4f,4.5f,20.4f,9.2f,15.7f,9.2f);p.setStrokeWidth(1.4f);line(canvas,9.5f,10,9.5f,15.5f);canvas.drawOval(11.6f,10,15,15.5f,p);break;
+            case "repeat":line(canvas,4,11,4,9,6,7,19,7);line(canvas,16,4,19,7,16,10);line(canvas,20,13,20,15,18,17,5,17);line(canvas,8,14,5,17,8,20);break;
+            case "speed":canvas.drawArc(3,5,21,23,180,180,false,p);line(canvas,12,14,16.5f,9.5f);p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,14,1.4f,p);break;
+            case "fit":line(canvas,4,9,4,4,9,4);line(canvas,15,4,20,4,20,9);line(canvas,20,15,20,20,15,20);line(canvas,9,20,4,20,4,15);canvas.drawRoundRect(8,8,16,16,1.5f,1.5f,p);break;
             case "lock":canvas.drawRoundRect(5,10.5f,19,21,3,3,p);canvas.drawArc(8,3,16,15,180,180,false,p);line(canvas,8,9,8,10.5f);line(canvas,16,9,16,10.5f);line(canvas,12,14.5f,12,17);break;
             case "power":canvas.drawArc(4,4,20,21,-50,280,false,p);line(canvas,12,2,12,11);break;
             case "more":p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,5,1.7f,p);canvas.drawCircle(12,12,1.7f,p);canvas.drawCircle(12,19,1.7f,p);break;

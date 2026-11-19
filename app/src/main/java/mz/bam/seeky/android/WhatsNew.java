@@ -23,12 +23,14 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.19.0", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.19", "Toque numa novidade para a experimentar", "star");
         panel.action("lock", "Bloqueio da aplicação", "Impressão digital, rosto ou PIN do telefone", false, () -> AppLock.show(a));
         panel.action("restore", "Cópia automática", "Estudos e notas guardados todos os dias ou semanas", false, () -> AutoBackup.show(a));
         panel.action("palette", "Tema Sistema", "Acompanha o modo claro/escuro do Android", false, () -> ThemeSettings.show(a));
         panel.action("flash", "Botão Flash renovado", "Toque longo para ajustes, lançar para a margem, atalho nas Definições Rápidas", false, a::iconSettings);
-        panel.action("speaker", "Vozes naturais do Google", "Online (mais naturais) ou offline, sem módulo extra", false, () -> NaturalVoicesActivity.open(a));
+        panel.action("speaker", "Vozes naturais do Google", "Online ou offline, agora em 15 idiomas", false, () -> NaturalVoicesActivity.open(a));
+        panel.section("Leitores");
+        panel.note("Música: capa do álbum, artista, controlos com ícones, velocidade, repetir e temporizador. Imagens: fundo escuro, alta resolução, informação da foto e partilhar. Ícone da aplicação novo.");
         panel.section("Voz");
         panel.note("Leitura mais natural: \"Dr.\" lê-se \"Doutor\", \"Capítulo IV\" lê-se \"Capítulo 4\" e os endereços web pelo nome do site. A voz escolhe a variante do seu país (pt-PT em Moçambique). Novo controlo de Tom em Ler em voz alta.");
         panel.section("Segurança");
