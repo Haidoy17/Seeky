@@ -18,6 +18,14 @@ final class Icons extends View {
             case "phone":canvas.drawRoundRect(6,2,18,22,3,3,p);line(canvas,10,18,14,18);break;
             case "usb":canvas.drawRoundRect(5,9,19,22,3,3,p);line(canvas,8,9,8,2,16,2,16,9);line(canvas,11,4,11,6);line(canvas,14,4,14,6);break;
 
+            case "tasks":line(canvas,3.5f,6.5f,5.2f,8.2f,8.2f,5.2f);line(canvas,11,7,20.5f,7);line(canvas,3.5f,12.5f,5.2f,14.2f,8.2f,11.2f);line(canvas,11,13,20.5f,13);line(canvas,11,19,20.5f,19);canvas.drawCircle(5.8f,19,1.6f,p);break;
+            case "import":line(canvas,12,3,12,14);line(canvas,7.5f,9.5f,12,14,16.5f,9.5f);line(canvas,4,14.5f,4,20,20,20,20,14.5f);break;
+            case "collection":line(canvas,6,4.5f,20.5f,4.5f,20.5f,15.5f);canvas.drawRoundRect(3,8,17.5f,20.5f,2,2,p);line(canvas,3,11.5f,8,11.5f,9.5f,9.5f);break;
+            case "widget":canvas.drawRoundRect(3,3,11,11,2.2f,2.2f,p);canvas.drawRoundRect(13,3,21,11,2.2f,2.2f,p);canvas.drawRoundRect(3,13,11,21,2.2f,2.2f,p);canvas.drawCircle(17,17,4,p);break;
+            case "shield":{android.graphics.Path sh=new android.graphics.Path();sh.moveTo(12,2.8f);sh.lineTo(19.5f,5.6f);sh.lineTo(19.5f,11);sh.cubicTo(19.5f,15.8f,16.3f,19.4f,12,21.2f);sh.cubicTo(7.7f,19.4f,4.5f,15.8f,4.5f,11);sh.lineTo(4.5f,5.6f);sh.close();canvas.drawPath(sh,p);}line(canvas,8.7f,11.8f,11,14.1f,15.4f,9.6f);break;
+            case "tune":line(canvas,4,7,20,7);line(canvas,4,17,20,17);p.setStyle(Paint.Style.FILL);canvas.drawCircle(9,7,2.4f,p);canvas.drawCircle(15,17,2.4f,p);break;
+            case "dictionary":canvas.drawRoundRect(5,3,19,21,2,2,p);line(canvas,9,3,9,21);line(canvas,11.5f,14,14,8,16.5f,14);line(canvas,12.5f,12,15.5f,12);break;
+            case "pdfbook":canvas.drawRoundRect(5,3,19,21,2,2,p);line(canvas,8.5f,8,15.5f,8);line(canvas,8.5f,12,15.5f,12);line(canvas,8.5f,16,12.5f,16);break;
             case "info":canvas.drawCircle(12,12,9,p);line(canvas,12,11,12,17);p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,7.6f,1.2f,p);break;
             case "playfill":p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(8.5f,4.5f);t.lineTo(19.5f,12);t.lineTo(8.5f,19.5f);t.close();canvas.drawPath(t,p);}break;
             case "pausefill":p.setStyle(Paint.Style.FILL);canvas.drawRoundRect(6.5f,4.5f,10.5f,19.5f,1.5f,1.5f,p);canvas.drawRoundRect(13.5f,4.5f,17.5f,19.5f,1.5f,1.5f,p);break;

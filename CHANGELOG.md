@@ -1,9 +1,21 @@
 # Registo de alterações
 
+## 5.19.2 — 2026-11-19
+
+- **Logótipo original reposto** como ícone do Seeky e do Seeky Flash (pedido do autor);
+  o ícone adaptativo da 5.19.1 foi retirado. O atalho das Definições Rápidas mantém um
+  ícone monocromático, como o Android exige.
+- **Ícones dentro da aplicação**: Ferramentas e ecrãs de trabalho com o ícone de cada
+  funcionalidade num quadrado arredondado tingido (estilo do painel Mais), texto centrado,
+  seta "›" e botão de voltar com ícone em vez de "‹". Ícones próprios para Tarefas,
+  Importação, Colecções, Motores de voz, Widget, Desempenho, Dicionário, Armazenamento,
+  Caderno PDF, Cópia, Licenças e Formato.
+- Versão 5.19.2 (5004302).
+
 ## 5.19.1 — 2026-11-19
 
-- **Ícone da aplicação** adaptativo e vectorial (lupa sobre texto), com versão monocromática;
-  ícone próprio para o Seeky Flash (lupa com relâmpago) e para o atalho das Definições Rápidas.
+- Ícone adaptativo experimental (retirado na 5.19.2 a pedido do autor); ícone monocromático
+  para o atalho das Definições Rápidas.
 - **Leitor de música/vídeo** redesenhado: capa e metadados incorporados (título, artista, álbum),
   fundo tingido pela cor da capa, controlos com ícones (recuar/avançar 10 s, reproduzir circular),
   velocidade, repetir, temporizador de sono, capítulos e tempo restante.

@@ -1,10 +1,10 @@
-## Seeky 5.19.1
+## Seeky 5.19.2
 
-Instale **Seeky_5.19.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.19.2.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
-- **Ícone novo** — nítido em qualquer ecrã, adapta-se à forma do seu telefone e aos ícones temáticos do Android 13+.
+- **Ícones das funcionalidades** — cada função com ícone próprio dentro de um quadrado colorido, botões de voltar com ícone. O logótipo do Seeky mantém-se.
 - **Leitor de música** — capa do álbum (quando o ficheiro a tem), título e artista, botão de reproduzir circular,
   recuar/avançar 10 s, velocidade, repetir, temporizador de sono e tempo restante.
 - **Visualizador de imagens** — fundo escuro, mais resolução, tamanho e megapíxeis da foto, rodar, ajustar e partilhar.

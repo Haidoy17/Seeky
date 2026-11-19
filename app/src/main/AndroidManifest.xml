@@ -15,7 +15,7 @@
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
  <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent><package android:name="com.google.android.tts"/><package android:name="mz.bam.seeky.vozes"/></queries>
- <application android:name="mz.bam.seeky.android.SeekyApplication" android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false" android:label="${appLabel}" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:usesCleartextTraffic="false" android:supportsRtl="true">
+ <application android:name="mz.bam.seeky.android.SeekyApplication" android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false" android:label="${appLabel}" android:icon="@drawable/seeky" android:theme="@style/AppTheme" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:usesCleartextTraffic="false" android:supportsRtl="true">
   <service android:name="mz.bam.seeky.android.AutoBackupJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>
   <activity android:name="mz.bam.seeky.android.LockActivity" android:exported="false" android:launchMode="singleTop" android:taskAffinity="" android:excludeFromRecents="true" android:configChanges="orientation|screenSize|uiMode"/>
   <activity android:name="mz.bam.seeky.android.NaturalVoicesActivity" android:exported="false"/>
@@ -48,7 +48,7 @@
   <service android:name="mz.bam.seeky.android.ReadAloudService" android:exported="false" android:stopWithTask="false" android:foregroundServiceType="mediaPlayback"/>
   <service android:name="mz.bam.seeky.android.MediaPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
   <service android:name="mz.bam.seeky.android.FlashTileService" android:label="Seeky Flash" android:icon="@drawable/ic_tile_flash" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE"/></intent-filter></service>
-  <activity android:name="mz.bam.seeky.android.FlashActivity" android:exported="true" android:label="Seeky Flash" android:icon="@mipmap/ic_launcher_flash" android:roundIcon="@mipmap/ic_launcher_flash" android:theme="@android:style/Theme.Translucent.NoTitleBar"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+  <activity android:name="mz.bam.seeky.android.FlashActivity" android:exported="true" android:label="Seeky Flash" android:theme="@android:style/Theme.Translucent.NoTitleBar"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
   <activity android:name="mz.bam.seeky.android.FlashSearchActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.MediaActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.StudyAssistantActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>

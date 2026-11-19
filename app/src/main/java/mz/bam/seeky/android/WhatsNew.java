@@ -30,7 +30,7 @@ final class WhatsNew {
         panel.action("flash", "Botão Flash renovado", "Toque longo para ajustes, lançar para a margem, atalho nas Definições Rápidas", false, a::iconSettings);
         panel.action("speaker", "Vozes naturais do Google", "Online ou offline, agora em 15 idiomas", false, () -> NaturalVoicesActivity.open(a));
         panel.section("Leitores");
-        panel.note("Música: capa do álbum, artista, controlos com ícones, velocidade, repetir e temporizador. Imagens: fundo escuro, alta resolução, informação da foto e partilhar. Ícone da aplicação novo.");
+        panel.note("Música: capa do álbum, artista, controlos com ícones, velocidade, repetir e temporizador. Imagens: fundo escuro, alta resolução, informação da foto e partilhar. Ícones das funcionalidades renovados.");
         panel.section("Voz");
         panel.note("Leitura mais natural: \"Dr.\" lê-se \"Doutor\", \"Capítulo IV\" lê-se \"Capítulo 4\" e os endereços web pelo nome do site. A voz escolhe a variante do seu país (pt-PT em Moçambique). Novo controlo de Tom em Ler em voz alta.");
         panel.section("Segurança");
