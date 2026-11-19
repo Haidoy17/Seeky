@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 /** User-enabled local file monitor and floating search, with visible stop controls. */
 public final class QuickSearchService extends Service {
     static final String STOP="mz.bam.seeky.android.STOP_FLOAT";
-    static final String SHOW="mz.bam.seeky.android.SHOW_FLOAT",MONITOR="mz.bam.seeky.android.MONITOR",REFRESH="mz.bam.seeky.android.REFRESH",STOP_ALL="mz.bam.seeky.android.STOP_ALL";
+    static final String SHOW="mz.bam.seeky.android.SHOW_FLOAT",MONITOR="mz.bam.seeky.android.MONITOR",REFRESH="mz.bam.seeky.android.REFRESH",STOP_ALL="mz.bam.seeky.android.STOP_ALL",EXPAND="mz.bam.seeky.android.EXPAND_FLOAT";
     static volatile boolean running=false,floating=false,monitoring=false;static volatile QuickSearchService instance;
     FileTracker tracker;SharedPreferences prefs;final OverlayRecovery recovery=new OverlayRecovery();
     static void visibleFolder(File folder){QuickSearchService service=instance;if(service!=null&&service.tracker!=null)service.tracker.folderVisible(folder);}
@@ -64,6 +64,7 @@ public final class QuickSearchService extends Service {
             if(!watch&&tracker!=null){tracker.close();tracker=null;monitoring=false;}
             if(REFRESH.equals(action)&&tracker!=null)tracker.refresh();
             if(overlay&&window==null)try{bubble();}catch(Exception e){overlayProblem(e);}
+            if(EXPAND.equals(action)&&overlay&&window!=null&&!expanded)expand();
             if(!overlay&&window!=null)remove();
             updateNotification();handler.removeCallbacks(permissionCheck);handler.postDelayed(permissionCheck,15000);
         }catch(Exception e){prefs.edit().putString("service_warning",e.toString()).apply();Toast.makeText(this,"O Android impediu a activação do Seeky: "+e.getMessage(),Toast.LENGTH_LONG).show();stopSelf();return START_NOT_STICKY;}
@@ -110,8 +111,11 @@ default:return true;}}});
     void scheduleTuck(){handler.removeCallbacks(tuckIdle);if(!dead&&!expanded&&!draggingBubble&&window!=null&&prefs.getBoolean("flash_auto_hide",false))handler.postDelayed(tuckIdle,FlashSettings.delay(this)*1000L);}
     void untuck(){if(!tucked)return;tucked=false;if(snap!=null)snap.cancel();int width=getResources().getDisplayMetrics().widthPixels;params.x=params.x<width/2?dp(6):width-params.width-dp(6);clamp();safeUpdate();}
     void tuck(){if(dead||expanded||draggingBubble||window==null||overlayHeld()||!prefs.getBoolean("flash_auto_hide",false))return;if(snap!=null)snap.cancel();int width=getResources().getDisplayMetrics().widthPixels,height=getResources().getDisplayMetrics().heightPixels,corner=Math.max(0,Math.min(4,prefs.getInt("flash_corner",0)));boolean right=corner==2||corner==4||corner==0&&params.x+params.width/2>=width/2;tucked=true;params.x=right?width-params.width/2:-params.width/2;if(corner>0)params.y=corner<=2?dp(30):height-params.height-dp(30);safeUpdate();}
-    void expand(){if(transitioning||expanded||window==null)return;transitioning=true;Motion.leave(window,()->{if(dead)return;transitioning=false;try{panel();}catch(Exception e){overlayProblem(e);}});}
-    void collapse(Runnable after){if(transitioning||window==null)return;transitioning=true;serial++;if(signal!=null)signal.cancel();searches.cancel();Motion.leave(window,()->{if(dead)return;transitioning=false;try{bubble();}catch(Exception e){overlayProblem(e);}if(after!=null)after.run();});}
+    void expand(){if(transitioning||expanded||window==null)return;
+/* Bloqueio da aplicação: o painel mostra nomes de ficheiros, por isso pede autenticação primeiro. */
+if(AppLock.required(this)){try{startActivity(new Intent(this,LockActivity.class).putExtra(LockActivity.FLASH,true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(Exception e){AppDiagnostics.record(this,"lock-start",e);}return;}
+AppLock.touch();transitioning=true;Motion.leave(window,()->{if(dead)return;transitioning=false;try{panel();}catch(Exception e){overlayProblem(e);}});}
+    void collapse(Runnable after){if(transitioning||window==null)return;AppLock.touch();transitioning=true;serial++;if(signal!=null)signal.cancel();searches.cancel();Motion.leave(window,()->{if(dead)return;transitioning=false;try{bubble();}catch(Exception e){overlayProblem(e);}if(after!=null)after.run();});}
     void dock(int target,SharedPreferences prefs){
         if(snap!=null)snap.cancel();final int end=Math.max(dp(6),Math.min(target,getResources().getDisplayMetrics().widthPixels-params.width-dp(6)));
         prefs.edit().putInt("float_x",end).putInt("float_y",params.y).apply();

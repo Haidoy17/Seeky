@@ -28,6 +28,7 @@ consideradas são:
 | Rede | `usesCleartextTraffic="false"`; sem redireccionamentos; chave de IA enviada em cabeçalho, nunca no URL; mensagens de erro com chaves ocultadas. |
 | Chaves | Cifradas com AES-GCM e chave do AndroidKeyStore (`SeekyAiVault`, `CloudVault`). |
 | Cópias/transferências | `allowBackup="false"`, `fullBackupContent="false"`, `data_extraction_rules` (cofres e token excluídos da transferência entre aparelhos). |
+| Acesso ao telefone desbloqueado | `AppLock` opcional: autenticação do Android ao abrir/voltar, painel Flash incluído, `FLAG_SECURE` no ecrã de bloqueio e pré-visualização oculta nas recentes (Android 13+). |
 | Assinatura | Chaves privadas fora do repositório; `.gitignore` bloqueia `*.jks`, `*.keystore`, `*.p12`. |
 
 ## Permissões sensíveis e porquê

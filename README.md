@@ -16,7 +16,7 @@ Android 8.0+ (API 26), alvo API 36.
 | Voz | Leitura em voz alta com destaque, exportação WAV por capítulo, dicionário de pronúncia, fundo musical |
 | Estudos | Disciplinas, materiais, cartões de revisão, temporizador de foco, plano de leitura, assistente IA (chave pessoal) |
 | Bíblia | Importação MyBible, USX 2/3, USFM, EPUB, TXT/CSV; referências por extenso na voz |
-| Segurança | Sem servidores obrigatórios, chaves no AndroidKeyStore, cópias verificadas por SHA-256 |
+| Segurança | Bloqueio por biometria/PIN do Android, cópia automática verificada, chaves no AndroidKeyStore, sem servidores obrigatórios |
 
 ## Estrutura do repositório
 
@@ -64,7 +64,7 @@ python3 tests/android_runtime/run.py ...    # Robolectric, ver tests/android_run
 
 ## Novidades da 5.19.0
 
-Ver [CHANGELOG.md](CHANGELOG.md). Em resumo: correcção de segurança na recepção de
+Ver [CHANGELOG.md](CHANGELOG.md). Em resumo: bloqueio da aplicação, cópia automática, tom de voz ajustável, ecrã de Novidades, correcção de segurança na recepção de
 ficheiros de outras aplicações, voz mais natural (normalização de texto e variante regional),
 botão Flash com resposta táctil e gestos, mosaico Flash como interruptor real, tema
 "Sistema" e repositório reorganizado com build Gradle funcional.

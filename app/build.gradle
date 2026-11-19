@@ -12,6 +12,7 @@ android {
         targetSdk 36
         versionCode 5004300
         versionName '5.19.0'
+        manifestPlaceholders = [appLabel: 'Seeky']
     }
 
     signingConfigs {
@@ -30,6 +31,8 @@ android {
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
+            // Nome distinto para não confundir com a versão instalada.
+            manifestPlaceholders = [appLabel: 'Seeky (teste)']
         }
         release {
             minifyEnabled false

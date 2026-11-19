@@ -29,7 +29,9 @@ Regras gerais do código:
 | Vozes naturais (opcional) | `voicebridge.NaturalSpeech`, `NaturalVoicesActivity`, `VoiceEngines`, `GoogleVoiceSetup` |
 | Livros e Bíblia | `BookLibrary`, `BookQuery`, `BookCovers`, `BookCategories`, `Bible*` (MyBible, USX, USFM, EPUB, texto), `ImportWork` |
 | Estudos | `StudyHub`, `StudyStore`, `StudyCards`, `StudySchedule`, `StudyTimerService`, `FocusClock`, `ReadingPlan`, `StudyAssistantActivity` + `SeekyAi*` (chave pessoal cifrada) |
-| Cópias de segurança | `WorkspaceBackup`, `BackupTransfers`, `BackupExtras`, `StudyBackup`, `NotebookBackup` |
+| Cópias de segurança | `WorkspaceBackup`, `BackupTransfers`, `BackupExtras`, `StudyBackup`, `NotebookBackup`, `AutoBackup` + `AutoBackupJob` (JobScheduler, pasta SAF) |
+| Bloqueio | `AppLock` (ciclo de vida das actividades, tempo limite), `LockActivity` (BiometricPrompt / credencial do ecrã de bloqueio) |
+| Novidades | `WhatsNew` |
 | OCR | `OcrEngine` (Tesseract), `OcrWork`, `OcrCache` |
 | Tarefas duráveis | `TaskService`, `TaskStore`, `TaskWork`, `WorkLeases`, `ResumeReceiver` |
 | Idioma | `AppLanguage`, `Translations` (dicionário pt → en) |

@@ -36,6 +36,7 @@ final class ReaderSpeech {
     AudioManager audio;
     AudioFocusRequest focus;
     ReaderSpeech(ReaderActivity activity){a=activity;prefs=a.getSharedPreferences("seeky",0);GoogleVoiceSetup.migrate(prefs);export=new SpeechAudioExport(a);narration=new NarrationOptions(a);background=new BackgroundSettings(a);voiceNotes=a.getSharedPreferences("voice_catalog",0);}
+    static String toneLabel(int percent){return percent<=85?"Mais grave":percent>=115?"Mais agudo":"Natural";}
     String tr(String value){return AppLanguage.text(a,value);}
     void show(){show(null,0);}
     void show(String selected,int from){
@@ -66,6 +67,10 @@ final class ReaderSpeech {
         info=a.text("A carregar vozes…",12);info.setTextColor(a.muted);panel.content.addView(info);
         retry=a.button("Tentar novamente",()->{loadEngines(engine());initEngine(true);});UiBox.style(retry);retry.setVisibility(View.GONE);panel.content.addView(retry);
         panel.section("Velocidade");speed=a.text("",12);panel.content.addView(speed);speedBar=new SeekBar(a);speedBar.setMax(150);speedBar.setProgress(Math.round((rate-.5f)*100));speed.setText(tr("Velocidade")+" · "+String.format(Locale.ROOT,"%.2f×",rate));speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar bar){}public void onProgressChanged(SeekBar bar,int p,boolean user){if(user){stopSample();rate=SpeechPolicy.rate(p);speed.setText(tr("Velocidade")+" · "+String.format(Locale.ROOT,"%.2f×",rate));}}public void onStopTrackingTouch(SeekBar bar){}});panel.content.addView(speedBar,new LinearLayout.LayoutParams(-1,a.dp(44)));
+        /* Tom: mais grave ou mais agudo; vale para a leitura, as amostras e a gravação WAV. */
+        panel.section("Tom");final TextView tone=a.text("",12);panel.content.addView(tone);final SeekBar toneBar=new SeekBar(a);toneBar.setMax(100);final int savedTone=Math.round(SpeechVoices.pitch*100);toneBar.setProgress(savedTone-50);tone.setText(tr("Tom")+" · "+tr(toneLabel(savedTone)));
+        toneBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar bar){}public void onProgressChanged(SeekBar bar,int p,boolean user){if(!user)return;stopSample();int percent=p+50;SpeechVoices.pitch=SpeechPolicy.pitch(percent);tone.setText(tr("Tom")+" · "+tr(toneLabel(percent)));}public void onStopTrackingTouch(SeekBar bar){a.getSharedPreferences("seeky",0).edit().putInt("speech_pitch",bar.getProgress()+50).apply();}});
+        panel.content.addView(toneBar,new LinearLayout.LayoutParams(-1,a.dp(44)));
         Switch continuous=new Switch(a);continuous.setText(tr("Continuar nas páginas seguintes"));continuous.setTextColor(a.ink);continuous.setTextSize(13);continuous.setMinHeight(a.dp(52));continuous.setChecked(prefs.getBoolean("speech_continuous",true));continuous.setEnabled(selection==null);continuous.setOnCheckedChangeListener((view,value)->prefs.edit().putBoolean("speech_continuous",value).apply());panel.content.addView(continuous);
         apply=a.button("Usar esta voz",()->{SpeechProfile profile=profile();if(profile!=null){profile.save(prefs);SpeechEvents.State active=SpeechEvents.state;if(active.active&&active.uri.equals(a.uri.toString()))ReadAloudService.control(a,ReadAloudService.CONFIGURE,active.token);toast("Voz guardada.");panel.dialog.dismiss();}});UiBox.style(apply);panel.content.addView(apply);
         start=a.button(selection==null?"Ler a partir daqui":"Ouvir selecção",()->start(false,a.chrome.current()));UiBox.style(start);panel.content.addView(start);
