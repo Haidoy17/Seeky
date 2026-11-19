@@ -43,6 +43,19 @@ docs/                   Guia do utilizador, arquitectura, terceiros, validaçõe
 A chave de assinatura **nunca** entra no repositório. Para actualizar a instalação existente
 sem desinstalar é obrigatório assinar com o mesmo certificado da versão instalada.
 
+### Versão comercial (GitHub Actions)
+
+1. Em **Settings → Secrets and variables → Actions**, crie `SEEKY_KEYSTORE_BASE64`
+   (a chave em base64), `SEEKY_SIGN_ALIAS` e `SEEKY_SIGN_PASSWORD`. Use a mesma chave da
+   versão instalada e do módulo Seeky Vozes Naturais.
+2. Crie uma etiqueta com a versão de `app/build.gradle`, por exemplo `v5.19.0`
+   (Releases → Draft a new release → Choose a tag, ou `git tag v5.19.0 && git push origin v5.19.0`).
+3. O workflow "Android" compila, assina, verifica e publica o Release com
+   `Seeky_5.19.0.apk` e `SHA256SUMS.txt`. As notas vêm de `docs/RELEASE_NOTES.md`.
+
+Sem a chave, a publicação falha de propósito: um APK sem a assinatura original não
+actualiza a instalação existente nem liga ao módulo de vozes naturais.
+
 ### Offline (sem Gradle)
 
 ```sh
