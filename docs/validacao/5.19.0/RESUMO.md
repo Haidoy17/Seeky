@@ -5,7 +5,7 @@ Ambiente: Linux, OpenJDK 21, Android SDK platform 36 / build-tools 36.0.0, Gradl
 | Verificação | Resultado |
 | --- | --- |
 | `./gradlew assembleDebug` | APK gerado (`mz.bam.seeky.v51.debug`, "Seeky (teste)") |
-| `./gradlew assembleRelease` assinado | `Seeky_5.19.1.apk`: `mz.bam.seeky.v51` 5.19.1 (5004301), "Seeky", assinaturas v2+v3, certificado `CN=Haidoy Carlos Mautempo, O=Seeky, C=MZ` (SHA-256 `98ce323b…0e05`), alinhamento 16 KB |
+| `./gradlew assembleRelease` assinado | `Seeky_5.19.2.apk`: `mz.bam.seeky.v51` 5.19.2 (5004302), "Seeky", logótipo original, assinaturas v2+v3, certificado `CN=Haidoy Carlos Mautempo, O=Seeky, C=MZ` (SHA-256 `98ce323b…0e05`), alinhamento 16 KB |
 | `tools/build_apk.py --unsigned` | APK gerado (`mz.bam.seeky.v51`, 5.19.0 / 5004300) |
 | `tools/run_tests.py` (núcleo JVM + host, inclui `SpeechNormalizerTest` com 32 verificações) | `ALL CHECKS COMPLETED` — `host-tests-log.txt` |
 | `tests/android_runtime/run.py` (Robolectric 4.14.1, API 33) | `OK (380 tests)` + `Viewers5190Test` (leitor de música, imagens, idiomas), incluindo `Security5190Test`, `Presentation5190Test` e `FlashTuck5190Test`; testes do antigo módulo de vozes retirados — `runtime-tests-log.txt`; capturas em `capturas/` |

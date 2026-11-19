@@ -22,7 +22,7 @@ Batch result: Narração guardada · 1 WAV
 .Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
 Batch result: Narração guardada · 1 WAV
 .........................................................................................................................................................................
-Time: 77.582
+Time: 78.655
 
 OK (380 tests)
 

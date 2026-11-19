@@ -1,9 +1,40 @@
 # Registo de alterações
 
+## 5.20.0 — 2026-11-19
+
+Visual moderno, a partir das referências enviadas pelo autor.
+
+- **Temas Areia, Floresta e Carvão** (`AppPalette.modern`): Areia é a nova predefinição
+  (quem usava o antigo "Claro" passa uma vez para Areia; os temas clássicos mantêm-se);
+  "Sistema" alterna entre Areia e Floresta. Contraste verificado (texto ≥ 7:1, secundário ≥ 4,5:1).
+- **Cabeçalhos limpos** (`BrandSurface.modern`): bloco de cor com cantos arredondados, sem ondas.
+- **Tipografia** (`AppFonts`): títulos em serifa (Noto Serif) nos temas modernos.
+- **Ícones**: traço mais fino; categorias do Início em cartões com ícones de linha; ícones
+  dos painéis seguem a cor do tema.
+- **Menus** (`UiDialog`): ícone próprio por opção (~90 palavras-chave), cartões com contorno e
+  seta; listas de escolha sem ícone.
+- **Capas geradas** (`BookCoverArt`) para livros sem imagem: tom natural por título, título em
+  serifa, moldura e autor; inicial nas capas pequenas (sem sobrepor o selo de progresso).
+- Ícones novos: olho, movimento, alfinete, ponto, tarefas, importar, colecções, widget, escudo,
+  ajustes, dicionário, caderno.
+- `Modern5200Test` com capturas dos ecrãs nos três temas.
+
+## 5.19.2 — 2026-11-19
+
+- **Logótipo original reposto** como ícone do Seeky e do Seeky Flash (pedido do autor);
+  o ícone adaptativo da 5.19.1 foi retirado. O atalho das Definições Rápidas mantém um
+  ícone monocromático, como o Android exige.
+- **Ícones dentro da aplicação**: Ferramentas e ecrãs de trabalho com o ícone de cada
+  funcionalidade num quadrado arredondado tingido (estilo do painel Mais), texto centrado,
+  seta "›" e botão de voltar com ícone em vez de "‹". Ícones próprios para Tarefas,
+  Importação, Colecções, Motores de voz, Widget, Desempenho, Dicionário, Armazenamento,
+  Caderno PDF, Cópia, Licenças e Formato.
+- Versão 5.19.2 (5004302).
+
 ## 5.19.1 — 2026-11-19
 
-- **Ícone da aplicação** adaptativo e vectorial (lupa sobre texto), com versão monocromática;
-  ícone próprio para o Seeky Flash (lupa com relâmpago) e para o atalho das Definições Rápidas.
+- Ícone adaptativo experimental (retirado na 5.19.2 a pedido do autor); ícone monocromático
+  para o atalho das Definições Rápidas.
 - **Leitor de música/vídeo** redesenhado: capa e metadados incorporados (título, artista, álbum),
   fundo tingido pela cor da capa, controlos com ícones (recuar/avançar 10 s, reproduzir circular),
   velocidade, repetir, temporizador de sono, capítulos e tempo restante.

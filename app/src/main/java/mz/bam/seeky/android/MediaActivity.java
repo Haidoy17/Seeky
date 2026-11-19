@@ -151,7 +151,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         info.setPadding(dp(24), dp(16), dp(24), dp(4));
         titleView = text("", 20, palette.ink);
         titleView.setText(clean(name));
-        titleView.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        titleView.setTypeface(AppFonts.title(this, 20));
         titleView.setSingleLine();
         titleView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
         titleView.setMarqueeRepeatLimit(-1);
