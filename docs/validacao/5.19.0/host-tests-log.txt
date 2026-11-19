@@ -36,7 +36,7 @@ PASS Brazil prefers Brazilian Portuguese voices
 PASS Mozambique prefers British English voices
 PASS own country wins and unknown regions stay neutral
 32 speech normalizer checks
-PASS 7 EPUB Bible checks; 69 parts / 33000 synthetic verses in 922 ms
+PASS 7 EPUB Bible checks; 69 parts / 33000 synthetic verses in 892 ms
 PASS 11 Bible import regressions
 PASS 35 optional reading, Bible import, evidence and WAV index checks
 PASS 100 Bible citation pronunciation and source mapping checks
@@ -104,24 +104,6 @@ PASS software credit retains requested signature
 PASS RIFF size includes appended metadata
 PASS odd PCM byte count stays aligned before tags
 PASS 22 audio naming and metadata checks
-PASS PDF line wrapping no longer creates pauses inside a sentence
-PASS engine word positions still map to original paragraph offsets
-PASS discretionary line-end hyphens do not break a spoken word
-PASS ordinary meaningful hyphens are retained
-PASS CRLF, indentation and trailing layout whitespace are normalised
-PASS normalisation preserves numbers, signs and decimal punctuation
-PASS multiple page separators cannot overflow the source map
-PASS emoji UTF16 units retain exact source offsets
-PASS engine offsets outside the text remain bounded
-PASS layout-only text never becomes a spoken request
-PASS chunk boundaries prefer complete sentences over single layout newlines
-PASS pausing normalised speech retains the original document position
-PASS speech uses longer sentence context with smaller requests at slow rates
-PASS natural voice requests are not cut off by the old one-minute timeout
-PASS chunking does not separate an abbreviation from its following name
-PASS titles and initials do not become artificial sentence pauses
-PASS online playback starts with a shorter request while offline keeps normal context
-PASS 17 natural speech and source mapping checks
 PASS incomplete narration is never published as a ready file
 PASS joined narration retains the selected engine PCM format
 PASS offline narration preserves every audio sample without recompression
@@ -282,7 +264,7 @@ PASS rename detected by parent snapshot
 PASS deletion detected without reading other file contents
 PASS outside volume rejected
 PASS symlink excluded from metadata discovery
-Metadata-only shallow listing with 4 GiB sparse file: 1.717843 ms on host, not Android
+Metadata-only shallow listing with 4 GiB sparse file: 1.774158 ms on host, not Android
 Passed 17 discovery checks
 PASS first system-catalog page starts from zero
 PASS pending pages keep a stable generation boundary

@@ -14,7 +14,6 @@
  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
- <uses-permission android:name="mz.bam.seeky.vozes.permission.NATURAL_VOICE"/>
  <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent><package android:name="com.google.android.tts"/><package android:name="mz.bam.seeky.vozes"/></queries>
  <application android:name="mz.bam.seeky.android.SeekyApplication" android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false" android:label="${appLabel}" android:icon="@drawable/seeky" android:theme="@style/AppTheme" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:usesCleartextTraffic="false" android:supportsRtl="true">
   <service android:name="mz.bam.seeky.android.AutoBackupJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>

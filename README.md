@@ -13,7 +13,7 @@ Android 8.0+ (API 26), alvo API 36.
 | Ficheiros | Catálogo local indexado, categorias, colecções, favoritos, lixeira segura, ZIP/7z/TAR/GZ/BZ2/XZ |
 | Flash | Botão flutuante de pesquisa, painel rápido, mosaico das Definições Rápidas, recolha automática |
 | Leitura | PDF, EPUB (formato original ou texto fluido), DOCX, TXT; marcadores, notas, revisão |
-| Voz | Leitura em voz alta com destaque, exportação WAV por capítulo, dicionário de pronúncia, fundo musical |
+| Voz | Vozes naturais do Google (online e offline), leitura em voz alta com destaque, tom e velocidade, exportação WAV por capítulo, dicionário de pronúncia, fundo musical |
 | Estudos | Disciplinas, materiais, cartões de revisão, temporizador de foco, plano de leitura, assistente IA (chave pessoal) |
 | Bíblia | Importação MyBible, USX 2/3, USFM, EPUB, TXT/CSV; referências por extenso na voz |
 | Segurança | Bloqueio por biometria/PIN do Android, cópia automática verificada, chaves no AndroidKeyStore, sem servidores obrigatórios |
@@ -23,7 +23,6 @@ Android 8.0+ (API 26), alvo API 36.
 ```
 app/                    Aplicação Android (código, recursos, assets, JARs e bibliotecas nativas)
   src/main/java/mz/bam/seeky/android/   Código da aplicação (pacote único, ver docs/ARQUITECTURA.md)
-  src/main/java/mz/bam/seeky/voicebridge/  Ponte para o módulo opcional "Seeky Vozes Naturais"
 backend/                Esquema Supabase (histórico; o login social foi retirado)
 tests/                  Testes JVM do núcleo, testes host e testes Robolectric (android_runtime/)
 tools/                  Compilação offline (aapt/d8), entrega e execução dos testes
@@ -47,7 +46,7 @@ sem desinstalar é obrigatório assinar com o mesmo certificado da versão insta
 
 1. Em **Settings → Secrets and variables → Actions**, crie `SEEKY_KEYSTORE_BASE64`
    (a chave em base64), `SEEKY_SIGN_ALIAS` e `SEEKY_SIGN_PASSWORD`. Use a mesma chave da
-   versão instalada e do módulo Seeky Vozes Naturais.
+   versão instalada.
 2. Crie uma etiqueta com a versão de `app/build.gradle`, por exemplo `v5.19.0`
    (Releases → Draft a new release → Choose a tag, ou `git tag v5.19.0 && git push origin v5.19.0`).
 3. O workflow "Android" compila, assina, verifica e publica o Release com

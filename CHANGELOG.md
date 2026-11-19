@@ -17,8 +17,10 @@
 - **Botão Flash recolhe-se sozinho**: após 10 s sem uso fica meio escondido na margem, com a
   lupa deslocada para a parte visível e ligeiramente translúcido. Ligado por omissão; o tempo
   (3–30 s) e a posição continuam ajustáveis em Ícones e botão Flash.
-- **Vozes naturais**: quando o módulo Seeky Vozes Naturais recusa a ligação por o Seeky estar
-  assinado com outro certificado (ex.: versão de teste), o ecrã de vozes explica a causa.
+- **Vozes naturais do Google** substituem o módulo Seeky Vozes Naturais, que foi retirado
+  (ponte `voicebridge`, permissão e testes). O ecrã "Vozes naturais do Google" escolhe entre
+  online (mais naturais) e offline, baixa as vozes e ajuda a remover o módulo antigo. Quem
+  usava o módulo passa automaticamente para as vozes online do Google.
 - **APK assinado no GitHub Actions** quando os segredos da chave estão configurados.
 
 

@@ -26,7 +26,7 @@ Regras gerais do código:
 | Leitor | `ReaderActivity`, `ReaderChrome`, `ReaderPageView`, `ReaderScrollView`, `OriginalDocument`/`OriginalWebView` (EPUB/DOCX com CSP), `EpubLayout`, `PdfTextSource`, `TextPaging`, `ReaderStore` |
 | Voz (TTS) | `ReadAloudService`, `ReaderSpeech`, `SpeechVoices`, `SpeechPolicy`, `SpeechParameters`, `SpeechText` → `BibleReferences` → **`SpeechNormalizer`** → `PronunciationRules` (via `VoiceText`), `SpeechChunks`, `SpeechCursor`, `WebSpeechHighlight` |
 | Exportação de áudio | `NarrationExportService`, `SpeechAudioExport`, `WaveJoiner`, `BackgroundMixer`, `WavInfo`, `WavCues` |
-| Vozes naturais (opcional) | `voicebridge.NaturalSpeech`, `NaturalVoicesActivity`, `VoiceEngines`, `GoogleVoiceSetup` |
+| Vozes do Google | `NaturalVoicesActivity` (vozes naturais do Google online/offline), `GoogleVoiceSetup` (motor por omissão e migração de motores retirados), `VoiceEngines` |
 | Livros e Bíblia | `BookLibrary`, `BookQuery`, `BookCovers`, `BookCategories`, `Bible*` (MyBible, USX, USFM, EPUB, texto), `ImportWork` |
 | Estudos | `StudyHub`, `StudyStore`, `StudyCards`, `StudySchedule`, `StudyTimerService`, `FocusClock`, `ReadingPlan`, `StudyAssistantActivity` + `SeekyAi*` (chave pessoal cifrada) |
 | Cópias de segurança | `WorkspaceBackup`, `BackupTransfers`, `BackupExtras`, `StudyBackup`, `NotebookBackup`, `AutoBackup` + `AutoBackupJob` (JobScheduler, pasta SAF) |
