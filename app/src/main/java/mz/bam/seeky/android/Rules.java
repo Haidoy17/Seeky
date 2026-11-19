@@ -7,15 +7,19 @@ import java.util.Locale;
 public final class Rules {
  private static final java.util.regex.Pattern MARKS=java.util.regex.Pattern.compile("\\p{M}+");
  public static String normalize(String s) { return MARKS.matcher(Normalizer.normalize(s, Normalizer.Form.NFD)).replaceAll("").toLowerCase(Locale.ROOT); }
+ /** Versão das regras de categoria: ao mudar, o catálogo existente é reclassificado uma vez. */
+ public static final int CATEGORY_RULES=2;
+ /** Cada ficheiro na sua categoria: o tipo real (extensão e MIME) decide, por esta ordem. */
  public static String category(String name, String mime) {
-  String n=name.toLowerCase(Locale.ROOT);
-  if(MediaFormats.kind(name,mime).equals("image"))return "Imagens";
-  if(mime.startsWith("video/"))return "Vídeos";
-  if(MediaFormats.kind(name,mime).equals("audio"))return "Áudio";
-  if(n.endsWith(".pdf"))return "PDF";
-  if(n.matches(".*\\.(zip|rar|7z|tar|gz|bz2|xz|tgz|tbz2|txz)$"))return "Arquivos";
-  if(n.endsWith(".apk")||n.endsWith(".apks")||n.endsWith(".xapk"))return "Aplicações";
-  if(n.matches(".*\\.(docx?|xlsx?|pptx?|txt|csv|md|json|xml|html?|odt|epub)$"))return "Documentos";
+  String n=name.toLowerCase(Locale.ROOT), m=mime==null?"":mime.toLowerCase(Locale.ROOT);
+  if(n.endsWith(".pdf")||m.equals("application/pdf"))return "PDF";
+  if(n.matches(".*\\.(apk|apks|xapk|apkm)$")||m.equals("application/vnd.android.package-archive"))return "Aplicações";
+  if(n.matches(".*\\.(zip|rar|7z|tar|gz|bz2|xz|tgz|tbz2|txz|zst|lz|lzma|cab|iso)$"))return "Arquivos";
+  String kind=MediaFormats.kind(name,mime);
+  if(kind.equals("image"))return "Imagens";
+  if(kind.equals("video"))return "Vídeos";
+  if(kind.equals("audio"))return "Áudio";
+  if(kind.equals("epub")||kind.equals("docx")||n.matches(".*\\.(docx?|docm|dotx?|xlsx?|xlsm|xltx|pptx?|ppsx?|potx|txt|rtf|csv|tsv|md|markdown|json|xml|html?|odt|ods|odp|odg|epub|mobi|azw3?|fb2|djvu|usfm|usx|sfm|tex|pages|numbers|key|wps|wpd|hwp|srt|vtt)$"))return "Documentos";
   return "Outros";
  }
  public static String like(String input) { return "%"+normalize(input).replace("\\","\\\\").replace("%","\\%").replace("_","\\_")+"%"; }

@@ -27,6 +27,7 @@
    <intent-filter><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.DEFAULT"/><data android:scheme="content"/><data android:scheme="file"/><data android:mimeType="*/*"/></intent-filter>
   </activity>
   <receiver android:name="mz.bam.seeky.android.ReadingWidget" android:exported="false"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/reading_widget_info"/></receiver>
+  <receiver android:name="mz.bam.seeky.android.SeekyWidget" android:exported="false" android:label="Seeky"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/seeky_widget_info"/></receiver>
   <activity android:name="mz.bam.seeky.android.CollectionEditorActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.LibrarySearchActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.LibraryBatchActivity" android:exported="false"/>

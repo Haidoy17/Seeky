@@ -1,5 +1,22 @@
 # Registo de alterações
 
+## 5.22.0 — 2026-11-19
+
+- **Categorias certas** (`Rules.category`, regras v2): vídeos reconhecidos pela extensão (mkv,
+  avi, webm, 3gp…), PDF e APK também pelo MIME, mais arquivos (zst, iso, cab…), APKs (apkm) e
+  documentos (rtf, ods, odp, mobi, azw3, fb2, djvu, usx, srt…). O catálogo existente é
+  reclassificado uma vez, em segundo plano. `CategoryRulesTest` (36 verificações).
+- **Limpeza** (`StorageCleaner`, Mais → Armazenamento e limpeza): cache do Seeky (preserva o
+  que está em uso), miniaturas da galeria, APKs duplicados (mesmo pacote e versão) ou já
+  instalados — enviados para a lixeira com confirmação —, ficheiros duplicados e atalhos do
+  Android para libertar espaço e para a cache de outras aplicações.
+- **Widget "Seeky"** (`SeekyWidget`): barra de pesquisa e atalhos para PDF, Imagens, Vídeos,
+  Áudio e Limpeza, nas cores do tema; volta a pintar-se ao mudar de tema. "Widget no ecrã
+  inicial" permite escolher entre este e o de continuar leitura.
+- A verificação automática de actualizações não corre quando o Seeky não consegue ler a própria
+  versão (evita oferecer uma "actualização" sem termo de comparação).
+- `Cleanup5220Test`; 390 testes Robolectric passam.
+
 ## 5.21.1 — 2026-11-19
 
 - **Cabeçalho sem barra** (`AppPalette.bare`) em Areia, Floresta, Néon, Vidro e Gelo: só o
