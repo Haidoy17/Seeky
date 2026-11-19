@@ -7,17 +7,23 @@ import android.view.View;
 /** Crisp native vector icons; original Seeky wordmark is left untouched. */
 final class Icons extends View {
     String name; int color; final Paint p=new Paint(3);
-    Icons(Context c,String name,int color){super(c);this.name=name;this.color=color;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
+    /** Traço fino nos temas modernos, um pouco mais firme nos clássicos. */
+    final float stroke;
+    Icons(Context c,String name,int color){super(c);this.name=name;this.color=color;stroke=AppPalette.of(c).modern?1.55f:1.8f;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
     void setSymbol(String name,int color){if(!this.name.equals(name)||this.color!=color){this.name=name;this.color=color;invalidate();}}
     void line(Canvas c,float... points){for(int i=0;i+3<points.length;i+=2)c.drawLine(points[i],points[i+1],points[i+2],points[i+3],p);}
     @Override protected void onDraw(Canvas canvas){
-        super.onDraw(canvas);canvas.save();float s=Math.min(getWidth(),getHeight())/24f;canvas.translate((getWidth()-24*s)/2,(getHeight()-24*s)/2);canvas.scale(s,s);p.setColor(color);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.8f);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
+        super.onDraw(canvas);canvas.save();float s=Math.min(getWidth(),getHeight())/24f;canvas.translate((getWidth()-24*s)/2,(getHeight()-24*s)/2);canvas.scale(s,s);p.setColor(color);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(stroke);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
         switch(name){
             case "chevron":line(canvas,9,5,16,12,9,19);break;
             case "minus":line(canvas,5,12,19,12);break;
             case "phone":canvas.drawRoundRect(6,2,18,22,3,3,p);line(canvas,10,18,14,18);break;
             case "usb":canvas.drawRoundRect(5,9,19,22,3,3,p);line(canvas,8,9,8,2,16,2,16,9);line(canvas,11,4,11,6);line(canvas,14,4,14,6);break;
 
+            case "eye":{android.graphics.Path e=new android.graphics.Path();e.moveTo(2.5f,12);e.quadTo(12,3.5f,21.5f,12);e.quadTo(12,20.5f,2.5f,12);e.close();canvas.drawPath(e,p);}canvas.drawCircle(12,12,3,p);break;
+            case "motion":canvas.drawCircle(15,12,5.5f,p);line(canvas,3,8,7,8);line(canvas,2,12,7,12);line(canvas,3,16,7,16);break;
+            case "dot":canvas.drawCircle(12,12,7.5f,p);p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,12,2.6f,p);break;
+            case "pin":line(canvas,9,3.5f,15,3.5f);line(canvas,10,3.5f,10,9,7,13,17,13,14,9,14,3.5f);line(canvas,12,13,12,20.5f);break;
             case "tasks":line(canvas,3.5f,6.5f,5.2f,8.2f,8.2f,5.2f);line(canvas,11,7,20.5f,7);line(canvas,3.5f,12.5f,5.2f,14.2f,8.2f,11.2f);line(canvas,11,13,20.5f,13);line(canvas,11,19,20.5f,19);canvas.drawCircle(5.8f,19,1.6f,p);break;
             case "import":line(canvas,12,3,12,14);line(canvas,7.5f,9.5f,12,14,16.5f,9.5f);line(canvas,4,14.5f,4,20,20,20,20,14.5f);break;
             case "collection":line(canvas,6,4.5f,20.5f,4.5f,20.5f,15.5f);canvas.drawRoundRect(3,8,17.5f,20.5f,2,2,p);line(canvas,3,11.5f,8,11.5f,9.5f,9.5f);break;

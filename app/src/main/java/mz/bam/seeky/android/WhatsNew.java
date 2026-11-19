@@ -23,7 +23,8 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.19", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.20", "Toque numa novidade para a experimentar", "star");
+        panel.action("palette", "Visual novo", "Temas Areia, Floresta e Carvão, títulos elegantes, ícones de linha e capas geradas", false, () -> ThemeSettings.show(a));
         panel.action("lock", "Bloqueio da aplicação", "Impressão digital, rosto ou PIN do telefone", false, () -> AppLock.show(a));
         panel.action("restore", "Cópia automática", "Estudos e notas guardados todos os dias ou semanas", false, () -> AutoBackup.show(a));
         panel.action("palette", "Tema Sistema", "Acompanha o modo claro/escuro do Android", false, () -> ThemeSettings.show(a));

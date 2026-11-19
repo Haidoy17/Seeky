@@ -1,9 +1,14 @@
-## Seeky 5.19.2
+## Seeky 5.20.0
 
-Instale **Seeky_5.19.2.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.20.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Visual novo** — temas Areia (creme e verde-oliva, a nova predefinição), Floresta (verde escuro)
+  e Carvão (grafite e coral); cabeçalhos limpos sem ondas, títulos em serifa elegante, ícones de
+  linha finos, categorias em cartões e capas geradas para os livros sem imagem. Os temas
+  clássicos continuam em Cores.
+- **Menus com ícones certos** — cada opção (Cores, Idioma, Velocidade, Repetir…) com o seu ícone.
 - **Ícones das funcionalidades** — cada função com ícone próprio dentro de um quadrado colorido, botões de voltar com ícone. O logótipo do Seeky mantém-se.
 - **Leitor de música** — capa do álbum (quando o ficheiro a tem), título e artista, botão de reproduzir circular,
   recuar/avançar 10 s, velocidade, repetir, temporizador de sono e tempo restante.
