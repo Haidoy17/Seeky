@@ -55,7 +55,7 @@ public final class LockActivity extends Activity {
         column.addView(badge, new LinearLayout.LayoutParams(dp(96), dp(96)));
 
         TextView title = text(getIntent().getBooleanExtra(ENABLE, false) ? "Activar bloqueio" : "Seeky bloqueado", 22, p.ink);
-        title.setTypeface(AppFonts.title(this, 22));
+        ThemeStyle.title(title,22);
         LinearLayout.LayoutParams gap = new LinearLayout.LayoutParams(-2, -2);
         gap.topMargin = dp(24);
         column.addView(title, gap);

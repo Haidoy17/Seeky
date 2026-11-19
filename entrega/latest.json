@@ -1,8 +1,8 @@
 {
-  "versionCode": 5004401,
-  "versionName": "5.20.1",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.20.1.apk",
-  "sha256": "b1882e60d7edbdb38449ccc10efc82590bcbeb009d02786e9828e5527c4114e3",
-  "bytes": 13175048,
-  "notes": "Actualizações dentro da aplicação: o Seeky procura novas versões e instala com um toque, verificando a assinatura."
+  "versionCode": 5004500,
+  "versionName": "5.21.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.21.0.apk",
+  "sha256": "91317bb8dc7e5f3c84e18777251b773f136a504be50c898404180c4759dd190d",
+  "bytes": 13182580,
+  "notes": "Nove temas com design próprio: Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo, Carvão e Ciano. Cada um muda cabeçalho, letra, ícones, menus e capas."
 }

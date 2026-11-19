@@ -1,5 +1,22 @@
 # Registo de alterações
 
+## 5.21.0 — 2026-11-19
+
+Design por tema, a partir das novas referências do autor.
+
+- **9 temas modernos** (`AppPalette.MODERN`): Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo,
+  Carvão, Ciano — cada um com `style`, cor secundária, raio dos cartões e estilo de ícone
+  (quadrado tingido, contorno, sem caixa, círculo). Selector de cores com descrição de cada tema.
+- **`ThemeStyle`**: tipografia dos títulos por tema (serifa, maiúsculas espaçadas finas,
+  condensada, média com brilho néon), caixas dos ícones, textura de papel (ruído em cache),
+  quadrados inclinados, grelha em perspectiva, traço néon e brilho radial.
+- **`BrandSurface`**: cabeçalhos, cartão de destaque e fundos próprios por tema (cartões
+  empilhados com papel, grelha + linha néon, brilho violeta, padrão de quadrados, círculos).
+  Corrigido o alfa herdado da sombra que deixava o bloco translúcido.
+- **`BookCoverArt`**: capas geradas por tema (editorial, rótulo empilhado em papel, moldura
+  néon, vidro, minimalista, quadrados, degradê); título e autor fora da zona do menu e do selo.
+- `Modern5200Test` captura Início e Livros nos 9 temas e verifica o contraste de todos.
+
 ## 5.20.1 — 2026-11-19
 
 - **Actualizações dentro da aplicação** (`AppUpdates`): ao abrir, no máximo uma vez por dia, o
