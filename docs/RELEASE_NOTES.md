@@ -1,9 +1,14 @@
-## Seeky 5.19.0
+## Seeky 5.19.1
 
-Instale **Seeky_5.19.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.19.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Ícone novo** — nítido em qualquer ecrã, adapta-se à forma do seu telefone e aos ícones temáticos do Android 13+.
+- **Leitor de música** — capa do álbum (quando o ficheiro a tem), título e artista, botão de reproduzir circular,
+  recuar/avançar 10 s, velocidade, repetir, temporizador de sono e tempo restante.
+- **Visualizador de imagens** — fundo escuro, mais resolução, tamanho e megapíxeis da foto, rodar, ajustar e partilhar.
+- **Mais vozes** — 15 idiomas de leitura (incluindo Kiswahili e Afrikaans), com amostra em cada um e vozes numeradas.
 - **Bloqueio da aplicação** — impressão digital, rosto ou PIN do telefone (Mais → Bloqueio da aplicação).
 - **Cópia automática** — estudos e notas guardados todos os dias ou semanas numa pasta à sua escolha.
 - **Botão Flash** — recolhe-se para a margem após 10 s, com a lupa visível; toque longo abre os

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone monocromático do atalho Seeky Flash nas Definições Rápidas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+ <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:pathData="M3.5,10.5a7,7 0,1 0,14 0a7,7 0,1 0,-14 0z"/>
+ <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="2.4" android:strokeLineCap="round" android:pathData="M15.5,15.5L21,21"/>
+ <path android:fillColor="#FFFFFFFF" android:pathData="M11.5,5.5L7.5,11.5H10.2L9.2,15.5L13.5,9.5H10.8Z"/>
+</vector>
