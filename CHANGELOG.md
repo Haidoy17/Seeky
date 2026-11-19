@@ -1,5 +1,16 @@
 # Registo de alterações
 
+## 5.20.1 — 2026-11-19
+
+- **Actualizações dentro da aplicação** (`AppUpdates`): ao abrir, no máximo uma vez por dia, o
+  Seeky lê `entrega/latest.json` no ramo `main` do GitHub e, se houver versão mais recente,
+  oferece "Actualizar agora". Descarga só por HTTPS de anfitriões do GitHub; o APK só chega ao
+  instalador se o tamanho e o SHA-256 baterem certo e se for o mesmo pacote, mais recente e
+  assinado com o mesmo certificado instalado. "Mais tarde" adia 3 dias; verificação automática
+  pode ser desligada em Mais → Actualizações.
+- `tools/publish_update.py` publica uma versão (APK + `latest.json` + SHA256SUMS).
+- `Updates5201Test`; 387 testes Robolectric passam.
+
 ## 5.20.0 — 2026-11-19
 
 Visual moderno, a partir das referências enviadas pelo autor.

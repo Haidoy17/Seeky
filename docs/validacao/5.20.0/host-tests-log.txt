@@ -36,7 +36,7 @@ PASS Brazil prefers Brazilian Portuguese voices
 PASS Mozambique prefers British English voices
 PASS own country wins and unknown regions stay neutral
 32 speech normalizer checks
-PASS 7 EPUB Bible checks; 69 parts / 33000 synthetic verses in 987 ms
+PASS 7 EPUB Bible checks; 69 parts / 33000 synthetic verses in 979 ms
 PASS 11 Bible import regressions
 PASS 35 optional reading, Bible import, evidence and WAV index checks
 PASS 100 Bible citation pronunciation and source mapping checks
@@ -264,7 +264,7 @@ PASS rename detected by parent snapshot
 PASS deletion detected without reading other file contents
 PASS outside volume rejected
 PASS symlink excluded from metadata discovery
-Metadata-only shallow listing with 4 GiB sparse file: 1.666826 ms on host, not Android
+Metadata-only shallow listing with 4 GiB sparse file: 5.367367 ms on host, not Android
 Passed 17 discovery checks
 PASS first system-catalog page starts from zero
 PASS pending pages keep a stable generation boundary

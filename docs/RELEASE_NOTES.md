@@ -1,9 +1,10 @@
-## Seeky 5.20.0
+## Seeky 5.20.1
 
-Instale **Seeky_5.20.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.20.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Actualizações automáticas** — a partir desta versão o Seeky avisa quando há uma versão nova e instala-a com um toque (Mais → Actualizações).
 - **Visual novo** — temas Areia (creme e verde-oliva, a nova predefinição), Floresta (verde escuro)
   e Carvão (grafite e coral); cabeçalhos limpos sem ondas, títulos em serifa elegante, ícones de
   linha finos, categorias em cartões e capas geradas para os livros sem imagem. Os temas
