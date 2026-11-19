@@ -1,9 +1,17 @@
-## Seeky 5.20.0
+## Seeky 5.21.1
 
-Instale **Seeky_5.20.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.21.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Cabeçalho limpo** em Areia, Floresta, Néon, Vidro e Gelo (só logótipo e informação) e textos com hierarquia e alinhamento uniformes em todos os temas.
+- **Nove temas com design próprio** (Preferências → Cores): Areia (editorial creme e oliva),
+  Floresta (verde escuro), Aurora (bordô e cinza com textura de papel e cartões empilhados),
+  Ouro (grafite e mostarda), Néon (preto com brilho laranja e grelha), Vidro (escuro com brilho
+  violeta), Gelo (cinza claro minimalista com cabeçalho preto), Carvão (padrão de quadrados e
+  coral) e Ciano (ardósia e degradê azul). Cada tema muda cabeçalho, letra dos títulos, caixas
+  dos ícones, menus e capas geradas.
+- **Actualizações automáticas** — a partir desta versão o Seeky avisa quando há uma versão nova e instala-a com um toque (Mais → Actualizações).
 - **Visual novo** — temas Areia (creme e verde-oliva, a nova predefinição), Floresta (verde escuro)
   e Carvão (grafite e coral); cabeçalhos limpos sem ondas, títulos em serifa elegante, ícones de
   linha finos, categorias em cartões e capas geradas para os livros sem imagem. Os temas

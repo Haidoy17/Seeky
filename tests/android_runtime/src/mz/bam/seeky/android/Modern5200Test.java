@@ -30,7 +30,7 @@ public class Modern5200Test {
         f.drain();
     }
 
-    static String slug(String theme) { return theme.equals("Carvão") ? "carvao" : theme.toLowerCase(java.util.Locale.ROOT); }
+    static String slug(String theme) { return java.text.Normalizer.normalize(theme, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase(java.util.Locale.ROOT); }
 
     void books() {
         String[] titles = {"A arte de ler", "Cursos e módulos", "Fé e conhecimento"};
@@ -43,7 +43,7 @@ public class Modern5200Test {
     }
 
     @Test public void modernPalettesAreReadable() {
-        for (String name : new String[]{AppPalette.SAND, AppPalette.FOREST, AppPalette.CHARCOAL}) {
+        for (String name : AppPalette.MODERN) {
             AppPalette p = new AppPalette(name);
             assertTrue(name, p.modern);
             assertTrue(name + " text", AppPalette.contrast(p.ink, p.bg) >= 7);
@@ -74,7 +74,7 @@ public class Modern5200Test {
 
     @Test public void modernScreensHaveNativePreviews() throws Exception {
         books();
-        for (String name : new String[]{AppPalette.SAND, AppPalette.FOREST, AppPalette.CHARCOAL}) {
+        for (String name : AppPalette.MODERN) {
             theme(name);
             a.tab = "Início"; a.render(); f.drain();
             assertTrue(BooksToolsTest.labels(a.shell).contains("As suas categorias"));

@@ -55,6 +55,19 @@ sem desinstalar é obrigatório assinar com o mesmo certificado da versão insta
 Sem a chave, a publicação falha de propósito: um APK sem a assinatura original não
 actualiza a instalação existente nem liga ao módulo de vozes naturais.
 
+### Publicar uma actualização para os telemóveis
+
+O Seeky verifica `entrega/latest.json` no ramo `main` uma vez por dia (Mais → Actualizações).
+Para publicar uma versão nova:
+
+1. Aumente `versionCode`/`versionName` em `app/build.gradle`.
+2. Compile e assine (`./gradlew assembleRelease` com a chave).
+3. `python3 tools/publish_update.py app/build/outputs/apk/release/app-release.apk "Notas da versão"`
+4. Junte as alterações ao `main`. Os telemóveis recebem o aviso no próximo arranque.
+
+O telemóvel só instala o APK se o SHA-256 coincidir com `latest.json` e se estiver assinado
+com a mesma chave da aplicação instalada.
+
 ### Offline (sem Gradle)
 
 ```sh

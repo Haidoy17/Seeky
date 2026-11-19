@@ -1,5 +1,44 @@
 # Registo de alterações
 
+## 5.21.1 — 2026-11-19
+
+- **Cabeçalho sem barra** (`AppPalette.bare`) em Areia, Floresta, Néon, Vidro e Gelo: só o
+  logótipo, a legenda e os botões sobre o fundo, na cor do texto do tema; barra de estado na
+  cor do fundo. Aurora, Ouro, Carvão e Ciano mantêm a barra.
+- **Hierarquia e alinhamento**: margem única (16 dp) para logótipo, títulos, contagens e
+  cartões; títulos de página 24 sp, secções 20 sp com subtítulo 13 sp e espaçamento fixo;
+  legendas em maiúsculas espaçadas (O SEU ARQUIVO, ARMAZENAMENTO, N LIVROS); cartão de
+  armazenamento alinhado à esquerda com valor 26 sp em escrita normal.
+- Retirados efeitos que cortavam o fundo (Vidro) e tapavam texto (Aurora/Ouro).
+
+## 5.21.0 — 2026-11-19
+
+Design por tema, a partir das novas referências do autor.
+
+- **9 temas modernos** (`AppPalette.MODERN`): Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo,
+  Carvão, Ciano — cada um com `style`, cor secundária, raio dos cartões e estilo de ícone
+  (quadrado tingido, contorno, sem caixa, círculo). Selector de cores com descrição de cada tema.
+- **`ThemeStyle`**: tipografia dos títulos por tema (serifa, maiúsculas espaçadas finas,
+  condensada, média com brilho néon), caixas dos ícones, textura de papel (ruído em cache),
+  quadrados inclinados, grelha em perspectiva, traço néon e brilho radial.
+- **`BrandSurface`**: cabeçalhos, cartão de destaque e fundos próprios por tema (cartões
+  empilhados com papel, grelha + linha néon, brilho violeta, padrão de quadrados, círculos).
+  Corrigido o alfa herdado da sombra que deixava o bloco translúcido.
+- **`BookCoverArt`**: capas geradas por tema (editorial, rótulo empilhado em papel, moldura
+  néon, vidro, minimalista, quadrados, degradê); título e autor fora da zona do menu e do selo.
+- `Modern5200Test` captura Início e Livros nos 9 temas e verifica o contraste de todos.
+
+## 5.20.1 — 2026-11-19
+
+- **Actualizações dentro da aplicação** (`AppUpdates`): ao abrir, no máximo uma vez por dia, o
+  Seeky lê `entrega/latest.json` no ramo `main` do GitHub e, se houver versão mais recente,
+  oferece "Actualizar agora". Descarga só por HTTPS de anfitriões do GitHub; o APK só chega ao
+  instalador se o tamanho e o SHA-256 baterem certo e se for o mesmo pacote, mais recente e
+  assinado com o mesmo certificado instalado. "Mais tarde" adia 3 dias; verificação automática
+  pode ser desligada em Mais → Actualizações.
+- `tools/publish_update.py` publica uma versão (APK + `latest.json` + SHA256SUMS).
+- `Updates5201Test`; 387 testes Robolectric passam.
+
 ## 5.20.0 — 2026-11-19
 
 Visual moderno, a partir das referências enviadas pelo autor.

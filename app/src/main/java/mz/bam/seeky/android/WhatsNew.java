@@ -23,8 +23,9 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.20", "Toque numa novidade para a experimentar", "star");
-        panel.action("palette", "Visual novo", "Temas Areia, Floresta e Carvão, títulos elegantes, ícones de linha e capas geradas", false, () -> ThemeSettings.show(a));
+        UiPanel panel = new UiPanel(a, "Novidades da 5.21", "Toque numa novidade para a experimentar", "star");
+        panel.action("palette", "Nove temas com design próprio", "Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo, Carvão e Ciano — cada um com cabeçalho, letra, ícones e capas", false, () -> ThemeSettings.show(a));
+        panel.action("refresh", "Actualizações automáticas", "O Seeky procura novas versões e instala com um toque", false, () -> AppUpdates.settings(a));
         panel.action("lock", "Bloqueio da aplicação", "Impressão digital, rosto ou PIN do telefone", false, () -> AppLock.show(a));
         panel.action("restore", "Cópia automática", "Estudos e notas guardados todos os dias ou semanas", false, () -> AutoBackup.show(a));
         panel.action("palette", "Tema Sistema", "Acompanha o modo claro/escuro do Android", false, () -> ThemeSettings.show(a));

@@ -1,0 +1,28 @@
+JUnit version 4.13.2
+..........................................................................................................................................................................................................Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 1 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 2 WAV
+.Batch result: Pausado · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Pausado · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 2 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.........................................................................................................................................................................
+Time: 77.891
+
+OK (387 tests)
+

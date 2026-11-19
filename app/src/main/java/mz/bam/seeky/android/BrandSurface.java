@@ -21,14 +21,50 @@ final class BrandSurface extends Drawable {
   else{top(c,Math.min(90*density,h*.20f),Math.min(35*density,h*.08f),ThemeColors.blend(colors.surface,colors.accent,.055f),false);bottom(c,32*density,ThemeColors.blend(colors.surface,colors.accent,.11f),false);}
   c.restoreToCount(save);
  }
- /** Visual moderno: cabeçalho em bloco sólido com cantos arredondados, sem ondas; fundo liso. */
+ /** Visual moderno: cada tema desenha o seu cabeçalho, cartão de destaque e fundo. */
  void modern(Canvas c,Rect b,float h){
-  if(kind==HEADER||kind==BOOK_HEADER){float r=28*density,bottom=b.top+h*(kind==BOOK_HEADER?.97f:.90f);
-   path.reset();path.addRoundRect(new RectF(b.left,b.top,b.right,bottom),new float[]{0,0,0,0,r,r,r,r},Path.Direction.CW);
-   paint.setShader(new LinearGradient(b.left,b.top,b.right,bottom,start,end,Shader.TileMode.CLAMP));c.drawPath(path,paint);
-   color(0x0dffffff);c.drawCircle(b.right-40*density,b.top+h*.15f,h*.55f,paint);}
-  else if(kind==HERO){paint.setShader(new LinearGradient(b.left,b.top,b.right,b.bottom,start,end,Shader.TileMode.CLAMP));c.drawRect(b,paint);
-   color(0x12ffffff);c.drawCircle(b.right-b.width()*.08f,b.top+b.height()*.2f,b.height()*.75f,paint);color(0x0bffffff);c.drawCircle(b.right-b.width()*.08f,b.top+b.height()*.2f,b.height()*1.1f,paint);}
+  String st=colors.style;float d=density;RectF all=new RectF(b);
+  boolean stacked=st.equals("aurora")||st.equals("ouro");
+  if(kind==BACKGROUND){
+   if(st.equals("neon"))ThemeStyle.grid(c,new RectF(b.left,b.bottom-b.height()*.42f,b.right,b.bottom),d,0x0dffffff);
+   else if(st.equals("carvao"))ThemeStyle.squares(c,all,d,0x07ffffff);
+   else if(stacked)ThemeStyle.paper(c,all,7,d);
+   else if(st.equals("ciano")){color(0x08ffffff);c.drawCircle(b.left,b.bottom,b.width()*.7f,paint);}
+   return;}
+  if(kind==SHEET){if(stacked)ThemeStyle.paper(c,all,11,d);return;}
+  if((kind==HEADER||kind==BOOK_HEADER)&&colors.bare)return;
+  if(kind==HEADER||kind==BOOK_HEADER){
+   float r=30*d,bottom=b.top+h*(kind==BOOK_HEADER?.97f:stacked?.80f:.90f);
+   if(stacked){float second=Math.min(b.bottom-2*d,bottom+h*.16f);Path card=rounded(b.left,b.top,b.right,second,r);
+    color(0x26000000);c.save();c.translate(0,3*d);c.drawPath(card,paint);c.restore();color(colors.secondary);c.drawPath(card,paint);
+    c.save();c.clipPath(card);ThemeStyle.paper(c,new RectF(b.left,b.top,b.right,second),21,d);c.restore();}
+   Path block=rounded(b.left,b.top,b.right,bottom,r);
+   if(stacked){color(0x33000000);c.save();c.translate(0,4*d);c.drawPath(block,paint);c.restore();}
+   color(0xffffffff);/* opaco: a sombra anterior deixava alfa no pincel */paint.setShader(new LinearGradient(b.left,b.top,b.right,bottom,start,end,Shader.TileMode.CLAMP));c.drawPath(block,paint);paint.setShader(null);
+   c.save();c.clipPath(block);RectF area=new RectF(b.left,b.top,b.right,bottom);
+   switch(st){
+    case "aurora":case "ouro":ThemeStyle.paper(c,area,3,d);break;
+    case "neon":ThemeStyle.grid(c,area,d,0x12ffffff);break;
+    case "vidro":ThemeStyle.bloom(c,b.right-b.width()*.15f,b.top+h*.2f,b.width()*.75f,colors.secondary);break;
+    case "carvao":ThemeStyle.squares(c,area,d,0x0fffffff);break;
+    case "ciano":color(0x16ffffff);c.drawCircle(b.right-30*d,b.top+h*.1f,h*.62f,paint);color(0x0effffff);c.drawCircle(b.left+b.width()*.2f,bottom,h*.5f,paint);break;
+    case "gelo":color(0x10ffffff);c.drawCircle(b.right-20*d,b.top,h*.5f,paint);break;
+    default:color(0x0dffffff);c.drawCircle(b.right-40*d,b.top+h*.15f,h*.55f,paint);}
+   c.restore();
+   if(st.equals("neon")){Path edge=new Path();edge.moveTo(b.left,bottom-r);edge.quadTo(b.left,bottom,b.left+r,bottom);edge.lineTo(b.right-r,bottom);edge.quadTo(b.right,bottom,b.right,bottom-r);ThemeStyle.glow(c,edge,colors.accent,d);}
+   else if(st.equals("carvao")){color(colors.accent);c.drawRoundRect(b.left+24*d,bottom-14*d,b.left+72*d,bottom-10*d,2*d,2*d,paint);}
+   else if(st.equals("vidro")){paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(d);color(0x22ffffff);paint.setStyle(Paint.Style.STROKE);c.drawPath(block,paint);paint.setStyle(Paint.Style.FILL);}
+   return;}
+  if(kind==HERO){
+   color(0xffffffff);paint.setShader(new LinearGradient(b.left,b.top,b.right,b.bottom,start,end,Shader.TileMode.CLAMP));c.drawRect(b,paint);paint.setShader(null);
+   switch(st){
+    case "aurora":case "ouro":ThemeStyle.paper(c,all,5,d);color((colors.secondary&0xffffff)|0x55000000);c.drawCircle(b.right,b.top,b.height()*.9f,paint);break;
+    case "neon":ThemeStyle.grid(c,all,d,0x14ffffff);Path frame=new Path();frame.addRoundRect(new RectF(b.left+3*d,b.top+3*d,b.right-3*d,b.bottom-3*d),20*d,20*d,Path.Direction.CW);ThemeStyle.glow(c,frame,colors.accent,d*.6f);break;
+    case "vidro":ThemeStyle.bloom(c,b.right-b.width()*.1f,b.top,b.width()*.8f,colors.secondary);break;
+    case "carvao":ThemeStyle.squares(c,all,d,0x10ffffff);break;
+    default:color(0x12ffffff);c.drawCircle(b.right-b.width()*.08f,b.top+b.height()*.2f,b.height()*.75f,paint);color(0x0bffffff);c.drawCircle(b.right-b.width()*.08f,b.top+b.height()*.2f,b.height()*1.1f,paint);}
+  }
  }
+ Path rounded(float l,float t,float r,float bottom,float radius){Path p=new Path();p.addRoundRect(new RectF(l,t,r,bottom),new float[]{0,0,0,0,radius,radius,radius,radius},Path.Direction.CW);return p;}
  public void setAlpha(int alpha){}public void setColorFilter(ColorFilter filter){}public int getOpacity(){return PixelFormat.TRANSLUCENT;}
 }
