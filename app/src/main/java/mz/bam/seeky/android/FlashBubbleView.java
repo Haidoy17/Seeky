@@ -67,6 +67,23 @@ final class FlashBubbleView extends FrameLayout {
   addView(circle,new FrameLayout.LayoutParams(size,size,Gravity.CENTER));
  }
 
+ /**
+  * Recolhido na margem: metade do círculo fica fora do ecrã, por isso a lupa desloca-se para a
+  * metade visível e o botão fica ligeiramente translúcido — vê-se que há algo ali sem estorvar.
+  */
+ void tucked(boolean tucked,boolean right){
+  View icon=circle.getChildCount()>0?circle.getChildAt(0):null;
+  float shift=tucked?(right?-1:1)*circle.getLayoutParams().width/4f:0f;
+  float alpha=tucked?.82f:1f;
+  if(Motion.enabled(getContext())){
+   if(icon!=null)icon.animate().translationX(shift).setDuration(200).start();
+   circle.animate().alpha(alpha).setDuration(200).start();
+  }else{
+   if(icon!=null)icon.setTranslationX(shift);
+   circle.setAlpha(alpha);
+  }
+ }
+
  /** Dedo pousado/levantado: encolhe ligeiramente e volta com mola. */
  void press(boolean down){
   if(!Motion.enabled(getContext())){circle.setScaleX(1f);circle.setScaleY(1f);return;}

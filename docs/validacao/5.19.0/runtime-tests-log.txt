@@ -1,5 +1,5 @@
 JUnit version 4.13.2
-..................................................................................................................................................................................................Batch result: Narração guardada · 1 WAV
+....................................................................................................................................................................................................Batch result: Narração guardada · 1 WAV
 .Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
 .Batch result: Narração guardada · 1 WAV
 .Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
@@ -22,7 +22,7 @@ Batch result: Narração guardada · 1 WAV
 .Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
 Batch result: Narração guardada · 1 WAV
 .........................................................................................................................................................................
-Time: 74.008
+Time: 73.311
 
-OK (379 tests)
+OK (381 tests)
 
