@@ -1,9 +1,10 @@
-## Seeky 5.21.0
+## Seeky 5.21.1
 
-Instale **Seeky_5.21.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.21.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Cabeçalho limpo** em Areia, Floresta, Néon, Vidro e Gelo (só logótipo e informação) e textos com hierarquia e alinhamento uniformes em todos os temas.
 - **Nove temas com design próprio** (Preferências → Cores): Areia (editorial creme e oliva),
   Floresta (verde escuro), Aurora (bordô e cinza com textura de papel e cartões empilhados),
   Ouro (grafite e mostarda), Néon (preto com brilho laranja e grelha), Vidro (escuro com brilho

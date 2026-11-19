@@ -1,5 +1,16 @@
 # Registo de alterações
 
+## 5.21.1 — 2026-11-19
+
+- **Cabeçalho sem barra** (`AppPalette.bare`) em Areia, Floresta, Néon, Vidro e Gelo: só o
+  logótipo, a legenda e os botões sobre o fundo, na cor do texto do tema; barra de estado na
+  cor do fundo. Aurora, Ouro, Carvão e Ciano mantêm a barra.
+- **Hierarquia e alinhamento**: margem única (16 dp) para logótipo, títulos, contagens e
+  cartões; títulos de página 24 sp, secções 20 sp com subtítulo 13 sp e espaçamento fixo;
+  legendas em maiúsculas espaçadas (O SEU ARQUIVO, ARMAZENAMENTO, N LIVROS); cartão de
+  armazenamento alinhado à esquerda com valor 26 sp em escrita normal.
+- Retirados efeitos que cortavam o fundo (Vidro) e tapavam texto (Aurora/Ouro).
+
 ## 5.21.0 — 2026-11-19
 
 Design por tema, a partir das novas referências do autor.

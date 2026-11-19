@@ -29,10 +29,10 @@ final class BrandSurface extends Drawable {
    if(st.equals("neon"))ThemeStyle.grid(c,new RectF(b.left,b.bottom-b.height()*.42f,b.right,b.bottom),d,0x0dffffff);
    else if(st.equals("carvao"))ThemeStyle.squares(c,all,d,0x07ffffff);
    else if(stacked)ThemeStyle.paper(c,all,7,d);
-   else if(st.equals("vidro"))ThemeStyle.bloom(c,b.right,b.top+b.height()*.18f,b.width()*.95f,colors.secondary);
    else if(st.equals("ciano")){color(0x08ffffff);c.drawCircle(b.left,b.bottom,b.width()*.7f,paint);}
    return;}
   if(kind==SHEET){if(stacked)ThemeStyle.paper(c,all,11,d);return;}
+  if((kind==HEADER||kind==BOOK_HEADER)&&colors.bare)return;
   if(kind==HEADER||kind==BOOK_HEADER){
    float r=30*d,bottom=b.top+h*(kind==BOOK_HEADER?.97f:stacked?.80f:.90f);
    if(stacked){float second=Math.min(b.bottom-2*d,bottom+h*.16f);Path card=rounded(b.left,b.top,b.right,second,r);
@@ -58,7 +58,7 @@ final class BrandSurface extends Drawable {
   if(kind==HERO){
    color(0xffffffff);paint.setShader(new LinearGradient(b.left,b.top,b.right,b.bottom,start,end,Shader.TileMode.CLAMP));c.drawRect(b,paint);paint.setShader(null);
    switch(st){
-    case "aurora":case "ouro":ThemeStyle.paper(c,all,5,d);color(colors.secondary);c.drawRoundRect(b.left-30*d,b.bottom-b.height()*.12f,b.right*.55f,b.bottom+30*d,22*d,22*d,paint);break;
+    case "aurora":case "ouro":ThemeStyle.paper(c,all,5,d);color((colors.secondary&0xffffff)|0x55000000);c.drawCircle(b.right,b.top,b.height()*.9f,paint);break;
     case "neon":ThemeStyle.grid(c,all,d,0x14ffffff);Path frame=new Path();frame.addRoundRect(new RectF(b.left+3*d,b.top+3*d,b.right-3*d,b.bottom-3*d),20*d,20*d,Path.Direction.CW);ThemeStyle.glow(c,frame,colors.accent,d*.6f);break;
     case "vidro":ThemeStyle.bloom(c,b.right-b.width()*.1f,b.top,b.width()*.8f,colors.secondary);break;
     case "carvao":ThemeStyle.squares(c,all,d,0x10ffffff);break;
