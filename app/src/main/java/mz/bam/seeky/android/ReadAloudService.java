@@ -122,7 +122,7 @@ public final class ReadAloudService extends Service {
             engineTask=engineWorker.submit(()->{try{
                 Voice chosen=SpeechVoices.resolve(engine.getVoices(),owner.online,owner.language,owner.voice);
                 if(chosen==null){main.post(()->{if(owner==request&&expected==engineGeneration){main.removeCallbacks(engineConnectTimeout);pause("A voz escolhida não está disponível. Escolha ou instale outra voz.");}});return;}
-                if(owner.engine.equals(NaturalVoicesActivity.ENGINE)&&(chosen.getFeatures()==null||!chosen.getFeatures().contains("seeky:piper-v1")))throw new java.io.IOException("Actualize o módulo de vozes naturais.");
+                
                 SpeechVoices.apply(engine,chosen,owner.rate);
                 engine.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());engine.setOnUtteranceProgressListener(progress);
                 main.post(()->{if(closed||owner!=request||expected!=engineGeneration)return;main.removeCallbacks(engineConnectTimeout);engineReady=true;if(!cursor.paused)message="A ler em voz alta";publish();speak();});

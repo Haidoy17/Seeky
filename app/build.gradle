@@ -23,6 +23,9 @@ android {
                 storePassword System.getenv('SEEKY_SIGN_PASSWORD')
                 keyAlias System.getenv('SEEKY_SIGN_ALIAS')
                 keyPassword System.getenv('SEEKY_SIGN_PASSWORD')
+                // v3 permite rodar a chave no futuro sem obrigar a desinstalar.
+                enableV2Signing true
+                enableV3Signing true
             }
         }
     }

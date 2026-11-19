@@ -28,6 +28,7 @@ final class WhatsNew {
         panel.action("restore", "Cópia automática", "Estudos e notas guardados todos os dias ou semanas", false, () -> AutoBackup.show(a));
         panel.action("palette", "Tema Sistema", "Acompanha o modo claro/escuro do Android", false, () -> ThemeSettings.show(a));
         panel.action("flash", "Botão Flash renovado", "Toque longo para ajustes, lançar para a margem, atalho nas Definições Rápidas", false, a::iconSettings);
+        panel.action("speaker", "Vozes naturais do Google", "Online (mais naturais) ou offline, sem módulo extra", false, () -> NaturalVoicesActivity.open(a));
         panel.section("Voz");
         panel.note("Leitura mais natural: \"Dr.\" lê-se \"Doutor\", \"Capítulo IV\" lê-se \"Capítulo 4\" e os endereços web pelo nome do site. A voz escolhe a variante do seu país (pt-PT em Moçambique). Novo controlo de Tom em Ler em voz alta.");
         panel.section("Segurança");

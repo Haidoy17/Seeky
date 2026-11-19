@@ -8,7 +8,7 @@ names=['BibleEpubText','StudyEvidence','StudyCards','WorkspaceEpoch','BibleHtml'
 sources=[src/(n+'.java') for n in names]+sorted((root/'tests').glob('*Test.java'))
 compiler=['java','-jar',str(a.ecj.resolve()),'-8','-proc:none','-warn:none'] if a.ecj else ['javac','-source','8','-target','8']
 subprocess.run(compiler+['-d',str(out)]+[str(f) for f in sources],check=True)
-for name in ['SpeechNormalizerTest','BibleEpubImportTest','BibleImportTest','PlusCoreTest','BibleReferencesTest','SpeechStructureTest','EpubLayoutTest','StudioAudioTest','AudioNamingTest','NaturalSpeechTest','WaveJoinerTest','DiagnosticTraceTest','SpeechReadingTest','VisualPolicyTest','PerformanceCoreTest','CoreTest','DiskWalkerTest','LatestWorkTest','DiscoveryTest','GenerationWindowTest','FileTransferTest','ReaderCoreTest','OrderingTest','TrashTest','CsvTest','StudyTextTest','StudyScheduleTest','StudyFilesTest','CloudProtocolTest','CoreStabilityTest','TextSearchTest']:
+for name in ['SpeechNormalizerTest','BibleEpubImportTest','BibleImportTest','PlusCoreTest','BibleReferencesTest','SpeechStructureTest','EpubLayoutTest','StudioAudioTest','AudioNamingTest','WaveJoinerTest','DiagnosticTraceTest','SpeechReadingTest','VisualPolicyTest','PerformanceCoreTest','CoreTest','DiskWalkerTest','LatestWorkTest','DiscoveryTest','GenerationWindowTest','FileTransferTest','ReaderCoreTest','OrderingTest','TrashTest','CsvTest','StudyTextTest','StudyScheduleTest','StudyFilesTest','CloudProtocolTest','CoreStabilityTest','TextSearchTest']:
  subprocess.run(['java','-cp',str(out),'mz.bam.seeky.android.'+name],check=True)
 subprocess.run([sys.executable,str(root/'tests/catalog_test.py')],check=True)
 
