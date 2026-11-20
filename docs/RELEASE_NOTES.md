@@ -1,8 +1,20 @@
-## Seeky 5.26.0
+## Seeky 5.27.0
 
-Instale **Seeky_5.26.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+Instale **Seeky_5.27.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
 
 ### Novidades
+- **Leitor de música organizado**:
+  - separadores Capa · Letra · Fila;
+  - controlos na ordem habitual;
+  - acções com nome (Equalizador, Velocidade, Temporizador, Partilhar) e menu Mais por
+    secções.
+- **Letras**: procurar online e escolher; copiar do Google e voltar (aplica-se sozinha);
+  colar, copiar e tamanho do texto.
+- **Vídeo**: rodar o ecrã, rodar a imagem, ajustar/preencher/esticar e controlos que se
+  escondem.
+- **Música → Início**: adicionadas recentemente e mais ouvidas hoje, na semana e no mês.
+
+### Da 5.26
 - **Mais → Multimédia → Música e Vídeos** — biblioteca com procura automática, pastas e
   ficheiros adicionados, organizada por faixas, artistas, álbuns, géneros, anos e pastas.
 - **Fila** — faixa anterior e seguinte, aleatório e repetir.

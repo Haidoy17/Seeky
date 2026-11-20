@@ -23,8 +23,13 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.26", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.27", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("audio", "Leitor de música reorganizado", "Capa · Letra · Fila; controlos na ordem habitual; Equalizador, Velocidade, Temporizador e Partilhar com nome; o resto no menu Mais", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.action("lyrics", "Letras online", "Procure e escolha a versão certa, ou copie do Google e volte: aplica-se sozinha. Copiar, colar e tamanho do texto", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.action("screenrotate", "Vídeo: rodar e ajustar", "Rodar o ecrã, rodar a imagem 90°, ajustar, preencher ou esticar; controlos que se escondem", false, () -> LibraryActivity.open(a, MediaLibrary.VIDEO));
+        panel.action("chart", "Mais ouvidas", "Hoje, esta semana, este mês ou sempre; adicionadas e ouvidas recentemente", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.section("Da 5.26");
         panel.action("audio", "Leitor de música", "Biblioteca por faixas, artistas, álbuns, géneros, anos e pastas; procura automática; fila, aleatório e repetir", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
         panel.action("video", "Leitor de vídeo", "Vídeos por pastas, recentes, anos e favoritos", false, () -> LibraryActivity.open(a, MediaLibrary.VIDEO));
         panel.action("tune", "Equalizador tipo Poweramp", "10 bandas, pré-amplificação, graves, agudos, virtualização, volume extra e balanço", false, () -> EqualizerActivity.open(a));

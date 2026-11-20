@@ -76,8 +76,16 @@ final class Icons extends View {
             case "video":canvas.drawRoundRect(3,5,21,19,3,3,p);line(canvas,10,9,16,12,10,15,10,9);break;
             case "audio":line(canvas,9,17,9,5,19,3,19,15);canvas.drawOval(3,16,9,21,p);canvas.drawOval(13,14,19,19,p);break;
             case "shuffle":line(canvas,3,17,8,17,15,7,20,7);line(canvas,17,4,20,7,17,10);line(canvas,3,7,8,7,15,17,20,17);line(canvas,17,14,20,17,17,20);break;
-            case "skipnext":line(canvas,6,5,15,12,6,19,6,5);line(canvas,18,5,18,19);break;
-            case "skipprev":line(canvas,18,5,9,12,18,19,18,5);line(canvas,6,5,6,19);break;
+            case "skipnext":p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(5,5);t.lineTo(15.5f,12);t.lineTo(5,19);t.close();canvas.drawPath(t,p);}canvas.drawRoundRect(16.5f,5,19.5f,19,1.2f,1.2f,p);break;
+            case "skipprev":p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(19,5);t.lineTo(8.5f,12);t.lineTo(19,19);t.close();canvas.drawPath(t,p);}canvas.drawRoundRect(4.5f,5,7.5f,19,1.2f,1.2f,p);break;
+            case "heart":{android.graphics.Path h=new android.graphics.Path();h.moveTo(12,20);h.cubicTo(4,14.5f,2.5f,10.5f,3.5f,7.5f);h.cubicTo(4.8f,3.8f,9.8f,3.2f,12,7);h.cubicTo(14.2f,3.2f,19.2f,3.8f,20.5f,7.5f);h.cubicTo(21.5f,10.5f,20,14.5f,12,20);h.close();canvas.drawPath(h,p);}break;
+            case "heartfill":p.setStyle(Paint.Style.FILL);{android.graphics.Path h=new android.graphics.Path();h.moveTo(12,20);h.cubicTo(4,14.5f,2.5f,10.5f,3.5f,7.5f);h.cubicTo(4.8f,3.8f,9.8f,3.2f,12,7);h.cubicTo(14.2f,3.2f,19.2f,3.8f,20.5f,7.5f);h.cubicTo(21.5f,10.5f,20,14.5f,12,20);h.close();canvas.drawPath(h,p);}break;
+            case "lyrics":line(canvas,4,6,15,6);line(canvas,4,10,15,10);line(canvas,4,14,11,14);line(canvas,4,18,9,18);canvas.drawCircle(16,18,2.2f,p);line(canvas,18.2f,18,18.2f,9,21,10);break;
+            case "queue":line(canvas,4,6,16,6);line(canvas,4,11,16,11);line(canvas,4,16,10,16);p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(14,14);t.lineTo(20.5f,17.5f);t.lineTo(14,21);t.close();canvas.drawPath(t,p);}break;
+            case "timer":canvas.drawCircle(12,13.5f,7.5f,p);line(canvas,12,13.5f,12,9.5f);line(canvas,9.5f,3,14.5f,3);line(canvas,18.5f,6.5f,19.8f,5.2f);break;
+            case "screenrotate":canvas.drawRoundRect(7,3,17,21,2.5f,2.5f,p);line(canvas,10.5f,18,13.5f,18);canvas.drawArc(1.5f,6,8.5f,14,110,140,false,p);line(canvas,2.2f,8.8f,2.6f,11.2f,5,10.6f);break;
+            case "aspect":canvas.drawRoundRect(3,5,21,19,2.5f,2.5f,p);line(canvas,6.5f,10,6.5f,8.5f,9,8.5f);line(canvas,17.5f,14,17.5f,15.5f,15,15.5f);break;
+            case "paste":canvas.drawRoundRect(5,5,19,21,2.5f,2.5f,p);canvas.drawRoundRect(9,3,15,7,1.5f,1.5f,p);line(canvas,8.5f,11,15.5f,11);line(canvas,8.5f,15,13.5f,15);break;
             case "wifi":canvas.drawArc(2,5,22,25,225,90,false,p);canvas.drawArc(6,9,18,21,225,90,false,p);canvas.drawArc(10,13,14,17,225,90,false,p);canvas.drawCircle(12,19,0.6f,p);break;
             case "chart":line(canvas,4,4,4,20,20,20);line(canvas,8,16,8,12);line(canvas,12,16,12,8);line(canvas,16,16,16,10);break;
             case "camera":canvas.drawRoundRect(3,7,21,19,3,3,p);line(canvas,8,7,9.5f,4.5f,14.5f,4.5f,16,7);canvas.drawCircle(12,13,3.5f,p);break;

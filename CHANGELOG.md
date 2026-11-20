@@ -1,5 +1,39 @@
 # Registo de alterações
 
+## 5.27.0 — 2026-11-20
+
+- **Leitor de música reorganizado** (`MediaActivity` reescrito):
+  - lugares fixos: cabeçalho (voltar · "A reproduzir" e "Faixa N de M" · Mais) e separadores
+    Capa · Letra · Fila (a fila passa a estar no próprio ecrã);
+  - título, artista e favorita (coração);
+  - controlos na ordem habitual: aleatório · anterior · reproduzir · seguinte · repetir (com "1"
+    em repetir uma);
+  - barra de acções com nome: Equalizador · Velocidade · Temporizador · Partilhar;
+  - menu Mais por secções: Reprodução (−10 s, +10 s, temporizador, velocidade, capítulos),
+    Esta faixa (favorita, letra, fila, partilhar, detalhes, abrir fora) e Biblioteca
+    (biblioteca, equalizador, parar).
+- **Ícones**: anterior/seguinte cheios, coração, letra, fila, temporizador, rodar ecrã, ajuste,
+  colar; o mini-leitor usava setas e o botão Aleatório usava o ícone de repetir — corrigido.
+- **Letras**:
+  - Procurar online (pesquisa LRCLIB editável, com lista de resultados sincronizados ou em
+    texto; o escolhido aplica-se logo);
+  - Google: abre a pesquisa e, ao voltar, a letra copiada é aplicada automaticamente (ignora
+    endereços e textos curtos);
+  - Colar, Copiar (toque longo copia uma linha), Editar ou Remover, tamanho do texto A−/A+,
+    partilhar a letra.
+- **Vídeo**:
+  - ecrã inteiro com controlos que se escondem sozinhos;
+  - rodar o ecrã (automático, horizontal, vertical) e rodar a imagem 90° (vídeos gravados de
+    lado);
+  - ajuste Ajustar / Preencher / Esticar; velocidade, fotograma e partilhar;
+  - rodar o telefone já não reinicia o ecrã.
+- **Biblioteca de música e vídeo**: novo separador Início com:
+  - adicionadas recentemente;
+  - mais ouvidas Hoje / Esta semana / Este mês / Sempre (histórico de reproduções, com o
+    número de vezes);
+  - ouvidas recentemente e favoritas, cada uma com "Ver todas".
+- `Media5270Test` (4 testes); testes da 5.26 actualizados.
+
 ## 5.26.0 — 2026-11-20
 
 - **Aviso de novas versões** (`UpdateJob`): uma tarefa em segundo plano (de 6 em 6 horas, só
