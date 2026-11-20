@@ -11,8 +11,16 @@ import java.util.regex.*;
 final class BibleReferences {
     private static final class Book {
         final String pt,en;final int chapters,verses;
-        Book(String pt,String en,int chapters,int verses){this.pt=pt;this.en=en;this.chapters=chapters;this.verses=verses;}
+        Book(String pt,String en,int chapters,int verses){this.pt=pt;this.en=en;this.chapters=chapters;this.verses=verses;ORDER.add(this);}
     }
+    /** Books in Bible order, as registered below. */
+    private static final List<Book> ORDER=new ArrayList<>();
+    private static final Set<String> DEUTERO=new HashSet<>(Arrays.asList("Tobias","Judite","Primeiro Macabeus","Segundo Macabeus","Sabedoria","Eclesiástico","Baruque"));
+    /** Protestant chapter counts where the Catholic or Orthodox canon adds chapters. */
+    private static final Map<String,Integer> SHORTER=new HashMap<>();
+    static {SHORTER.put("Ester",10);SHORTER.put("Daniel",12);SHORTER.put("Joel",3);SHORTER.put("Salmos",150);}
+    /** Plain (accent-free) alias keys for typed or spoken book names. */
+    private static final Map<String,Book> PLAIN=new HashMap<>();
     private static final Map<String,Book> BOOKS=new HashMap<>();
     /** Per alias key: characters and letters of the name part, and whether a number prefixes it. */
     private static final Map<String,int[]> INFO=new HashMap<>();
@@ -117,12 +125,33 @@ final class BibleReferences {
     private static void register(Book book,String alias,String name,boolean numbered){
         String k=key(alias);
         // Ambiguous abbreviations are resolved in the speech language below.
-        BOOKS.put(k,book);
+        BOOKS.put(k,book);PLAIN.put(plain(alias),book);
         int letters=0;for(int i=0;i<name.length();i++)if(Character.isLetter(name.charAt(i)))letters++;
         INFO.put(k,new int[]{name.length(),letters,numbered?1:0});
         String[] words=alias.split(" ");StringBuilder pattern=new StringBuilder();
         for(int i=0;i<words.length;i++){if(i>0)pattern.append(numbered&&i==1?SPACE:"[\\s\\p{Zs}]+");pattern.append(Pattern.quote(words[i]));}
         ALIASES.add(pattern.toString());
+    }
+    private static String plain(String value){return java.text.Normalizer.normalize(value,java.text.Normalizer.Form.NFD).replaceAll("\\p{M}+","").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9ºª]","");}
+    /** Canonical Portuguese names in Bible order; deuterocanonical books only when asked. */
+    static List<String> books(boolean deutero){List<String> out=new ArrayList<>();for(Book b:ORDER)if(deutero||!DEUTERO.contains(b.pt))out.add(b.pt);return out;}
+    static boolean deuterocanonical(String book){return DEUTERO.contains(book);}
+    /** Chapters of a canonical book in the usual Protestant numbering (0 when unknown). */
+    static int chapters(String book){Integer shorter=SHORTER.get(book);if(shorter!=null)return shorter;for(Book b:ORDER)if(b.pt.equals(book))return b.chapters;return 0;}
+    static boolean newTestament(String book){List<String> all=books(true);int at=all.indexOf(book);return at>=all.indexOf("Mateus");}
+    /** A typed or spoken book name ("primeira carta aos coríntios", "evangelho de joão", "Is") as a canonical name, or "". */
+    static String bookNamed(String text){
+        if(text==null)return "";
+        String t=" "+text.toLowerCase(Locale.ROOT).replaceAll("[\\p{Punct}“”«»]"," ")+" ";
+        t=t.replaceAll("\\s(o|a)?\\s*(livro|evangelho|carta|epístola|epistola|profecia|profeta)\\s+(de|do|da|dos|das|segundo|aos|às|as|a|ao)\\s"," ");
+        t=t.replaceAll("\\s(carta|epístola|epistola)\\s"," ").replaceAll("\\s(aos|aas|às|de|do|da)\\s"," ").replaceAll("\\s(o|a|é|e|no|na|em|livro)\\s"," ");
+        String compact=t.trim();
+        for(String candidate:new String[]{compact,compact.replaceAll("^(o|a)\\s+",""),compact.replaceAll("\\s+\\d+.*$","")}){
+            if(candidate.isEmpty())continue;
+            Book b=BOOKS.get(key(candidate));if(b==null)b=PLAIN.get(plain(candidate));
+            if(b!=null)return key(candidate).equals("jn")?"Jonas":b.pt;
+        }
+        return "";
     }
     static String canonical(String name){Book book=BOOKS.get(key(name));if(book==null)return "";return key(name).equals("jn")?"Jonas":book.pt;}
 

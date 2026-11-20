@@ -23,8 +23,14 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.28", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.29", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("edit", "Marcações com cores", "Seleccione um texto (também no PDF) → Cores e mais marcas: 6 cores, sublinhar, riscar e nota", false, () -> HighlightsActivity.open(a, null));
+        panel.action("bookmark", "As minhas marcações", "Todas num só lugar: procurar, ver por completo e abrir o livro na página e no sítio exactos", false, () -> HighlightsActivity.open(a, null));
+        panel.action("calendar", "Estudo bíblico", "Leitura de hoje, controlo semanal, planos (Bíblia em 1 ano, NT em 3 meses…), passagens guardadas", false, () -> BibleStudyActivity.open(a));
+        panel.action("cards", "Decorar versículos", "Cartões automáticos com livro, capítulo e versículo: escreva ou diga o texto, ou diga o livro", false, () -> BibleStudyActivity.open(a));
+        panel.action("star", "Jogo da Bíblia", "10 perguntas, 3 níveis, tempo, ajuda 50/50, respostas por voz e Recorde com o seu nome", false, () -> BibleGameActivity.open(a));
+        panel.section("Da 5.28");
         panel.action("book", "Passagens bíblicas ao toque", "Em PDF (também depois do OCR), Word, EPUB e texto: toque em \"Isaías 3.1-7, 12\", \"Jo 3,16\" ou \"Salmo 23\" e a passagem abre ali mesmo", false, () -> BibleLinks.query(a));
         panel.action("copy", "Leitura rápida da passagem", "Copiar, partilhar, ouvir, capítulo inteiro com a passagem destacada, capítulo anterior e seguinte, comparar versões, guardar e tamanho do texto", false, () -> BibleLinks.query(a));
         panel.action("bookmark", "Passagens guardadas", "As passagens que guardar ficam em Consultar passagem → Guardadas", false, () -> BibleLinks.saved(a));

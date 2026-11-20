@@ -111,6 +111,8 @@ final class BibleLinks {
         dialog.getButton(-1).setOnClickListener(v->{BibleReferences.Reference ref=BibleReferences.lookup(input.getText().toString());if(ref==null){input.setError(AppLanguage.text(a,"Indique o livro, o capítulo e, se quiser, os versículos."));return;}dialog.dismiss();open(a,ref);});
     }
     static void open(Activity a,BibleReferences.Reference ref){if(ref!=null)new Passage(a,ref,-1).load();}
+    /** A whole chapter with "Marcar como lido"; {@code done} runs after marking. */
+    static void readChapter(Activity a,String book,int chapter,Runnable done){BibleReferences.Reference ref=BibleReferences.lookup(book+" "+chapter);if(ref==null)return;Passage p=new Passage(a,ref,-1);p.onRead=done;p.load();}
     static void passage(Activity a,StudyStore.Row source,BibleReferences.Reference ref){if(ref!=null)new Passage(a,ref,source.id()).load();}
     static void list(ReaderActivity a){a.worker.execute(()->{try{String text=a.tools!=null&&a.tools.draft!=null?a.tools.draft.text:"";if(text.isEmpty())try(SpeechDocument d=new SpeechDocument(a,a.uri,a.name,a.mime,()->a.dead)){text=d.part(a.chrome.current());}List<BibleReferences.Reference> refs=BibleReferences.references(text);a.ui(()->choose(a,refs));}catch(Exception e){a.ui(()->PlusUi.error(a,e));}});}
     /** Lists the citations of a page; one citation opens directly. */
@@ -130,6 +132,9 @@ final class BibleLinks {
             c.getSharedPreferences(PREFS,0).edit().putString("bible_saved",next.toString()).apply();
         }catch(JSONException ignored){}
     }
+    static void unsave(Context c,String title){
+        try{JSONArray next=new JSONArray();for(JSONObject o:savedItems(c))if(!o.optString("title").equals(title))next.put(o);c.getSharedPreferences(PREFS,0).edit().putString("bible_saved",next.toString()).apply();}catch(RuntimeException ignored){}
+    }
     static void saved(Activity a){
         List<JSONObject> items=savedItems(a);
         if(items.isEmpty()){PlusUi.toast(a,"Ainda não guardou passagens. Use Guardar na leitura rápida.");return;}
@@ -143,8 +148,10 @@ final class BibleLinks {
         long source;boolean whole,compare;int chapter,lastChapter,serial;
         List<StudyStore.Row> sources=Collections.emptyList();
         UiDialog dialog;LinearLayout versions,navigation;TextView meta,body,wholeLabel,voiceLabel,compareChip;
-        String plain="",speakable="",version="";
+        String plain="",speakable="",version="",memory="";
         TextToSpeech voice;
+        /** Runs after "Marcar como lido" (the study plan refreshes its day). */
+        Runnable onRead;
 
         Passage(Activity a,BibleReferences.Reference ref,long source){
             this.a=a;this.ref=ref;colors=AppPalette.of(a);
@@ -181,7 +188,7 @@ final class BibleLinks {
         void show(List<StudyStore.Row> found,long picked,Map<Long,List<StudyStore.Row>> passages,int last){
             if(found.isEmpty()){if(dialog!=null)dialog.dismiss();missing();return;}
             sources=found;source=picked;lastChapter=last;version=name(picked);
-            SpannableStringBuilder out=new SpannableStringBuilder();StringBuilder copy=new StringBuilder(),speak=new StringBuilder();int count=0;
+            SpannableStringBuilder out=new SpannableStringBuilder();StringBuilder copy=new StringBuilder(),speak=new StringBuilder(),mem=new StringBuilder();int count=0;
             copy.append(whole?ref.book+" "+chapter:ref.title).append(compare?"":" ("+version+")").append('\n');
             for(Map.Entry<Long,List<StudyStore.Row>> e:passages.entrySet()){
                 List<StudyStore.Row> rows=e.getValue();
@@ -197,12 +204,12 @@ final class BibleLinks {
                     if(whole&&ref.explicit&&ref.contains(c,v))out.setSpan(new BackgroundColorSpan((colors.accent&0xffffff)|0x2e000000),start,out.length(),0);
                     out.append('\n');
                     copy.append(chapters&&!whole?c+":"+v:""+v).append(' ').append(value).append('\n');
-                    if(e.getKey()==picked){speak.append(value).append('\n');count++;}
+                    if(e.getKey()==picked){speak.append(value).append('\n');count++;if(!ref.explicit||ref.contains(c,v))mem.append(mem.length()>0?" ":"").append(value);}
                 }
                 if(rows.size()>500){int at=out.length();out.append(AppLanguage.text(a,"Mostrados 500 versículos. Consulte um intervalo menor.")).append('\n');out.setSpan(new ForegroundColorSpan(colors.muted),at,out.length(),0);}
             }
             while(out.length()>0&&out.charAt(out.length()-1)=='\n')out.delete(out.length()-1,out.length());
-            plain=copy.toString().trim();speakable=speak.toString();
+            plain=copy.toString().trim();speakable=speak.toString();memory=mem.toString();
             String detail=compare?AppLanguage.text(a,"Comparação de")+" "+passages.size()+" "+AppLanguage.text(a,"versões"):version+" · "+(whole?AppLanguage.text(a,"capítulo")+" "+chapter+" "+AppLanguage.text(a,"completo"):count+" "+AppLanguage.text(a,count==1?"versículo":"versículos"));
             if(dialog==null)build();
             meta.setText(detail);body.setText(out);
@@ -229,6 +236,7 @@ final class BibleLinks {
             voiceLabel=chip(actions,"speaker","Ouvir",false,this::listen);
             compareChip=chip(actions,"collection","Comparar versões",false,()->{compare=!compare;load();});
             chip(actions,"bookmark","Guardar",false,()->{save(a,ref,version,plain);PlusUi.toast(a,"Passagem guardada. Veja em Consultar passagem → Guardadas.");});
+            chip(actions,"cards","Decorar",false,this::memorise);
             chip(actions,null,"A−",false,()->size(-1));
             chip(actions,null,"A+",false,()->size(1));
             meta=new TextView(a);meta.setTextSize(13);meta.setTextColor(colors.muted);
@@ -259,8 +267,19 @@ final class BibleLinks {
         void fillNavigation(){
             navigation.removeAllViews();
             if(!whole)return;
+            chip(navigation,"check","Marcar como lido",false,this::markRead);
             if(chapter>1)chip(navigation,"back","Capítulo "+(chapter-1),false,()->{chapter--;load();});
             if(chapter<lastChapter)chip(navigation,"arrow","Capítulo "+(chapter+1),false,()->{chapter++;load();});
+        }
+        void markRead(){
+            final int read=chapter;
+            PlusUi.run(a,()->{boolean added;try(BibleStudyStore st=new BibleStudyStore(a)){added=st.read(ref.book,read,System.currentTimeMillis());}PlusUi.post(a,()->{PlusUi.toast(a,added?ref.book+" "+read+" "+AppLanguage.text(a,"marcado como lido hoje."):AppLanguage.text(a,"Este capítulo já estava marcado hoje."));if(onRead!=null)onRead.run();});});
+        }
+        void memorise(){
+            final String text=memory.trim();
+            if(text.isEmpty()){PlusUi.toast(a,"Esta passagem não consta da Bíblia escolhida.");return;}
+            if(text.length()>1500){PlusUi.toast(a,"Para decorar, escolha uma passagem mais curta.");return;}
+            PlusUi.run(a,()->{boolean added;try(BibleStudyStore st=new BibleStudyStore(a)){added=st.addCard(ref,text,version,System.currentTimeMillis());}PlusUi.post(a,()->PlusUi.toast(a,added?"Adicionada aos cartões para decorar (Estudo bíblico).":"Esta passagem já está nos cartões para decorar."));});
         }
         void copy(){((android.content.ClipboardManager)a.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText(ref.title,plain));PlusUi.toast(a,"Passagem copiada.");}
         void size(int step){float next=Math.max(13,Math.min(28,body.getTextSize()/a.getResources().getDisplayMetrics().scaledDensity+step*1.5f));body.setTextSize(next);a.getSharedPreferences(PREFS,0).edit().putFloat("bible_quick_size",next).apply();dialog.refit();}
