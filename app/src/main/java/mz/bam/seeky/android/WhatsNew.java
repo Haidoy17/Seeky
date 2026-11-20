@@ -23,22 +23,30 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.22", "Toque numa novidade para a experimentar", "star");
-        panel.action("palette", "Nove temas com design próprio", "Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo, Carvão e Ciano — cada um com cabeçalho, letra, ícones e capas", false, () -> ThemeSettings.show(a));
-        panel.action("refresh", "Actualizações automáticas", "O Seeky procura novas versões e instala com um toque", false, () -> AppUpdates.settings(a));
+        UiPanel panel = new UiPanel(a, "Novidades da 5.23", "Toque numa novidade para a experimentar", "star");
+        panel.action("refresh", "Actualizações sem erro de assinatura", "A actualização dentro da aplicação já reconhece a assinatura do Seeky em todos os Android", false, () -> AppUpdates.settings(a));
+        panel.section("Ficheiros e PDF");
+        panel.action("wifi", "Transferir por Wi-Fi", "Enviar e receber ficheiros do computador pelo navegador, sem cabo", false, () -> WifiTransfer.show(a));
+        panel.action("pdf", "Ferramentas de PDF", "Juntar, extrair, rodar, comprimir e fotos para PDF", false, () -> PdfTools.show(a));
+        panel.action("scan", "Digitalizar documento", "Câmara com recorte automático e filtro de documento", false, () -> ScanActivity.open(a));
+        panel.action("storage", "Mapa do armazenamento", "Pastas que ocupam mais espaço e ficheiros grandes antigos", false, () -> StorageMap.show(a));
+        panel.action("lock", "Pasta privada", "Esconda ficheiros com a impressão digital ou o PIN", false, () -> PrivateFolder.show(a));
+        panel.section("Leitura");
+        panel.action("chart", "Estatísticas e metas de leitura", "Tempo por dia, dias seguidos, meta e lembrete", false, () -> ReadingStats.show(a));
+        panel.action("translate", "Dicionário e tradução", "Seleccione uma palavra no leitor; guarde-a no Vocabulário", false, () -> WordLookup.vocabulary(a));
+        panel.action("globe", "Bibliotecas gratuitas", "Project Gutenberg e catálogos OPDS, directo para a biblioteca", false, () -> OpenLibraries.show(a));
+        panel.note("No leitor: Exportar anotações agora também cria PDF e cartões de revisão a partir dos destaques e notas.");
+        panel.section("Estudos");
+        panel.action("calendar", "Provas e trabalhos", "Contagem decrescente e lembretes", false, () -> StudyAgenda.show(a));
+        panel.action("clock", "Pomodoro", "Foco e pausas com o tempo de cada disciplina", false, () -> Pomodoro.show(a));
+        panel.section("Ecrã inicial");
+        panel.action("widget", "Widget Hoje", "Meta de leitura, Continuar, Ouvir e cartões para rever", false, () -> TodayWidget.pin(a));
+        panel.note("Mantenha premido o ícone do Seeky para Pesquisar, Continuar leitura, Limpeza ou Wi-Fi. Novo tema Horário: Areia de dia, Floresta à noite.");
+        panel.section("Também no Seeky");
         panel.action("trash", "Limpeza e APKs duplicados", "Cache, miniaturas, APKs repetidos ou já instalados", false, () -> StorageCleaner.show(a));
-        panel.action("widget", "Widget no ecrã inicial", "Pesquisa e categorias sem abrir o Seeky", false, a::widgetChoice);
         panel.action("lock", "Bloqueio da aplicação", "Impressão digital, rosto ou PIN do telefone", false, () -> AppLock.show(a));
         panel.action("restore", "Cópia automática", "Estudos e notas guardados todos os dias ou semanas", false, () -> AutoBackup.show(a));
-        panel.action("palette", "Tema Sistema", "Acompanha o modo claro/escuro do Android", false, () -> ThemeSettings.show(a));
-        panel.action("flash", "Botão Flash renovado", "Toque longo para ajustes, lançar para a margem, atalho nas Definições Rápidas", false, a::iconSettings);
-        panel.action("speaker", "Vozes naturais do Google", "Online ou offline, agora em 15 idiomas", false, () -> NaturalVoicesActivity.open(a));
-        panel.section("Leitores");
-        panel.note("Música: capa do álbum, artista, controlos com ícones, velocidade, repetir e temporizador. Imagens: fundo escuro, alta resolução, informação da foto e partilhar. Ícones das funcionalidades renovados.");
-        panel.section("Voz");
-        panel.note("Leitura mais natural: \"Dr.\" lê-se \"Doutor\", \"Capítulo IV\" lê-se \"Capítulo 4\" e os endereços web pelo nome do site. A voz escolhe a variante do seu país (pt-PT em Moçambique). Novo controlo de Tom em Ler em voz alta.");
-        panel.section("Segurança");
-        panel.note("Ficheiros partilhados por outras aplicações já não podem pedir ao Seeky que leia a sua área privada.");
+        panel.action("palette", "Temas com design próprio", "Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo, Carvão, Ciano e Horário", false, () -> ThemeSettings.show(a));
         panel.show();
     }
 }

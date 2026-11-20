@@ -2,15 +2,15 @@ package mz.bam.seeky.android;
 import android.content.Context;
 final class AppPalette {
  /** "Sistema" segue o modo claro/escuro do Android (Claro ou Escuro). */
- static final String SYSTEM="Sistema";
+ static final String SYSTEM="Sistema";static final String SCHEDULE="Horário";
  /** Temas modernos: cada um com cores, cabeçalho, tipografia, ícones e capas próprios. */
  static final String SAND="Areia",FOREST="Floresta",CHARCOAL="Carvão",AURORA="Aurora",GOLD="Ouro",NEON="Néon",GLASS="Vidro",ICE="Gelo",CYAN="Ciano",DEFAULT=SAND;
  static final String[] MODERN={SAND,FOREST,AURORA,GOLD,NEON,GLASS,ICE,CHARCOAL,CYAN};
  /** Descrição curta de cada tema moderno, mostrada no selector de cores. */
- static String describe(String name){switch(name){case SAND:return "creme e oliva, editorial";case FOREST:return "verde floresta, escuro";case AURORA:return "bordô e cinza, papel";case GOLD:return "grafite e mostarda";case NEON:return "preto com néon laranja";case GLASS:return "vidro escuro e violeta";case ICE:return "cinza claro minimalista";case CHARCOAL:return "grafite e coral";case CYAN:return "ardósia e ciano";case SYSTEM:return "Areia ou Floresta, conforme o Android";default:return "";}}
+ static String describe(String name){switch(name){case SAND:return "creme e oliva, editorial";case FOREST:return "verde floresta, escuro";case AURORA:return "bordô e cinza, papel";case GOLD:return "grafite e mostarda";case NEON:return "preto com néon laranja";case GLASS:return "vidro escuro e violeta";case ICE:return "cinza claro minimalista";case CHARCOAL:return "grafite e coral";case CYAN:return "ardósia e ciano";case SYSTEM:return "Areia ou Floresta, conforme o Android";case SCHEDULE:return "Areia de dia (7h–19h), Floresta à noite";default:return "";}}
  /** Estilo de ícone: 0 quadrado tingido, 1 contorno, 2 sem caixa, 3 círculo. */
  static final int TILE_TINT=0,TILE_OUTLINE=1,TILE_NONE=2,TILE_CIRCLE=3;
- static final String[] NAMES={SYSTEM,SAND,FOREST,AURORA,GOLD,NEON,GLASS,ICE,CHARCOAL,CYAN,"Claro","Escuro","Jade","Oceano","Coral","Âmbar","Rosa","Grafite","Azul royal","Turquesa","Esmeralda","Laranja","Vinho","Lavanda","Céu","Noite"};
+ static final String[] NAMES={SYSTEM,SCHEDULE,SAND,FOREST,AURORA,GOLD,NEON,GLASS,ICE,CHARCOAL,CYAN,"Claro","Escuro","Jade","Oceano","Coral","Âmbar","Rosa","Grafite","Azul royal","Turquesa","Esmeralda","Laranja","Vinho","Lavanda","Céu","Noite"};
  final int bg,surface,ink,muted,accent,line,tint,heroStart,heroEnd,onAccent;final boolean light,modern;
  /** Identidade do tema moderno ("areia", "aurora", "neon"…; "classic" nos restantes), segunda cor dos cartões empilhados, raio dos cartões e estilo dos ícones. */
  final String style;final int secondary,radius,tile;
@@ -37,7 +37,9 @@ final class AppPalette {
  /** Cor do logótipo e do texto do cabeçalho: tinta do tema sem barra, branco sobre barra colorida. */
  int headerInk(){return bare?ink:0xffffffff;}
  int headerMuted(){return bare?muted:0xddffffff;}
+ /** Tema Horário: Areia das 7h às 19h, Floresta no resto do dia. */
+ static boolean daytime(long now){java.util.Calendar cal=java.util.Calendar.getInstance();cal.setTimeInMillis(now);int h=cal.get(java.util.Calendar.HOUR_OF_DAY);return h>=7&&h<19;}
  static boolean night(Context c){return (c.getResources().getConfiguration().uiMode&android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES;}
  static AppPalette of(Context c){android.content.SharedPreferences p=c.getSharedPreferences("seeky",0);String name=p.getString("theme",DEFAULT);
-if(SYSTEM.equals(name))name=night(c)?FOREST:SAND;return name.equals("Personalizado")?new AppPalette(p.getInt("theme_custom_accent",0xff7c13d9),p.getInt("theme_custom_background",0xfffaf8ff)):new AppPalette(name);}
+if(SYSTEM.equals(name))name=night(c)?FOREST:SAND;else if(SCHEDULE.equals(name))name=daytime(System.currentTimeMillis())?SAND:FOREST;return name.equals("Personalizado")?new AppPalette(p.getInt("theme_custom_accent",0xff7c13d9),p.getInt("theme_custom_background",0xfffaf8ff)):new AppPalette(name);}
 }

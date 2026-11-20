@@ -1,5 +1,42 @@
 # Registo de alterações
 
+## 5.23.0 — 2026-11-20
+
+- **Actualização sem erro de assinatura** (`AppUpdates.verifyPackage`): no Android 9–12 o
+  certificado de um APK descarregado só é devolvido quando se pede também `GET_SIGNATURES`;
+  pedir apenas `GET_SIGNING_CERTIFICATES` dava uma lista vazia e a actualização era recusada
+  como "não assinada". O certificado é agora lido por três vias (SigningInfo, Signature[] e
+  assinatura v1 do JAR); se nenhuma funcionar, decide o instalador do Android, que recusa
+  sempre outra chave. O APK é assinado com v1 + v2 + v3 (`tools/sign_release.sh` repete a assinatura com o apksigner). A mensagem de chave
+  diferente mostra as impressões digitais. **Quem tem a 5.22 instala esta versão uma vez à mão;
+  a partir daí, as actualizações dentro da aplicação funcionam.**
+- **Transferir por Wi-Fi** (`WifiTransfer`): servidor local na porta 8080 com código de 6
+  dígitos, sessão HttpOnly/SameSite=Strict, bloqueio após 5 códigos errados e desligar após 20,
+  envios com cabeçalho próprio, caminhos confinados à pasta partilhada, desliga-se ao fechar ou
+  após 15 min sem uso.
+- **Ferramentas de PDF** (`PdfTools`): juntar, extrair páginas, rodar, comprimir imagens e fotos
+  para PDF (A4, rotação EXIF); também no menu de cada PDF.
+- **Digitalizar documento** (`ScanActivity`, `ScanProvider`): câmara ou galeria, detecção
+  automática da folha (Otsu + maior região clara), cantos ajustáveis, correcção de perspectiva,
+  filtros Documento/Cores/Original e várias páginas num PDF.
+- **Mapa do armazenamento** (`StorageMap`): pastas por tamanho com barras e navegação, e
+  ficheiros com mais de 50 MB sem alterações há 6 meses (para a lixeira com confirmação).
+- **Pasta privada** (`PrivateFolder`, `Auth`): ficheiros na área interna do Seeky, abertos só
+  com impressão digital, rosto, PIN ou padrão; restaurar, abrir ou apagar.
+- **Estatísticas e metas de leitura** (`ReadingStats`): tempo por dia, dias seguidos, semana,
+  mês, livros com mais tempo, meta diária e lembrete.
+- **Dicionário e tradução** (`WordLookup`) na selecção do leitor (texto e PDF), com Vocabulário
+  e cartões de revisão.
+- **Anotações**: exportar para PDF e criar cartões de revisão a partir de destaques e notas
+  (`AnnotationTools`).
+- **Bibliotecas gratuitas** (`OpenLibraries`): Project Gutenberg e catálogos OPDS (incluindo
+  Calibre na rede local); os livros entram directamente na biblioteca.
+- **Provas e trabalhos** (`StudyAgenda`) com contagem decrescente e lembretes; **Pomodoro**
+  (`Pomodoro`) sobre o temporizador de estudo, com o tempo por disciplina.
+- **Tema Horário** (Areia de dia, Floresta à noite), **widget Hoje** (`TodayWidget`) e
+  **atalhos do ícone** (`AppShortcuts`). Audiolivro: já existia em Ler em voz alta → Livro inteiro.
+- `Features5230Test` (18 testes).
+
 ## 5.22.1 — 2026-11-20
 
 - **Títulos em negrito** em todos os temas (pedido do autor): Areia e Floresta em serifa negrito;

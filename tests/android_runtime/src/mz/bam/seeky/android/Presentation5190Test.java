@@ -28,7 +28,7 @@ public class Presentation5190Test {
     @Test public void morePageOffersTheNewFeatures() throws Exception {
         a.tab = "Ferramentas"; a.render(); f.drain();
         String labels = BooksToolsTest.labels(a.shell);
-        assertTrue(labels.contains("Novidades da 5.22"));
+        assertTrue(labels.contains("Novidades da 5.23"));
         assertTrue(labels.contains("Bloqueio da aplicação"));
         assertTrue(labels.contains("Cópia automática"));
     }
@@ -37,7 +37,7 @@ public class Presentation5190Test {
         WhatsNew.show(a);
         UiPanel p = latest();
         String labels = BooksToolsTest.labels(p.root);
-        for (String item : new String[]{"Bloqueio da aplicação", "Cópia automática", "Tema Sistema", "Botão Flash renovado"}) assertTrue(item, labels.contains(item));
+        for (String item : new String[]{"Transferir por Wi-Fi", "Pomodoro", "Bloqueio da aplicação", "Cópia automática"}) assertTrue(item, labels.contains(item));
         f.capture(p.root, "novidades-5190", 340, 760);
     }
 

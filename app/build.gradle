@@ -10,8 +10,8 @@ android {
         applicationId 'mz.bam.seeky.v51'
         minSdk 26
         targetSdk 36
-        versionCode 5004601
-        versionName '5.22.1'
+        versionCode 5005000
+        versionName '5.23.0'
         manifestPlaceholders = [appLabel: 'Seeky']
     }
 
@@ -24,6 +24,8 @@ android {
                 keyAlias System.getenv('SEEKY_SIGN_ALIAS')
                 keyPassword System.getenv('SEEKY_SIGN_PASSWORD')
                 // v3 permite rodar a chave no futuro sem obrigar a desinstalar.
+                // v1 também: alguns Android só lêem o certificado de um APK descarregado pela assinatura JAR.
+                enableV1Signing true
                 enableV2Signing true
                 enableV3Signing true
             }

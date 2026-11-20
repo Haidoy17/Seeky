@@ -75,6 +75,10 @@ final class Icons extends View {
             case "image":canvas.drawRoundRect(3,4,21,20,3,3,p);canvas.drawCircle(8,9,1.6f,p);line(canvas,4,18,10,12,14,16,17,13,21,17);break;
             case "video":canvas.drawRoundRect(3,5,21,19,3,3,p);line(canvas,10,9,16,12,10,15,10,9);break;
             case "audio":line(canvas,9,17,9,5,19,3,19,15);canvas.drawOval(3,16,9,21,p);canvas.drawOval(13,14,19,19,p);break;
+            case "wifi":canvas.drawArc(2,5,22,25,225,90,false,p);canvas.drawArc(6,9,18,21,225,90,false,p);canvas.drawArc(10,13,14,17,225,90,false,p);canvas.drawCircle(12,19,0.6f,p);break;
+            case "chart":line(canvas,4,4,4,20,20,20);line(canvas,8,16,8,12);line(canvas,12,16,12,8);line(canvas,16,16,16,10);break;
+            case "camera":canvas.drawRoundRect(3,7,21,19,3,3,p);line(canvas,8,7,9.5f,4.5f,14.5f,4.5f,16,7);canvas.drawCircle(12,13,3.5f,p);break;
+            case "translate":line(canvas,3,6,13,6);line(canvas,8,4,8,6);line(canvas,5,6,7.5f,12,11,14);line(canvas,11,6,9,11,5,14);line(canvas,13,20,16.5f,11,20,20);line(canvas,14.2f,17,18.8f,17);break;
             case "clock":canvas.drawCircle(12,12,9,p);line(canvas,12,6,12,12,16,14);break;
             case "float":canvas.drawRoundRect(3,3,21,21,4,4,p);canvas.drawRoundRect(11,11,22,21,3,3,p);line(canvas,7,8,15,8);break;
             case "copy":canvas.drawRoundRect(8,8,21,21,3,3,p);line(canvas,16,4,16,3,3,3,3,16,4,16);break;

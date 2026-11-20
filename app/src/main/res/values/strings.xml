@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
  <string name="seeky_widget_description">Pesquisar no Seeky e abrir PDF, imagens, vídeos, áudio ou a limpeza</string>
+ <string name="today_widget_description">Meta de leitura, livro actual, Ouvir e cartões para rever hoje</string>
 </resources>

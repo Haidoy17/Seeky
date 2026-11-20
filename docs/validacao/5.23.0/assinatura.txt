@@ -1,0 +1,8 @@
+Verified using v1 scheme (JAR signing): true
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Signer #1 certificate DN: CN=Haidoy Carlos Mautempo, O=Seeky, C=MZ
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+zipalign 16 KB: OK
+be335ac8905b24fd98259d41ed09c5f233fc58d50e1a13df1eb448f679aca20d  entrega/Seeky_5.23.0.apk
+AppUpdates.jarSigners (v1): 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
