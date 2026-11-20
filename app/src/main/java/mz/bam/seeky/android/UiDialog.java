@@ -55,6 +55,7 @@ final class UiDialog extends AlertDialog {
  class ChoiceRows extends BaseAdapter {public int getCount(){return spec.items.length;}public Object getItem(int p){return spec.items[p];}public long getItemId(int p){return p;}public View getView(int position,View recycled,ViewGroup parent){ChoiceRow row=recycled instanceof ChoiceRow?(ChoiceRow)recycled:new ChoiceRow();row.bind(position);return row;}}
  /** Ícone de cada item de menu, pelo significado do texto (português e inglês). */
  static final String[][] SYMBOLS={
+  {"marcar selec","edit"},{"marcação","edit"},{"destaque","edit"},{"sublinhado","edit"},{"riscado","edit"},{"plano de leitura","calendar"},{"decorar","cards"},{"partida","star"},{"como jogar","info"},{"passagens","book"},
   {"cores","palette"},{"colors","palette"},{"tema","palette"},{"idioma","globe"},{"language","globe"},{"english","globe"},{"português","globe"},
   {"bloqueio","lock"},{"lock","lock"},{"cópia autom","restore"},{"backup","restore"},{"recupera","restore"},
   {"acesso geral","storage"},{"armazen","storage"},{"flutuante","float"},{"bolha","float"},{"ícones e botão","flash"},{"motor de pesquisa","flash"},

@@ -1,5 +1,43 @@
 # Registo de alterações
 
+## 5.29.0 — 2026-11-20
+
+- **Marcações com cores** no texto e nas páginas PDF:
+  - seleccionar → Destacar (amarelo) ou **Cores e mais marcas**: 6 cores, sublinhar, riscar e
+    nota;
+  - no PDF as marcas ficam desenhadas na página (efeito de marcador nas páginas claras) e um
+    toque na marca mostra-a por completo;
+  - o caderno de leitura passa a aceitar as cores novas e o riscado (antes rejeitava-os como
+    "Anotação inválida").
+- **As minhas marcações** (Mais, página inicial e menu do leitor → Marcações deste livro):
+  - todas as marcações de todos os livros, com pesquisa e filtros (destaques, sublinhados,
+    riscados, notas e cada cor);
+  - toque para ver por completo (copiar, partilhar, mudar cor, eliminar);
+  - toque longo ou "Abrir no livro" abre o livro na página e no sítio exactos (as palavras
+    ficam seleccionadas no texto);
+  - partilhar todas as marcações agrupadas por livro.
+- **Estudo bíblico** (novo menu):
+  - sequência de dias, leitura de hoje com marcar como lido (também para quem lê na sua Bíblia
+    em PDF ou papel) e "Ler" dentro do Seeky;
+  - controlo semanal (capítulos por dia, cartões e jogos) com meta da semana;
+  - planos: Bíblia em 1 ano, Novo Testamento em 3 meses, Evangelhos em 30 dias, Salmos e
+    Provérbios em 2 meses, um capítulo por dia;
+  - passagens guardadas: ler, decorar ou remover.
+- **Decorar** com cartões de repetição espaçada:
+  - na leitura rápida, "Decorar" cria o cartão com livro, capítulo, versículo e texto;
+  - modos: escrever ou dizer o versículo (com pista das iniciais e as palavras em falta a
+    vermelho), dizer o livro, ou misto;
+  - Errei / Difícil / Bom / Fácil marcam a próxima revisão; aos 21 dias fica decorado.
+- **Jogo da Bíblia** (novo menu fora dos livros):
+  - 10 perguntas, 3 níveis (30, 25 e 20 s), pontos com bónus de tempo e de sequência;
+  - passagem → livro, referência → passagem, livro e capítulo, resposta escrita ou falada,
+    histórias, ordem dos livros, grupos, autores, capítulos e factos;
+  - ajuda 50/50, responder por voz (nome do livro ou letra);
+  - resultado com estrelas e revisão das respostas; guardar o nome no Recorde (10 melhores por
+    nível);
+  - sem Bíblia importada, joga com histórias, livros e factos.
+- A leitura rápida ganhou "Decorar" e, no capítulo inteiro, "Marcar como lido".
+
 ## 5.28.0 — 2026-11-20
 
 - **Passagens bíblicas reconhecidas como se escrevem em português** (`BibleReferences` reescrito):

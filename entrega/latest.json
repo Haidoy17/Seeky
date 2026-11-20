@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005500,
-  "versionName": "5.28.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.28.0.apk",
-  "sha256": "cab407d60309c1f0bd6b78f4261c85abda623aaeaed3fcdabe7c44e2666e7526",
-  "bytes": 13440631,
-  "notes": "Passagens bíblicas ao toque em PDF (também depois do OCR), Word, EPUB e texto — Isaías 3.1-7, 12, Jo 3,16, Salmo 23 — com leitura rápida: versões, copiar, partilhar, ouvir, capítulo inteiro, comparar e guardar."
+  "versionCode": 5005600,
+  "versionName": "5.29.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.29.0.apk",
+  "sha256": "ce9f51fcd9d53f7d6e18c4a18eb1582786bd2eb5bf372a1b4e24a02028beeb9a",
+  "bytes": 13506543,
+  "notes": "Marcações com cores no texto e no PDF e lista As minhas marcações (abre no sítio exacto); Estudo bíblico com leitura diária e semanal, planos e cartões para decorar; Jogo da Bíblia com 3 níveis, 10 perguntas, voz e Recorde."
 }

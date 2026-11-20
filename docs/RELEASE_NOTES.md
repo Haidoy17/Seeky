@@ -1,3 +1,18 @@
+## Seeky 5.29.0
+
+Instale **Seeky_5.29.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Marcações com cores** no texto e no PDF: 6 cores, sublinhar, riscar e nota.
+- **As minhas marcações**: todas num só lugar, com pesquisa; abrem o livro na página e no
+  sítio exactos, e podem ver-se por completo.
+- **Estudo bíblico**: leitura de hoje, controlo semanal, planos de leitura e passagens
+  guardadas.
+- **Decorar**: cartões automáticos (livro, capítulo, versículo); escreva ou diga o versículo, ou
+  diga o livro.
+- **Jogo da Bíblia**: 10 perguntas, 3 níveis, respostas por voz, ajuda 50/50 e Recorde com o seu
+  nome.
+
 ## Seeky 5.28.0
 
 Instale **Seeky_5.28.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
