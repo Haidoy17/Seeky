@@ -11,7 +11,15 @@ final class OriginalDocument {
  MarkBar markBar;boolean scrolledToMark;
  interface Picked{void take(int start,int end,String text);}
  int part(){return a.kind.equals("epub")?a.chapter:0;}
- void showMarkBar(android.view.ActionMode mode){hideMarkBar();markBar=MarkBar.show(a,kind->markSelection(kind,mode));}
+ void showMarkBar(android.view.ActionMode mode){hideMarkBar();markBar=MarkBar.show(a,new MarkBar.Host(){public void mark(String kind){markSelection(kind,mode);}public void action(String what){webAction(what,mode);}public android.graphics.Rect anchor(){return view instanceof OriginalWebView?((OriginalWebView)view).contentRect:null;}});}
+ void placeMarkBar(){if(markBar!=null)markBar.place();}
+ void webAction(String what,android.view.ActionMode mode){
+  if(what.equals("more")){if(view instanceof OriginalWebView)((OriginalWebView)view).showMenu(mode);return;}
+  if(what.equals("note")){markSelection("note",mode);return;}
+  selection(mode,(s,e,t)->{String text=Highlights.clean(t);
+   if(what.equals("copy")){((android.content.ClipboardManager)a.getSystemService(android.content.Context.CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(a.name,text));PlusUi.toast(a,"Texto copiado.");}
+   else if(what.equals("dictionary"))WordLookup.show(a,text);else if(what.equals("share"))ShareTools.text(a,text);});
+ }
  void hideMarkBar(){if(markBar!=null){markBar.dismiss();markBar=null;}}
  /** Reads the selected words' offsets, then closes the selection menu. */
  void selection(android.view.ActionMode mode,Picked picked){

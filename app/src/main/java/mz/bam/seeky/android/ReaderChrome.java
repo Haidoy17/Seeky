@@ -17,7 +17,9 @@ import java.util.*;
 final class ReaderChrome implements SpeechEvents.Listener {
     final ReaderActivity a;
     final SharedPreferences prefs;
-    LinearLayout top, bottom, navigation, speechBar, dock, toolStrip, grid, floating;
+    LinearLayout top, bottom, navigation, speechBar, dock, toolStrip, grid, floating, footer;
+    TextView footLeft, footTitle, footPage;
+    final Runnable footerTick=new Runnable(){public void run(){refreshFooter();if(footer!=null&&footer.getVisibility()==View.VISIBLE&&!a.dead)a.main.postDelayed(this,30000);}};
     /** Title bar colour and the ink drawn on it (0 until the bar is styled). */
     int barColor, barInk;
     boolean compact;
@@ -116,6 +118,26 @@ final class ReaderChrome implements SpeechEvents.Listener {
         View scroll=pageButton("motion","Rolagem vertical ou página a página",this::toggleScroll);LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(a.dp(54),a.dp(54));sp.leftMargin=a.dp(14);floating.addView(scroll,sp);
         FrameLayout.LayoutParams fp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.END);fp.setMargins(0,0,a.dp(16),a.dp(16));stage.addView(floating,fp);
         floatingVisibility();
+        footer=row();footer.setPadding(a.dp(14),0,a.dp(14),0);
+        footLeft=a.text("",12);footTitle=a.text("",12);footTitle.setGravity(Gravity.CENTER);footTitle.setMaxLines(1);footTitle.setEllipsize(TextUtils.TruncateAt.END);footTitle.setPadding(a.dp(10),0,a.dp(10),0);
+        footPage=a.text("",13);footPage.setTypeface(null,Typeface.BOLD);
+        footer.addView(footLeft);footer.addView(footTitle,new LinearLayout.LayoutParams(0,-2,1));footer.addView(footPage);
+        for(TextView t:new TextView[]{footLeft,footTitle,footPage}){t.setIncludeFontPadding(false);t.setPadding(t==footTitle?a.dp(10):0,0,t==footTitle?a.dp(10):0,0);t.setGravity(Gravity.CENTER_VERTICAL|(t==footTitle?Gravity.CENTER_HORIZONTAL:0));}
+        stage.addView(footer,new FrameLayout.LayoutParams(-1,a.dp(32),Gravity.BOTTOM));footer.setVisibility(View.GONE);
+    }
+    /** Reading footer in full screen: battery, time, title and page, like a printed running foot. */
+    void refreshFooter(){
+        if(footer==null)return;
+        boolean document=a.kind.equals("pdf")||a.kind.equals("epub")||a.kind.equals("docx")||a.kind.equals("text");
+        boolean show=hidden&&document&&prefs.getBoolean("reader_footer",true);footer.setVisibility(show?View.VISIBLE:View.GONE);if(!show)return;
+        int desk=desk(a.readerTheme);boolean light=AppPalette.luminance(desk)>0.5;int ink=light?0xff4a4f57:0xffc4c8cf;
+        footer.setBackgroundColor((desk&0xffffff)|0xe6000000);footLeft.setTextColor(ink);footTitle.setTextColor(ink);footPage.setTextColor(ink);
+        int level=-1;try{android.os.BatteryManager battery=(android.os.BatteryManager)a.getSystemService(Context.BATTERY_SERVICE);if(battery!=null)level=battery.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY);}catch(RuntimeException ignored){}
+        String time=android.text.format.DateFormat.getTimeFormat(a).format(new Date());
+        footLeft.setText((level>0&&level<=100?level+"%  ":"")+time);
+        footTitle.setText(title.getText());
+        int total=Math.max(1,count()),part=Math.max(0,Math.min(total-1,current()));
+        footPage.setText(a.kind.equals("pdf")?(part+1)+"/"+total:pageLabel.getText());
     }
     View pageButton(String symbol,String label,Runnable action){
         FrameLayout b=new FrameLayout(a);GradientDrawable bg=new GradientDrawable();bg.setShape(GradientDrawable.OVAL);
@@ -184,7 +206,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         if(a.original!=null&&a.original.active){int unit=ReadingProgress.units(part,total,a.original.scroll(),a.original.height(),a.original.viewport());pageLabel.setText((total==1?tr("Documento"):tr("Capítulo")+" "+(part+1)+" / "+total)+" · "+(int)Math.min(100,100L*unit/Math.max(1L,(long)total*1000))+"%");}
         else if(total>1&&a.bookScroll!=null&&a.bookText!=null&&!a.kind.equals("pdf")){int unit=ReadingProgress.units(part,total,a.bookScroll.getScrollY(),a.bookText.getHeight(),a.bookScroll.getHeight());int progress=(int)Math.min(100,100L*unit/Math.max(1L,(long)total*1000));pageLabel.setText(tr("Capítulo")+" "+(part+1)+" / "+total+" · "+progress+"%");}
         if(total==1&&!a.kind.equals("pdf")&&(a.original==null||!a.original.active)){int percent=0;if(a.bookScroll!=null&&a.bookText!=null){int range=a.bookText.getHeight()-a.bookScroll.getHeight();percent=range<=0?100:Math.min(100,Math.max(0,a.bookScroll.getScrollY()*100/range));}pageLabel.setText(tr("Leitura de texto")+" · "+percent+"%");}
-        layoutTools();changed();if(a.extras!=null)a.extras.updateFocus();
+        layoutTools();refreshFooter();changed();if(a.extras!=null)a.extras.updateFocus();
     }
     void contents(){if(a.book!=null)a.chapters();else if(a.kind.equals("pdf"))a.tools.contents();else if(a.tools!=null)a.tools.bookmarks();}
     void applyText(){
@@ -198,7 +220,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         if(a.bookScroll!=null){a.bookScroll.setFillViewport(true);a.bookScroll.setClipToPadding(false);a.bookScroll.setPadding(a.dp(12),a.dp(12),a.dp(12),a.dp(12));}
     }
     void applyAppearance(){prefs.edit().putInt("reader_paper",a.readerTheme).apply();if(a.body!=null&&barColor!=0)a.body.setBackgroundColor(desk(a.readerTheme));if(floating!=null){boolean light=AppPalette.luminance(ReaderAppearance.paper(a.readerTheme))>0.5;for(int i=0;i<floating.getChildCount();i++){View b=floating.getChildAt(i);if(b.getBackground() instanceof GradientDrawable)((GradientDrawable)b.getBackground()).setColor(light?0xd9b9bcc2:0xd93a3d44);if(b instanceof FrameLayout&&((FrameLayout)b).getChildAt(0) instanceof Icons){Icons icon=(Icons)((FrameLayout)b).getChildAt(0);icon.setSymbol(icon.name,light?0xff3c3f45:0xffe8eaee);}}}applyText();if(a.pageList!=null)for(int n=0;n<a.pageList.getChildCount();n++){View page=a.pageList.getChildAt(n);if(page instanceof ReaderPageView)((ReaderPageView)page).appearance();}}
-    void toggleChrome(){hidden=!hidden;top.setVisibility(hidden?View.GONE:View.VISIBLE);bottom.setVisibility(hidden?View.GONE:View.VISIBLE);floatingVisibility();a.applyReaderWindow();if(a.pageAdapter!=null)a.pageList.post(()->{if(!a.dead)a.pageAdapter.notifyDataSetChanged();});}
+    void toggleChrome(){hidden=!hidden;top.setVisibility(hidden?View.GONE:View.VISIBLE);bottom.setVisibility(hidden?View.GONE:View.VISIBLE);floatingVisibility();a.main.removeCallbacks(footerTick);if(hidden)footerTick.run();else refreshFooter();a.applyReaderWindow();if(a.pageAdapter!=null)a.pageList.post(()->{if(!a.dead)a.pageAdapter.notifyDataSetChanged();});}
     void rotate(){int orientation=a.getResources().getConfiguration().orientation;a.setRequestedOrientation(orientation==android.content.res.Configuration.ORIENTATION_PORTRAIT?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);}
     void addNote(){
         UiPanel panel=new UiPanel(a,"Adicionar nota",null,"note");

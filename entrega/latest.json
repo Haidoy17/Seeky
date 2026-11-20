@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006000,
-  "versionName": "5.33.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.33.0.apk",
-  "sha256": "90a687c62ce36d8e9db6452a33320576d851376a42e6deb9cfbef91186ac36f6",
-  "bytes": 13523733,
-  "notes": "Leitor renovado: barra de título colorida, régua de páginas numa linha, todas as ferramentas numa grelha e, no PDF, botões sobre a página para ajustar e mudar a rolagem."
+  "versionCode": 5006100,
+  "versionName": "5.34.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.34.0.apk",
+  "sha256": "ff71114c7ce498d2121318296a40e0eafbbf3f9e0d302961025879e8713f2639",
+  "bytes": 13527415,
+  "notes": "Painel de selecção junto ao texto: Destacar, Sublinhar, Riscar e Ondulado em 6 cores, mais Nota, Copiar, Dicionário, Partilhar e Mais; rodapé em ecrã cheio com bateria, hora, título e página."
 }

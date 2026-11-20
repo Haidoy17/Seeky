@@ -24,25 +24,38 @@ final class Highlights {
     static final int[] COLORS={0xffffe58a,0xffc5ecb0,0xffbfdcff,0xffffc7df,0xffffd3a6,0xffdccdff};
     static final String[] NAMES={"Amarelo","Verde","Azul","Rosa","Laranja","Lilás"};
 
-    static boolean filled(String kind){return kind.startsWith("highlight")||kind.equals("note");}
+    /** Colour keys of a kind ("underline-green"); plain "highlight" is yellow, plain "underline" blue, plain "strike" red. */
+    static final String[] KEYS={"yellow","green","blue","pink","orange","purple"};
+    /** Stronger shades for lines (underline, strike-through, wavy underline). */
+    static final int[] LINES={0xffd4a400,0xff2e9d57,0xff2f80ed,0xffe0558c,0xffef8a1e,0xff8e5cd9};
+    static String style(String kind){int dash=kind.indexOf('-');return dash<0?kind:kind.substring(0,dash);}
+    /** Index in KEYS/COLORS/NAMES, or -1 for the style's own default. */
+    static int colourIndex(String kind){int dash=kind.indexOf('-');if(dash<0)return style(kind).equals("highlight")?0:-1;return java.util.Arrays.asList(KEYS).indexOf(kind.substring(dash+1));}
+    static String kind(String style,int colour){if(style.equals("highlight")&&colour<=0)return "highlight";return style+"-"+KEYS[Math.max(0,Math.min(KEYS.length-1,colour))];}
+    static boolean valid(String kind){String st=style(kind);if(st.equals("note"))return kind.equals("note");if(!java.util.Arrays.asList("highlight","underline","strike","squiggle").contains(st))return false;return kind.indexOf('-')<0||colourIndex(kind)>=0;}
+    static boolean filled(String kind){String st=style(kind);return st.equals("highlight")||st.equals("note");}
     static int color(String kind){
-        for(int i=0;i<KINDS.length;i++)if(KINDS[i].equals(kind))return COLORS[i];
-        if("note".equals(kind))return 0xffcce7fa;if("underline".equals(kind))return 0xff3b82f6;if("strike".equals(kind))return 0xffd9534f;
-        return COLORS[0];
+        String st=style(kind);int i=colourIndex(kind);
+        if(st.equals("note"))return 0xffcce7fa;
+        if(st.equals("highlight"))return COLORS[Math.max(0,i)];
+        if(i>=0)return LINES[i];
+        return st.equals("underline")?0xff3b82f6:0xffd9534f;
     }
     static String label(String kind){
-        if(kind.equals("underline"))return "Sublinhado";if(kind.equals("strike"))return "Riscado";if(kind.equals("note"))return "Nota";
-        for(int i=0;i<KINDS.length;i++)if(KINDS[i].equals(kind))return i==0?"Destaque":"Destaque "+NAMES[i].toLowerCase(Locale.ROOT);
-        return "Destaque";
+        String st=style(kind);
+        if(st.equals("note"))return "Nota";
+        String base=st.equals("underline")?"Sublinhado":st.equals("strike")?"Riscado":st.equals("squiggle")?"Ondulado":"Destaque";
+        int i=colourIndex(kind);
+        return i<=0&&st.equals("highlight")||i<0?base:base+" "+NAMES[i].toLowerCase(Locale.ROOT);
     }
     /** Undo label in the notebook journal. */
-    static String verb(String kind){return kind.equals("underline")?"Sublinhar":kind.equals("strike")?"Riscar":kind.equals("note")?"Adicionar nota":"Destacar";}
+    static String verb(String kind){String st=style(kind);return st.equals("underline")||st.equals("squiggle")?"Sublinhar":st.equals("strike")?"Riscar":st.equals("note")?"Adicionar nota":"Destacar";}
     /** Spans of one mark in a text reader. */
     static void apply(Spannable text,int start,int end,String kind){
-        int f=Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
-        if(kind.equals("underline")){text.setSpan(new UnderlineSpan(),start,end,f);return;}
-        if(kind.equals("strike")){text.setSpan(new StrikethroughSpan(),start,end,f);text.setSpan(new ForegroundColorSpan(0xff8a8f99),start,end,f);return;}
-        text.setSpan(new BackgroundColorSpan(color(kind)),start,end,f);text.setSpan(new ForegroundColorSpan(0xff272237),start,end,f);
+        int f=Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;String st=style(kind);int c=color(kind);
+        if(st.equals("underline")||st.equals("squiggle")){text.setSpan(new UnderlineSpan(),start,end,f);if(kind.indexOf('-')>0)text.setSpan(new BackgroundColorSpan((c&0xffffff)|0x2e000000),start,end,f);return;}
+        if(st.equals("strike")){text.setSpan(new StrikethroughSpan(),start,end,f);text.setSpan(new ForegroundColorSpan(kind.indexOf('-')>0?c:0xff8a8f99),start,end,f);return;}
+        text.setSpan(new BackgroundColorSpan(c),start,end,f);text.setSpan(new ForegroundColorSpan(0xff272237),start,end,f);
     }
 
     static final class Store extends SQLiteOpenHelper {
@@ -241,7 +254,7 @@ final class Highlights {
         return 0xff000000|(r<<16)|(g<<8)|b;
     }
     /** "Destaque · amarelo", "Sublinhado"… with the colour name for coloured highlights. */
-    static String colourName(String kind){for(int i=0;i<KINDS.length;i++)if(KINDS[i].equals(kind))return NAMES[i];return "";}
+    static String colourName(String kind){int i=colourIndex(kind);return i<0||style(kind).equals("note")?"":NAMES[i];}
     /** The marked words as a quote: colour bar, softly tinted card, serif text in the page's ink. */
     static LinearLayout quote(Screens s,Entry e,int maxLines,float size){
         int color=color(e.kind);
@@ -250,8 +263,9 @@ final class Highlights {
         View bar=new View(s.a);bar.setBackground(s.round(color,3));
         LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(s.dp(5),-1);bp.setMargins(s.dp(10),s.dp(12),0,s.dp(12));card.addView(bar,bp);
         TextView text=new TextView(s.a);text.setText(e.text);text.setTextSize(size);text.setTextColor(s.p.ink);text.setTypeface(android.graphics.Typeface.SERIF);text.setLineSpacing(s.dp(3),1.1f);
-        if(e.kind.equals("underline")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.UNDERLINE_TEXT_FLAG);}
-        if(e.kind.equals("strike")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);}
+        String st=style(e.kind);
+        if(st.equals("underline")||st.equals("squiggle")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.UNDERLINE_TEXT_FLAG);}
+        if(st.equals("strike")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);}
         if(maxLines>0){text.setMaxLines(maxLines);text.setEllipsize(TextUtils.TruncateAt.END);}else text.setTextIsSelectable(true);
         text.setPadding(s.dp(12),s.dp(12),s.dp(14),s.dp(12));
         card.addView(text,new LinearLayout.LayoutParams(0,-2,1));
@@ -262,7 +276,7 @@ final class Highlights {
         LinearLayout p=s.row();p.setPadding(s.dp(8),s.dp(3),s.dp(10),s.dp(3));p.setBackground(s.round(s.p.tint,12));
         View dot=new View(s.a);GradientDrawable g=new GradientDrawable();g.setShape(GradientDrawable.OVAL);g.setColor(color(e.kind));dot.setBackground(g);p.addView(dot,new LinearLayout.LayoutParams(s.dp(10),s.dp(10)));
         String name=colourName(e.kind);
-        TextView t=s.text(AppLanguage.text(s.a,e.kind.startsWith("highlight")?"Destaque":label(e.kind))+(name.isEmpty()?"":" · "+AppLanguage.text(s.a,name).toLowerCase(Locale.ROOT)),13.5f,s.p.ink,true);t.setPadding(s.dp(6),0,0,0);
+        TextView t=s.text(AppLanguage.text(s.a,label(style(e.kind)))+(name.isEmpty()?"":" · "+AppLanguage.text(s.a,name).toLowerCase(Locale.ROOT)),13.5f,s.p.ink,true);t.setPadding(s.dp(6),0,0,0);
         p.addView(t);return p;
     }
     private Highlights(){}
