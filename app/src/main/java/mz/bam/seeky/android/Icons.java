@@ -75,6 +75,9 @@ final class Icons extends View {
             case "image":canvas.drawRoundRect(3,4,21,20,3,3,p);canvas.drawCircle(8,9,1.6f,p);line(canvas,4,18,10,12,14,16,17,13,21,17);break;
             case "video":canvas.drawRoundRect(3,5,21,19,3,3,p);line(canvas,10,9,16,12,10,15,10,9);break;
             case "audio":line(canvas,9,17,9,5,19,3,19,15);canvas.drawOval(3,16,9,21,p);canvas.drawOval(13,14,19,19,p);break;
+            case "shuffle":line(canvas,3,17,8,17,15,7,20,7);line(canvas,17,4,20,7,17,10);line(canvas,3,7,8,7,15,17,20,17);line(canvas,17,14,20,17,17,20);break;
+            case "skipnext":line(canvas,6,5,15,12,6,19,6,5);line(canvas,18,5,18,19);break;
+            case "skipprev":line(canvas,18,5,9,12,18,19,18,5);line(canvas,6,5,6,19);break;
             case "wifi":canvas.drawArc(2,5,22,25,225,90,false,p);canvas.drawArc(6,9,18,21,225,90,false,p);canvas.drawArc(10,13,14,17,225,90,false,p);canvas.drawCircle(12,19,0.6f,p);break;
             case "chart":line(canvas,4,4,4,20,20,20);line(canvas,8,16,8,12);line(canvas,12,16,12,8);line(canvas,16,16,16,10);break;
             case "camera":canvas.drawRoundRect(3,7,21,19,3,3,p);line(canvas,8,7,9.5f,4.5f,14.5f,4.5f,16,7);canvas.drawCircle(12,13,3.5f,p);break;

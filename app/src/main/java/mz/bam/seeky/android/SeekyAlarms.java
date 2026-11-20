@@ -20,5 +20,6 @@ public final class SeekyAlarms extends BroadcastReceiver {
     static void reschedule(Context c) {
         try { ReadingStats.schedule(c); } catch (Exception e) { AppDiagnostics.record(c, "reading-schedule", e); }
         try { StudyAgenda.scheduleAll(c); } catch (Exception e) { AppDiagnostics.record(c, "agenda-schedule", e); }
+        UpdateJob.schedule(c);
     }
 }

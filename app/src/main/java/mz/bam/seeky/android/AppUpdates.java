@@ -52,6 +52,7 @@ final class AppUpdates {
 
     static SharedPreferences prefs(Context c) { return c.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE); }
     static boolean automatic(Context c) { return prefs(c).getBoolean("automatic", true); }
+    static boolean notifications(Context c) { return prefs(c).getBoolean("notify", true); }
 
     static long installedVersion(Context c) {
         try {
@@ -354,14 +355,23 @@ final class AppUpdates {
     }
 
     static void settings(Activity a) {
-        boolean on = automatic(a);
+        boolean on = automatic(a), notify = notifications(a);
         UiPanel panel = new UiPanel(a, "Actualizações", AppLanguage.text(a, "Versão instalada:") + " " + MainActivity.VERSION.replace("Seeky ", ""), "refresh");
         panel.note("O Seeky procura novas versões no GitHub e só instala ficheiros assinados com a mesma chave. Os seus dados mantêm-se.");
         panel.action("refresh", "Procurar actualizações agora", null, false, () -> check(a, true));
-        panel.action("clock", on ? "Desligar verificação automática" : "Ligar verificação automática", on ? "Activa · uma vez por dia" : "Desligada", false, () -> {
+        panel.action("star", notify ? "Notificar novas versões: activo" : "Notificar novas versões: desligado",
+                notify ? AppLanguage.text(a, "Aviso nas notificações sempre que sair uma versão, mesmo com o Seeky fechado") : AppLanguage.text(a, "Toque para ser avisado de cada nova versão"), false, () -> {
+            prefs(a).edit().putBoolean("notify", !notify).apply();
+            if (!notify) Notify.ask(a);
+            UpdateJob.schedule(a);
+            settings(a);
+        });
+        panel.action("clock", on ? "Desligar verificação ao abrir" : "Ligar verificação ao abrir", on ? "Activa · uma vez por dia" : "Desligada", false, () -> {
             prefs(a).edit().putBoolean("automatic", !on).apply();
             settings(a);
         });
+        long last = prefs(a).getLong("last_background_check", 0);
+        if (last > 0) panel.note(AppLanguage.text(a, "Última verificação em segundo plano:") + " " + java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT).format(new java.util.Date(last)));
         panel.show();
     }
 }

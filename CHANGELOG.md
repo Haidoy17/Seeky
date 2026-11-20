@@ -1,5 +1,36 @@
 # Registo de alterações
 
+## 5.26.0 — 2026-11-20
+
+- **Aviso de novas versões** (`UpdateJob`): uma tarefa em segundo plano (de 6 em 6 horas, só
+  com rede) mostra uma notificação quando sai uma versão nova, uma vez por versão. Toque para
+  actualizar. Ligar e desligar em Mais → Actualizações.
+- **Leitor de música** (`LibraryActivity`, `MediaLibrary`, Mais → Multimédia → Música):
+  - procura automática no telefone (MediaStore, memória interna e cartão SD; ao abrir, no
+    máximo de 12 em 12 horas); adicionar pasta (com subpastas) e adicionar músicas soltas;
+  - separadores Faixas, Artistas, Álbuns, Géneros, Anos, Pastas, Favoritas, Recentes e Mais
+    ouvidas, com pesquisa, ordenação e entrada em cada artista ou álbum;
+  - tocar tudo e aleatório; tocar a seguir e adicionar à fila; partilhar, detalhes e remover;
+  - mini-leitor no fundo do ecrã.
+- **Leitor de vídeo**: a mesma biblioteca para vídeos (pastas, recentes, anos, favoritos, mais
+  vistos), com miniaturas.
+- **Fila de reprodução** (`MediaQueue`): faixa anterior e seguinte (no leitor, na notificação e
+  nos auscultadores), aleatório, repetir (desligado, tudo, uma) e lista da fila; passa sozinha
+  à faixa seguinte.
+- **Equalizador ao estilo Poweramp** (`EqualizerActivity`, `AudioEffects`):
+  - 10 bandas de 31 Hz a 16 kHz (±15 dB) com curva de resposta e pré-amplificação
+    (`DynamicsProcessing` no Android 9+; equalizador do aparelho no Android 8);
+  - 15 predefinições, incluindo Gospel, Voz falada e Kizomba, e predefinições do utilizador;
+  - botões rotativos de graves, agudos, virtualização e volume extra; volume do sistema,
+    balanço e limitador.
+- **Letras** (`Lyrics`), no leitor (botão Aa):
+  - procura pela ordem: letra guardada, ficheiro .lrc ao lado da música, letra incorporada
+    (ID3, FLAC, M4A) e LRCLIB na internet (envia só título, artista, álbum e duração; pode
+    desligar-se);
+  - letras sincronizadas que se destacam e avançam com a música; tocar numa linha salta para
+    esse momento; colar ou editar a letra.
+- `Media5260Test` (11 testes).
+
 ## 5.25.0 — 2026-11-20
 
 - **Editor de fotografias** (`PhotoEditorActivity`, `PhotoEdit`), a partir do visualizador de

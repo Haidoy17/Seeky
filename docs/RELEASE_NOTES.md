@@ -1,8 +1,17 @@
-## Seeky 5.25.0
+## Seeky 5.26.0
 
-Instale **Seeky_5.25.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+Instale **Seeky_5.26.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
 
 ### Novidades
+- **Mais → Multimédia → Música e Vídeos** — biblioteca com procura automática, pastas e
+  ficheiros adicionados, organizada por faixas, artistas, álbuns, géneros, anos e pastas.
+- **Fila** — faixa anterior e seguinte, aleatório e repetir.
+- **Equalizador tipo Poweramp** — 10 bandas, graves, agudos, virtualização, volume extra e
+  balanço.
+- **Letras** no leitor de música, sincronizadas quando disponíveis.
+- **Notificação de novas versões**.
+
+### Da 5.25
 - **Editor de fotografias** — abra uma foto e toque em Editar:
   - recortar com proporções, endireitar, perspectiva, rodar e espelhar;
   - 12 filtros e 10 ajustes;
