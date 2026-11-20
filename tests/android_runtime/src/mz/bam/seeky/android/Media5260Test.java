@@ -273,7 +273,10 @@ public class Media5260Test {
         idle(c, a);
         View root = ((ViewGroup) a.findViewById(android.R.id.content)).getChildAt(0);
         String labels = BooksToolsTest.labels(root);
-        for (String s : new String[]{"Música", "Faixas", "Artistas", "Álbuns", "Géneros", "Anos", "Pastas", "Favoritas", "Mais ouvidas", "Tocar tudo", "Aleatório"}) assertTrue(s, labels.contains(s));
+        for (String s : new String[]{"Música", "Início", "Faixas", "Artistas", "Álbuns", "Géneros", "Anos", "Pastas", "Favoritas", "Tocar tudo", "Aleatório"}) assertTrue(s, labels.contains(s));
+        a.tab = "Faixas";
+        a.load();
+        idle(c, a);
         assertEquals(4, a.rows.size());
         a.list.measure(View.MeasureSpec.makeMeasureSpec(360, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(600, View.MeasureSpec.EXACTLY));
         a.list.layout(0, 0, 360, 600);
@@ -319,7 +322,10 @@ public class Media5260Test {
         idle(c, a);
         View root = ((ViewGroup) a.findViewById(android.R.id.content)).getChildAt(0);
         String labels = BooksToolsTest.labels(root);
-        assertTrue(labels.contains("Vídeos") && labels.contains("Pastas") && labels.contains("Ver tudo"));
+        assertTrue(labels.contains("Vídeos") && labels.contains("Pastas") && labels.contains("Ver tudo") && labels.contains("Adicionados recentemente"));
+        a.tab = "Vídeos";
+        a.load();
+        idle(c, a);
         assertEquals(1, a.rows.size());
         c.pause().stop().destroy();
     }
@@ -361,8 +367,9 @@ public class Media5260Test {
         capture(root, "letra");
         a.queuePanel();
         shadowOf(Looper.getMainLooper()).idleFor(300, TimeUnit.MILLISECONDS);
-        assertTrue(BooksToolsTest.labels(UiPanel.open.get(a).iterator().next().root).contains("Faixa 2"));
-        UiPanel.dismissAll(a);
+        boolean listed = false;
+        for (MediaQueue.Item it : a.queueRows) listed |= it.title.equals("Faixa 2");
+        assertTrue("fila no separador Fila", listed);
         c.pause().stop().destroy();
     }
 

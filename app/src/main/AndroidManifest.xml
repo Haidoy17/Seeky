@@ -61,7 +61,7 @@
   <service android:name="mz.bam.seeky.android.FlashTileService" android:label="Seeky Flash" android:icon="@drawable/ic_tile_flash" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE"/></intent-filter></service>
   <activity android:name="mz.bam.seeky.android.FlashActivity" android:exported="true" android:label="Seeky Flash" android:theme="@android:style/Theme.Translucent.NoTitleBar"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
   <activity android:name="mz.bam.seeky.android.FlashSearchActivity" android:exported="false"/>
-  <activity android:name="mz.bam.seeky.android.MediaActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+  <activity android:name="mz.bam.seeky.android.MediaActivity" android:exported="false" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.StudyAssistantActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.ToolsActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <provider android:name="mz.bam.seeky.android.PlusFileProvider" android:authorities="${applicationId}.reading" android:exported="false" android:grantUriPermissions="true"/>

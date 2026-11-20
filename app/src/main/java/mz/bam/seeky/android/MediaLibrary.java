@@ -24,7 +24,7 @@ final class MediaLibrary extends SQLiteOpenHelper {
     static final String AUDIO = "audio", VIDEO = "video";
     static final int MAX_FOLDER_FILES = 5000;
 
-    MediaLibrary(Context c) { super(c.getApplicationContext(), "media_library.db", null, 1); }
+    MediaLibrary(Context c) { super(c.getApplicationContext(), "media_library.db", null, 2); }
 
     @Override public void onCreate(SQLiteDatabase d) {
         d.execSQL("CREATE TABLE tracks(id INTEGER PRIMARY KEY,uri TEXT UNIQUE NOT NULL,kind TEXT NOT NULL,title TEXT NOT NULL DEFAULT '',artist TEXT NOT NULL DEFAULT '',album TEXT NOT NULL DEFAULT '',"
@@ -36,9 +36,16 @@ final class MediaLibrary extends SQLiteOpenHelper {
         d.execSQL("CREATE INDEX tracks_album ON tracks(kind,album)");
         d.execSQL("CREATE INDEX tracks_folder ON tracks(kind,folder)");
         d.execSQL("CREATE TABLE folders(uri TEXT PRIMARY KEY,kind TEXT NOT NULL,label TEXT NOT NULL,added INTEGER NOT NULL)");
+        history(d);
     }
 
-    @Override public void onUpgrade(SQLiteDatabase d, int a, int b) {}
+    /** Histórico de reproduções (uma linha por audição) para "mais ouvidas hoje, na semana, no mês". */
+    static void history(SQLiteDatabase d) {
+        d.execSQL("CREATE TABLE IF NOT EXISTS plays(uri TEXT NOT NULL,at INTEGER NOT NULL)");
+        d.execSQL("CREATE INDEX IF NOT EXISTS plays_at ON plays(at,uri)");
+    }
+
+    @Override public void onUpgrade(SQLiteDatabase d, int a, int b) { if (a < 2) history(d); }
 
     static final class Track {
         long id, duration, size, added, modified, lastPlayed;
@@ -348,10 +355,52 @@ final class MediaLibrary extends SQLiteOpenHelper {
 
     void remove(String uri) { getWritableDatabase().delete("tracks", "uri=?", new String[]{uri}); }
 
-    static void played(Context c, String uri) {
+    /** Favorita a partir do leitor; se o ficheiro ainda não estiver na biblioteca, passa a estar. */
+    static void setFavorite(Context c, String uri, String title, String artist, String kind, boolean on) {
         try (MediaLibrary db = new MediaLibrary(c)) {
-            db.getWritableDatabase().execSQL("UPDATE tracks SET plays=plays+1,last_played=? WHERE uri=?", new Object[]{System.currentTimeMillis(), uri});
+            SQLiteDatabase d = db.getWritableDatabase();
+            ContentValues v = new ContentValues();
+            v.put("favorite", on ? 1 : 0);
+            if (d.update("tracks", v, "uri=?", new String[]{uri}) == 0 && on) {
+                Track t = new Track();
+                t.uri = uri; t.kind = kind; t.title = title; t.artist = artist == null ? "" : artist;
+                t.source = "manual"; t.folder = AppLanguage.text(c, "Adicionados"); t.added = System.currentTimeMillis();
+                ContentValues all = values(t, 0);
+                all.put("favorite", 1);
+                d.insert("tracks", null, all);
+            }
         } catch (Exception ignored) {}
+    }
+
+    static void played(Context c, String uri) { played(c, uri, System.currentTimeMillis()); }
+
+    static void played(Context c, String uri, long at) {
+        try (MediaLibrary db = new MediaLibrary(c)) {
+            SQLiteDatabase d = db.getWritableDatabase();
+            d.execSQL("UPDATE tracks SET plays=plays+1,last_played=? WHERE uri=?", new Object[]{at, uri});
+            d.execSQL("INSERT INTO plays(uri,at) VALUES(?,?)", new Object[]{uri, at});
+            if (at % 50 == 0) d.delete("plays", "at<?", new String[]{String.valueOf(at - 400L * 86400000L)});
+        } catch (Exception ignored) {}
+    }
+
+    static final int TODAY = 0, WEEK = 1, MONTH = 2, EVER = 3;
+    static final String[] PERIODS = {"Hoje", "Esta semana", "Este mês", "Sempre"};
+
+    /** Início do período: hoje à meia-noite, últimos 7 ou 30 dias. */
+    static long since(int period, long now) {
+        if (period == TODAY) { Calendar c = Calendar.getInstance(); c.setTimeInMillis(now); c.set(Calendar.HOUR_OF_DAY, 0); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0); return c.getTimeInMillis(); }
+        return period == WEEK ? now - 7 * 86400000L : period == MONTH ? now - 30 * 86400000L : 0;
+    }
+
+    /** Mais ouvidas num período; {@code plays} de cada faixa passa a ser o número de audições no período. */
+    List<Track> top(String kind, int period, long now, int limit) {
+        if (period == EVER) return tracks(kind, "plays>0", null, "plays DESC,last_played DESC", limit);
+        List<Track> out = new ArrayList<>();
+        try (Cursor c = getReadableDatabase().rawQuery("SELECT t.*,COUNT(*) AS n FROM plays p JOIN tracks t ON t.uri=p.uri WHERE t.kind=? AND p.at>=? GROUP BY p.uri ORDER BY n DESC,MAX(p.at) DESC LIMIT " + Math.max(1, limit),
+                new String[]{kind, String.valueOf(since(period, now))})) {
+            while (c.moveToNext()) { Track t = track(c); t.plays = c.getInt(c.getColumnIndexOrThrow("n")); out.add(t); }
+        }
+        return out;
     }
 
     /** Preferências simples da biblioteca (data da última procura, ordenação). */

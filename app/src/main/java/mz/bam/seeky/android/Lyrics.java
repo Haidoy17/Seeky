@@ -335,6 +335,56 @@ final class Lyrics {
         return best == null ? new Result() : fromJson(best);
     }
 
+    /** Um resultado da pesquisa online, para o utilizador escolher. */
+    static final class Candidate {
+        String track = "", artist = "", album = "";
+        long duration;
+        boolean synced, instrumental;
+        JSONObject json;
+        String detail() {
+            StringBuilder b = new StringBuilder(artist);
+            if (!album.isEmpty()) b.append(b.length() > 0 ? " · " : "").append(album);
+            if (duration > 0) b.append(b.length() > 0 ? " · " : "").append(duration / 60).append(':').append(String.format(Locale.ROOT, "%02d", duration % 60));
+            return b.toString();
+        }
+    }
+
+    /** Pesquisa livre na LRCLIB (título, artista ou parte da letra); até 20 resultados. */
+    static List<Candidate> search(String query) throws Exception {
+        List<Candidate> out = new ArrayList<>();
+        if (query == null || query.trim().isEmpty()) return out;
+        String body = get("https://lrclib.net/api/search?q=" + enc(query));
+        if (body == null) return out;
+        JSONArray list = new JSONArray(body);
+        for (int i = 0; i < Math.min(20, list.length()); i++) {
+            JSONObject o = list.getJSONObject(i);
+            Candidate c = new Candidate();
+            c.track = o.optString("trackName", o.optString("name"));
+            c.artist = o.optString("artistName");
+            c.album = o.optString("albumName");
+            c.duration = Math.round(o.optDouble("duration", 0));
+            c.synced = !o.isNull("syncedLyrics") && !o.optString("syncedLyrics").isEmpty();
+            c.instrumental = o.optBoolean("instrumental");
+            c.json = o;
+            if (c.synced || c.instrumental || (!o.isNull("plainLyrics") && !o.optString("plainLyrics").isEmpty())) out.add(c);
+        }
+        out.sort((a, b) -> Boolean.compare(b.synced, a.synced));
+        return out;
+    }
+
+    /** Texto copiado de uma página: limpa espaços e linhas a mais. */
+    static String cleanPasted(String text) {
+        if (text == null) return "";
+        String t = text.replace("\r\n", "\n").replace('\r', '\n').replaceAll("[ \\t]+\n", "\n").replaceAll("\n{3,}", "\n\n");
+        return t.trim();
+    }
+
+    /** Parece uma letra? (várias linhas e algum texto) — usado ao aplicar automaticamente o que foi copiado. */
+    static boolean looksLikeLyrics(String text) {
+        String t = cleanPasted(text);
+        return t.length() >= 40 && t.split("\n").length >= 3 && !t.startsWith("http");
+    }
+
     static Result fromJson(JSONObject o) {
         String synced = o.isNull("syncedLyrics") ? "" : o.optString("syncedLyrics"), plainText = o.isNull("plainLyrics") ? "" : o.optString("plainLyrics");
         Result r = !synced.isEmpty() ? result(synced, "LRCLIB") : result(plainText, "LRCLIB");

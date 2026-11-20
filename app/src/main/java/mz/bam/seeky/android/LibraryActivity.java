@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import java.util.*;
+import java.util.IdentityHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,12 +31,26 @@ import java.util.concurrent.Executors;
  */
 public final class LibraryActivity extends Activity {
     static final int ADD_FILES = 1, ADD_FOLDER = 2, PERMISSION = 3;
-    static final String[] AUDIO_TABS = {"Faixas", "Artistas", "Álbuns", "Géneros", "Anos", "Pastas", "Favoritas", "Recentes", "Mais ouvidas"};
-    static final String[] VIDEO_TABS = {"Vídeos", "Pastas", "Recentes", "Anos", "Favoritos", "Mais vistos"};
+    static final String[] AUDIO_TABS = {"Início", "Faixas", "Álbuns", "Artistas", "Pastas", "Géneros", "Anos", "Favoritas"};
+    static final String[] VIDEO_TABS = {"Início", "Vídeos", "Pastas", "Anos", "Favoritos"};
     static final String[] SORTS = {"Título", "Artista", "Álbum", "Ano", "Data de adição", "Duração"};
     static final String[] SORT_SQL = {"title COLLATE NOCASE", "artist COLLATE NOCASE,album COLLATE NOCASE,track", "album COLLATE NOCASE,track,title COLLATE NOCASE", "year DESC,album COLLATE NOCASE,track", "added DESC", "duration DESC"};
 
-    String kind = MediaLibrary.AUDIO, tab, query = "", groupColumn, groupValue;
+    String kind = MediaLibrary.AUDIO, tab, query = "", groupColumn, groupValue, special;
+    int period = MediaLibrary.WEEK;
+
+    /** Cabeçalho de secção do Início (com "Ver todas") ou nota. */
+    static final class Section {
+        final String title, action;
+        final Runnable run;
+        final boolean note;
+        Section(String title, String action, Runnable run, boolean note) { this.title = title; this.action = action; this.run = run; this.note = note; }
+    }
+
+    /** Marcador da linha de períodos (Hoje · Esta semana · Este mês · Sempre). */
+    static final Object PERIODS = new Object();
+    final Map<Object, List<MediaLibrary.Track>> context = new IdentityHashMap<>();
+    final Set<Object> counted = Collections.newSetFromMap(new IdentityHashMap<>());
     MediaLibrary db;
     AppPalette p;
     final ExecutorService work = Executors.newSingleThreadExecutor(), artWork = Executors.newFixedThreadPool(2);
@@ -109,10 +124,18 @@ public final class LibraryActivity extends Activity {
         super.onStop();
     }
 
-    @Override protected void onDestroy() { UiPanel.dismissAll(this); work.shutdownNow(); artWork.shutdownNow(); db.close(); super.onDestroy(); }
+    @Override protected void onDestroy() {
+        UiPanel.dismissAll(this);
+        work.shutdownNow();
+        artWork.shutdownNow();
+        try { work.awaitTermination(800, java.util.concurrent.TimeUnit.MILLISECONDS); } catch (InterruptedException ignored) {}
+        db.close();
+        super.onDestroy();
+    }
 
     @Override public void onBackPressed() {
         if (groupValue != null) { groupValue = null; groupColumn = null; load(); return; }
+        if (special != null) { special = null; load(); return; }
         if (search.getVisibility() == View.VISIBLE && !query.isEmpty()) { search.setText(""); search.setVisibility(View.GONE); return; }
         super.onBackPressed();
     }
@@ -181,7 +204,7 @@ public final class LibraryActivity extends Activity {
         bar.addView(pill("playfill", video() ? "Ver tudo" : "Tocar tudo", true, v -> playAll(false)));
         LinearLayout.LayoutParams pg = new LinearLayout.LayoutParams(-2, -2);
         pg.leftMargin = dp(6);
-        bar.addView(pill("repeat", "Aleatório", false, v -> playAll(true)), pg);
+        bar.addView(pill("shuffle", "Aleatório", false, v -> playAll(true)), pg);
         root.addView(bar);
 
         FrameLayout stage = new FrameLayout(this);
@@ -216,14 +239,14 @@ public final class LibraryActivity extends Activity {
         texts.addView(miniSub);
         mini.addView(texts, new LinearLayout.LayoutParams(0, -2, 1));
         FrameLayout prev = new FrameLayout(this), play = new FrameLayout(this), next = new FrameLayout(this);
-        prev.addView(new Icons(this, "back", p.ink), new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
+        prev.addView(new Icons(this, "skipprev", p.ink), new FrameLayout.LayoutParams(dp(20), dp(20), Gravity.CENTER));
         miniPlay = new Icons(this, "playfill", p.onAccent);
         play.addView(miniPlay, new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
         GradientDrawable circle = new GradientDrawable();
         circle.setShape(GradientDrawable.OVAL);
         circle.setColor(p.accent);
         play.setBackground(circle);
-        next.addView(new Icons(this, "arrow", p.ink), new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
+        next.addView(new Icons(this, "skipnext", p.ink), new FrameLayout.LayoutParams(dp(20), dp(20), Gravity.CENTER));
         prev.setOnClickListener(v -> command(MediaPlaybackService.TRACK_PREV));
         play.setOnClickListener(v -> command(service != null && service.playing ? MediaPlaybackService.PAUSE : MediaPlaybackService.PLAY));
         next.setOnClickListener(v -> command(MediaPlaybackService.TRACK_NEXT));
@@ -258,13 +281,13 @@ public final class LibraryActivity extends Activity {
     void buildTabs() {
         tabs.removeAllViews();
         for (String name : tabNames()) {
-            boolean on = name.equals(tab) && groupValue == null;
+            boolean on = name.equals(tab) && groupValue == null && special == null;
             TextView t = label(name, 13, on ? p.onAccent : p.ink, true);
             t.setPadding(dp(14), dp(8), dp(14), dp(8));
             t.setBackground(round(on ? p.accent : p.tint, 16));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
             lp.rightMargin = dp(6);
-            t.setOnClickListener(v -> { tab = name; groupValue = null; groupColumn = null; load(); });
+            t.setOnClickListener(v -> { tab = name; groupValue = null; groupColumn = null; special = null; load(); });
             tabs.addView(t, lp);
         }
     }
@@ -295,18 +318,43 @@ public final class LibraryActivity extends Activity {
     void load() {
         buildTabs();
         final int gen = ++generation;
-        final String t = tab, q = query, gc = groupColumn, gv = groupValue;
+        final String t = tab, q = query, gc = groupColumn, gv = groupValue, sp = special;
+        final int per = period;
         busy.setVisibility(View.VISIBLE);
         work.execute(() -> {
             List<Object> out = new ArrayList<>();
+            Map<Object, List<MediaLibrary.Track>> owners = new IdentityHashMap<>();
+            Set<Object> plays = Collections.newSetFromMap(new IdentityHashMap<>());
             List<MediaLibrary.Track> tracks = new ArrayList<>();
-            String info;
+            String info, heading = null;
+            long now = System.currentTimeMillis();
             try {
                 String column = groupColumn(t);
-                if (gv != null) {
+                if (sp != null) {
+                    if (sp.equals("recent")) { tracks = db.tracks(kind, null, null, "added DESC", 300); heading = video() ? "Adicionados recentemente" : "Adicionadas recentemente"; }
+                    else if (sp.equals("history")) { tracks = db.tracks(kind, "last_played>0", null, "last_played DESC", 200); heading = video() ? "Vistos recentemente" : "Ouvidas recentemente"; }
+                    else { out.add(PERIODS); tracks = db.top(kind, per, now, 200); plays.addAll(tracks); heading = (video() ? "Mais vistos" : "Mais ouvidas") + " · " + AppLanguage.text(this, MediaLibrary.PERIODS[per]); }
+                    if (!q.isEmpty()) tracks = filter(tracks, q);
+                    out.addAll(tracks);
+                    if (tracks.isEmpty()) out.add(new Section(per == MediaLibrary.TODAY ? "Ainda não ouviu nada hoje." : "Nada neste período.", null, null, true));
+                    info = count(tracks);
+                } else if (gv != null) {
                     String order = gc.equals("album") ? "track,title COLLATE NOCASE" : gc.equals("artist") ? "album COLLATE NOCASE,track,title COLLATE NOCASE" : SORT_SQL[sort()];
                     tracks = db.tracks(kind, gc + "=?" + (q.isEmpty() ? "" : " AND (" + MediaLibrary.search(q) + ")"), concat(new String[]{gv}, q.isEmpty() ? new String[0] : MediaLibrary.searchArgs(q)), order, 0);
                     out.addAll(tracks);
+                    info = count(tracks);
+                } else if (t.equals("Início") && q.isEmpty()) {
+                    tracks = db.tracks(kind, null, null, SORT_SQL[sort()], 0);
+                    List<MediaLibrary.Track> recent = db.tracks(kind, null, null, "added DESC", 6), top = db.top(kind, per, now, 8),
+                            history = db.tracks(kind, "last_played>0", null, "last_played DESC", 5), favs = db.tracks(kind, "favorite=1", null, "title COLLATE NOCASE", 5);
+                    section(out, owners, video() ? "Adicionados recentemente" : "Adicionadas recentemente", recent, () -> { special = "recent"; load(); }, "Ainda não há ficheiros na biblioteca.");
+                    out.add(new Section(video() ? "Mais vistos" : "Mais ouvidas", "Ver todas", () -> { special = "top"; load(); }, false));
+                    out.add(PERIODS);
+                    plays.addAll(top);
+                    for (MediaLibrary.Track x : top) { out.add(x); owners.put(x, top); }
+                    if (top.isEmpty()) out.add(new Section(per == MediaLibrary.TODAY ? (video() ? "Ainda não viu nada hoje." : "Ainda não ouviu nada hoje.") : "Nada neste período.", null, null, true));
+                    if (!history.isEmpty()) section(out, owners, video() ? "Vistos recentemente" : "Ouvidas recentemente", history, () -> { special = "history"; load(); }, null);
+                    if (!favs.isEmpty()) section(out, owners, video() ? "Favoritos" : "Favoritas", favs, () -> { tab = tabNames()[tabNames().length - 1]; load(); }, null);
                     info = count(tracks);
                 } else if (column != null) {
                     List<MediaLibrary.Group> groups = db.groups(kind, column, q);
@@ -315,30 +363,43 @@ public final class LibraryActivity extends Activity {
                 } else {
                     String where = q.isEmpty() ? "" : MediaLibrary.search(q);
                     String[] args = q.isEmpty() ? null : MediaLibrary.searchArgs(q);
-                    String order = SORT_SQL[sort()];
-                    int limit = 0;
                     if (t.startsWith("Favorit")) where = and(where, "favorite=1");
-                    else if (t.equals("Recentes")) { order = "added DESC"; limit = 300; }
-                    else if (t.startsWith("Mais")) { where = and(where, "plays>0"); order = "plays DESC,last_played DESC"; limit = 200; }
-                    tracks = db.tracks(kind, where, args, order, limit);
+                    tracks = db.tracks(kind, where, args, SORT_SQL[sort()], 0);
                     out.addAll(tracks);
                     info = count(tracks);
                 }
             } catch (Exception e) { info = e.getMessage() == null ? "" : e.getMessage(); }
             final List<MediaLibrary.Track> shown = tracks;
-            final String text = info;
+            final String text = info, title2 = heading;
             main.post(() -> {
                 if (gen != generation || isFinishing()) return;
                 busy.setVisibility(View.GONE);
                 rows.clear();
                 rows.addAll(out);
+                context.clear();
+                context.putAll(owners);
+                counted.clear();
+                counted.addAll(plays);
                 visible = shown;
                 summary.setText(text);
-                title.setText(groupValue != null ? groupName(groupColumn, groupValue) : AppLanguage.text(this, video() ? "Vídeos" : "Música"));
+                title.setText(title2 != null ? AppLanguage.text(this, title2) : groupValue != null ? groupName(groupColumn, groupValue) : AppLanguage.text(this, video() ? "Vídeos" : "Música"));
                 adapter.notifyDataSetChanged();
-                if (rows.isEmpty()) showEmpty();
+                if (shown.isEmpty() && sp == null && gv == null && (t.equals("Início") || t.equals(tabNames()[1]))) showEmpty();
             });
         });
+    }
+
+    void section(List<Object> out, Map<Object, List<MediaLibrary.Track>> owners, String title, List<MediaLibrary.Track> list, Runnable all, String empty) {
+        out.add(new Section(title, list.size() >= 5 ? "Ver todas" : null, all, false));
+        for (MediaLibrary.Track x : list) { out.add(x); owners.put(x, list); }
+        if (list.isEmpty() && empty != null) out.add(new Section(empty, null, null, true));
+    }
+
+    static List<MediaLibrary.Track> filter(List<MediaLibrary.Track> list, String q) {
+        String needle = q.toLowerCase(Locale.ROOT).trim();
+        List<MediaLibrary.Track> out = new ArrayList<>();
+        for (MediaLibrary.Track t : list) if ((t.title + " " + t.artist + " " + t.album + " " + t.folder).toLowerCase(Locale.ROOT).contains(needle)) out.add(t);
+        return out;
     }
 
     static String and(String a, String b) { return a == null || a.isEmpty() ? b : "(" + a + ") AND " + b; }
@@ -494,8 +555,8 @@ public final class LibraryActivity extends Activity {
 
     void trackMenu(MediaLibrary.Track t) {
         UiPanel panel = new UiPanel(this, t.title, t.subtitle().isEmpty() ? t.folder : t.subtitle(), video() ? "video" : "audio");
-        panel.quick(new String[]{"playfill", "arrow", "add"}, new String[]{video() ? "Ver" : "Tocar", "A seguir", "Na fila"}, new Runnable[]{
-                () -> play(visible.indexOf(t) >= 0 ? visible : Collections.singletonList(t), Math.max(0, visible.indexOf(t)), false),
+        panel.quick(new String[]{"playfill", "skipnext", "queue"}, new String[]{video() ? "Ver" : "Tocar", "A seguir", "Na fila"}, new Runnable[]{
+                () -> { List<MediaLibrary.Track> owner = context.containsKey(t) ? context.get(t) : visible; play(owner.indexOf(t) >= 0 ? owner : Collections.singletonList(t), Math.max(0, owner.indexOf(t)), false); },
                 () -> { MediaQueue.insertNext(this, t.item()); PlusUi.toast(this, "Toca a seguir."); },
                 () -> { MediaQueue.append(this, t.item()); PlusUi.toast(this, "Adicionado à fila."); }});
         panel.action("star", t.favorite ? "Tirar das favoritas" : "Adicionar às favoritas", null, false, () -> { db.favorite(t.uri, !t.favorite); load(); });
@@ -526,7 +587,8 @@ public final class LibraryActivity extends Activity {
 
     void clicked(Object row) {
         if (row instanceof MediaLibrary.Group) { MediaLibrary.Group g = (MediaLibrary.Group) row; drill(groupColumn(tab), g.name); }
-        else if (row instanceof MediaLibrary.Track) play(visible, visible.indexOf(row), false);
+        else if (row instanceof MediaLibrary.Track) { List<MediaLibrary.Track> owner = context.containsKey(row) ? context.get(row) : visible; play(owner, owner.indexOf(row), false); }
+        else if (row instanceof Section && ((Section) row).run != null) ((Section) row).run.run();
     }
 
     // ---- reproduzir ----
@@ -575,11 +637,15 @@ public final class LibraryActivity extends Activity {
         public int getCount() { return rows.size(); }
         public Object getItem(int i) { return rows.get(i); }
         public long getItemId(int i) { return i; }
-        @Override public int getViewTypeCount() { return 1; }
+        @Override public int getViewTypeCount() { return 3; }
+        @Override public int getItemViewType(int i) { Object r = rows.get(i); return r == PERIODS ? 2 : r instanceof Section ? 1 : 0; }
+        @Override public boolean isEnabled(int i) { Object r = rows.get(i); return r != PERIODS && !(r instanceof Section && ((Section) r).run == null); }
 
         public View getView(int i, View convert, ViewGroup parent) {
-            Holder h = convert == null ? new Holder() : (Holder) convert.getTag();
             Object row = rows.get(i);
+            if (row == PERIODS) return periods();
+            if (row instanceof Section) return sectionView((Section) row, convert);
+            Holder h = convert == null ? new Holder() : (Holder) convert.getTag();
             String current = service != null && service.uri != null ? service.uri.toString() : "";
             if (row instanceof MediaLibrary.Track) {
                 MediaLibrary.Track t = (MediaLibrary.Track) row;
@@ -587,7 +653,8 @@ public final class LibraryActivity extends Activity {
                 h.title.setText(t.title);
                 h.title.setTextColor(playing ? p.accent : p.ink);
                 h.subtitle.setText(video() ? join(t.folder, t.width > 0 ? t.height + "p" : "", t.size > 0 ? Rules.bytes(t.size) : "") : (t.subtitle().isEmpty() ? AppLanguage.text(h.root.getContext(), "Artista desconhecido") : t.subtitle()));
-                h.right.setText(t.duration > 0 ? ReaderActivity.clock((int) t.duration) : "");
+                h.right.setText(counted.contains(t) ? t.plays + "×" : t.duration > 0 ? ReaderActivity.clock((int) t.duration) : "");
+                h.right.setTextColor(counted.contains(t) ? p.accent : p.muted);
                 h.more.setVisibility(View.VISIBLE);
                 h.more.setOnClickListener(v -> trackMenu(t));
                 h.star.setVisibility(t.favorite ? View.VISIBLE : View.GONE);
@@ -610,6 +677,44 @@ public final class LibraryActivity extends Activity {
             }
             return h.root;
         }
+    }
+
+    View sectionView(Section s, View convert) {
+        LinearLayout row = convert instanceof LinearLayout && "section".equals(convert.getTag()) ? (LinearLayout) convert : null;
+        if (row == null) {
+            row = new LinearLayout(this);
+            row.setTag("section");
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.addView(label("", 16, p.ink, true), new LinearLayout.LayoutParams(0, -2, 1));
+            row.addView(label("", 13, p.accent, true));
+        }
+        TextView title = (TextView) row.getChildAt(0), more = (TextView) row.getChildAt(1);
+        title.setText(AppLanguage.text(this, s.title));
+        title.setTextSize(s.note ? 13 : 17);
+        title.setTypeface(s.note ? null : ThemeStyle.BOLD);
+        title.setTextColor(s.note ? p.muted : p.ink);
+        row.setPadding(dp(16), dp(s.note ? 4 : 18), dp(16), dp(s.note ? 10 : 6));
+        more.setText(s.action == null ? "" : AppLanguage.text(this, s.action) + " ›");
+        return row;
+    }
+
+    View periods() {
+        LinearLayout row = new LinearLayout(this);
+        row.setPadding(dp(14), dp(2), dp(14), dp(6));
+        for (int i = 0; i < MediaLibrary.PERIODS.length; i++) {
+            final int k = i;
+            boolean on = i == period;
+            TextView t = label(MediaLibrary.PERIODS[i], 12, on ? p.onAccent : p.ink, true);
+            t.setGravity(Gravity.CENTER);
+            t.setPadding(dp(4), dp(7), dp(4), dp(7));
+            t.setMaxLines(1);
+            t.setBackground(round(on ? p.accent : p.tint, 14));
+            t.setOnClickListener(v -> { period = k; load(); });
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, -2, 1);
+            lp.rightMargin = i < MediaLibrary.PERIODS.length - 1 ? dp(6) : 0;
+            row.addView(t, lp);
+        }
+        return row;
     }
 
     static String join(String... parts) {

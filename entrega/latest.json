@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005300,
-  "versionName": "5.26.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.26.0.apk",
-  "sha256": "519c39fa07ca08dd579b2944e8c36daa4b1c7df87cefe84e5902c754704d6e1c",
-  "bytes": 13406656,
-  "notes": "Leitor de música e de vídeo com biblioteca (artistas, álbuns, géneros, anos, pastas), fila, equalizador tipo Poweramp com graves, agudos, virtualização e volume, letras das músicas e aviso de novas versões."
+  "versionCode": 5005400,
+  "versionName": "5.27.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.27.0.apk",
+  "sha256": "9ce04088bdc7482b13af90a195be8016edcc8a53260de11f9503adf971da79c1",
+  "bytes": 13419966,
+  "notes": "Leitor de música e vídeo reorganizado: Capa, Letra e Fila, controlos na ordem habitual, letras online (procurar, copiar do Google e aplicar sozinha), rodar o vídeo e mais ouvidas hoje, na semana e no mês."
 }
