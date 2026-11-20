@@ -1,0 +1,2 @@
+.eBible: 66 livros, 31102 versículos
+OK (421 tests)

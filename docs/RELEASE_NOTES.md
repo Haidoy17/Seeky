@@ -1,10 +1,18 @@
-## Seeky 5.23.0
+## Seeky 5.24.0
 
-Instale **Seeky_5.23.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
-notas e definições mantêm-se. **Esta instalação é feita à mão uma vez**; a partir dela, as
-actualizações dentro da aplicação reconhecem a assinatura em todos os Android.
+Instale **Seeky_5.24.0.apk** por cima do Seeky actual, sem desinstalar. Com a 5.23 instalada,
+a actualização também aparece dentro da aplicação.
 
 ### Novidades
+- **Bíblias** — Ferramentas → Bíblias: mais de 1500 versões em 1200 línguas para descarregar
+  (eBible.org), ou importe a sua (MyBible, USX, USFM).
+- **Digitalizador** — efeitos (Documento, Melhorar, Sem sombras, Preto e branco…), brilho,
+  contraste, nitidez, lupa para os cantos, várias páginas da câmara ou da galeria, PDF ou JPG,
+  partilhar e OCR.
+- **Mapa do armazenamento** — resumo do telefone, espaço por tipo, pastas maiores e ficheiros
+  antigos com ícones.
+
+### Da 5.23
 - **Transferir por Wi-Fi** — abra no computador o endereço mostrado e escreva o código.
 - **Ferramentas de PDF** — juntar, extrair, rodar, comprimir e fotos para PDF.
 - **Digitalizar documento** — câmara com recorte automático e filtro de documento.

@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005000,
-  "versionName": "5.23.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.23.0.apk",
-  "sha256": "be335ac8905b24fd98259d41ed09c5f233fc58d50e1a13df1eb448f679aca20d",
-  "bytes": 13296765,
-  "notes": "Correcção da assinatura na actualização dentro da aplicação. Novo: transferir por Wi-Fi, ferramentas de PDF, digitalizar documentos, mapa do armazenamento, pasta privada, estatísticas e metas de leitura, dicionário e tradução, bibliotecas gratuitas, provas e trabalhos, Pomodoro, tema Horário, widget Hoje e atalhos do ícone."
+  "versionCode": 5005100,
+  "versionName": "5.24.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.24.0.apk",
+  "sha256": "30fffa4f890a8e0ebc769de5e1418b192cd13d3928c59aa3f69368783e86c3d0",
+  "bytes": 13330544,
+  "notes": "Bíblias para descarregar (mais de 1500 versões em 1200 línguas), digitalizador renovado com efeitos, ajustes, várias páginas, PDF ou JPG e OCR, e mapa do armazenamento renovado."
 }

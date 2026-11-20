@@ -191,7 +191,8 @@ final class ReadingStats {
         List<String[]> top = topBooks(a, 5);
         if (!top.isEmpty()) {
             p.section("Livros com mais tempo");
-            for (String[] b : top) p.note(b[0] + " · " + minutes(a, Long.parseLong(b[1])));
+            long most = Math.max(1, Long.parseLong(top.get(0)[1]));
+            for (String[] b : top) p.content.addView(UiRows.meter(p, a, "book", b[0].isEmpty() ? AppLanguage.text(a, "Sem título") : b[0], minutes(a, Long.parseLong(b[1])), null, Long.parseLong(b[1]) / (float) most, p.accent, null));
         }
         p.section("Meta e lembrete");
         p.action("star", "Meta diária: " + goal(a) + " min", "Quantos minutos quer ler por dia", false, () -> chooseGoal(a));

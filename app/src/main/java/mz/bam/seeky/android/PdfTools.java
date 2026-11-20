@@ -106,20 +106,28 @@ final class PdfTools {
     }
 
     /** Uma página por imagem, A4 na orientação da imagem, com margem. */
-    static void images(List<File> images, File out) throws IOException {
+    static void images(List<File> images, File out) throws IOException { images(images, out, 0, .85f, 18); }
+
+    /**
+     * Uma página por imagem. {@code page}: 0 = A4, 1 = Carta, 2 = tamanho da imagem (595 pt de
+     * largura); A4 e Carta seguem a orientação da imagem. {@code margin} em pontos.
+     */
+    static void images(List<File> images, File out, int page, float quality, int margin) throws IOException {
         try (PDDocument doc = new PDDocument()) {
             for (File f : images) {
                 Bitmap bmp = decode(f, 2400);
                 if (bmp == null) continue;
                 boolean landscape = bmp.getWidth() > bmp.getHeight();
-                PDRectangle size = landscape ? new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth()) : PDRectangle.A4;
-                PDPage page = new PDPage(size);
-                doc.addPage(page);
-                PDImageXObject img = JPEGFactory.createFromImage(doc, bmp, .85f);
-                float margin = 18, w = size.getWidth() - 2 * margin, h = size.getHeight() - 2 * margin;
+                PDRectangle base = page == 1 ? PDRectangle.LETTER : PDRectangle.A4;
+                PDRectangle size = page == 2 ? new PDRectangle(595f, 595f * bmp.getHeight() / bmp.getWidth())
+                        : landscape ? new PDRectangle(base.getHeight(), base.getWidth()) : base;
+                PDPage p = new PDPage(size);
+                doc.addPage(p);
+                PDImageXObject img = JPEGFactory.createFromImage(doc, bmp, quality);
+                float w = size.getWidth() - 2 * margin, h = size.getHeight() - 2 * margin;
                 float scale = Math.min(w / bmp.getWidth(), h / bmp.getHeight());
                 float iw = bmp.getWidth() * scale, ih = bmp.getHeight() * scale;
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+                try (PDPageContentStream cs = new PDPageContentStream(doc, p)) {
                     cs.drawImage(img, (size.getWidth() - iw) / 2, (size.getHeight() - ih) / 2, iw, ih);
                 }
                 bmp.recycle();
