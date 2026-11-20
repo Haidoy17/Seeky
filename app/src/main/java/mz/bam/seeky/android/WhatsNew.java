@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.32", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.33", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.note("Leitor renovado (ao segurar o telefone na vertical): barra de título com a cor da aplicação, régua de páginas numa só linha (‹ régua 341/383 ›), todas as ferramentas visíveis numa grelha — Índice, Pesquisar, Marcadores, Ouvir, Texto, Visualizar, Rodar, Marcações, Nota, Partilhar, Ecrã cheio e Mais — e, no PDF, botões redondos sobre a página para ajustar (página, largura, altura) e mudar entre rolagem vertical e página a página. À volta da página, fundo cinzento nos temas claros.");
+        panel.section("Da 5.32");
         panel.action("edit", "As minhas marcações renovadas", "Citações legíveis também no tema escuro, sem falhas entre as palavras; por data ou por livro; filtros por tipo e cor; copiar, partilhar e abrir em cada cartão", false, () -> HighlightsActivity.open(a, null));
         panel.section("Da 5.31");
         panel.action("edit", "Marcar no EPUB e no Word originais", "Na vista original (também \"EPUB ajustado\"), ao seleccionar aparece a barra de cores e Destacar, Cores e mais marcas e Nota no menu; as marcas voltam a aparecer ao reabrir", false, () -> HighlightsActivity.open(a, null));

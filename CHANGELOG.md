@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.33.0 — 2026-11-20
+
+- **Leitor renovado** (inspirado no modelo de leitor de PDF enviado), na vertical:
+  - barra de título com a cor da aplicação, título maior e menu ⋮ (Ferramentas de leitura); a
+    barra de estado acompanha a cor;
+  - régua de páginas numa só linha, entre as setas, com o número da página (‹ régua 341/383 ›);
+  - todas as ferramentas visíveis numa grelha de 2 linhas, sem deslizar: Índice, Pesquisar,
+    Marcadores, Ouvir, Texto, Visualizar, Rodar, Marcações (deste livro), Nota, Partilhar, Ecrã
+    cheio e Mais (Estudar com Seeky, Definições, Organizar, Ferramentas de leitura, Passagens
+    bíblicas, Estudo bíblico);
+  - no PDF, dois botões redondos sobre a página: ajustar (página → largura → altura) e rolagem
+    vertical / página a página;
+  - fundo cinzento claro à volta da página nos temas claros (escuro nos temas escuros).
+- Na horizontal mantém-se a barra única compacta, com as mesmas ferramentas.
+
 ## 5.32.0 — 2026-11-20
 
 - **As minhas marcações renovadas**:

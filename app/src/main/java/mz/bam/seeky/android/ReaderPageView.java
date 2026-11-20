@@ -16,7 +16,7 @@ final class ReaderPageView extends ZoomImageView {
     }
     void appearance() {
         setColorFilter(new ColorMatrixColorFilter(ReaderAppearance.pdfMatrix(activity.readerTheme)));
-        setBackgroundColor(0xff202226);invalidate();
+        setBackgroundColor(ReaderChrome.desk(activity.readerTheme));invalidate();
     }
     @Override void fit() {
         Drawable drawable=getDrawable();if(drawable==null||getWidth()==0||getHeight()==0)return;
