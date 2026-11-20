@@ -225,4 +225,25 @@ public class Bible529Test {
         page.markSelection("strike");drain();
         assertEquals(1,page.marks.size());assertEquals("strike",page.marks.get(0).kind);assertEquals("viverá",page.marks.get(0).text);
     }
+
+    @Test public void originalEpubMarksAreStoredListedAndReopenAtTheMarkedWords()throws Exception{
+        String uri="content://seeky.bible529.reader/livro.epub";
+        long id=Highlights.addWeb(a,uri,"Ansiedade.epub","application/epub+zip",5,120,168,"highlight-green","","Todo mundo tem medo de alguma coisa");
+        Highlights.addWeb(a,uri,"Ansiedade.epub","application/epub+zip",5,300,320,"underline","","pode literalmente nos");
+        List<Highlights.Entry> page=Highlights.web(a,uri,5);
+        assertEquals(2,page.size());assertTrue(page.get(0).web);assertTrue(Highlights.web(a,uri,4).isEmpty());
+        Highlights.Entry green=null;for(Highlights.Entry e:Highlights.all(a,uri))if(e.kind.equals("highlight-green"))green=e;
+        assertNotNull(green);assertEquals("capítulo 6",green.where());assertEquals("Ansiedade.epub",green.name);
+        a.getSharedPreferences("seeky",0).edit().putBoolean("reader_original_"+uri,false).apply();
+        Intent open=Highlights.intent(a,green);
+        assertEquals(5,open.getIntExtra("study_segment",-1));assertEquals(120,open.getIntExtra("original_mark",-1));assertFalse("stays in the original view",open.hasExtra("search_offset"));
+        assertTrue(a.getSharedPreferences("seeky",0).getBoolean("reader_original_"+uri,false));
+        String js=WebMarks.apply(page);
+        assertTrue(js,js.contains("["+id+",120,168,\"background-color:#c5ecb0")&&js.contains("text-decoration:underline"));
+        assertEquals("{\"s\":1}",WebMarks.unquote("\"{\\\"s\\\":1}\""));assertEquals("",WebMarks.unquote("null"));
+        Highlights.change(a,green,"highlight-pink");
+        boolean pink=false;for(Highlights.Entry e:Highlights.web(a,uri,5))pink|=e.kind.equals("highlight-pink");assertTrue(pink);
+        for(Highlights.Entry e:Highlights.all(a,uri))Highlights.change(a,e,null);
+        assertTrue(Highlights.web(a,uri,5).isEmpty());
+    }
 }

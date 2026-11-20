@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005700,
-  "versionName": "5.30.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.30.0.apk",
-  "sha256": "e0adb3e56c4b4b635fb8236db3ae585f6afecf1be505207a8f06f3f46e1e56b3",
-  "bytes": 13509917,
-  "notes": "Barra de marcar ao seleccionar texto no leitor do Seeky (também no PDF): 6 cores, Sublinhar, Riscar e Nota num toque."
+  "versionCode": 5005800,
+  "versionName": "5.31.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.31.0.apk",
+  "sha256": "8c2af5fdd0d1367274facb3dde98408bedfd34ea93433ca4dea55a019eea17c1",
+  "bytes": 13515036,
+  "notes": "Marcar no EPUB e no Word na vista original (também EPUB ajustado): barra de cores, Destacar, Cores e mais marcas e Nota; as marcas voltam a aparecer ao reabrir e estão em As minhas marcações."
 }

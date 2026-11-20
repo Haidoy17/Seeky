@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.31.0 — 2026-11-20
+
+- **Marcações na vista original do EPUB e do Word** (incluindo "EPUB ajustado"): antes a
+  selecção só mostrava "Copiar · Selecionar tudo" do sistema e não era possível marcar.
+  - ao seleccionar aparece a barra de marcar (6 cores, Sublinhar, Riscar, Nota) e o menu ganha
+    Destacar, Cores e mais marcas e Nota;
+  - as marcas ficam guardadas por capítulo e voltam a aparecer ao reabrir, ao mudar o tamanho
+    da letra ou ao ajustar o EPUB; mantêm-se mesmo quando o texto está em negrito ou numa
+    ligação bíblica;
+  - um toque numa marca mostra-a por completo (copiar, partilhar, mudar cor, eliminar);
+  - aparecem em As minhas marcações e "Abrir no livro" volta à vista original, ao capítulo e
+    às palavras marcadas.
+- O menu de selecção da vista original passa a aparecer junto às palavras seleccionadas (antes
+  podia ficar por cima da barra de baixo).
+
 ## 5.30.0 — 2026-11-20
 
 - **Barra de marcar ao seleccionar**: no leitor do Seeky, ao seleccionar texto (páginas de

@@ -1,0 +1,2 @@
+package mz.bam.seeky.android;
+public class DumpJs{public static void main(String[] a)throws Exception{java.nio.file.Files.write(java.nio.file.Paths.get(a[0],"select.js"),WebMarks.SELECT.getBytes("UTF-8"));java.nio.file.Files.write(java.nio.file.Paths.get(a[0],"apply.js"),WebMarks.APPLY.getBytes("UTF-8"));}}
