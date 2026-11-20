@@ -1,8 +1,8 @@
 {
-  "versionCode": 5004600,
-  "versionName": "5.22.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.22.0.apk",
-  "sha256": "44fdb6341f356396e32f09a0be6c7e815d2813d7e20b884ba9951a8854d39554",
-  "bytes": 13197216,
-  "notes": "Categorias certas para vídeos, documentos, arquivos e APKs. Nova Limpeza: cache, miniaturas, APKs duplicados ou já instalados. Widget Seeky com pesquisa e atalhos."
+  "versionCode": 5004601,
+  "versionName": "5.22.1",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.22.1.apk",
+  "sha256": "14b033465897cc69ee1cae9a54799241511a3f2559ba8467cc0ba36cb2a00d99",
+  "bytes": 13197304,
+  "notes": "Títulos principais em negrito em todos os temas, incluindo os títulos das capas geradas."
 }

@@ -1,9 +1,10 @@
-## Seeky 5.22.0
+## Seeky 5.22.1
 
-Instale **Seeky_5.22.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+Instale **Seeky_5.22.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
 notas e definições mantêm-se.
 
 ### Novidades
+- **Títulos em negrito** — os títulos principais deixaram de usar letra fina, em todos os temas e nas capas geradas.
 - **Categorias certas** — cada ficheiro vai para a categoria a que pertence (vídeos MKV/AVI, eBooks, documentos ODT/RTF, arquivos ISO…); os ficheiros já catalogados são reorganizados sozinhos.
 - **Limpeza** — Mais → Armazenamento e limpeza: cache do Seeky, miniaturas da galeria, APKs duplicados ou de aplicações já instaladas, ficheiros duplicados e atalhos do Android.
 - **Widget** — pesquisa e atalhos para PDF, Imagens, Vídeos, Áudio e Limpeza no ecrã inicial.

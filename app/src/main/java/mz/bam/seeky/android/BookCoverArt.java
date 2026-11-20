@@ -106,7 +106,7 @@ final class BookCoverArt extends View {
         boolean gelo = style.equals("gelo");
         text.setColor(ink);
         text.setTextAlign(Paint.Align.LEFT);
-        text.setTypeface(gelo ? ThemeStyle.CONDENSED : style.equals("ciano") ? ThemeStyle.LIGHT : ThemeStyle.MEDIUM);
+        text.setTypeface(gelo ? ThemeStyle.CONDENSED : ThemeStyle.BOLD);
         text.setLetterSpacing(gelo ? .02f : 0);
         text.setTextSize(Math.max(dp(12), Math.min(dp(22), w * .13f)));
         String shown = gelo ? title.toUpperCase(Locale.ROOT) : title;
@@ -136,8 +136,8 @@ final class BookCoverArt extends View {
         if (small) { initial(c, w, h, ink, (top + bottom) / 2); return; }
         text.setColor(ink);
         text.setTextAlign(Paint.Align.LEFT);
-        text.setTypeface(ThemeStyle.LIGHT);
-        text.setLetterSpacing(.14f);
+        text.setTypeface(ThemeStyle.BOLD);
+        text.setLetterSpacing(.08f);
         text.setTextSize(Math.max(dp(10), Math.min(dp(17), w * .095f)));
         float pad = w * .1f;
         StaticLayout layout = fit(title.toUpperCase(Locale.ROOT), (int) (w * .84f - pad), Layout.Alignment.ALIGN_NORMAL, 3);
@@ -165,7 +165,7 @@ final class BookCoverArt extends View {
         float pad = inset + Math.max(dp(6), w * .06f);
         text.setColor(cream);
         text.setTextAlign(Paint.Align.LEFT);
-        text.setTypeface(ThemeStyle.SERIF);
+        text.setTypeface(ThemeStyle.SERIF_BOLD);
         text.setTextSize(Math.max(dp(12), Math.min(dp(22), w * .13f)));
         StaticLayout layout = fit(title, (int) Math.max(1, w - pad * 2), Layout.Alignment.ALIGN_CENTER, 4);
         float top = h * .2f;
@@ -201,7 +201,7 @@ final class BookCoverArt extends View {
 
     void initial(Canvas c, float w, float h, int color, float centerY) {
         text.setColor(color);
-        text.setTypeface(style.equals("areia") || style.equals("floresta") || style.equals("classic") ? ThemeStyle.SERIF : ThemeStyle.MEDIUM);
+        text.setTypeface(style.equals("areia") || style.equals("floresta") || style.equals("classic") ? ThemeStyle.SERIF_BOLD : ThemeStyle.BOLD);
         text.setLetterSpacing(0);
         text.setTextSize(Math.min(w, h) * .42f);
         text.setTextAlign(Paint.Align.CENTER);

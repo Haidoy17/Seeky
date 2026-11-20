@@ -19,6 +19,9 @@ final class ThemeStyle {
     static final Typeface LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
     static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
     static final Typeface CONDENSED = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+    /** Títulos: sempre em negrito (pedido do autor, 5.22.1 — as versões finas liam-se mal). */
+    static final Typeface SERIF_BOLD = Typeface.create("serif", Typeface.BOLD);
+    static final Typeface BOLD = Typeface.create("sans-serif", Typeface.BOLD);
 
     /** Tipografia de título conforme o tema. */
     static void title(TextView t, float sizeSp) {
@@ -27,12 +30,12 @@ final class ThemeStyle {
         t.setAllCaps(false);
         t.setLetterSpacing(0);
         switch (p.style) {
-            case "areia": case "floresta": t.setTypeface(sizeSp >= 18 ? SERIF : Typeface.create("serif", Typeface.BOLD)); break;
-            case "aurora": case "ouro": t.setTypeface(sizeSp >= 18 ? LIGHT : MEDIUM); t.setAllCaps(sizeSp >= 18); t.setLetterSpacing(sizeSp >= 18 ? .14f : .04f); break;
-            case "neon": t.setTypeface(MEDIUM); t.setShadowLayer(sizeSp >= 18 ? 14 : 8, 0, 0, (p.accent & 0xffffff) | 0x99000000); break;
+            case "areia": case "floresta": t.setTypeface(SERIF_BOLD); break;
+            case "aurora": case "ouro": t.setTypeface(BOLD); t.setAllCaps(sizeSp >= 18); t.setLetterSpacing(sizeSp >= 18 ? .08f : .02f); break;
+            case "neon": t.setTypeface(BOLD); t.setShadowLayer(sizeSp >= 18 ? 14 : 8, 0, 0, (p.accent & 0xffffff) | 0x99000000); break;
             case "gelo": t.setTypeface(CONDENSED); t.setAllCaps(sizeSp >= 20); t.setLetterSpacing(.02f); break;
-            case "ciano": t.setTypeface(sizeSp >= 18 ? LIGHT : MEDIUM); t.setLetterSpacing(.02f); break;
-            case "vidro": case "carvao": t.setTypeface(MEDIUM); t.setLetterSpacing(-.01f); break;
+            case "ciano": t.setTypeface(BOLD); t.setLetterSpacing(.01f); break;
+            case "vidro": case "carvao": t.setTypeface(BOLD); t.setLetterSpacing(-.01f); break;
             default: t.setTypeface(Typeface.DEFAULT_BOLD);
         }
     }
