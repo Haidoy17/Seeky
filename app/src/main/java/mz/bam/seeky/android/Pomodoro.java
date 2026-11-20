@@ -113,7 +113,8 @@ final class Pomodoro {
         List<String[]> week = week(a);
         panel.section("Últimos 7 dias");
         if (week.isEmpty()) panel.note("Ainda não há sessões de foco esta semana.");
-        for (String[] w : week) panel.note((w[0].isEmpty() ? AppLanguage.text(a, "Sem disciplina") : w[0]) + " · " + ReadingStats.minutes(a, Long.parseLong(w[1])));
+        long most = week.isEmpty() ? 1 : Math.max(1, Long.parseLong(week.get(0)[1]));
+        for (String[] w : week) panel.content.addView(UiRows.meter(panel, a, "course", w[0].isEmpty() ? AppLanguage.text(a, "Sem disciplina") : w[0], ReadingStats.minutes(a, Long.parseLong(w[1])), null, Long.parseLong(w[1]) / (float) most, panel.accent, null));
         panel.show();
     }
 

@@ -255,7 +255,7 @@ public class Features5230Test {
         float[] q = ScanActivity.detect(photo);
         float[] expected = {80, 60, 330, 90, 310, 540, 60, 510};
         for (int i = 0; i < 8; i++) assertEquals("canto " + i, expected[i], q[i], 12);
-        Bitmap flat = ScanActivity.warp(photo, q, 0);
+        Bitmap flat = ScanActivity.warp(photo, q, 2000);
         assertTrue(flat.getHeight() > flat.getWidth());
         assertTrue(Color.red(flat.getPixel(flat.getWidth() / 2, flat.getHeight() / 2)) > 240);
         Bitmap empty = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
@@ -368,12 +368,18 @@ public class Features5230Test {
         assertEquals(3L * 1024 * 1024, (long) m.total.get(r + "/DCIM"));
         assertTrue(m.children.get(r).contains(r + "/Filmes"));
         assertTrue(m.children.get(r + "/DCIM").contains(r + "/DCIM/Camera"));
-        assertEquals(1, m.oldBig.size());
+        assertEquals(1, m.old.size());
+        assertEquals(80L * 1024 * 1024, m.types.get("Vídeos")[0]);
+        assertEquals(1, m.types.get("Imagens")[1]);
         StorageMap.model = m;
         StorageMap.open(a, null);
         UiPanel p = latest();
-        assertTrue(BooksToolsTest.labels(p.root), BooksToolsTest.labels(p.root).contains("Filmes"));
-        assertTrue(BooksToolsTest.labels(p.root).contains("ficheiros grandes e antigos"));
-        f.capture(p.root, "mapa-armazenamento-5230", 340, 620);
+        String labels = BooksToolsTest.labels(p.root);
+        assertTrue(labels, labels.contains("Filmes"));
+        assertTrue(labels.contains("antigo.mkv"));
+        assertTrue(labels.contains("Memória interna"));
+        assertTrue(labels.contains("Vídeos"));
+        assertFalse("sem caminhos crus", labels.contains(r + "/Filmes"));
+        f.capture(p.root, "mapa-armazenamento-5230", 340, 1500);
     }
 }

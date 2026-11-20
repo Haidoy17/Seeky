@@ -32,7 +32,20 @@ public final class ScanProvider extends ContentProvider {
         } catch (java.io.IOException e) { throw new FileNotFoundException(); }
     }
 
+    /** Bíblia descarregada e já limpa, só de leitura: bible/&lt;id&gt;.usfm (para a importação existente). */
+    File bible(Uri uri) throws FileNotFoundException {
+        java.util.List<String> parts = uri.getPathSegments();
+        if (getContext() == null || parts.size() != 2 || !parts.get(0).equals("bible") || !parts.get(1).matches("[A-Za-z0-9_-]{2,40}\\.usfm")) throw new FileNotFoundException();
+        File f = new File(BibleCatalog.downloads(getContext()), parts.get(1));
+        if (!f.isFile()) throw new FileNotFoundException();
+        return f;
+    }
+
     @Override public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        if (uri.getPathSegments().size() == 2 && "bible".equals(uri.getPathSegments().get(0))) {
+            if (!"r".equals(mode)) throw new FileNotFoundException("Só leitura");
+            return ParcelFileDescriptor.open(bible(uri), ParcelFileDescriptor.MODE_READ_ONLY);
+        }
         if (uri.getPathSegments().size() == 3) {
             if (!"r".equals(mode)) throw new FileNotFoundException("Só leitura");
             return ParcelFileDescriptor.open(privateCopy(uri), ParcelFileDescriptor.MODE_READ_ONLY);
@@ -45,14 +58,16 @@ public final class ScanProvider extends ContentProvider {
     }
 
     @Override public String getType(Uri uri) {
+        if (uri.getPathSegments().size() == 2 && "bible".equals(uri.getPathSegments().get(0))) return "text/plain";
         if (uri.getPathSegments().size() == 3) try { return StorageAccess.mime(privateCopy(uri)); } catch (Exception e) { return "application/octet-stream"; }
         return "image/jpeg";
     }
 
     @Override public Cursor query(Uri uri, String[] p, String s, String[] a, String o) {
-        if (uri.getPathSegments().size() != 3) return null;
+        boolean bible = uri.getPathSegments().size() == 2 && "bible".equals(uri.getPathSegments().get(0));
+        if (uri.getPathSegments().size() != 3 && !bible) return null;
         try {
-            File f = privateCopy(uri);
+            File f = bible ? bible(uri) : privateCopy(uri);
             android.database.MatrixCursor c = new android.database.MatrixCursor(new String[]{android.provider.OpenableColumns.DISPLAY_NAME, android.provider.OpenableColumns.SIZE});
             c.addRow(new Object[]{f.getName(), f.length()});
             return c;

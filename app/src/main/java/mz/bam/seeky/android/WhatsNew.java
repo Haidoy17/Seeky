@@ -23,7 +23,12 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.23", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.24", "Toque numa novidade para a experimentar", "star");
+        panel.section("Nesta versão");
+        panel.action("book", "Bíblias para descarregar", "Mais de 1500 versões em 1200 línguas, incluindo português e línguas de Moçambique", false, () -> BibleCatalog.show(a));
+        panel.action("scan", "Digitalizador renovado", "Efeitos, brilho, contraste, nitidez, lupa, várias páginas da câmara ou da galeria, PDF ou JPG e OCR", false, () -> ScanActivity.open(a));
+        panel.action("storage", "Mapa do armazenamento renovado", "Resumo do telefone, espaço por tipo, pastas maiores e ficheiros antigos com ícones", false, () -> StorageMap.show(a));
+        panel.section("Da 5.23");
         panel.action("refresh", "Actualizações sem erro de assinatura", "A actualização dentro da aplicação já reconhece a assinatura do Seeky em todos os Android", false, () -> AppUpdates.settings(a));
         panel.section("Ficheiros e PDF");
         panel.action("wifi", "Transferir por Wi-Fi", "Enviar e receber ficheiros do computador pelo navegador, sem cabo", false, () -> WifiTransfer.show(a));

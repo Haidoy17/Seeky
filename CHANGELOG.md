@@ -1,5 +1,29 @@
 # Registo de alterações
 
+## 5.24.0 — 2026-11-20
+
+- **Bíblias para descarregar** (`BibleCatalog`): catálogo do eBible.org com mais de 1500
+  traduções em mais de 1200 línguas (incluindo português — Bíblia Livre, Bíblia Portuguesa
+  Mundial, Nova Bíblia Viva — e línguas de Moçambique), pesquisa por nome ou língua, licença e
+  conteúdo (Bíblia completa, NT…) de cada versão. O ZIP USFM é juntado num só ficheiro sem notas,
+  referências cruzadas nem atributos Strong e entra pela importação de Bíblias existente
+  (servido pelo `ScanProvider`, só leitura). Testado com a Bíblia Livre real: 66 livros e
+  31 102 versículos. Versões com direitos de autor continuam a importar-se do ficheiro do
+  utilizador (MyBible, USX, USFM).
+- **Digitalizador renovado** (`ScanActivity`, `ScanFilters`): três passos (Recortar, Melhorar,
+  Páginas); detecção da folha com três candidatos (clara, escura, cor diferente da mesa); lupa
+  ao arrastar os cantos; efeitos com miniaturas (Documento sem sombras, Melhorar, Sem sombras,
+  Cinzento, Preto e branco, Vívido, Original); brilho, contraste e nitidez; rotação; várias
+  fotos da galeria de uma vez; reordenar, duplicar e apagar páginas; exportar PDF (A4, Carta ou
+  tamanho da foto) ou JPG em três qualidades, guardar e partilhar, e extrair texto por OCR. O
+  botão Flash deixa de aparecer por cima.
+- **Mapa do armazenamento renovado** (`StorageMap`, `UiRows`): resumo do telefone (usado, livre,
+  total), espaço por tipo com barra colorida, volumes com nomes (Memória interna, Cartão SD),
+  pastas maiores com barras, ficheiros grandes e antigos com ícone, tamanho, idade e pasta
+  abreviada; "Analisar o arquivo" abre este mapa. Estatísticas de leitura e Pomodoro usam as
+  mesmas linhas com barras.
+- `Features5240Test` (11 testes).
+
 ## 5.23.0 — 2026-11-20
 
 - **Actualização sem erro de assinatura** (`AppUpdates.verifyPackage`): no Android 9–12 o
