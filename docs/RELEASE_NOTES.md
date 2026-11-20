@@ -1,3 +1,12 @@
+## Seeky 5.35.0
+
+Instale **Seeky_5.35.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **10 temas novos** a partir das suas paletas: Ardósia, Sálvia, Névoa, Hortelã, Pinheiro, Menta,
+  Petróleo, Quartzo, Folha e Produtivo.
+- **Selector de cores com miniaturas** de cada tema (Mais → Preferências → Cores, ou Novidades).
+
 ## Seeky 5.34.0
 
 Instale **Seeky_5.34.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

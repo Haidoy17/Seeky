@@ -30,7 +30,7 @@ final class ThemeStyle {
         t.setAllCaps(false);
         t.setLetterSpacing(0);
         switch (p.style) {
-            case "areia": case "floresta": t.setTypeface(SERIF_BOLD); break;
+            case "areia": case "floresta": case "salvia": case "pinheiro": t.setTypeface(SERIF_BOLD); break;
             case "aurora": case "ouro": t.setTypeface(BOLD); t.setAllCaps(sizeSp >= 18); t.setLetterSpacing(sizeSp >= 18 ? .08f : .02f); break;
             case "neon": t.setTypeface(BOLD); t.setShadowLayer(sizeSp >= 18 ? 14 : 8, 0, 0, (p.accent & 0xffffff) | 0x99000000); break;
             case "gelo": t.setTypeface(CONDENSED); t.setAllCaps(sizeSp >= 20); t.setLetterSpacing(.02f); break;

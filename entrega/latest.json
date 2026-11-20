@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006100,
-  "versionName": "5.34.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.34.0.apk",
-  "sha256": "ff71114c7ce498d2121318296a40e0eafbbf3f9e0d302961025879e8713f2639",
-  "bytes": 13527415,
-  "notes": "Painel de selecção junto ao texto: Destacar, Sublinhar, Riscar e Ondulado em 6 cores, mais Nota, Copiar, Dicionário, Partilhar e Mais; rodapé em ecrã cheio com bateria, hora, título e página."
+  "versionCode": 5006200,
+  "versionName": "5.35.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.35.0.apk",
+  "sha256": "58ded3005f2b116439326a765cdc105807eedc89851cc45a93f8a106ab61e160",
+  "bytes": 13532142,
+  "notes": "10 temas novos a partir das suas paletas (Ardósia, Sálvia, Névoa, Hortelã, Pinheiro, Menta, Petróleo, Quartzo, Folha, Produtivo) e selector de cores com miniaturas."
 }

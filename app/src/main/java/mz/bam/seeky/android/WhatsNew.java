@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.34", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.35", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("palette", "10 temas novos", "Ardósia, Sálvia, Névoa, Hortelã, Pinheiro, Menta, Petróleo, Quartzo, Folha e Produtivo — das paletas que enviou", false, () -> ThemeSettings.show(a));
+        panel.action("grid", "Escolher cores com pré-visualização", "O selector mostra uma miniatura de cada tema, agrupada em Novos, Modernos, Automáticos e Clássicos", false, () -> ThemeSettings.show(a));
+        panel.section("Da 5.34");
         panel.note("Painel de selecção junto ao texto (PDF, EPUB, Word e texto): estilos Destacar, Sublinhar, Riscar e Ondulado; seis cores que mudam com o estilo; e Nota, Copiar, Dicionário, Partilhar e Mais. Toque num estilo e depois numa cor — a marcação fica logo no livro. \"Mais\" mostra o menu completo.");
         panel.note("Em ecrã cheio, um rodapé discreto mostra a bateria, a hora, o título e a página (por exemplo 341/383).");
         panel.section("Da 5.33");

@@ -101,4 +101,18 @@ public class Modern5200Test {
         f.capture(prefs.root, "moderno-areia-preferencias", 360, 760);
         prefs.dismiss();
     }
+
+    @Test public void themePickerShowsPaletteMiniaturesAndAppliesTheChoice() throws Exception {
+        ThemeSettings.show(a);
+        shadowOf(Looper.getMainLooper()).idle();
+        UiDialog d = (UiDialog) org.robolectric.shadows.ShadowDialog.getLatestDialog();
+        String labels = BooksToolsTest.labels(d.root);
+        for (String name : AppPalette.PALETTES) assertTrue(name, labels.contains(name));
+        assertTrue(labels.contains("Novos — das suas paletas") && labels.contains("Modernos") && labels.contains("Clássicos") && labels.contains("Personalizar cores…"));
+        f.capture(d.root, "seletor-temas", 360, 800);
+        PageTurnTest.findDescription(d.root, AppPalette.SAGE).performClick();
+        shadowOf(Looper.getMainLooper()).idle();
+        assertEquals(AppPalette.SAGE, a.prefs.getString("theme", ""));
+        theme(AppPalette.SAND);
+    }
 }

@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.35.0 — 2026-11-20
+
+- **10 temas novos**, criados a partir das paletas enviadas pelo autor:
+  - **Ardósia** (ardósia e coral, escuro), **Sálvia** (#f0efe6, #5f7e7b, #c3c1af, #405a5c),
+    **Névoa** (#6E7F9A, #93B5C6, #C9CCD5, #E4D8DC, #FFE3E3), **Hortelã** (#2C6975, #68B2A0,
+    #CDE0C9, #E0ECDE), **Pinheiro** (#00412E, #96BF8A, #E8EAE5), **Menta** (#40916C, #D8F3DC,
+    #74C69D, #1B4332), **Petróleo** (petróleo escuro e pêssego), **Quartzo** (verde-quartzo e
+    rosado), **Folha** (verde-folha claro) e **Produtivo** (azul-petróleo e laranja);
+  - cada tema tem cabeçalho, cartões, raio, estilo de ícones e cores das capas próprios, e passa
+    nas regras de legibilidade (texto ≥ 7:1, texto secundário ≥ 4,5:1, botões ≥ 4,5:1);
+  - os tons que não eram legíveis como estão nas imagens foram ajustados (por exemplo o laranja
+    do Produtivo leva texto escuro nos botões).
+- **Selector de cores com miniaturas**: cada tema aparece com a sua pré-visualização (página,
+  cabeçalho, cartão e botão), agrupado em Novos, Modernos, Automáticos e Clássicos.
+
 ## 5.34.0 — 2026-11-20
 
 - **Painel de selecção junto ao texto** (inspirado no modelo enviado), em PDF, EPUB/Word
