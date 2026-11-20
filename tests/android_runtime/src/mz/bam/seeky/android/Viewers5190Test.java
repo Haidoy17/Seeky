@@ -82,7 +82,15 @@ public class Viewers5190Test {
         assertFalse("no text-only transport buttons", labels.contains("Reproduzir") || labels.contains("−10 s"));
         assertEquals("Reproduzir", a.play.getContentDescription().toString());
         assertNotNull(VoiceToolsTest.findText(root, "1×"));
+        assertNotNull("partilhar no cabeçalho", PageTurnTest.findDescription(root, "Partilhar"));
         capture(root, "musica", 360, 760);
+        a.share();
+        idle(400);
+        UiPanel share = UiPanel.open.get(a).iterator().next();
+        String options = BooksToolsTest.labels(share.root);
+        assertTrue(options, options.contains("Partilhar música") && options.contains("Partilhar o que estou a ouvir") && options.contains("Abrir noutra aplicação"));
+        capture(share.root, "musica-partilhar", 340, 420);
+        UiPanel.dismissAll(a);
         c.pause().stop().destroy();
     }
 
@@ -111,6 +119,9 @@ public class Viewers5190Test {
         assertTrue(details, details.contains("1600 × 1200") && details.contains("1.9 MP"));
         assertNotNull(PageTurnTest.findDescription(a.controls, "Informação da imagem"));
         assertNotNull(PageTurnTest.findDescription(a.controls, "Rodar"));
+        assertNotNull(PageTurnTest.findDescription(a.controls, "Editar foto"));
+        assertNotNull(PageTurnTest.findDescription(a.controls, "Partilhar"));
+        assertNotNull(PageTurnTest.findDescription(a.controls, "Abrir noutra aplicação"));
         View root = ((ViewGroup) a.findViewById(android.R.id.content)).getChildAt(0);
         capture(root, "imagem", 360, 760);
         c.pause().stop().destroy();

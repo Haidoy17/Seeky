@@ -1,9 +1,21 @@
-## Seeky 5.24.0
+## Seeky 5.25.0
 
-Instale **Seeky_5.24.0.apk** por cima do Seeky actual, sem desinstalar. Com a 5.23 instalada,
-a actualização também aparece dentro da aplicação.
+Instale **Seeky_5.25.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
 
 ### Novidades
+- **Editor de fotografias** — abra uma foto e toque em Editar:
+  - recortar com proporções, endireitar, perspectiva, rodar e espelhar;
+  - 12 filtros e 10 ajustes;
+  - desenhar e escrever;
+  - desfazer e comparar com o original;
+  - guardar como cópia, substituir o original ou partilhar.
+- **Partilhar enquanto vê, ouve ou lê**:
+  - fotos;
+  - músicas, incluindo "o que estou a ouvir";
+  - vídeos, incluindo o fotograma actual;
+  - documentos, incluindo a página do PDF como imagem e o texto seleccionado.
+
+### Da 5.24
 - **Bíblias** — Ferramentas → Bíblias: mais de 1500 versões em 1200 línguas para descarregar
   (eBible.org), ou importe a sua (MyBible, USX, USFM).
 - **Digitalizador** — efeitos (Documento, Melhorar, Sem sombras, Preto e branco…), brilho,

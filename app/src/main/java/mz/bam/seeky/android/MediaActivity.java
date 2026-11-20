@@ -113,6 +113,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         heading.setGravity(Gravity.CENTER);
         heading.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         head.addView(heading, new LinearLayout.LayoutParams(0, -2, 1));
+        head.addView(iconButton("share", "Partilhar", 22, this::share), new LinearLayout.LayoutParams(dp(48), dp(48)));
         head.addView(iconButton("more", "Mais opções", 22, this::menu), new LinearLayout.LayoutParams(dp(48), dp(48)));
         root.addView(head);
 
@@ -358,8 +359,39 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         catch (Exception e) { AppDiagnostics.record(this, "media-command", e); }
     }
 
+    String mime() { return MediaFormats.mime(name, getIntent().getType()); }
+
+    /** Partilhar enquanto toca: o ficheiro, o que está a ouvir (texto) ou, no vídeo, o fotograma actual. */
+    void share() {
+        UiPanel p = new UiPanel(this, "Partilhar", name, "share");
+        p.action(isVideo ? "video" : "audio", isVideo ? "Partilhar vídeo" : "Partilhar música", AppLanguage.text(this, "Envia o ficheiro para WhatsApp, e-mail, Bluetooth…"), false, () -> ShareTools.file(this, uri, name, mime()));
+        if (!isVideo) p.action("note", "Partilhar o que estou a ouvir", AppLanguage.text(this, "Título e artista em texto"), false, () -> {
+            String title = titleView == null ? name : titleView.getText().toString(), artist = subtitleView == null ? "" : subtitleView.getText().toString();
+            ShareTools.text(this, AppLanguage.text(this, "A ouvir:") + " " + title + (artist.isEmpty() ? "" : " — " + artist));
+        });
+        if (isVideo && video != null) p.action("image", "Partilhar este fotograma", AppLanguage.text(this, "Imagem do momento actual do vídeo"), false, () -> {
+            Bitmap frame = video.getBitmap();
+            if (frame == null) toast("O vídeo ainda não mostrou nenhuma imagem.");
+            else ShareTools.bitmap(this, frame, name.replaceAll("\\.[^.]+$", "") + " - fotograma.jpg", false);
+        });
+        p.action("more", "Abrir noutra aplicação", null, false, this::outside);
+        p.show();
+    }
+
+    void outside() {
+        try {
+            Catalog.Entry e = new Catalog.Entry();
+            e.uri = uri.toString();
+            Uri shared = StorageAccess.shareUri(this, e);
+            Intent outside = new Intent(Intent.ACTION_VIEW).setDataAndType(shared, mime()).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            outside.setClipData(ClipData.newRawUri(name, shared));
+            startActivity(Intent.createChooser(outside, AppLanguage.text(this, "Abrir fora")));
+        } catch (Exception e) { toast("Formato indisponível."); }
+    }
+
     void menu() {
-        new UiDialog.Builder(this).setTitle("Reprodução").setItems(new String[]{"Velocidade", "Repetir", "Abrir fora", "Parar reprodução", "Capítulos e títulos", "Temporizador de sono"}, (d, n) -> {
+        new UiDialog.Builder(this).setTitle("Reprodução").setItems(new String[]{"Velocidade", "Repetir", "Abrir fora", "Parar reprodução", "Capítulos e títulos", "Temporizador de sono", "Partilhar"}, (d, n) -> {
+            if (n == 6) { share(); return; }
             if (n == 0) chooseSpeed();
             else if (n == 1) { if (service != null) { service.repeat = !service.repeat; refreshRepeat(); } }
             else if (n == 2) {

@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.24", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.25", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.note("Editor de fotografias: abra uma foto e toque em Editar — recortar com proporções, endireitar, perspectiva, espelhar, 12 filtros, 10 ajustes (brilho, contraste, saturação, calor, realces, sombras, nitidez, vinheta…), desenhar e escrever, desfazer e comparar com o original.");
+        panel.note("Partilhar enquanto vê ou ouve: fotos, músicas (também \"o que estou a ouvir\"), vídeos (também o fotograma actual) e documentos (também a página do PDF como imagem e o texto seleccionado).");
+        panel.section("Da 5.24");
         panel.action("book", "Bíblias para descarregar", "Mais de 1500 versões em 1200 línguas, incluindo português e línguas de Moçambique", false, () -> BibleCatalog.show(a));
         panel.action("scan", "Digitalizador renovado", "Efeitos, brilho, contraste, nitidez, lupa, várias páginas da câmara ou da galeria, PDF ou JPG e OCR", false, () -> ScanActivity.open(a));
         panel.action("storage", "Mapa do armazenamento renovado", "Resumo do telefone, espaço por tipo, pastas maiores e ficheiros antigos com ícones", false, () -> StorageMap.show(a));
