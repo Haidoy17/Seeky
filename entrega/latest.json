@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005600,
-  "versionName": "5.29.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.29.0.apk",
-  "sha256": "ce9f51fcd9d53f7d6e18c4a18eb1582786bd2eb5bf372a1b4e24a02028beeb9a",
-  "bytes": 13506543,
-  "notes": "Marcações com cores no texto e no PDF e lista As minhas marcações (abre no sítio exacto); Estudo bíblico com leitura diária e semanal, planos e cartões para decorar; Jogo da Bíblia com 3 níveis, 10 perguntas, voz e Recorde."
+  "versionCode": 5005700,
+  "versionName": "5.30.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.30.0.apk",
+  "sha256": "e0adb3e56c4b4b635fb8236db3ae585f6afecf1be505207a8f06f3f46e1e56b3",
+  "bytes": 13509917,
+  "notes": "Barra de marcar ao seleccionar texto no leitor do Seeky (também no PDF): 6 cores, Sublinhar, Riscar e Nota num toque."
 }

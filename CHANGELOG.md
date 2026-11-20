@@ -1,5 +1,14 @@
 # Registo de alterações
 
+## 5.30.0 — 2026-11-20
+
+- **Barra de marcar ao seleccionar**: no leitor do Seeky, ao seleccionar texto (páginas de
+  texto e páginas PDF) aparece em baixo uma barra com as 6 cores, Sublinhar, Riscar e Nota.
+  Um toque marca a selecção, que fica logo pintada no livro e em As minhas marcações. Antes, as
+  cores estavam escondidas no menu "Cores e mais marcas" do menu de selecção.
+- As marcações funcionam nos livros abertos no Seeky; noutras aplicações de leitura usa-se o
+  menu dessas aplicações. Para abrir no Seeky: Ficheiros/Biblioteca, ou "Abrir com" → Seeky.
+
 ## 5.29.0 — 2026-11-20
 
 - **Marcações com cores** no texto e nas páginas PDF:
