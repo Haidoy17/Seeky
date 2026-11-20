@@ -1,0 +1,6 @@
+Signer #1 certificate DN: CN=Haidoy Carlos Mautempo, O=Seeky, C=MZ
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+Signer #1 certificate SHA-1 digest: d06073d4055517d4247d51d5039a4d0bb5cdd30e
+Signer #1 certificate MD5 digest: 0dff3187d3d8ccb84100d71a80a34e1f
+zipalign 16 KB: OK
+44fdb6341f356396e32f09a0be6c7e815d2813d7e20b884ba9951a8854d39554  entrega/Seeky_5.22.0.apk

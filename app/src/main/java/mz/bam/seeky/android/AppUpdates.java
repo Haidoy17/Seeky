@@ -118,6 +118,7 @@ final class AppUpdates {
     /** Ao abrir a aplicação: no máximo uma vez por dia, em silêncio se não houver nada. */
     static void maybeCheck(MainActivity a) {
         if (!automatic(a)) return;
+        if (installedVersion(a) <= 0) return; // versão própria desconhecida: não há com que comparar
         long last = prefs(a).getLong("last_check", 0), now = System.currentTimeMillis();
         if (now - last < DAY && now >= last) return;
         prefs(a).edit().putLong("last_check", now).apply();
