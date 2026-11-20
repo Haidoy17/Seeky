@@ -1,9 +1,21 @@
-## Seeky 5.22.1
+## Seeky 5.23.0
 
-Instale **Seeky_5.22.1.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
-notas e definições mantêm-se.
+Instale **Seeky_5.23.0.apk** por cima do Seeky actual, sem desinstalar: livros, estudos,
+notas e definições mantêm-se. **Esta instalação é feita à mão uma vez**; a partir dela, as
+actualizações dentro da aplicação reconhecem a assinatura em todos os Android.
 
 ### Novidades
+- **Transferir por Wi-Fi** — abra no computador o endereço mostrado e escreva o código.
+- **Ferramentas de PDF** — juntar, extrair, rodar, comprimir e fotos para PDF.
+- **Digitalizar documento** — câmara com recorte automático e filtro de documento.
+- **Mapa do armazenamento** e **Pasta privada** com impressão digital ou PIN.
+- **Estatísticas e metas de leitura**, **Dicionário e tradução**, **Vocabulário** e
+  **Bibliotecas gratuitas** (Project Gutenberg e OPDS).
+- **Anotações para PDF e cartões de revisão**.
+- **Provas e trabalhos** com lembretes e **Pomodoro** por disciplina.
+- **Tema Horário**, **widget Hoje** e **atalhos ao manter premido o ícone**.
+
+### Da 5.22
 - **Títulos em negrito** — os títulos principais deixaram de usar letra fina, em todos os temas e nas capas geradas.
 - **Categorias certas** — cada ficheiro vai para a categoria a que pertence (vídeos MKV/AVI, eBooks, documentos ODT/RTF, arquivos ISO…); os ficheiros já catalogados são reorganizados sozinhos.
 - **Limpeza** — Mais → Armazenamento e limpeza: cache do Seeky, miniaturas da galeria, APKs duplicados ou de aplicações já instaladas, ficheiros duplicados e atalhos do Android.

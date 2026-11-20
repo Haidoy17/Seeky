@@ -222,32 +222,91 @@ final class AppUpdates {
         verifyPackage(c, target, r.versionCode);
     }
 
-    /** O APK tem de ser o Seeky, mais recente e assinado com o mesmo certificado instalado. */
+    /**
+     * O APK tem de ser o Seeky, mais recente e assinado com o mesmo certificado instalado.
+     *
+     * <p>No Android 9–12, {@code getPackageArchiveInfo} só devolve o certificado de um ficheiro
+     * quando também se pede {@code GET_SIGNATURES}; pedir apenas {@code GET_SIGNING_CERTIFICATES}
+     * dava uma lista vazia e a actualização era recusada como "não assinada" (corrigido na 5.23).
+     * Lê-se agora o certificado por três vias (SigningInfo, Signature[] e assinatura v1 do JAR).
+     * Se nenhuma funcionar no aparelho, a decisão fica com o instalador do Android, que recusa
+     * sempre uma actualização assinada com outra chave.
+     */
     @SuppressWarnings("deprecation")
     static void verifyPackage(Context c, File apk, long minimumVersion) throws Exception {
         PackageManager pm = c.getPackageManager();
-        int flags = Build.VERSION.SDK_INT >= 28 ? PackageManager.GET_SIGNING_CERTIFICATES : PackageManager.GET_SIGNATURES;
+        int flags = PackageManager.GET_SIGNATURES | (Build.VERSION.SDK_INT >= 28 ? PackageManager.GET_SIGNING_CERTIFICATES : 0);
         PackageInfo archive = pm.getPackageArchiveInfo(apk.getPath(), flags);
-        PackageInfo installed = pm.getPackageInfo(c.getPackageName(), flags);
+        if (archive == null) archive = pm.getPackageArchiveInfo(apk.getPath(), 0);
         if (archive == null) throw new IOException(AppLanguage.text(c, "O ficheiro descarregado não é um APK válido."));
         long version = Build.VERSION.SDK_INT >= 28 ? archive.getLongVersionCode() : archive.versionCode;
         if (!c.getPackageName().equals(archive.packageName) || version < minimumVersion || version <= installedVersion(c))
             throw new IOException(AppLanguage.text(c, "O APK descarregado não é uma versão mais recente do Seeky."));
-        if (!sameSigner(signers(archive), signers(installed)))
-            throw new IOException(AppLanguage.text(c, "O APK descarregado não está assinado com a chave do Seeky. Não foi instalado."));
+        Set<String> mine = installedSigners(c);
+        Set<String> theirs = signers(archive);
+        if (theirs.isEmpty()) theirs = jarSigners(apk);
+        if (theirs.isEmpty() || mine.isEmpty()) return; // o instalador do Android verifica a chave
+        if (!sameSigner(theirs, mine))
+            throw new IOException(AppLanguage.text(c, "O APK descarregado está assinado com outra chave e não foi instalado.")
+                    + "\n\n" + AppLanguage.text(c, "Instalado:") + " " + shortPrint(mine) + "\n" + AppLanguage.text(c, "Descarregado:") + " " + shortPrint(theirs));
     }
 
     @SuppressWarnings("deprecation")
+    static Set<String> installedSigners(Context c) {
+        try {
+            PackageManager pm = c.getPackageManager();
+            int flags = PackageManager.GET_SIGNATURES | (Build.VERSION.SDK_INT >= 28 ? PackageManager.GET_SIGNING_CERTIFICATES : 0);
+            return signers(pm.getPackageInfo(c.getPackageName(), flags));
+        } catch (Exception e) { return new HashSet<>(); }
+    }
+
+    /** Certificados de todas as fontes que o aparelho preencher (histórico de rotação incluído). */
+    @SuppressWarnings("deprecation")
     static Set<String> signers(PackageInfo info) {
-        Signature[] list = null;
-        if (Build.VERSION.SDK_INT >= 28 && info.signingInfo != null)
-            list = info.signingInfo.hasMultipleSigners() ? info.signingInfo.getApkContentsSigners() : info.signingInfo.getSigningCertificateHistory();
-        if (list == null) list = info.signatures;
         Set<String> out = new HashSet<>();
+        if (info == null) return out;
+        if (Build.VERSION.SDK_INT >= 28 && info.signingInfo != null) {
+            add(out, info.signingInfo.getApkContentsSigners());
+            if (!info.signingInfo.hasMultipleSigners()) add(out, info.signingInfo.getSigningCertificateHistory());
+        }
+        add(out, info.signatures);
+        return out;
+    }
+
+    static void add(Set<String> out, Signature[] list) {
         if (list != null) for (Signature s : list) {
             try { out.add(toHex(MessageDigest.getInstance("SHA-256").digest(s.toByteArray()))); } catch (Exception ignored) {}
         }
-        return out;
+    }
+
+    /**
+     * Assinatura v1 (JAR): o {@link java.util.jar.JarFile} verifica cada entrada ao lê-la até ao fim
+     * e só então expõe os certificados. Conta apenas se todas as entradas estiverem assinadas pelo
+     * mesmo conjunto de certificados.
+     */
+    static Set<String> jarSigners(File apk) {
+        Set<String> common = null;
+        try (java.util.jar.JarFile jar = new java.util.jar.JarFile(apk, true)) {
+            byte[] buffer = new byte[65536];
+            for (java.util.Enumeration<java.util.jar.JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
+                java.util.jar.JarEntry entry = e.nextElement();
+                String name = entry.getName();
+                if (entry.isDirectory() || name.startsWith("META-INF/")) continue;
+                try (InputStream in = jar.getInputStream(entry)) { while (in.read(buffer) != -1) { /* verificação */ } }
+                java.security.cert.Certificate[] certs = entry.getCertificates();
+                if (certs == null || certs.length == 0) return new HashSet<>();
+                Set<String> these = new HashSet<>();
+                for (java.security.cert.Certificate cert : certs) these.add(toHex(MessageDigest.getInstance("SHA-256").digest(cert.getEncoded())));
+                if (common == null) common = these; else if (!common.equals(these)) return new HashSet<>();
+            }
+        } catch (Exception e) { return new HashSet<>(); }
+        return common == null ? new HashSet<>() : common;
+    }
+
+    static String shortPrint(Set<String> prints) {
+        StringBuilder b = new StringBuilder();
+        for (String p : new TreeSet<>(prints)) { if (b.length() > 0) b.append(", "); b.append(p, 0, Math.min(16, p.length())); }
+        return b.toString();
     }
 
     static boolean sameSigner(Set<String> archive, Set<String> installed) {
