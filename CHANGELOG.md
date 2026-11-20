@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.34.0 — 2026-11-20
+
+- **Painel de selecção junto ao texto** (inspirado no modelo enviado), em PDF, EPUB/Word
+  originais e texto:
+  - estilos: Destacar, Sublinhar, Riscar e Ondulado (novo), cada um com 6 cores — tons suaves
+    para destacar e cores fortes para as linhas;
+  - toque num estilo e depois numa cor: a marcação fica logo no livro e em As minhas
+    marcações; o estilo e a cor ficam lembrados;
+  - Nota, Copiar, Dicionário, Partilhar e Mais (mostra o menu completo do Seeky);
+  - fica por cima das palavras seleccionadas (ou por baixo quando não há espaço) e acompanha os
+    selectores; o menu do sistema deixa de se sobrepor.
+- Sublinhados, riscados e ondulados com cor no PDF (desenhados na página), na vista original
+  (CSS) e no texto; filtros "Ondulados" e por cor em As minhas marcações.
+- **Rodapé de leitura em ecrã cheio**: bateria, hora, título e página (ex.: 341/383).
+
 ## 5.33.0 — 2026-11-20
 
 - **Leitor renovado** (inspirado no modelo de leitor de PDF enviado), na vertical:

@@ -1,3 +1,12 @@
+## Seeky 5.34.0
+
+Instale **Seeky_5.34.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Painel de selecção junto ao texto**: Destacar, Sublinhar, Riscar e Ondulado em 6 cores, mais
+  Nota, Copiar, Dicionário, Partilhar e Mais.
+- **Rodapé em ecrã cheio** com bateria, hora, título e página.
+
 ## Seeky 5.33.0
 
 Instale **Seeky_5.33.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

@@ -216,10 +216,21 @@ public class Bible529Test {
         String[] picked={null};
         MarkBar bar=MarkBar.show(a,kind->picked[0]=kind);drain();
         assertNotNull(bar);
-        for(String d:new String[]{"Destacar amarelo","Destacar verde","Destacar azul","Destacar rosa","Destacar laranja","Destacar lilás","Sublinhar","Riscar","Nota"})assertNotNull(d,PageTurnTest.findDescription(bar.row,d));
-        assertTrue("fits a 360 dp phone: "+bar.row.getMeasuredWidth(),bar.row.getMeasuredWidth()<=340);capture(bar.row,"barra-marcar",58);
+        for(String d:new String[]{"Destacar amarelo","Destacar verde","Destacar azul","Destacar rosa","Destacar laranja","Destacar lilás"})assertNotNull(d,PageTurnTest.findDescription(bar.row,d));
+        for(String d:new String[]{"Destacar","Sublinhar","Riscar","Ondulado","Nota","Copiar","Dicionário","Partilhar","Mais"})assertNotNull(d,PageTurnTest.findDescription(bar.card,d));
+        assertTrue("fits a 360 dp phone: "+bar.card.getMeasuredWidth(),bar.card.getMeasuredWidth()<=344);
+        capture(bar.card,"painel-seleccao",bar.card.getMeasuredHeight());
+        PageTurnTest.findDescription(bar.card,"Sublinhar").performClick();
+        assertNotNull("colours follow the style",PageTurnTest.findDescription(bar.row,"Sublinhar azul"));
+        capture(bar.card,"painel-sublinhar",bar.card.getMeasuredHeight());
+        PageTurnTest.findDescription(bar.row,"Sublinhar azul").performClick();
+        assertEquals("underline-blue",picked[0]);assertEquals("underline",a.getSharedPreferences("seeky",0).getString("mark_style",""));
+        a.getSharedPreferences("seeky",0).edit().putString("mark_style","highlight").apply();
+        bar=MarkBar.show(a,kind->picked[0]=kind);drain();
         PageTurnTest.findDescription(bar.row,"Destacar verde").performClick();
         assertEquals("highlight-green",picked[0]);assertFalse(bar.showing());
+        assertTrue(Highlights.valid("squiggle-pink")&&Highlights.valid("underline-green")&&Highlights.valid("highlight")&&!Highlights.valid("underline-gold")&&!Highlights.valid("box"));
+        assertEquals("Ondulado rosa",Highlights.label("squiggle-pink"));assertEquals(Highlights.LINES[3],Highlights.color("squiggle-pink"));assertEquals(0xff3b82f6,Highlights.color("underline"));
         // Text page: the selected words take the colour at once.
         String text=a.bookText.getText().toString();int start=text.indexOf("firme"),end=text.indexOf(" das coisas");
         android.text.Selection.setSelection((Spannable)a.bookText.getText(),start,end);

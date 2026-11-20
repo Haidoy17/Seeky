@@ -32,8 +32,10 @@ final class WebMarks {
     /** CSS of one mark: highlighter colours keep dark letters in light and dark themes. */
     static String style(String kind){
         String c=String.format(Locale.ROOT,"#%06x",Highlights.color(kind)&0xffffff);
-        if(kind.equals("underline"))return "text-decoration:underline;text-decoration-color:"+c+";text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer";
-        if(kind.equals("strike"))return "text-decoration:line-through;text-decoration-color:"+c+";text-decoration-thickness:2px;cursor:pointer";
+        String st=Highlights.style(kind);
+        if(st.equals("underline"))return "text-decoration:underline;text-decoration-color:"+c+";text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer";
+        if(st.equals("squiggle"))return "text-decoration:underline wavy;text-decoration-color:"+c+";text-decoration-thickness:1.5px;text-underline-offset:3px;cursor:pointer";
+        if(st.equals("strike"))return "text-decoration:line-through;text-decoration-color:"+c+";text-decoration-thickness:2px;cursor:pointer";
         return "background-color:"+c+";color:#272237;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone;cursor:pointer"+(kind.equals("note")?";border-bottom:2px dotted #2f80ed":"");
     }
     static String apply(List<Highlights.Entry> marks){

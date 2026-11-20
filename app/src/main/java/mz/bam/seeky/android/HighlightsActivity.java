@@ -61,11 +61,11 @@ public final class HighlightsActivity extends Activity {
         buildFilters();refresh();
     }
     @Override protected void onResume(){super.onResume();load();}
-    void load(){PlusUi.run(this,()->{List<Highlights.Entry> found=Highlights.all(this,only);PlusUi.post(this,()->{all=found;if(colour!=null){boolean used=false;for(Highlights.Entry e:all)used|=e.kind.equals(colour);if(!used)colour=null;}buildFilters();refresh();});});}
+    void load(){PlusUi.run(this,()->{List<Highlights.Entry> found=Highlights.all(this,only);PlusUi.post(this,()->{all=found;if(colour!=null){boolean used=false;int ci=java.util.Arrays.asList(Highlights.KINDS).indexOf(colour);for(Highlights.Entry e:all)used|=Highlights.colourIndex(e.kind)==ci;if(!used)colour=null;}buildFilters();refresh();});});}
 
     void buildFilters(){
         types.removeAllViews();
-        String[][] kinds={{"all","Todas"},{"color","Destaques"},{"underline","Sublinhados"},{"strike","Riscados"},{"note","Notas"}};
+        String[][] kinds={{"all","Todas"},{"color","Destaques"},{"underline","Sublinhados"},{"squiggle","Ondulados"},{"strike","Riscados"},{"note","Notas"}};
         for(String[] k:kinds){
             int n=0;for(Highlights.Entry e:all)if(matches(e,k[0]))n++;
             if(n==0&&!k[0].equals("all")&&!filter.equals(k[0]))continue;
@@ -74,7 +74,7 @@ public final class HighlightsActivity extends Activity {
         }
         colours.removeAllViews();
         for(int i=0;i<Highlights.KINDS.length;i++){
-            final String key=Highlights.KINDS[i];int n=0;for(Highlights.Entry e:all)if(e.kind.equals(key))n++;if(n==0)continue;
+            final String key=Highlights.KINDS[i];final int index=i;int n=0;for(Highlights.Entry e:all)if(Highlights.colourIndex(e.kind)==index&&!Highlights.style(e.kind).equals("note"))n++;if(n==0)continue;
             boolean on=key.equals(colour);
             FrameLayout dot=new FrameLayout(this);GradientDrawable g=new GradientDrawable();g.setShape(GradientDrawable.OVAL);g.setColor(Highlights.COLORS[i]);g.setStroke(s.dp(on?3:1),on?s.p.accent:(s.p.ink&0xffffff)|0x33000000);dot.setBackground(g);
             if(on)dot.addView(new Icons(this,"check",0xff272237),new FrameLayout.LayoutParams(s.dp(16),s.dp(16),Gravity.CENTER));
@@ -83,13 +83,13 @@ public final class HighlightsActivity extends Activity {
         }
         colours.setVisibility(colours.getChildCount()>1||colour!=null?View.VISIBLE:View.GONE);
     }
-    boolean matches(Highlights.Entry e,String f){if(f.equals("all"))return true;if(f.equals("color"))return e.kind.startsWith("highlight");return e.kind.equals(f);}
+    boolean matches(Highlights.Entry e,String f){if(f.equals("all"))return true;String st=Highlights.style(e.kind);if(f.equals("color"))return st.equals("highlight");return st.equals(f);}
 
     void refresh(){
         String q=BibleStudyCore.plain(query);
         List<Highlights.Entry> shown=new ArrayList<>();
         for(Highlights.Entry e:all){
-            if(!matches(e,filter)||colour!=null&&!e.kind.equals(colour))continue;
+            if(!matches(e,filter)||colour!=null&&(Highlights.colourIndex(e.kind)!=java.util.Arrays.asList(Highlights.KINDS).indexOf(colour)||Highlights.style(e.kind).equals("note")))continue;
             if(!q.isEmpty()&&!BibleStudyCore.plain(e.text+" "+e.note+" "+e.name).contains(q))continue;
             shown.add(e);
         }

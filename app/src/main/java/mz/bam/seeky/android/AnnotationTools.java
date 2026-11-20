@@ -31,7 +31,7 @@ final class AnnotationTools {
         final int part;
         final String kind, text, note;
         Item(int part, String kind, String text, String note) { this.part = part; this.kind = kind; this.text = text; this.note = note; }
-        String label() { return kind.equals("note") ? "Nota" : kind.equals("underline") ? "Sublinhado" : "Destaque"; }
+        String label() { return Highlights.label(kind); }
     }
 
     static List<Item> collect(ReaderStore store, String uri) {
