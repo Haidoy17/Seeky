@@ -23,8 +23,14 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.25", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.26", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("audio", "Leitor de música", "Biblioteca por faixas, artistas, álbuns, géneros, anos e pastas; procura automática; fila, aleatório e repetir", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.action("video", "Leitor de vídeo", "Vídeos por pastas, recentes, anos e favoritos", false, () -> LibraryActivity.open(a, MediaLibrary.VIDEO));
+        panel.action("tune", "Equalizador tipo Poweramp", "10 bandas, pré-amplificação, graves, agudos, virtualização, volume extra e balanço", false, () -> EqualizerActivity.open(a));
+        panel.note("Letras das músicas no leitor (toque em Aa): sincronizadas, do ficheiro ou da internet, e editáveis.");
+        panel.action("refresh", "Aviso de novas versões", "Notificação sempre que sair uma actualização", false, () -> AppUpdates.settings(a));
+        panel.section("Da 5.25");
         panel.note("Editor de fotografias: abra uma foto e toque em Editar — recortar com proporções, endireitar, perspectiva, espelhar, 12 filtros, 10 ajustes (brilho, contraste, saturação, calor, realces, sombras, nitidez, vinheta…), desenhar e escrever, desfazer e comparar com o original.");
         panel.note("Partilhar enquanto vê ou ouve: fotos, músicas (também \"o que estou a ouvir\"), vídeos (também o fotograma actual) e documentos (também a página do PDF como imagem e o texto seleccionado).");
         panel.section("Da 5.24");

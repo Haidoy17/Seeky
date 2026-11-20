@@ -10,6 +10,7 @@ import android.os.*;
 import android.text.TextUtils;
 import android.view.*;
 import android.widget.*;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -38,6 +39,16 @@ public final class MediaActivity extends Activity implements TextureView.Surface
     FrameLayout stage;
     ImageView art;
     boolean shownPlaying;
+    int shownSerial = -1, lyricIndex = -2;
+    Icons shuffleIcon;
+    TextView repeatBadge, lyricSource;
+    FrameLayout lyricsPanel;
+    LinearLayout lyricLines;
+    ScrollView lyricScroll;
+    View coverFrame;
+    Lyrics.Result lyrics;
+    boolean showLyrics;
+    String lyricsFor = "";
 
     final ServiceConnection connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName c, IBinder binder) {
@@ -113,6 +124,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         heading.setGravity(Gravity.CENTER);
         heading.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         head.addView(heading, new LinearLayout.LayoutParams(0, -2, 1));
+        if (!isVideo) head.addView(iconButton("tune", "Equalizador", 22, () -> EqualizerActivity.open(this)), new LinearLayout.LayoutParams(dp(48), dp(48)));
         head.addView(iconButton("share", "Partilhar", 22, this::share), new LinearLayout.LayoutParams(dp(48), dp(48)));
         head.addView(iconButton("more", "Mais opções", 22, this::menu), new LinearLayout.LayoutParams(dp(48), dp(48)));
         root.addView(head);
@@ -142,7 +154,10 @@ public final class MediaActivity extends Activity implements TextureView.Surface
             cover.addView(placeholder, new FrameLayout.LayoutParams(-1, -1));
             cover.setTag(placeholder);
             stage.setPadding(dp(32), dp(12), dp(32), dp(12));
-            stage.addView(new SquareFrame(this, cover), new FrameLayout.LayoutParams(-1, -1, Gravity.CENTER));
+            coverFrame = new SquareFrame(this, cover);
+            stage.addView(coverFrame, new FrameLayout.LayoutParams(-1, -1, Gravity.CENTER));
+            buildLyricsPanel();
+            stage.addView(lyricsPanel, new FrameLayout.LayoutParams(-1, -1));
             root.addView(stage, new LinearLayout.LayoutParams(-1, 0, 1));
         }
 
@@ -198,7 +213,9 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         LinearLayout controls = new LinearLayout(this);
         controls.setGravity(Gravity.CENTER);
         controls.setPadding(0, dp(12), 0, dp(4));
-        controls.addView(iconButton("replay10", "Recuar 10 segundos", 30, () -> { if (service != null) service.skip(-10000); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        boolean tracks = !isVideo || MediaQueue.size() > 1;
+        if (tracks) controls.addView(iconButton("skipprev", "Faixa anterior", 26, () -> command(MediaPlaybackService.TRACK_PREV)), new LinearLayout.LayoutParams(dp(52), dp(52)));
+        controls.addView(iconButton("replay10", "Recuar 10 segundos", 28, () -> { if (service != null) service.skip(-10000); }), new LinearLayout.LayoutParams(dp(56), dp(56)));
         play = new FrameLayout(this);
         GradientDrawable circle = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{ThemeColors.blend(palette.accent, Color.WHITE, .12f), palette.accent});
         circle.setShape(GradientDrawable.OVAL);
@@ -212,9 +229,10 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         play.setContentDescription(AppLanguage.text(this, "Reproduzir"));
         play.setOnClickListener(v -> { v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY); command(service != null && service.playing ? MediaPlaybackService.PAUSE : MediaPlaybackService.PLAY); });
         LinearLayout.LayoutParams playParams = new LinearLayout.LayoutParams(dp(76), dp(76));
-        playParams.setMargins(dp(28), 0, dp(28), 0);
+        playParams.setMargins(dp(tracks ? 12 : 28), 0, dp(tracks ? 12 : 28), 0);
         controls.addView(play, playParams);
-        controls.addView(iconButton("forward10", "Avançar 10 segundos", 30, () -> { if (service != null) service.skip(10000); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        controls.addView(iconButton("forward10", "Avançar 10 segundos", 28, () -> { if (service != null) service.skip(10000); }), new LinearLayout.LayoutParams(dp(56), dp(56)));
+        if (tracks) controls.addView(iconButton("skipnext", "Faixa seguinte", 26, () -> command(MediaPlaybackService.TRACK_NEXT)), new LinearLayout.LayoutParams(dp(52), dp(52)));
         root.addView(controls);
 
         // Controlos secundários: velocidade · repetir · temporizador · capítulos
@@ -228,14 +246,41 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         speedChip.setContentDescription(AppLanguage.text(this, "Velocidade"));
         speedChip.setOnClickListener(v -> chooseSpeed());
         extras.addView(speedChip, new LinearLayout.LayoutParams(dp(64), dp(40)));
+        MediaQueue.load(this);
+        FrameLayout shuffle = iconButton("shuffle", "Aleatório", 22, () -> {
+            MediaQueue.setShuffle(this, !MediaQueue.shuffle);
+            refreshRepeat();
+            toast(MediaQueue.shuffle ? "Aleatório activado" : "Aleatório desligado");
+        });
+        shuffleIcon = (Icons) shuffle.getChildAt(0);
+        extras.addView(shuffle, spaced());
         FrameLayout repeat = iconButton("repeat", "Repetir", 22, () -> {
-            if (service != null) { service.repeat = !service.repeat; refreshRepeat(); toast(service.repeat ? "Repetir activado" : "Repetir desligado"); }
+            MediaQueue.cycleRepeat(this);
+            if (service != null) service.repeat = MediaQueue.repeat == MediaQueue.REPEAT_ONE;
+            refreshRepeat();
+            toast(MediaQueue.repeat == MediaQueue.REPEAT_ONE ? "Repetir esta faixa" : MediaQueue.repeat == MediaQueue.REPEAT_ALL ? "Repetir tudo" : "Repetir desligado");
         });
         repeatIcon = (Icons) repeat.getChildAt(0);
+        repeatBadge = text("1", 9, palette.onAccent);
+        repeatBadge.setGravity(Gravity.CENTER);
+        repeatBadge.setTypeface(ThemeStyle.BOLD);
+        GradientDrawable badge = new GradientDrawable();
+        badge.setShape(GradientDrawable.OVAL);
+        badge.setColor(palette.accent);
+        repeatBadge.setBackground(badge);
+        repeatBadge.setVisibility(View.GONE);
+        repeat.addView(repeatBadge, new FrameLayout.LayoutParams(dp(14), dp(14), Gravity.TOP | Gravity.END));
         extras.addView(repeat, spaced());
+        if (!isVideo) extras.addView(iconButton("type", "Letra", 22, this::toggleLyrics), spaced());
+        extras.addView(iconButton("tasks", "Fila de reprodução", 22, this::queuePanel), spaced());
         extras.addView(iconButton("clock", "Temporizador de sono", 22, () -> NarrationIndex.sleep(this)), spaced());
         extras.addView(iconButton("contents", "Capítulos e títulos", 22, () -> NarrationIndex.show(this)), spaced());
-        root.addView(extras);
+        HorizontalScrollView extraScroll = new HorizontalScrollView(this);
+        extraScroll.setHorizontalScrollBarEnabled(false);
+        extraScroll.addView(extras);
+        LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(-2, -2);
+        ep.gravity = Gravity.CENTER_HORIZONTAL;
+        root.addView(extraScroll, ep);
 
         status = text("A preparar…", 12, palette.muted);
         status.setGravity(Gravity.CENTER);
@@ -349,9 +394,165 @@ public final class MediaActivity extends Activity implements TextureView.Surface
     void refreshSpeed() { if (service != null) speedChip.setText(speedLabel(service.speed)); }
 
     void refreshRepeat() {
-        if (service == null || repeatIcon == null) return;
-        repeatIcon.setSymbol("repeat", service.repeat ? palette.accent : palette.ink);
-        ((View) repeatIcon.getParent()).setBackground(ripple(service.repeat ? palette.tint : Color.TRANSPARENT, 999));
+        if (repeatIcon == null) return;
+        boolean on = MediaQueue.repeat != MediaQueue.REPEAT_OFF || (service != null && service.repeat);
+        repeatIcon.setSymbol("repeat", on ? palette.accent : palette.ink);
+        ((View) repeatIcon.getParent()).setBackground(ripple(on ? palette.tint : Color.TRANSPARENT, 999));
+        if (repeatBadge != null) repeatBadge.setVisibility(MediaQueue.repeat == MediaQueue.REPEAT_ONE || (service != null && service.repeat) ? View.VISIBLE : View.GONE);
+        if (shuffleIcon != null) {
+            shuffleIcon.setSymbol("shuffle", MediaQueue.shuffle ? palette.accent : palette.ink);
+            ((View) shuffleIcon.getParent()).setBackground(ripple(MediaQueue.shuffle ? palette.tint : Color.TRANSPARENT, 999));
+        }
+    }
+
+    // ---- faixa mudou (fila) ----
+
+    void trackChanged() {
+        if (service == null || service.uri == null || service.uri.equals(uri)) return;
+        uri = service.uri;
+        name = service.title;
+        titleView.setText(clean(name));
+        subtitleView.setText(service.artist.isEmpty() ? MediaFormats.ext(name).toUpperCase(Locale.ROOT) : service.artist);
+        if (!isVideo) { art.setImageDrawable(null); View cover = (View) art.getParent(); Object ph = cover.getTag(); if (ph instanceof View) ((View) ph).setVisibility(View.VISIBLE); loadArtwork(); }
+        lyrics = null;
+        lyricsFor = "";
+        if (showLyrics) loadLyrics(false);
+    }
+
+    void queuePanel() {
+        MediaQueue.load(this);
+        List<MediaQueue.Item> next = MediaQueue.upcoming();
+        UiPanel p = new UiPanel(this, "Fila de reprodução", UiRows.count(this, MediaQueue.size(), "faixa", "faixas") + (MediaQueue.shuffle ? " · " + AppLanguage.text(this, "aleatório") : ""), "tasks");
+        if (next.size() <= 1) p.note("Só há esta faixa. Abra Mais → Música para tocar álbuns, artistas ou listas inteiras.");
+        for (int i = 0; i < Math.min(100, next.size()); i++) {
+            MediaQueue.Item it = next.get(i);
+            final int original = MediaQueue.items.indexOf(it);
+            p.action(i == 0 ? "playfill" : "audio", (i == 0 ? "▶ " : (i + ". ")) + clean(it.title), it.artist, false, () -> {
+                if (MediaQueue.jump(this, original) != null) command(MediaPlaybackService.QUEUE);
+            });
+        }
+        p.show();
+    }
+
+    // ---- letras ----
+
+    void buildLyricsPanel() {
+        lyricsPanel = new FrameLayout(this);
+        lyricsPanel.setVisibility(View.GONE);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor((palette.surface & 0xffffff) | 0xee000000);
+        bg.setCornerRadius(dp(24));
+        lyricsPanel.setBackground(bg);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout head = new LinearLayout(this);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.setPadding(dp(16), dp(8), dp(4), 0);
+        lyricSource = text("", 11, palette.muted);
+        head.addView(lyricSource, new LinearLayout.LayoutParams(0, -2, 1));
+        head.addView(iconButton("edit", "Editar letra", 18, this::editLyrics), new LinearLayout.LayoutParams(dp(40), dp(40)));
+        head.addView(iconButton("refresh", "Procurar de novo", 18, () -> { Lyrics.forget(this, uri.toString()); loadLyrics(true); }), new LinearLayout.LayoutParams(dp(40), dp(40)));
+        box.addView(head);
+        lyricScroll = new ScrollView(this);
+        lyricScroll.setVerticalScrollBarEnabled(false);
+        lyricLines = new LinearLayout(this);
+        lyricLines.setOrientation(LinearLayout.VERTICAL);
+        lyricLines.setPadding(dp(20), dp(8), dp(20), dp(160));
+        lyricScroll.addView(lyricLines);
+        box.addView(lyricScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        lyricsPanel.addView(box, new FrameLayout.LayoutParams(-1, -1));
+    }
+
+    void toggleLyrics() {
+        showLyrics = !showLyrics;
+        lyricsPanel.setVisibility(showLyrics ? View.VISIBLE : View.GONE);
+        coverFrame.setVisibility(showLyrics ? View.INVISIBLE : View.VISIBLE);
+        stage.setPadding(dp(showLyrics ? 14 : 32), dp(12), dp(showLyrics ? 14 : 32), dp(12));
+        if (showLyrics && !uri.toString().equals(lyricsFor)) loadLyrics(false);
+    }
+
+    void loadLyrics(boolean force) {
+        final Uri target = uri;
+        lyricsFor = target.toString();
+        lyricIndex = -2;
+        lyricLines.removeAllViews();
+        lyricSource.setText(AppLanguage.text(this, "A procurar a letra…"));
+        final String title = titleView.getText().toString(), artist = service != null ? service.artist : "", album = "";
+        final long duration = service != null ? service.duration() : 0;
+        final String[] meta = {title, artist};
+        new Thread(() -> {
+            String t = meta[0], a = meta[1], al = album;
+            MediaMetadataRetriever r = new MediaMetadataRetriever();
+            try {
+                r.setDataSource(this, target);
+                String mt = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE), ma = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST), mb = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                if (mt != null && !mt.trim().isEmpty()) t = mt.trim();
+                if (ma != null && !ma.trim().isEmpty()) a = ma.trim();
+                if (mb != null) al = mb.trim();
+            } catch (Exception ignored) {} finally { try { r.release(); } catch (Exception ignored) {} }
+            Lyrics.Result result = Lyrics.find(this, target, t, a, al, duration, Lyrics.online(this));
+            handler.post(() -> { if (!isFinishing() && target.toString().equals(lyricsFor)) showLyricsResult(result); });
+        }, "seeky-lyrics").start();
+    }
+
+    void showLyricsResult(Lyrics.Result r) {
+        lyrics = r;
+        lyricLines.removeAllViews();
+        lyricIndex = -2;
+        if (!r.found()) {
+            lyricSource.setText(AppLanguage.text(this, "Letra não encontrada"));
+            TextView t = text(Lyrics.online(this) ? "Não encontrámos a letra desta música. Toque no lápis para a colar ou escrever." : "Active as letras da internet em Música → Mais opções, ou toque no lápis para colar a letra.", 15, palette.muted);
+            t.setPadding(0, dp(24), 0, 0);
+            lyricLines.addView(t);
+            return;
+        }
+        lyricSource.setText(AppLanguage.text(this, "Letra:") + " " + AppLanguage.text(this, r.source) + (r.isSynced() ? " · " + AppLanguage.text(this, "sincronizada") : ""));
+        if (r.instrumental && r.text.isEmpty()) { lyricLines.addView(text("♪ Instrumental ♪", 20, palette.muted)); return; }
+        if (r.isSynced()) {
+            for (Lyrics.Line line : r.synced) {
+                TextView t = text(line.text.isEmpty() ? "♪" : line.text, 20, palette.muted);
+                t.setTypeface(ThemeStyle.BOLD);
+                t.setPadding(0, dp(7), 0, dp(7));
+                final long at = line.time;
+                t.setOnClickListener(v -> { if (service != null) service.seek(at); });
+                lyricLines.addView(t);
+            }
+        } else {
+            TextView t = text(r.text, 17, palette.ink);
+            t.setLineSpacing(dp(4), 1f);
+            t.setTextIsSelectable(true);
+            lyricLines.addView(t);
+        }
+    }
+
+    void syncLyrics(long position) {
+        if (!showLyrics || lyrics == null || !lyrics.isSynced()) return;
+        int i = Lyrics.current(lyrics.synced, position + 250);
+        if (i == lyricIndex || i >= lyricLines.getChildCount()) return;
+        if (lyricIndex >= 0 && lyricIndex < lyricLines.getChildCount()) { TextView old = (TextView) lyricLines.getChildAt(lyricIndex); old.setTextColor(palette.muted); old.setTextSize(20); }
+        lyricIndex = i;
+        if (i < 0) return;
+        TextView now = (TextView) lyricLines.getChildAt(i);
+        now.setTextColor(palette.accent);
+        now.setTextSize(23);
+        lyricScroll.post(() -> lyricScroll.smoothScrollTo(0, Math.max(0, now.getTop() - lyricScroll.getHeight() / 3)));
+    }
+
+    void editLyrics() {
+        EditText input = new EditText(this);
+        input.setMinLines(6);
+        input.setGravity(Gravity.TOP);
+        input.setHint(AppLanguage.text(this, "Cole aqui a letra (texto ou LRC com [mm:ss])"));
+        if (lyrics != null && lyrics.found()) input.setText(lyrics.isSynced() ? Lyrics.lrcText(lyrics) : lyrics.text);
+        FrameLayout box = new FrameLayout(this);
+        box.setPadding(dp(20), dp(6), dp(20), 0);
+        box.addView(input);
+        new UiDialog.Builder(this).setTitle("Editar letra").setView(box).setPositiveButton("Guardar", (d, w) -> {
+            String text = input.getText().toString().trim();
+            if (text.isEmpty()) { Lyrics.forget(this, uri.toString()); loadLyrics(false); return; }
+            Lyrics.store(this, uri.toString(), text, "Seeky");
+            showLyricsResult(Lyrics.result(text, "Seeky"));
+        }).setNegativeButton("Cancelar", null).show();
     }
 
     void command(String action) {
@@ -418,6 +619,8 @@ public final class MediaActivity extends Activity implements TextureView.Surface
                     time.setText(ReaderActivity.clock(position));
                 }
                 remaining.setText("-" + ReaderActivity.clock(Math.max(0, duration - position)));
+                if (service.serial != shownSerial) { shownSerial = service.serial; trackChanged(); }
+                syncLyrics(position);
                 if (shownPlaying != service.playing || playIcon.getTag() == null) {
                     shownPlaying = service.playing;
                     playIcon.setTag(Boolean.TRUE);
@@ -429,7 +632,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
                 refreshRepeat();
                 fitVideo();
             }
-            handler.postDelayed(this, 500);
+            handler.postDelayed(this, showLyrics ? 250 : 500);
         }
     };
 

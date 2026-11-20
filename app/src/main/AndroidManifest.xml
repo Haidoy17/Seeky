@@ -5,7 +5,9 @@
  <uses-permission android:name="android.permission.INTERNET"/>
  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
  <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
+ <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+<uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
@@ -16,6 +18,7 @@
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
  <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent><package android:name="com.google.android.tts"/><package android:name="mz.bam.seeky.vozes"/></queries>
  <application android:name="mz.bam.seeky.android.SeekyApplication" android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false" android:label="${appLabel}" android:icon="@drawable/seeky" android:theme="@style/AppTheme" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:usesCleartextTraffic="false" android:supportsRtl="true">
+  <service android:name="mz.bam.seeky.android.UpdateJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>
   <service android:name="mz.bam.seeky.android.AutoBackupJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>
   <activity android:name="mz.bam.seeky.android.LockActivity" android:exported="false" android:launchMode="singleTop" android:taskAffinity="" android:excludeFromRecents="true" android:configChanges="orientation|screenSize|uiMode"/>
   <activity android:name="mz.bam.seeky.android.NaturalVoicesActivity" android:exported="false"/>
@@ -29,6 +32,8 @@
   <receiver android:name="mz.bam.seeky.android.ReadingWidget" android:exported="false"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/reading_widget_info"/></receiver>
   <receiver android:name="mz.bam.seeky.android.TodayWidget" android:exported="false" android:label="Seeky Hoje"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/today_widget_info"/></receiver>
   <receiver android:name="mz.bam.seeky.android.SeekyAlarms" android:exported="false"/>
+  <activity android:name="mz.bam.seeky.android.LibraryActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+  <activity android:name="mz.bam.seeky.android.EqualizerActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
   <activity android:name="mz.bam.seeky.android.PhotoEditorActivity" android:exported="false" android:configChanges="orientation|screenSize|screenLayout" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.ScanActivity" android:exported="false" android:configChanges="orientation|screenSize" android:theme="@android:style/Theme.Material.NoActionBar"/>
   <provider android:name="mz.bam.seeky.android.ScanProvider" android:authorities="${applicationId}.scan" android:exported="false" android:grantUriPermissions="true"/>
