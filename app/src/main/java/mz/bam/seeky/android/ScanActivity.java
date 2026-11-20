@@ -75,6 +75,7 @@ public final class ScanActivity extends Activity {
     File shot, pendingOutput;
     String pendingName = "", pendingMime = "application/pdf";
     AppPalette palette;
+    int accent, onAccent;
     TextView title, subtitle, badge;
     FrameLayout stage;
     CropView crop;
@@ -102,6 +103,8 @@ public final class ScanActivity extends Activity {
     @Override protected void onCreate(Bundle saved) {
         super.onCreate(saved);
         palette = AppPalette.of(this);
+        accent = darkAccent(palette.accent);
+        onAccent = AppPalette.contrast(Color.WHITE, accent) >= 4.5 ? Color.WHITE : 0xff111111;
         getWindow().setStatusBarColor(0xff101010);
         getWindow().setNavigationBarColor(0xff101010);
         buildLayout();
@@ -213,7 +216,7 @@ public final class ScanActivity extends Activity {
         root.addView(top);
 
         stage = new FrameLayout(this);
-        crop = new CropView(this, palette.accent);
+        crop = new CropView(this, accent);
         previewView = new ImageView(this);
         previewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         previewView.setPadding(dp(16), dp(8), dp(16), dp(8));
@@ -251,9 +254,9 @@ public final class ScanActivity extends Activity {
         b.setOrientation(LinearLayout.VERTICAL);
         b.setGravity(Gravity.CENTER);
         b.setPadding(dp(4), dp(8), dp(4), dp(8));
-        b.setBackground(round(active ? (palette.accent & 0xffffff) | 0x33000000 : Color.TRANSPARENT, 14));
-        b.addView(new Icons(this, symbol, active ? palette.accent : Color.WHITE), new LinearLayout.LayoutParams(dp(24), dp(24)));
-        TextView t = label(text, 11, active ? palette.accent : 0xffdddddd, false);
+        b.setBackground(round(active ? (accent & 0xffffff) | 0x33000000 : Color.TRANSPARENT, 14));
+        b.addView(new Icons(this, symbol, active ? accent : Color.WHITE), new LinearLayout.LayoutParams(dp(24), dp(24)));
+        TextView t = label(text, 11, active ? accent : 0xffdddddd, false);
         t.setGravity(Gravity.CENTER);
         t.setMaxLines(1);
         t.setEllipsize(TextUtils.TruncateAt.END);
@@ -264,9 +267,9 @@ public final class ScanActivity extends Activity {
     }
 
     TextView primary(String text, View.OnClickListener click) {
-        TextView t = label(text, 15, palette.onAccent, true);
+        TextView t = label(text, 15, onAccent, true);
         t.setGravity(Gravity.CENTER);
-        t.setBackground(round(palette.accent, 24));
+        t.setBackground(round(accent, 24));
         t.setPadding(dp(18), 0, dp(18), 0);
         t.setMaxLines(1);
         t.setOnClickListener(click);
@@ -344,7 +347,7 @@ public final class ScanActivity extends Activity {
             ImageView thumb = new ImageView(this);
             thumb.setScaleType(ImageView.ScaleType.CENTER_CROP);
             GradientDrawable frame = round(0xff2a2a2a, 10);
-            if (on) frame.setStroke(dp(2.5f), palette.accent);
+            if (on) frame.setStroke(dp(2.5f), accent);
             thumb.setBackground(frame);
             thumb.setPadding(dp(3), dp(3), dp(3), dp(3));
             if (sample != null) {
@@ -355,7 +358,7 @@ public final class ScanActivity extends Activity {
                 thumb.setImageBitmap(ScanFilters.apply(sample, s));
             }
             chip.addView(thumb, new LinearLayout.LayoutParams(dp(58), dp(74)));
-            TextView name = label(ScanFilters.NAMES[f], 10, on ? palette.accent : 0xffdddddd, on);
+            TextView name = label(ScanFilters.NAMES[f], 10, on ? accent : 0xffdddddd, on);
             name.setPadding(0, dp(4), 0, 0);
             name.setGravity(Gravity.CENTER);
             name.setMaxLines(2);
@@ -396,8 +399,8 @@ public final class ScanActivity extends Activity {
         SeekBar bar = new SeekBar(this);
         bar.setMax(max - min);
         bar.setProgress(value - min);
-        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(palette.accent));
-        bar.setThumbTintList(android.content.res.ColorStateList.valueOf(palette.accent));
+        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(accent));
+        bar.setThumbTintList(android.content.res.ColorStateList.valueOf(accent));
         TextView v = label(String.valueOf(value), 12, Color.WHITE, true);
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             public void onProgressChanged(SeekBar s, int p, boolean user) { v.setText(String.valueOf(p + min)); if (user) setter.set(p + min); }
@@ -462,8 +465,8 @@ public final class ScanActivity extends Activity {
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(dp(24), dp(80), dp(24), dp(24));
             FrameLayout icon = new FrameLayout(this);
-            icon.setBackground(round((palette.accent & 0xffffff) | 0x33000000, 36));
-            icon.addView(new Icons(this, "scan", palette.accent), new FrameLayout.LayoutParams(dp(40), dp(40), Gravity.CENTER));
+            icon.setBackground(round((accent & 0xffffff) | 0x33000000, 36));
+            icon.addView(new Icons(this, "scan", accent), new FrameLayout.LayoutParams(dp(40), dp(40), Gravity.CENTER));
             empty.addView(icon, new LinearLayout.LayoutParams(dp(88), dp(88)));
             TextView t = label("Nenhuma página ainda", 18, Color.WHITE, true);
             t.setPadding(0, dp(16), 0, dp(6));
@@ -485,9 +488,9 @@ public final class ScanActivity extends Activity {
             img.setBackground(round(0xff222222, 12));
             img.setPadding(dp(6), dp(6), dp(6), dp(6));
             cell.addView(img, new FrameLayout.LayoutParams(-1, dp(220)));
-            TextView number = label(String.valueOf(i + 1), 12, palette.onAccent, true);
+            TextView number = label(String.valueOf(i + 1), 12, onAccent, true);
             number.setGravity(Gravity.CENTER);
-            number.setBackground(round(palette.accent, 12));
+            number.setBackground(round(accent, 12));
             cell.addView(number, new FrameLayout.LayoutParams(dp(26), dp(26), Gravity.TOP | Gravity.START));
             TextView effect = label(ScanFilters.NAMES[p.settings.filter], 10, Color.WHITE, false);
             effect.setPadding(dp(8), dp(3), dp(8), dp(3));
@@ -690,11 +693,11 @@ public final class ScanActivity extends Activity {
         List<TextView> all = new ArrayList<>();
         for (int i = 0; i < names.length; i++) {
             final int index = i;
-            TextView t = label(names[i], 13, i == selected ? palette.onAccent : p.ink, true);
+            TextView t = label(names[i], 13, i == selected ? onAccent : p.ink, true);
             t.setGravity(Gravity.CENTER);
             t.setPadding(dp(6), dp(10), dp(6), dp(10));
             t.setMaxLines(1);
-            t.setBackground(round(i == selected ? palette.accent : palette.tint, 12));
+            t.setBackground(round(i == selected ? accent : palette.tint, 12));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, -2, 1);
             lp.rightMargin = i < names.length - 1 ? dp(6) : 0;
             row.addView(t, lp);
@@ -702,8 +705,8 @@ public final class ScanActivity extends Activity {
             t.setOnClickListener(v -> {
                 setter.set(index);
                 for (int k = 0; k < all.size(); k++) {
-                    all.get(k).setTextColor(k == index ? palette.onAccent : p.ink);
-                    all.get(k).setBackground(round(k == index ? palette.accent : palette.tint, 12));
+                    all.get(k).setTextColor(k == index ? onAccent : p.ink);
+                    all.get(k).setBackground(round(k == index ? accent : palette.tint, 12));
                 }
             });
         }
@@ -1113,5 +1116,12 @@ public final class ScanActivity extends Activity {
                     return true;
             }
         }
+    }
+
+    /** Cor de destaque legível sobre fundo escuro: aclara as cores escuras dos temas claros. */
+    static int darkAccent(int accent) {
+        int c = accent;
+        for (int i = 0; i < 10 && AppPalette.contrast(c, 0xff151515) < 4.5; i++) c = ThemeColors.blend(c, Color.WHITE, .2f);
+        return c;
     }
 }

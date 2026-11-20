@@ -1,5 +1,28 @@
 # Registo de alterações
 
+## 5.25.0 — 2026-11-20
+
+- **Editor de fotografias** (`PhotoEditorActivity`, `PhotoEdit`), a partir do visualizador de
+  imagens (Editar):
+  - Recortar: proporções Livre, Original, 1:1, 4:3, 3:4, 16:9 e 9:16, com grelha;
+  - endireitar ±45° com zoom automático (sem cantos vazios), perspectiva vertical e horizontal;
+  - rodar e espelhar;
+  - 12 filtros com intensidade;
+  - 10 ajustes (brilho, contraste, saturação, calor, matiz, realces, sombras, nitidez, vinheta,
+    grão) e Automático;
+  - desenho com pincel e marcador; texto com cor, tamanho e fundo, que se arrasta;
+  - desfazer e refazer; manter premido mostra o original;
+  - guardar como cópia (ao lado do original ou em Imagens/Seeky), substituir o original (com
+    confirmação) ou partilhar. Até 3200 px, com nova tentativa mais pequena se faltar memória.
+- **Partilhar nos leitores** (`ShareTools`):
+  - foto aberta: Partilhar e Abrir noutra aplicação;
+  - música: botão no cabeçalho, com "o que estou a ouvir" em texto;
+  - vídeo: também o fotograma actual;
+  - documentos: botão na barra do leitor; nos PDF, também a página actual como imagem; texto
+    seleccionado com Partilhar selecção.
+- Editor e digitalizador aclaram a cor de destaque nos temas claros, para se ler no fundo escuro.
+- `PhotoEditor5250Test` (6 testes); `Viewers5190Test` verifica os novos botões.
+
 ## 5.24.0 — 2026-11-20
 
 - **Bíblias para descarregar** (`BibleCatalog`): catálogo do eBible.org com mais de 1500
