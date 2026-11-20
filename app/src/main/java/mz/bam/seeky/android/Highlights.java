@@ -46,14 +46,17 @@ final class Highlights {
     }
 
     static final class Store extends SQLiteOpenHelper {
-        Store(Context c){super(c.getApplicationContext(),"seeky-marks.db",null,1);}
+        Store(Context c){super(c.getApplicationContext(),"seeky-marks.db",null,2);}
         @Override public void onCreate(SQLiteDatabase d){
             d.execSQL("CREATE TABLE pdf_marks(id INTEGER PRIMARY KEY,uri TEXT NOT NULL,page INTEGER NOT NULL,start INTEGER NOT NULL,finish INTEGER NOT NULL,kind TEXT NOT NULL,note TEXT NOT NULL DEFAULT '',value TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL)");
             d.execSQL("CREATE INDEX pdf_marks_page ON pdf_marks(uri,page)");
             d.execSQL("CREATE TABLE books(uri TEXT PRIMARY KEY,name TEXT,mime TEXT,updated INTEGER)");
             d.execSQL("CREATE TABLE text_times(uri TEXT,segment INTEGER,start INTEGER,finish INTEGER,kind TEXT,created INTEGER,PRIMARY KEY(uri,segment,start,finish,kind))");
+            web(d);
         }
-        @Override public void onUpgrade(SQLiteDatabase d,int o,int n){}
+        /** EPUB and Word pages in their original layout: offsets in the page's visible text. */
+        static void web(SQLiteDatabase d){d.execSQL("CREATE TABLE web_marks(id INTEGER PRIMARY KEY,uri TEXT NOT NULL,part INTEGER NOT NULL,start INTEGER NOT NULL,finish INTEGER NOT NULL,kind TEXT NOT NULL,note TEXT NOT NULL DEFAULT '',value TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL)");d.execSQL("CREATE INDEX web_marks_part ON web_marks(uri,part)");}
+        @Override public void onUpgrade(SQLiteDatabase d,int o,int n){if(o<2)web(d);}
     }
     static void remember(Context c,String uri,String name,String mime){
         try(Store s=new Store(c)){ContentValues v=new ContentValues();v.put("uri",uri);v.put("name",name==null?"":name);v.put("mime",mime==null?"":mime);v.put("updated",System.currentTimeMillis());s.getWritableDatabase().insertWithOnConflict("books",null,v,SQLiteDatabase.CONFLICT_REPLACE);}
@@ -75,12 +78,30 @@ final class Highlights {
     }
 
     static final class Entry {
+        /** Mark made in the original EPUB/Word view (offsets in that page's text). */
+        boolean web;
         final boolean pdf;final long id,created;final String uri,name,mime,kind,note,text,digest;final int part,start,end;
         Entry(boolean pdf,long id,String uri,String name,String mime,int part,int start,int end,String kind,String note,String text,String digest,long created){this.pdf=pdf;this.id=id;this.uri=uri;this.name=name;this.mime=mime;this.part=part;this.start=start;this.end=end;this.kind=kind;this.note=note==null?"":note;this.text=text==null?"":text;this.digest=digest;this.created=created;}
         /** "página 12", "capítulo 3" or "parte 2" in the language of the document. */
-        String where(){String m=mime==null?"":mime;return (pdf||m.contains("pdf")?"página ":m.contains("epub")?"capítulo ":"parte ")+(part+1);}
+        String where(){String m=mime==null?"":mime;if(web&&!m.contains("epub"))return "documento";return (pdf||m.contains("pdf")?"página ":m.contains("epub")?"capítulo ":"parte ")+(part+1);}
     }
     static String name(String uri,String stored){if(stored!=null&&!stored.isEmpty())return stored;String last=Uri.parse(uri).getLastPathSegment();return last==null||last.isEmpty()?"Documento":last.substring(last.lastIndexOf('/')+1);}
+    static long addWeb(Context c,String uri,String name,String mime,int part,int start,int end,String kind,String note,String value){
+        remember(c,uri,name,mime);
+        try(Store s=new Store(c)){
+            SQLiteDatabase db=s.getWritableDatabase();
+            db.delete("web_marks","uri=? AND part=? AND start=? AND finish=? AND kind=?",new String[]{uri,""+part,""+start,""+end,kind});
+            ContentValues v=new ContentValues();v.put("uri",uri);v.put("part",part);v.put("start",start);v.put("finish",end);v.put("kind",kind);v.put("note",note==null?"":note);v.put("value",value==null?"":value);v.put("created",System.currentTimeMillis());
+            return db.insert("web_marks",null,v);
+        }
+    }
+    static List<Entry> web(Context c,String uri,int part){
+        List<Entry> out=new ArrayList<>();
+        try(Store s=new Store(c);Cursor q=s.getReadableDatabase().rawQuery("SELECT id,start,finish,kind,note,value,created FROM web_marks WHERE uri=? AND part=? ORDER BY start",new String[]{uri,""+part})){
+            while(q.moveToNext()){Entry e=new Entry(false,q.getLong(0),uri,"","",part,q.getInt(1),q.getInt(2),q.getString(3),q.getString(4),q.getString(5),"",q.getLong(6));e.web=true;out.add(e);}
+        }
+        return out;
+    }
     static List<Entry> pdf(Context c,String uri,int page){
         List<Entry> out=new ArrayList<>();
         try(Store s=new Store(c);Cursor q=s.getReadableDatabase().rawQuery("SELECT id,start,finish,kind,note,value,created FROM pdf_marks WHERE uri=? AND page=? ORDER BY start",new String[]{uri,""+page})){
@@ -97,6 +118,9 @@ final class Highlights {
             try(Cursor q=db.rawQuery("SELECT uri,segment,start,finish,kind,created FROM text_times",null)){while(q.moveToNext())times.put(q.getString(0)+"|"+q.getInt(1)+"|"+q.getInt(2)+"|"+q.getInt(3)+"|"+q.getString(4),q.getLong(5));}
             try(Cursor q=only==null?db.rawQuery("SELECT id,uri,page,start,finish,kind,note,value,created FROM pdf_marks",null):db.rawQuery("SELECT id,uri,page,start,finish,kind,note,value,created FROM pdf_marks WHERE uri=?",new String[]{only})){
                 while(q.moveToNext()){String uri=q.getString(1);String[] b=books.get(uri);out.add(new Entry(true,q.getLong(0),uri,name(uri,b==null?null:b[0]),b==null||b[1].isEmpty()?"application/pdf":b[1],q.getInt(2),q.getInt(3),q.getInt(4),q.getString(5),q.getString(6),q.getString(7),"",q.getLong(8)));}
+            }
+            try(Cursor q=only==null?db.rawQuery("SELECT id,uri,part,start,finish,kind,note,value,created FROM web_marks",null):db.rawQuery("SELECT id,uri,part,start,finish,kind,note,value,created FROM web_marks WHERE uri=?",new String[]{only})){
+                while(q.moveToNext()){String uri=q.getString(1);String[] b=books.get(uri);Entry e=new Entry(false,q.getLong(0),uri,name(uri,b==null?null:b[0]),b==null||b[1]==null?"":b[1],q.getInt(2),q.getInt(3),q.getInt(4),q.getString(5),q.getString(6),q.getString(7),"",q.getLong(8));e.web=true;out.add(e);}
             }
         }
         try(ReaderStore r=new ReaderStore(c);Cursor q=only==null?r.getReadableDatabase().rawQuery("SELECT uri,segment,digest,value,marks FROM draft WHERE marks<>'[]'",null):r.getReadableDatabase().rawQuery("SELECT uri,segment,digest,value,marks FROM draft WHERE marks<>'[]' AND uri=?",new String[]{only})){
@@ -116,7 +140,7 @@ final class Highlights {
     }
     /** Changes the style of a mark (kind) or removes it (null). */
     static void change(Context c,Entry e,String kind){
-        if(e.pdf){try(Store s=new Store(c)){if(kind==null)s.getWritableDatabase().delete("pdf_marks","id=?",new String[]{""+e.id});else{ContentValues v=new ContentValues();v.put("kind",kind);s.getWritableDatabase().update("pdf_marks",v,"id=?",new String[]{""+e.id});}}return;}
+        if(e.pdf||e.web){String table=e.web?"web_marks":"pdf_marks";try(Store s=new Store(c)){if(kind==null)s.getWritableDatabase().delete(table,"id=?",new String[]{""+e.id});else{ContentValues v=new ContentValues();v.put("kind",kind);s.getWritableDatabase().update(table,v,"id=?",new String[]{""+e.id});}}return;}
         try(ReaderStore r=new ReaderStore(c)){
             SQLiteDatabase db=r.getWritableDatabase();
             db.beginTransaction();
@@ -136,7 +160,9 @@ final class Highlights {
     static Intent intent(Context c,Entry e){
         String mime=e.mime==null||e.mime.isEmpty()?MediaFormats.mime(e.name,null):e.mime;
         Intent i=new Intent(c,ReaderActivity.class).setDataAndType(Uri.parse(e.uri),mime).putExtra("name",e.name).putExtra("study_segment",e.part);
-        if(!e.pdf)i.putExtra("search_offset",e.start).putExtra("search_length",Math.max(1,e.end-e.start));
+        // Original EPUB/Word marks open in the original view and scroll to the marked words.
+        if(e.web){c.getSharedPreferences("seeky",0).edit().putBoolean("reader_original_"+e.uri,true).apply();i.putExtra("original_mark",e.start);}
+        else if(!e.pdf)i.putExtra("search_offset",e.start).putExtra("search_length",Math.max(1,e.end-e.start));
         return i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     }
     static void open(Activity a,Entry e){try{a.startActivity(intent(a,e));}catch(RuntimeException failed){PlusUi.toast(a,"Não foi possível abrir este livro. Abra-o de novo na biblioteca.");}}

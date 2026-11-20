@@ -1,0 +1,10 @@
+ok selected text {"s":15,"e":41,"t":"medo de alguma coisa. Pode"}
+ok wrapped across the bold run: 2
+ok marked words medo de alguma coisa. Pode
+ok link text selection {"s":65,"e":81,"t":"Isaías 3.1-7, 12"}
+ok re-applied both marks: 3
+ok underline inside link Isaías 3.1-7, 12
+ok stable after reload medo de alguma coisa. Pode
+ok scroll to mark
+ok unwrapped: Todo mundo tem medo de alguma coisa. Pode ser de cachorros. Leia Isaías 3.1-7, 12 hoje e fique em paz.
+ok tap opens the mark

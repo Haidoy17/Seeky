@@ -1,3 +1,12 @@
+## Seeky 5.31.0
+
+Instale **Seeky_5.31.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Marcar no EPUB e no Word originais** (também "EPUB ajustado"): ao seleccionar texto aparece a
+  barra de cores; Destacar, Cores e mais marcas e Nota no menu. As marcas ficam no livro, voltam a
+  aparecer ao reabrir e estão em As minhas marcações.
+
 ## Seeky 5.30.0
 
 Instale **Seeky_5.30.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
