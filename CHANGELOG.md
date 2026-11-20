@@ -1,5 +1,36 @@
 # Registo de alterações
 
+## 5.28.0 — 2026-11-20
+
+- **Passagens bíblicas reconhecidas como se escrevem em português** (`BibleReferences` reescrito):
+  - capítulo e versículo com dois pontos, ponto ou vírgula: `Jo 3:16`, `Isaías 3.1-7, 12`,
+    `Jo 3,16-18.20`;
+  - intervalos, listas, vários capítulos (`Is 3.1-4.2`, `Is 3.1-7, 12.3`, `Mt 5:3-12; 6:1`),
+    "e seguintes" (`2Tm 3.16s`), meio versículo (`Gn 1.1a`);
+  - capítulos inteiros (`Salmo 23`, `Isaías 53-55`) e livros de um só capítulo (`Judas 3`);
+  - texto de OCR sem espaço (`Isaías3.1`) e quebras de linha de PDF entre livro e capítulo;
+  - limites de capítulos e versículos por livro evitam falsos positivos ("Os 3,5 milhões",
+    "na 2.1 secção", "Ne 2.3.1", "João 3 vezes", "Na 2,3 g");
+  - a leitura em voz alta passa a dizer também "Isaías capítulo 3, versículos 1 a 7 e 12";
+  - mais rápido do que o reconhecedor anterior.
+- **Tocar na referência em todos os formatos**:
+  - PDF: as referências da página ficam sublinhadas e abrem com um toque (o resto da página
+    continua a mostrar/esconder a barra); um botão "N passagens bíblicas" lista as da página,
+    também em páginas digitalizadas depois do OCR;
+  - Word (vista original) e EPUB: as referências ficam ligadas mesmo quando o livro e o
+    capítulo estão em formatações diferentes;
+  - texto (TXT, Word/EPUB em texto, página PDF em texto, OCR) e o texto do digitalizador;
+  - seleccionar um texto → "Abrir passagem bíblica" (PDF e texto).
+- **Leitura rápida da passagem**, por cima do livro:
+  - versões importadas em botões (a escolhida fica lembrada);
+  - Copiar (com referência e versão), Partilhar, Ouvir, Guardar, A−/A+;
+  - Capítulo inteiro com a passagem destacada e capítulo anterior/seguinte;
+  - Comparar versões lado a lado;
+  - sem Bíblia importada: Descarregar uma Bíblia, Importar ficheiro ou Copiar referência.
+- **Passagens guardadas** em Consultar passagem → Guardadas, em Ferramentas → Bíblias e no menu
+  do leitor; o leitor também permite desactivar as ligações bíblicas.
+- Consulta escrita mais tolerante: `is 53`, `isaias 3.1-7, 12`.
+
 ## 5.27.0 — 2026-11-20
 
 - **Leitor de música reorganizado** (`MediaActivity` reescrito):

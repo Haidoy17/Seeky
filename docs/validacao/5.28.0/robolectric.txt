@@ -1,0 +1,3 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.28.0
+OK (448 tests)
+exit=0
