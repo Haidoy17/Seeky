@@ -91,7 +91,16 @@ public class Bible529Test {
         assertEquals(first.part,open.getIntExtra("study_segment",-1));assertEquals(start,open.getIntExtra("search_offset",-1));assertEquals("content://seeky.bible529.reader/book",open.getData().toString());
         HighlightsActivity list=launch(HighlightsActivity.class);
         String labels=labels(list);
-        assertTrue(labels,labels.contains("A fé é o firme fundamento")&&labels.contains("Estudo.txt")&&labels.contains("2 marcações")&&labels.contains("Destaques")&&labels.contains("Verde"));
+        assertTrue(labels,labels.contains("A fé é o firme fundamento")&&labels.contains("Estudo.txt")&&labels.contains("2 marcações · 1 livro")&&labels.contains("Todas 2")&&labels.contains("Destaques 1")&&labels.contains("Sublinhados 1")&&labels.contains("Destaque · verde")&&labels.contains("Abrir"));
+        assertNotNull("colour filter",PageTurnTest.findDescription(list.getWindow().getDecorView(),"Verde 1"));
+        click(list.getWindow().getDecorView(),"Verde 1");layout(list);assertTrue(labels(list).contains("1 marcação · 1 livro"));
+        click(list.getWindow().getDecorView(),"Verde 1");layout(list);
+        list.sort.performClick();drain();layout(list);assertTrue(labels(list),labels(list).contains("Por livro")&&labels(list).contains("Estudo.txt\n2"));
+        capture(list.getWindow().getDecorView(),"marcacoes-livro",800);
+        list.sort.performClick();drain();layout(list);
+        a.getSharedPreferences("seeky",0).edit().putString("theme","Noite").apply();
+        HighlightsActivity dark=launch(HighlightsActivity.class);capture(dark.getWindow().getDecorView(),"marcacoes-escuro",800);
+        a.getSharedPreferences("seeky",0).edit().remove("theme").apply();
         capture(list.getWindow().getDecorView(),"marcacoes",800);
         list.list.performItemClick(list.list.getAdapter().getView(0,null,list.list),0,0);drain();
         String full=dialog();assertTrue(full,full.contains("Abrir no livro")&&full.contains("Mudar cor")&&full.contains("Eliminar"));
@@ -103,6 +112,9 @@ public class Bible529Test {
     }
 
     @Test public void pdfMarksAreSavedDrawnAndOpenFromTheList()throws Exception{
+        assertEquals("Para a equipe da Avery e Penguin Random House",Highlights.clean("Para\ta\u0000equipe \t da\uE020Avery e\u00a0Penguin\u200bRandom\nHouse"));
+        assertEquals("atendimento técnico",Highlights.clean("atendi-\nmento\r\n técnico"));
+        assertEquals("compra deste conteúdo",Highlights.clean("  compra\ufffd\ufffddeste  conteúdo \t"));
         String line="Agora a fé é o firme fundamento das coisas.";
         Paint ink=new Paint(Paint.ANTI_ALIAS_FLAG);ink.setTextSize(13.5f);ink.setColor(Color.BLACK);
         List<PdfGlyphs.Glyph> boxes=new ArrayList<>();for(int i=0;i<line.length();i++)if(line.charAt(i)!=' ')boxes.add(new PdfGlyphs.Glyph(i,i+1,30+ink.measureText(line,0,i),118,ink.measureText(line,i,i+1),14));

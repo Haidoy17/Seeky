@@ -72,7 +72,7 @@ final class Highlights {
             SQLiteDatabase db=s.getWritableDatabase();
             // The same colour twice over the same words is one mark; another style is added on top.
             db.delete("pdf_marks","uri=? AND page=? AND start=? AND finish=? AND kind=?",new String[]{uri,""+page,""+start,""+end,kind});
-            ContentValues v=new ContentValues();v.put("uri",uri);v.put("page",page);v.put("start",start);v.put("finish",end);v.put("kind",kind);v.put("note",note==null?"":note);v.put("value",value==null?"":value);v.put("created",System.currentTimeMillis());
+            ContentValues v=new ContentValues();v.put("uri",uri);v.put("page",page);v.put("start",start);v.put("finish",end);v.put("kind",kind);v.put("note",note==null?"":note);v.put("value",clean(value));v.put("created",System.currentTimeMillis());
             return db.insert("pdf_marks",null,v);
         }
     }
@@ -81,7 +81,7 @@ final class Highlights {
         /** Mark made in the original EPUB/Word view (offsets in that page's text). */
         boolean web;
         final boolean pdf;final long id,created;final String uri,name,mime,kind,note,text,digest;final int part,start,end;
-        Entry(boolean pdf,long id,String uri,String name,String mime,int part,int start,int end,String kind,String note,String text,String digest,long created){this.pdf=pdf;this.id=id;this.uri=uri;this.name=name;this.mime=mime;this.part=part;this.start=start;this.end=end;this.kind=kind;this.note=note==null?"":note;this.text=text==null?"":text;this.digest=digest;this.created=created;}
+        Entry(boolean pdf,long id,String uri,String name,String mime,int part,int start,int end,String kind,String note,String text,String digest,long created){this.pdf=pdf;this.id=id;this.uri=uri;this.name=name;this.mime=mime;this.part=part;this.start=start;this.end=end;this.kind=kind;this.note=note==null?"":note.trim();this.text=clean(text);this.digest=digest;this.created=created;}
         /** "página 12", "capítulo 3" or "parte 2" in the language of the document. */
         String where(){String m=mime==null?"":mime;if(web&&!m.contains("epub"))return "documento";return (pdf||m.contains("pdf")?"página ":m.contains("epub")?"capítulo ":"parte ")+(part+1);}
     }
@@ -91,7 +91,7 @@ final class Highlights {
         try(Store s=new Store(c)){
             SQLiteDatabase db=s.getWritableDatabase();
             db.delete("web_marks","uri=? AND part=? AND start=? AND finish=? AND kind=?",new String[]{uri,""+part,""+start,""+end,kind});
-            ContentValues v=new ContentValues();v.put("uri",uri);v.put("part",part);v.put("start",start);v.put("finish",end);v.put("kind",kind);v.put("note",note==null?"":note);v.put("value",value==null?"":value);v.put("created",System.currentTimeMillis());
+            ContentValues v=new ContentValues();v.put("uri",uri);v.put("part",part);v.put("start",start);v.put("finish",end);v.put("kind",kind);v.put("note",note==null?"":note);v.put("value",clean(value));v.put("created",System.currentTimeMillis());
             return db.insert("web_marks",null,v);
         }
     }
@@ -193,11 +193,20 @@ final class Highlights {
     /** Full text of a mark with open, copy, share, colour and delete. */
     static void view(Activity a,Entry e,Runnable changed){
         Screens s=new Screens(a);LinearLayout root=s.column();
-        TextView where=s.text(e.name+" · "+e.where(),14,s.p.muted,true);root.addView(where);
-        SpannableString body=new SpannableString(e.text);apply(body,0,body.length(),e.kind);
-        TextView text=new TextView(a);text.setText(body);text.setTextSize(17);text.setTextColor(s.p.ink);text.setLineSpacing(s.dp(4),1.15f);text.setTextIsSelectable(true);text.setPadding(0,s.dp(10),0,s.dp(4));
-        root.addView(text);
-        if(!e.note.isEmpty()){TextView note=s.text(e.note,15,s.p.ink,false);note.setPadding(s.dp(12),s.dp(10),s.dp(12),s.dp(10));note.setBackground(s.round(0x332f80ed,12));note.setTextIsSelectable(true);root.addView(note,s.gap(10));}
+        LinearLayout head=s.row();head.addView(pill(s,e));
+        TextView when=s.text(e.created>0?java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(new Date(e.created)):"",12,s.p.muted,false);when.setGravity(Gravity.END);
+        head.addView(when,new LinearLayout.LayoutParams(0,-2,1));root.addView(head);
+        LinearLayout book=s.row();book.setPadding(0,s.dp(10),0,s.dp(10));
+        book.addView(new Icons(a,"book",s.p.accent),new LinearLayout.LayoutParams(s.dp(18),s.dp(18)));
+        TextView where=s.text(e.name+" · "+e.where(),14,s.p.ink,true);where.setPadding(s.dp(8),0,0,0);where.setMaxLines(2);where.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+        book.addView(where,new LinearLayout.LayoutParams(0,-2,1));root.addView(book);
+        root.addView(quote(s,e,0,18),new LinearLayout.LayoutParams(-1,-2));
+        if(!e.note.isEmpty()){
+            LinearLayout note=s.row();note.setGravity(Gravity.TOP);note.setPadding(s.dp(12),s.dp(10),s.dp(12),s.dp(10));note.setBackground(s.round(blend(s.p.surface,0xff2f80ed,s.p.light?.12f:.18f),14));
+            note.addView(new Icons(a,"note",0xff2f80ed),new LinearLayout.LayoutParams(s.dp(18),s.dp(18)));
+            TextView n=s.text(e.note,15,s.p.ink,false);n.setPadding(s.dp(8),0,0,0);n.setTextIsSelectable(true);note.addView(n,new LinearLayout.LayoutParams(0,-2,1));
+            root.addView(note,s.gap(10));
+        }
         LinearLayout actions=s.row();
         final UiDialog[] dialog=new UiDialog[1];
         s.addChip(actions,s.chip("copy","Copiar",false,()->{((android.content.ClipboardManager)a.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText(e.name,share(e)));PlusUi.toast(a,"Texto copiado.");}));
@@ -208,6 +217,53 @@ final class Highlights {
         dialog[0]=new UiDialog.Builder(a).setTitle(label(e.kind)).setView(root).setPositiveButton("Abrir no livro",(d,w)->open(a,e)).setNegativeButton("Fechar",null).create();
         dialog[0].show();
     }
-    static String share(Entry e){return "“"+e.text.trim()+"”"+(e.note.isEmpty()?"":"\n"+e.note)+"\n— "+e.name+", "+e.where();}
+    static String share(Entry e){return "“"+e.text+"”"+(e.note.isEmpty()?"":"\n"+e.note)+"\n— "+e.name+", "+e.where();}
+    /**
+     * Readable text of a mark. PDF text often carries tabs, private-use or control characters between
+     * words (drawn as gaps or boxes) and hyphenated line breaks; they become single spaces or are joined.
+     */
+    static String clean(String value){
+        if(value==null)return "";
+        String t=value.replaceAll("(\\p{L})[-\u00ad]\\s*[\\r\\n]+\\s*(\\p{Ll})","$1$2");
+        StringBuilder out=new StringBuilder(t.length());boolean gap=false;
+        for(int i=0;i<t.length();i++){
+            char c=t.charAt(i);int type=Character.getType(c);
+            // A zero-width space separates words in some PDFs; other format marks (soft hyphen, joiners) vanish.
+            if(type==Character.FORMAT&&c!='\u200b')continue;
+            if(Character.isWhitespace(c)||Character.isSpaceChar(c)||Character.isISOControl(c)||type==Character.PRIVATE_USE||c=='\ufffd'||c=='\u200b'){gap=true;continue;}
+            if(gap&&out.length()>0)out.append(' ');gap=false;out.append(c);
+        }
+        return out.toString();
+    }
+    /** {@code color} mixed into {@code base}: soft card tints that stay readable in dark themes. */
+    static int blend(int base,int color,float amount){
+        int r=Math.round(((base>>16)&255)*(1-amount)+((color>>16)&255)*amount),g=Math.round(((base>>8)&255)*(1-amount)+((color>>8)&255)*amount),b=Math.round((base&255)*(1-amount)+(color&255)*amount);
+        return 0xff000000|(r<<16)|(g<<8)|b;
+    }
+    /** "Destaque · amarelo", "Sublinhado"… with the colour name for coloured highlights. */
+    static String colourName(String kind){for(int i=0;i<KINDS.length;i++)if(KINDS[i].equals(kind))return NAMES[i];return "";}
+    /** The marked words as a quote: colour bar, softly tinted card, serif text in the page's ink. */
+    static LinearLayout quote(Screens s,Entry e,int maxLines,float size){
+        int color=color(e.kind);
+        LinearLayout card=new LinearLayout(s.a);card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setBackground(s.round(blend(s.p.surface,color,s.p.light?.22f:.13f),16));
+        View bar=new View(s.a);bar.setBackground(s.round(color,3));
+        LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(s.dp(5),-1);bp.setMargins(s.dp(10),s.dp(12),0,s.dp(12));card.addView(bar,bp);
+        TextView text=new TextView(s.a);text.setText(e.text);text.setTextSize(size);text.setTextColor(s.p.ink);text.setTypeface(android.graphics.Typeface.SERIF);text.setLineSpacing(s.dp(3),1.1f);
+        if(e.kind.equals("underline")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.UNDERLINE_TEXT_FLAG);}
+        if(e.kind.equals("strike")){text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);}
+        if(maxLines>0){text.setMaxLines(maxLines);text.setEllipsize(TextUtils.TruncateAt.END);}else text.setTextIsSelectable(true);
+        text.setPadding(s.dp(12),s.dp(12),s.dp(14),s.dp(12));
+        card.addView(text,new LinearLayout.LayoutParams(0,-2,1));
+        return card;
+    }
+    /** Small pill with the mark's colour and kind. */
+    static LinearLayout pill(Screens s,Entry e){
+        LinearLayout p=s.row();p.setPadding(s.dp(8),s.dp(3),s.dp(10),s.dp(3));p.setBackground(s.round(s.p.tint,12));
+        View dot=new View(s.a);GradientDrawable g=new GradientDrawable();g.setShape(GradientDrawable.OVAL);g.setColor(color(e.kind));dot.setBackground(g);p.addView(dot,new LinearLayout.LayoutParams(s.dp(10),s.dp(10)));
+        String name=colourName(e.kind);
+        TextView t=s.text(AppLanguage.text(s.a,e.kind.startsWith("highlight")?"Destaque":label(e.kind))+(name.isEmpty()?"":" · "+AppLanguage.text(s.a,name).toLowerCase(Locale.ROOT)),13.5f,s.p.ink,true);t.setPadding(s.dp(6),0,0,0);
+        p.addView(t);return p;
+    }
     private Highlights(){}
 }

@@ -1,3 +1,12 @@
+## Seeky 5.32.0
+
+Instale **Seeky_5.32.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **As minhas marcações renovadas**: cartões de citação legíveis (também no tema escuro), por data
+  ou por livro, filtros por tipo e cor, e copiar/partilhar/abrir em cada cartão.
+- O texto das marcações feitas em PDF já não mostra falhas escuras entre as palavras.
+
 ## Seeky 5.31.0
 
 Instale **Seeky_5.31.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

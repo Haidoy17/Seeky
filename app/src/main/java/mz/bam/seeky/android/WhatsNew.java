@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.31", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.32", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("edit", "As minhas marcações renovadas", "Citações legíveis também no tema escuro, sem falhas entre as palavras; por data ou por livro; filtros por tipo e cor; copiar, partilhar e abrir em cada cartão", false, () -> HighlightsActivity.open(a, null));
+        panel.section("Da 5.31");
         panel.action("edit", "Marcar no EPUB e no Word originais", "Na vista original (também \"EPUB ajustado\"), ao seleccionar aparece a barra de cores e Destacar, Cores e mais marcas e Nota no menu; as marcas voltam a aparecer ao reabrir", false, () -> HighlightsActivity.open(a, null));
         panel.section("Da 5.30");
         panel.action("edit", "Barra de marcar ao seleccionar", "No leitor do Seeky, ao seleccionar texto (também no PDF) aparece em baixo uma barra: 6 cores, Sublinhar, Riscar e Nota, com um toque", false, () -> HighlightsActivity.open(a, null));

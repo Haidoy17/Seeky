@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005800,
-  "versionName": "5.31.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.31.0.apk",
-  "sha256": "8c2af5fdd0d1367274facb3dde98408bedfd34ea93433ca4dea55a019eea17c1",
-  "bytes": 13515036,
-  "notes": "Marcar no EPUB e no Word na vista original (também EPUB ajustado): barra de cores, Destacar, Cores e mais marcas e Nota; as marcas voltam a aparecer ao reabrir e estão em As minhas marcações."
+  "versionCode": 5005900,
+  "versionName": "5.32.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.32.0.apk",
+  "sha256": "8dc155c0b427689f31a2198263906687b2d3ea6839ecfa6a8e439615332c49dd",
+  "bytes": 13520018,
+  "notes": "As minhas marcações renovadas: cartões de citação legíveis no tema escuro, por data ou por livro, filtros por tipo e cor, copiar/partilhar/abrir em cada cartão; texto das marcas de PDF sem falhas entre as palavras."
 }

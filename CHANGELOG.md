@@ -1,5 +1,21 @@
 # Registo de alterações
 
+## 5.32.0 — 2026-11-20
+
+- **As minhas marcações renovadas**:
+  - cada marcação é um cartão de citação: barra e fundo suave da cor, texto em serifa na cor do
+    tema (legível no tema escuro), etiqueta com o tipo e a cor, página/capítulo e data;
+  - acções em cada cartão: copiar, partilhar e Abrir (no livro, no sítio exacto); toque para ver
+    por completo;
+  - ordenar por data (Recentes) ou agrupar por livro, com o número de marcações de cada livro;
+  - filtros por tipo (só os que existem) e por cor (círculos), pesquisa por texto, nota ou livro
+    sem contar acentos, com botão para limpar;
+  - partilhar todas as marcações agrupadas por livro e página (botão junto à contagem).
+- **Texto das marcações limpo**: o texto extraído de alguns PDF traz tabulações e caracteres
+  invisíveis entre as palavras, que apareciam como falhas escuras ou blocos; passam a espaços
+  simples e as palavras partidas no fim da linha ("atendi-/mento") voltam a juntar-se.
+- Vista completa de uma marcação redesenhada (etiqueta, livro, citação, nota e acções).
+
 ## 5.31.0 — 2026-11-20
 
 - **Marcações na vista original do EPUB e do Word** (incluindo "EPUB ajustado"): antes a
