@@ -1,5 +1,12 @@
 # Registo de alterações
 
+## 5.22.1 — 2026-11-20
+
+- **Títulos em negrito** em todos os temas (pedido do autor): Areia e Floresta em serifa negrito;
+  Aurora, Ouro, Néon, Vidro, Carvão e Ciano em sans-serif negrito (deixam de usar as versões
+  finas/médias); Gelo mantém a condensada negrito. Inclui o valor do armazenamento e os títulos
+  das capas geradas. `BoldTitles5221Test`; 392 testes Robolectric passam.
+
 ## 5.22.0 — 2026-11-19
 
 - **Categorias certas** (`Rules.category`, regras v2): vídeos reconhecidos pela extensão (mkv,
