@@ -1,3 +1,13 @@
+## Seeky 5.30.0
+
+Instale **Seeky_5.30.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Barra de marcar**: ao seleccionar texto no leitor do Seeky (também no PDF) aparece em baixo
+  uma barra com 6 cores, Sublinhar, Riscar e Nota — um toque e a marcação fica no livro.
+- As marcações ficam nos livros abertos no Seeky. Se ler noutra aplicação, abra o livro no Seeky
+  ("Abrir com" → Seeky).
+
 ## Seeky 5.29.0
 
 Instale **Seeky_5.29.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

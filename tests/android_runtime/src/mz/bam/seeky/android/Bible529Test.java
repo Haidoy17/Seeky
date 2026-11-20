@@ -199,4 +199,30 @@ public class Bible529Test {
         assertEquals("Isaías 40",BibleGameActivity.spoken(chapters,Arrays.asList("Isaías 40")));
         assertNull(BibleGameActivity.spoken(books,Arrays.asList("não sei")));
     }
+
+    @Test public void theMarkingBarColoursTheSelectionInOneTapInTextAndPdf()throws Exception{
+        String[] picked={null};
+        MarkBar bar=MarkBar.show(a,kind->picked[0]=kind);drain();
+        assertNotNull(bar);
+        for(String d:new String[]{"Destacar amarelo","Destacar verde","Destacar azul","Destacar rosa","Destacar laranja","Destacar lilás","Sublinhar","Riscar","Nota"})assertNotNull(d,PageTurnTest.findDescription(bar.row,d));
+        assertTrue("fits a 360 dp phone: "+bar.row.getMeasuredWidth(),bar.row.getMeasuredWidth()<=340);capture(bar.row,"barra-marcar",58);
+        PageTurnTest.findDescription(bar.row,"Destacar verde").performClick();
+        assertEquals("highlight-green",picked[0]);assertFalse(bar.showing());
+        // Text page: the selected words take the colour at once.
+        String text=a.bookText.getText().toString();int start=text.indexOf("firme"),end=text.indexOf(" das coisas");
+        android.text.Selection.setSelection((Spannable)a.bookText.getText(),start,end);
+        a.tools.markSelection("highlight-blue",null);drain();
+        Spannable shown=(Spannable)a.bookText.getText();boolean blue=false;for(BackgroundColorSpan span:shown.getSpans(start,end,BackgroundColorSpan.class))blue|=span.getBackgroundColor()==Highlights.COLORS[2];
+        assertTrue("blue highlight from the bar",blue);
+        boolean listed=false;for(Highlights.Entry e:Highlights.all(a,null))listed|=e.kind.equals("highlight-blue")&&e.text.equals("firme fundamento");assertTrue(listed);
+        // PDF page: the selection becomes a mark drawn on the page.
+        String line="O justo viverá pela fé.";
+        List<PdfGlyphs.Glyph> boxes=new ArrayList<>();for(int i=0;i<line.length();i++)if(line.charAt(i)!=' ')boxes.add(new PdfGlyphs.Glyph(i,i+1,30+i*7,118,7,14));
+        ReaderPageView page=new ReaderPageView(a);page.setTag(2);page.biblePart=2;
+        Bitmap sheet=Bitmap.createBitmap(400,560,Bitmap.Config.ARGB_8888);sheet.eraseColor(Color.WHITE);page.setImageBitmap(sheet);
+        page.measure(View.MeasureSpec.makeMeasureSpec(360,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(504,View.MeasureSpec.EXACTLY));page.layout(0,0,360,504);page.fit();
+        page.glyphs=new PdfGlyphs(line,400,560,boxes);page.selectionStart=line.indexOf("viverá");page.selectionEnd=line.indexOf(" pela");
+        page.markSelection("strike");drain();
+        assertEquals(1,page.marks.size());assertEquals("strike",page.marks.get(0).kind);assertEquals("viverá",page.marks.get(0).text);
+    }
 }

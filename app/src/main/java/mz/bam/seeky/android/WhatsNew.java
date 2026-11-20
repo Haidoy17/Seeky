@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.29", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.30", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("edit", "Barra de marcar ao seleccionar", "No leitor do Seeky, ao seleccionar texto (também no PDF) aparece em baixo uma barra: 6 cores, Sublinhar, Riscar e Nota, com um toque", false, () -> HighlightsActivity.open(a, null));
+        panel.note("As marcações só ficam nos livros abertos no Seeky. Se ler noutra aplicação, abra o livro no Seeky (Ficheiros ou Biblioteca, ou \"Abrir com\" → Seeky).");
+        panel.section("Da 5.29");
         panel.action("edit", "Marcações com cores", "Seleccione um texto (também no PDF) → Cores e mais marcas: 6 cores, sublinhar, riscar e nota", false, () -> HighlightsActivity.open(a, null));
         panel.action("bookmark", "As minhas marcações", "Todas num só lugar: procurar, ver por completo e abrir o livro na página e no sítio exactos", false, () -> HighlightsActivity.open(a, null));
         panel.action("calendar", "Estudo bíblico", "Leitura de hoje, controlo semanal, planos (Bíblia em 1 ano, NT em 3 meses…), passagens guardadas", false, () -> BibleStudyActivity.open(a));
