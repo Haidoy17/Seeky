@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005900,
-  "versionName": "5.32.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.32.0.apk",
-  "sha256": "8dc155c0b427689f31a2198263906687b2d3ea6839ecfa6a8e439615332c49dd",
-  "bytes": 13520018,
-  "notes": "As minhas marcações renovadas: cartões de citação legíveis no tema escuro, por data ou por livro, filtros por tipo e cor, copiar/partilhar/abrir em cada cartão; texto das marcas de PDF sem falhas entre as palavras."
+  "versionCode": 5006000,
+  "versionName": "5.33.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.33.0.apk",
+  "sha256": "90a687c62ce36d8e9db6452a33320576d851376a42e6deb9cfbef91186ac36f6",
+  "bytes": 13523733,
+  "notes": "Leitor renovado: barra de título colorida, régua de páginas numa linha, todas as ferramentas numa grelha e, no PDF, botões sobre a página para ajustar e mudar a rolagem."
 }

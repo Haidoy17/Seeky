@@ -17,7 +17,9 @@ import java.util.*;
 final class ReaderChrome implements SpeechEvents.Listener {
     final ReaderActivity a;
     final SharedPreferences prefs;
-    LinearLayout top, bottom, navigation, speechBar, dock, toolStrip;
+    LinearLayout top, bottom, navigation, speechBar, dock, toolStrip, grid, floating;
+    /** Title bar colour and the ink drawn on it (0 until the bar is styled). */
+    int barColor, barInk;
     boolean compact;
     HorizontalScrollView actions;
     TextView title, pageLabel, speechLabel;View speechToggle;
@@ -48,7 +50,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         actions=new HorizontalScrollView(a);actions.setHorizontalScrollBarEnabled(false);LinearLayout strip=row();toolStrip=strip;
         action(strip,"type","Texto",this::textSettings);action(strip,"palette","Visualizar",this::visualSettings);action(strip,"rotate","Rotação",this::rotate);action(strip,"quiz","Estudar com Seeky",()->SeekyAi.reader(a,null));action(strip,"speaker","Ouvir",speech::show);action(strip,"share","Partilhar",this::share);action(strip,"note","Adicionar nota",this::addNote);action(strip,"expand","Tela cheia",this::toggleChrome);action(strip,"settings","Definições",this::settings);action(strip,"edit","Organizar",this::organize);actions.addView(strip);dock.addView(actions,new LinearLayout.LayoutParams(-1,a.dp(68)));a.root.addView(bottom);
         if(a.getIntent().getBooleanExtra("open_narrations",false))a.main.postDelayed(()->{if(!a.dead)speech.narration.manage();},350);
-        responsive(a.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE);
+        modernise();responsive(a.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE);
         a.root.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r>l&&b>t&&compact!=(r-l>b-t))responsive(r-l>b-t);});
         SpeechEvents.add(this);update();
         if(a.getIntent().getBooleanExtra("open_speech",false))a.main.postDelayed(()->{if(!a.dead)speech.show();},350);
@@ -60,15 +62,95 @@ final class ReaderChrome implements SpeechEvents.Listener {
         for(int i=1;i<top.getChildCount();i++)top.getChildAt(i).setVisibility(landscape?View.GONE:View.VISIBLE);
         LinearLayout.LayoutParams titleParams=(LinearLayout.LayoutParams)title.getLayoutParams();int titleHeight=a.dp(landscape?44:48);if(titleParams.height!=titleHeight){titleParams.height=titleHeight;title.setLayoutParams(titleParams);}
         dock.setOrientation(landscape?LinearLayout.HORIZONTAL:LinearLayout.VERTICAL);
-        if(seek.getParent()!= (landscape?navigation:dock)){
+        if(seek.getParent()!=navigation){
             ((ViewGroup)seek.getParent()).removeView(seek);
-            if(landscape)navigation.addView(seek,1,new LinearLayout.LayoutParams(0,a.dp(44),1));else dock.addView(seek,0,new LinearLayout.LayoutParams(-1,a.dp(26)));
+            navigation.addView(seek,1,new LinearLayout.LayoutParams(0,a.dp(44),1));
         }
         navigation.setLayoutParams(new LinearLayout.LayoutParams(landscape?a.dp(270):-1,a.dp(44)));
-        pageLabel.setLayoutParams(new LinearLayout.LayoutParams(landscape?a.dp(95):0,a.dp(44),landscape?0:1));
+        pageLabel.setLayoutParams(new LinearLayout.LayoutParams(landscape?a.dp(95):-2,a.dp(44)));pageLabel.setPadding(landscape?0:a.dp(6),0,landscape?0:a.dp(4),0);layoutTools();
         actions.setLayoutParams(new LinearLayout.LayoutParams(landscape?0:-1,a.dp(landscape?44:68),landscape?1:0));
         for(int i=0;i<toolStrip.getChildCount();i++){LinearLayout item=(LinearLayout)toolStrip.getChildAt(i);String label=String.valueOf(item.getContentDescription());item.setPadding(a.dp(5),landscape?0:a.dp(9),a.dp(5),landscape?0:a.dp(6));item.getChildAt(1).setVisibility(landscape?View.GONE:View.VISIBLE);item.setTooltipText(label);item.setLayoutParams(new LinearLayout.LayoutParams(a.dp(landscape?48:i==3?126:i==5?94:78),-1));}
         if(speechBar instanceof SpeechTransport)((SpeechTransport)speechBar).compact(landscape);
+    }
+    // Reader layout inspired by classic PDF readers --------------------------------------------------
+    static int desk(int theme){return AppPalette.luminance(ReaderAppearance.paper(theme))>0.5?0xffcfd2d7:0xff202226;}
+    /** Coloured title bar, one-line page slider, every tool visible in a grid and round page buttons. */
+    void modernise(){
+        AppPalette p=AppPalette.of(a);
+        barColor=p.accent;barInk=AppPalette.contrast(0xffffffff,barColor)>=3?0xffffffff:0xff10141d;
+        top.setBackgroundColor(barColor);top.setElevation(a.dp(3));
+        LinearLayout bar=(LinearLayout)top.getChildAt(0);
+        if(a.tools!=null)bar.addView(a.readerIcon("more",tr("Ferramentas de leitura"),a.extras::show),new LinearLayout.LayoutParams(a.dp(44),a.dp(44)));
+        for(int i=0;i<bar.getChildCount();i++){View child=bar.getChildAt(i);if(child instanceof FrameLayout&&((FrameLayout)child).getChildCount()>0&&((FrameLayout)child).getChildAt(0) instanceof Icons){Icons icon=(Icons)((FrameLayout)child).getChildAt(0);icon.setSymbol(icon.name,barInk);}}
+        title.setTextColor(barInk);title.setTextSize(18);title.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);title.setPadding(a.dp(8),0,a.dp(4),0);
+        for(int i=1;i<top.getChildCount();i++)if(top.getChildAt(i) instanceof TextView)((TextView)top.getChildAt(i)).setTextColor((barInk&0xffffff)|0xcc000000);
+        a.body.setBackgroundColor(desk(a.readerTheme));
+        bottom.setBackgroundColor(p.surface);bottom.setElevation(a.dp(6));
+        grid=column();grid.setPadding(a.dp(4),a.dp(2),a.dp(4),a.dp(6));
+        List<Object[]> tools=new ArrayList<>();
+        if(a.tools!=null){tools.add(new Object[]{"contents","Índice","Índice",(Runnable)this::contents});tools.add(new Object[]{"search","Pesquisar no documento","Pesquisar",(Runnable)()->a.tools.search(true)});tools.add(new Object[]{"bookmark","Marcadores","Marcadores",(Runnable)()->a.tools.bookmarks()});}
+        tools.add(new Object[]{"speaker","Ouvir","Ouvir",(Runnable)speech::show});
+        tools.add(new Object[]{"type","Texto","Texto",(Runnable)this::textSettings});
+        tools.add(new Object[]{"palette","Visualizar","Visualizar",(Runnable)this::visualSettings});
+        tools.add(new Object[]{"rotate","Rotação","Rodar",(Runnable)this::rotate});
+        tools.add(new Object[]{"edit","Marcações deste livro","Marcações",(Runnable)()->HighlightsActivity.open(a,a.uri.toString())});
+        tools.add(new Object[]{"note","Adicionar nota","Nota",(Runnable)this::addNote});
+        tools.add(new Object[]{"share","Partilhar","Partilhar",(Runnable)this::share});
+        tools.add(new Object[]{"expand","Tela cheia","Ecrã cheio",(Runnable)this::toggleChrome});
+        tools.add(new Object[]{"more","Mais ferramentas","Mais",(Runnable)this::more});
+        int columns=6;LinearLayout line=null;
+        for(int i=0;i<tools.size();i++){
+            if(i%columns==0){line=row();grid.addView(line,new LinearLayout.LayoutParams(-1,a.dp(58)));}
+            Object[] t=tools.get(i);final Runnable run=(Runnable)t[3];
+            LinearLayout cell=column();cell.setGravity(Gravity.CENTER);
+            cell.addView(new Icons(a,(String)t[0],a.ink),new LinearLayout.LayoutParams(a.dp(23),a.dp(23)));
+            TextView caption=a.text(tr((String)t[2]),10);caption.setGravity(Gravity.CENTER);caption.setMaxLines(1);caption.setEllipsize(TextUtils.TruncateAt.END);caption.setPadding(a.dp(2),a.dp(5),a.dp(2),0);cell.addView(caption,new LinearLayout.LayoutParams(-1,-2));
+            cell.setContentDescription(tr((String)t[1]));cell.setOnClickListener(v->run.run());Motion.touch(cell);
+            line.addView(cell,new LinearLayout.LayoutParams(0,-1,1));
+        }
+        if(line!=null)while(line.getChildCount()<columns)line.addView(new View(a),new LinearLayout.LayoutParams(0,-1,1));
+        dock.addView(grid,dock.indexOfChild(actions));
+        FrameLayout stage=(FrameLayout)a.body.getParent();
+        floating=row();
+        floating.addView(pageButton("fit","Ajustar página",this::cycleFit),new LinearLayout.LayoutParams(a.dp(54),a.dp(54)));
+        View scroll=pageButton("motion","Rolagem vertical ou página a página",this::toggleScroll);LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(a.dp(54),a.dp(54));sp.leftMargin=a.dp(14);floating.addView(scroll,sp);
+        FrameLayout.LayoutParams fp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.END);fp.setMargins(0,0,a.dp(16),a.dp(16));stage.addView(floating,fp);
+        floatingVisibility();
+    }
+    View pageButton(String symbol,String label,Runnable action){
+        FrameLayout b=new FrameLayout(a);GradientDrawable bg=new GradientDrawable();bg.setShape(GradientDrawable.OVAL);
+        boolean light=AppPalette.luminance(ReaderAppearance.paper(a.readerTheme))>0.5;bg.setColor(light?0xd9b9bcc2:0xd93a3d44);b.setBackground(bg);b.setElevation(a.dp(2));
+        b.addView(new Icons(a,symbol,light?0xff3c3f45:0xffe8eaee),new FrameLayout.LayoutParams(a.dp(26),a.dp(26),Gravity.CENTER));
+        b.setContentDescription(tr(label));b.setOnClickListener(v->action.run());Motion.touch(b);return b;
+    }
+    /** Portrait shows the tool grid; landscape keeps the single scrolling strip. */
+    void layoutTools(){
+        // In portrait the grid already has the index, search and bookmarks: the title bar keeps the title.
+        if(grid!=null&&top.getChildCount()>0&&top.getChildAt(0) instanceof LinearLayout){LinearLayout bar=(LinearLayout)top.getChildAt(0);for(int i=0;i<bar.getChildCount();i++){View c=bar.getChildAt(i);CharSequence d=c.getContentDescription();if(d!=null&&(d.toString().equals(tr("Índice"))||d.toString().equals(tr("Pesquisar no documento"))||d.toString().equals(tr("Marcadores"))))c.setVisibility(compact?View.VISIBLE:View.GONE);}}
+        boolean document=a.kind.equals("pdf")||a.kind.equals("epub")||a.kind.equals("docx")||a.kind.equals("text");
+        actions.setVisibility(document&&(compact||grid==null)?View.VISIBLE:View.GONE);
+        if(grid!=null)grid.setVisibility(document&&!compact?View.VISIBLE:View.GONE);
+        floatingVisibility();
+    }
+    void floatingVisibility(){if(floating!=null)floating.setVisibility(a.kind.equals("pdf")&&(a.tools==null||!a.tools.pdfText)&&!hidden&&!compact?View.VISIBLE:View.GONE);}
+    void cycleFit(){
+        a.pdfFit=(a.pdfFit+1)%3;prefs.edit().putInt("reader_fit",a.pdfFit).apply();if(a.pageAdapter!=null)a.pageAdapter.notifyDataSetChanged();
+        PlusUi.toast(a,tr("Ajustar")+": "+tr(new String[]{"Página","Largura","Altura"}[a.pdfFit]));
+    }
+    void toggleScroll(){
+        int part=current();a.continuous=!a.continuous;prefs.edit().putBoolean("reader_continuous",a.continuous).apply();a.currentPage=part;
+        if(a.pageAdapter!=null){a.pageAdapter.notifyDataSetChanged();a.pageList.setSelection(a.continuous?part:0);}
+        update();PlusUi.toast(a,tr(a.continuous?"Rolagem vertical":"Página a página"));
+    }
+    void more(){
+        UiPanel panel=new UiPanel(a,"Mais ferramentas",a.name,"more");
+        panel.action("quiz","Estudar com Seeky",null,false,()->SeekyAi.reader(a,null));
+        panel.action("settings","Definições de leitura",null,false,this::settings);
+        panel.action("edit","Organizar",null,false,this::organize);
+        panel.action("tools","Ferramentas de leitura","Resumo, notas de voz, caderno, acessibilidade…",false,a.extras::show);
+        if(a.tools!=null)panel.action("book","Passagens bíblicas","Nesta parte: toque para ler aqui mesmo",false,()->BibleLinks.list(a));
+        panel.action("calendar","Estudo bíblico",null,false,()->BibleStudyActivity.open(a));
+        panel.show();
     }
     void icon(LinearLayout row,String symbol,String label,Runnable action){row.addView(a.readerIcon(symbol,tr(label),action),new LinearLayout.LayoutParams(a.dp(44),a.dp(44)));}
     void action(LinearLayout strip,String symbol,String label,Runnable action){LinearLayout item=column();item.setGravity(Gravity.CENTER);item.setPadding(a.dp(5),a.dp(9),a.dp(5),a.dp(6));item.addView(new Icons(a,symbol,a.ink),new LinearLayout.LayoutParams(a.dp(24),a.dp(24)));TextView caption=a.text(label,10);caption.setGravity(Gravity.CENTER);caption.setPadding(0,a.dp(7),0,0);caption.setMaxLines(1);item.addView(caption);item.setContentDescription(tr(label));item.setOnClickListener(v->action.run());Motion.touch(item);strip.addView(item,new LinearLayout.LayoutParams(a.dp(label.equals("Estudar com Seeky")?126:label.equals("Adicionar nota")?94:78),-1));}
@@ -102,7 +184,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         if(a.original!=null&&a.original.active){int unit=ReadingProgress.units(part,total,a.original.scroll(),a.original.height(),a.original.viewport());pageLabel.setText((total==1?tr("Documento"):tr("Capítulo")+" "+(part+1)+" / "+total)+" · "+(int)Math.min(100,100L*unit/Math.max(1L,(long)total*1000))+"%");}
         else if(total>1&&a.bookScroll!=null&&a.bookText!=null&&!a.kind.equals("pdf")){int unit=ReadingProgress.units(part,total,a.bookScroll.getScrollY(),a.bookText.getHeight(),a.bookScroll.getHeight());int progress=(int)Math.min(100,100L*unit/Math.max(1L,(long)total*1000));pageLabel.setText(tr("Capítulo")+" "+(part+1)+" / "+total+" · "+progress+"%");}
         if(total==1&&!a.kind.equals("pdf")&&(a.original==null||!a.original.active)){int percent=0;if(a.bookScroll!=null&&a.bookText!=null){int range=a.bookText.getHeight()-a.bookScroll.getHeight();percent=range<=0?100:Math.min(100,Math.max(0,a.bookScroll.getScrollY()*100/range));}pageLabel.setText(tr("Leitura de texto")+" · "+percent+"%");}
-        actions.setVisibility(document?View.VISIBLE:View.GONE);changed();if(a.extras!=null)a.extras.updateFocus();
+        layoutTools();changed();if(a.extras!=null)a.extras.updateFocus();
     }
     void contents(){if(a.book!=null)a.chapters();else if(a.kind.equals("pdf"))a.tools.contents();else if(a.tools!=null)a.tools.bookmarks();}
     void applyText(){
@@ -115,8 +197,8 @@ final class ReaderChrome implements SpeechEvents.Listener {
         GradientDrawable paper=new GradientDrawable();paper.setColor(ReaderAppearance.paper(a.readerTheme));paper.setCornerRadius(a.dp(2));a.bookText.setBackground(paper);a.bookText.setElevation(a.dp(4));
         if(a.bookScroll!=null){a.bookScroll.setFillViewport(true);a.bookScroll.setClipToPadding(false);a.bookScroll.setPadding(a.dp(12),a.dp(12),a.dp(12),a.dp(12));}
     }
-    void applyAppearance(){prefs.edit().putInt("reader_paper",a.readerTheme).apply();applyText();if(a.pageList!=null)for(int n=0;n<a.pageList.getChildCount();n++){View page=a.pageList.getChildAt(n);if(page instanceof ReaderPageView)((ReaderPageView)page).appearance();}}
-    void toggleChrome(){hidden=!hidden;top.setVisibility(hidden?View.GONE:View.VISIBLE);bottom.setVisibility(hidden?View.GONE:View.VISIBLE);a.applyReaderWindow();if(a.pageAdapter!=null)a.pageList.post(()->{if(!a.dead)a.pageAdapter.notifyDataSetChanged();});}
+    void applyAppearance(){prefs.edit().putInt("reader_paper",a.readerTheme).apply();if(a.body!=null&&barColor!=0)a.body.setBackgroundColor(desk(a.readerTheme));if(floating!=null){boolean light=AppPalette.luminance(ReaderAppearance.paper(a.readerTheme))>0.5;for(int i=0;i<floating.getChildCount();i++){View b=floating.getChildAt(i);if(b.getBackground() instanceof GradientDrawable)((GradientDrawable)b.getBackground()).setColor(light?0xd9b9bcc2:0xd93a3d44);if(b instanceof FrameLayout&&((FrameLayout)b).getChildAt(0) instanceof Icons){Icons icon=(Icons)((FrameLayout)b).getChildAt(0);icon.setSymbol(icon.name,light?0xff3c3f45:0xffe8eaee);}}}applyText();if(a.pageList!=null)for(int n=0;n<a.pageList.getChildCount();n++){View page=a.pageList.getChildAt(n);if(page instanceof ReaderPageView)((ReaderPageView)page).appearance();}}
+    void toggleChrome(){hidden=!hidden;top.setVisibility(hidden?View.GONE:View.VISIBLE);bottom.setVisibility(hidden?View.GONE:View.VISIBLE);floatingVisibility();a.applyReaderWindow();if(a.pageAdapter!=null)a.pageList.post(()->{if(!a.dead)a.pageAdapter.notifyDataSetChanged();});}
     void rotate(){int orientation=a.getResources().getConfiguration().orientation;a.setRequestedOrientation(orientation==android.content.res.Configuration.ORIENTATION_PORTRAIT?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);}
     void addNote(){
         UiPanel panel=new UiPanel(a,"Adicionar nota",null,"note");

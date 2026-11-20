@@ -1,3 +1,11 @@
+## Seeky 5.33.0
+
+Instale **Seeky_5.33.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Leitor renovado**: barra de título colorida, régua de páginas numa linha (‹ 341/383 ›), todas as
+  ferramentas visíveis numa grelha e, no PDF, botões sobre a página para ajustar e mudar a rolagem.
+
 ## Seeky 5.32.0
 
 Instale **Seeky_5.32.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
