@@ -1,3 +1,16 @@
+## Seeky 5.28.0
+
+Instale **Seeky_5.28.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Passagens bíblicas ao toque** em PDF (também depois do OCR), Word, EPUB e texto:
+  `Isaías 3.1-7, 12`, `Jo 3,16`, `Gn 1:1-3; 2:4`, `Salmo 23`, `Judas 3`.
+- **Leitura rápida** por cima do livro: versões, copiar, partilhar, ouvir, capítulo inteiro
+  com a passagem destacada, capítulo anterior/seguinte, comparar versões, guardar e tamanho.
+- **Passagens guardadas** e opção para desactivar as ligações no menu do leitor.
+- Para ler as passagens é preciso ter uma Bíblia importada (Ferramentas → Bíblias →
+  Descarregar Bíblias).
+
 ## Seeky 5.27.0
 
 Instale **Seeky_5.27.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

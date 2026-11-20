@@ -856,7 +856,12 @@ public final class ScanActivity extends Activity {
                 busy.setVisibility(View.GONE);
                 show(state);
                 if (fail != null && result.isEmpty()) { new UiDialog.Builder(this).setTitle("Extrair texto").setMessage(fail).setPositiveButton("Fechar", null).show(); return; }
-                new UiDialog.Builder(this).setTitle("Texto reconhecido").setMessage(result.isEmpty() ? AppLanguage.text(this, "Não foi encontrado texto.") : result)
+                TextView recognised = PlusUi.text(this, result.isEmpty() ? AppLanguage.text(this, "Não foi encontrado texto.") : result, 15);
+                recognised.setTextIsSelectable(true);
+                recognised.setLineSpacing(PlusUi.dp(this, 3), 1.1f);
+                // Bible citations in the recognised page open in the quick reader.
+                BibleLinks.linkify(this, recognised, AppPalette.of(this).accent, PlusUi.WORK, false);
+                new UiDialog.Builder(this).setTitle("Texto reconhecido").setView(recognised)
                         .setPositiveButton("Copiar", (d, w) -> {
                             ((android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Seeky", result));
                             PlusUi.toast(this, "Texto copiado.");

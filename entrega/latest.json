@@ -1,8 +1,8 @@
 {
-  "versionCode": 5005400,
-  "versionName": "5.27.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.27.0.apk",
-  "sha256": "9ce04088bdc7482b13af90a195be8016edcc8a53260de11f9503adf971da79c1",
-  "bytes": 13419966,
-  "notes": "Leitor de música e vídeo reorganizado: Capa, Letra e Fila, controlos na ordem habitual, letras online (procurar, copiar do Google e aplicar sozinha), rodar o vídeo e mais ouvidas hoje, na semana e no mês."
+  "versionCode": 5005500,
+  "versionName": "5.28.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.28.0.apk",
+  "sha256": "cab407d60309c1f0bd6b78f4261c85abda623aaeaed3fcdabe7c44e2666e7526",
+  "bytes": 13440631,
+  "notes": "Passagens bíblicas ao toque em PDF (também depois do OCR), Word, EPUB e texto — Isaías 3.1-7, 12, Jo 3,16, Salmo 23 — com leitura rápida: versões, copiar, partilhar, ouvir, capítulo inteiro, comparar e guardar."
 }

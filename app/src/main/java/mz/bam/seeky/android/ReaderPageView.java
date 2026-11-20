@@ -11,7 +11,7 @@ final class ReaderPageView extends ZoomImageView {
     float downX,downY;
     boolean multiple;int lastFit=-1;
     ReaderPageView(ReaderActivity activity) {
-        super(activity);this.activity=activity;tapped=()->activity.chrome.toggleChrome();
+        super(activity);this.activity=activity;tapped=()->{if(!bibleTap(tapX,tapY))activity.chrome.toggleChrome();};
         setContentDescription(AppLanguage.text(activity,"Página do documento. Dois dedos para ampliar; deslize para mudar de página."));
     }
     void appearance() {
@@ -58,7 +58,7 @@ final class ReaderPageView extends ZoomImageView {
     PdfGlyphs glyphs;boolean glyphLoading;int selectionStart=-1,selectionEnd=-1,selectionAnchor;android.view.ActionMode selectionMode;SpeechEvents.State speechState;boolean speechFollow;
     final Runnable tileRequest=()->{detailScheduled=false;renderDetail();};
     final android.view.GestureDetector selectionGestures=new android.view.GestureDetector(getContext(),new android.view.GestureDetector.SimpleOnGestureListener(){public boolean onDown(MotionEvent e){return true;}public void onLongPress(MotionEvent e){float x=e.getX(),y=e.getY();loadGlyphs(()->selectAt(x,y));}});
-    void resetDocument(){tileSerial++;detailDocument++;detailTile=null;requestedMatrix=null;activity.main.removeCallbacks(tileRequest);detailScheduled=false;glyphs=null;glyphLoading=false;speechState=null;if(selectionMode!=null)selectionMode.finish();selectionStart=selectionEnd=-1;}
+    void resetDocument(){tileSerial++;detailDocument++;detailTile=null;requestedMatrix=null;activity.main.removeCallbacks(tileRequest);detailScheduled=false;glyphs=null;glyphLoading=false;activity.main.removeCallbacks(bibleRequest);bibleRefs=java.util.Collections.emptyList();pageRefs=java.util.Collections.emptyList();bibleRects=java.util.Collections.emptyList();biblePart=-1;speechState=null;if(selectionMode!=null)selectionMode.finish();selectionStart=selectionEnd=-1;}
     @Override void apply(){
         super.apply();
         if(activity==null)return;
@@ -116,12 +116,79 @@ final class ReaderPageView extends ZoomImageView {
     }
     void loadGlyphs(Runnable ready){if(glyphs!=null){ready.run();return;}if(glyphLoading||!(getTag() instanceof Integer))return;glyphLoading=true;final int part=(Integer)getTag();activity.worker.execute(()->{try{PdfGlyphs result=activity.tools.pdfMapped(part);activity.ui(()->{if(!Integer.valueOf(part).equals(getTag()))return;glyphLoading=false;glyphs=result;ready.run();invalidate();});}catch(Exception|OutOfMemoryError error){activity.ui(()->{glyphLoading=false;android.widget.Toast.makeText(activity,AppLanguage.text(activity,"O PDF não disponibilizou texto seleccionável nesta página."),android.widget.Toast.LENGTH_LONG).show();});AppDiagnostics.record(activity,"pdf-text-geometry",error);}});}
     int character(float x,float y){if(glyphs==null||getDrawable()==null)return -1;Matrix inverse=new Matrix();if(!matrix.invert(inverse))return -1;float[] p={x,y};inverse.mapPoints(p);return glyphs.at(p[0]*glyphs.width/getDrawable().getIntrinsicWidth(),p[1]*glyphs.height/getDrawable().getIntrinsicHeight());}
-    void selectAt(float x,float y){int at=character(x,y);if(at<0){android.widget.Toast.makeText(activity,AppLanguage.text(activity,"Esta região não tem texto seleccionável. Use Texto ou OCR para páginas digitalizadas."),android.widget.Toast.LENGTH_LONG).show();return;}int[] range=glyphs.word(at);selectionStart=range[0];selectionEnd=range[1];selectionAnchor=selectionStart;if(selectionMode==null)selectionMode=startActionMode(new android.view.ActionMode.Callback2(){public boolean onCreateActionMode(android.view.ActionMode m,android.view.Menu menu){menu.add(0,1,0,AppLanguage.text(activity,"Copiar texto"));menu.add(0,2,1,AppLanguage.text(activity,"Seleccionar tudo"));menu.add(0,3,2,AppLanguage.text(activity,"Dicionário e tradução"));menu.add(0,4,3,AppLanguage.text(activity,"Partilhar selecção"));return true;}public boolean onPrepareActionMode(android.view.ActionMode m,android.view.Menu menu){return false;}public boolean onActionItemClicked(android.view.ActionMode m,android.view.MenuItem item){if(item.getItemId()==4){int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));if(to>from)ShareTools.text(activity,glyphs.text.substring(from,to));m.finish();return true;}if(item.getItemId()==3){int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));if(to>from)WordLookup.show(activity,glyphs.text.substring(from,to));m.finish();return true;}if(item.getItemId()==2){selectionStart=0;selectionEnd=glyphs.text.length();m.invalidateContentRect();invalidate();return true;}if(item.getItemId()==1){((android.content.ClipboardManager)activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(activity.name,glyphs.text.substring(selectionStart,selectionEnd)));m.finish();return true;}return false;}public void onDestroyActionMode(android.view.ActionMode mode){selectionMode=null;selectionStart=selectionEnd=-1;invalidate();}public void onGetContentRect(android.view.ActionMode m,android.view.View v,Rect out){RectF box=selectionBounds();out.set(Math.max(0,(int)box.left),Math.max(0,(int)box.top),Math.min(getWidth(),(int)box.right),Math.min(getHeight(),(int)box.bottom));}},android.view.ActionMode.TYPE_FLOATING);getParent().requestDisallowInterceptTouchEvent(true);invalidate();}
+    void selectAt(float x,float y){int at=character(x,y);if(at<0){android.widget.Toast.makeText(activity,AppLanguage.text(activity,"Esta região não tem texto seleccionável. Use Texto ou OCR para páginas digitalizadas."),android.widget.Toast.LENGTH_LONG).show();return;}int[] range=glyphs.word(at);selectionStart=range[0];selectionEnd=range[1];selectionAnchor=selectionStart;if(selectionMode==null)selectionMode=startActionMode(new android.view.ActionMode.Callback2(){public boolean onCreateActionMode(android.view.ActionMode m,android.view.Menu menu){menu.add(0,1,0,AppLanguage.text(activity,"Copiar texto"));menu.add(0,2,1,AppLanguage.text(activity,"Seleccionar tudo"));menu.add(0,3,2,AppLanguage.text(activity,"Dicionário e tradução"));menu.add(0,4,3,AppLanguage.text(activity,"Partilhar selecção"));menu.add(0,5,4,AppLanguage.text(activity,"Abrir passagem bíblica"));return true;}public boolean onPrepareActionMode(android.view.ActionMode m,android.view.Menu menu){return false;}public boolean onActionItemClicked(android.view.ActionMode m,android.view.MenuItem item){if(item.getItemId()==5){int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));BibleReferences.Reference ref=to>from?BibleReferences.lookup(glyphs.text.substring(from,to)):null;if(ref==null)android.widget.Toast.makeText(activity,AppLanguage.text(activity,"Seleccione o livro, o capítulo e os versículos."),android.widget.Toast.LENGTH_LONG).show();else BibleLinks.open(activity,ref);m.finish();return true;}if(item.getItemId()==4){int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));if(to>from)ShareTools.text(activity,glyphs.text.substring(from,to));m.finish();return true;}if(item.getItemId()==3){int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));if(to>from)WordLookup.show(activity,glyphs.text.substring(from,to));m.finish();return true;}if(item.getItemId()==2){selectionStart=0;selectionEnd=glyphs.text.length();m.invalidateContentRect();invalidate();return true;}if(item.getItemId()==1){((android.content.ClipboardManager)activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(activity.name,glyphs.text.substring(selectionStart,selectionEnd)));m.finish();return true;}return false;}public void onDestroyActionMode(android.view.ActionMode mode){selectionMode=null;selectionStart=selectionEnd=-1;invalidate();}public void onGetContentRect(android.view.ActionMode m,android.view.View v,Rect out){RectF box=selectionBounds();out.set(Math.max(0,(int)box.left),Math.max(0,(int)box.top),Math.min(getWidth(),(int)box.right),Math.min(getHeight(),(int)box.bottom));}},android.view.ActionMode.TYPE_FLOATING);getParent().requestDisallowInterceptTouchEvent(true);invalidate();}
     RectF box(PdfGlyphs.Glyph g){RectF r=new RectF(g.left*getDrawable().getIntrinsicWidth()/glyphs.width,g.top*getDrawable().getIntrinsicHeight()/glyphs.height,g.right*getDrawable().getIntrinsicWidth()/glyphs.width,g.bottom*getDrawable().getIntrinsicHeight()/glyphs.height);matrix.mapRect(r);return r;}
     RectF selectionBounds(){RectF bounds=new RectF();if(glyphs!=null&&getDrawable()!=null)for(PdfGlyphs.Glyph g:glyphs.glyphs)if(g.end>selectionStart&&g.start<selectionEnd)bounds.union(box(g));return bounds;}
     void speech(SpeechEvents.State state,boolean follow){speechState=state;speechFollow=follow;if(state.active&&Integer.valueOf(state.part).equals(getTag()))loadGlyphs(this::invalidate);invalidate();}
-    void drawTextOverlays(Canvas canvas){if(getDrawable()==null)return;drawDetail(canvas);if(glyphs==null)return;
+    void drawTextOverlays(Canvas canvas){if(getDrawable()==null)return;drawDetail(canvas);drawBible(canvas);if(glyphs==null)return;
         int start=selectionStart,end=selectionEnd;boolean speaking=start<0&&speechState!=null&&speechState.active&&!speechState.loading&&Integer.valueOf(speechState.part).equals(getTag());if(speaking){start=speechState.offset;end=speechState.end>start?speechState.end:WebSpeechHighlight.wordEnd(glyphs.text,start);}
         if(start<0||end<=start)return;overlayPaint.setColor(speaking?0x80f5bc31:0x80599df2);for(PdfGlyphs.Glyph g:glyphs.glyphs)if(g.end>start&&g.start<end)canvas.drawRoundRect(box(g),2,2,overlayPaint);
+    }
+
+    // Bible citations on the page: underlined where the PDF has text, listed by a badge for OCR pages.
+    java.util.List<BibleReferences.Reference> bibleRefs=java.util.Collections.emptyList(),pageRefs=java.util.Collections.emptyList();
+    java.util.List<java.util.List<RectF>> bibleRects=java.util.Collections.emptyList();
+    int biblePart=-1;
+    final RectF bibleBadge=new RectF();
+    final Paint biblePaint=new Paint(Paint.ANTI_ALIAS_FLAG),bibleText=new Paint(Paint.ANTI_ALIAS_FLAG);
+    Icons badgeIcon;
+    final Runnable bibleRequest=this::scanBible;
+    @Override public void setImageBitmap(Bitmap bitmap){super.setImageBitmap(bitmap);if(bitmap!=null&&activity!=null){activity.main.removeCallbacks(bibleRequest);activity.main.postDelayed(bibleRequest,450);}}
+    void scanBible(){
+        if(activity.dead||activity.tools==null||!BibleLinks.enabled(activity)||!(getTag() instanceof Integer))return;
+        final int part=(Integer)getTag();if(part==biblePart)return;biblePart=part;
+        final PdfGlyphs known=glyphs;
+        activity.worker.execute(()->{
+            PdfGlyphs mapped=known;
+            try{if(mapped==null)mapped=activity.tools.pdfMapped(part);}catch(Exception|OutOfMemoryError ignored){mapped=null;}
+            java.util.List<BibleReferences.Reference> found=mapped==null||mapped.text.trim().isEmpty()?java.util.Collections.<BibleReferences.Reference>emptyList():BibleReferences.references(mapped.text),listed=found;
+            java.util.List<java.util.List<RectF>> rects=bibleLines(mapped,found);
+            if(found.isEmpty())try{if(OcrCache.row(activity,activity.uri.toString(),part)!=null)listed=BibleReferences.references(activity.tools.pdfSource(part));}catch(Exception|OutOfMemoryError ignored){}
+            final PdfGlyphs result=mapped;final java.util.List<BibleReferences.Reference> underline=found,badge=listed;
+            activity.ui(()->{if(!Integer.valueOf(part).equals(getTag()))return;if(glyphs==null&&result!=null)glyphs=result;bibleRefs=underline;bibleRects=rects;pageRefs=badge;invalidate();});
+        });
+    }
+    /** Page-space underline boxes of each citation, merged per printed line. */
+    static java.util.List<java.util.List<RectF>> bibleLines(PdfGlyphs mapped,java.util.List<BibleReferences.Reference> found){
+        java.util.List<java.util.List<RectF>> rects=new java.util.ArrayList<>();
+        for(BibleReferences.Reference ref:found){java.util.List<RectF> lines=new java.util.ArrayList<>();RectF line=null;for(PdfGlyphs.Glyph g:mapped.glyphs){if(g.end<=ref.start||g.start>=ref.end)continue;float h=g.bottom-g.top;if(line!=null&&Math.abs(g.top-line.top)<h*.5f&&g.left-line.right<h*1.6f&&g.left>=line.left-h)line.union(g.left,g.top,g.right,g.bottom);else{line=new RectF(g.left,g.top,g.right,g.bottom);lines.add(line);}}rects.add(lines);}
+        return rects;
+    }
+    RectF toView(RectF page){RectF r=new RectF(page.left*getDrawable().getIntrinsicWidth()/glyphs.width,page.top*getDrawable().getIntrinsicHeight()/glyphs.height,page.right*getDrawable().getIntrinsicWidth()/glyphs.width,page.bottom*getDrawable().getIntrinsicHeight()/glyphs.height);matrix.mapRect(r);return r;}
+    void drawBible(Canvas canvas){
+        bibleBadge.setEmpty();
+        if(getDrawable()==null)return;
+        if(glyphs!=null&&!bibleRects.isEmpty()){
+            float stroke=Math.max(1.5f,activity.dp(1.6f));
+            for(java.util.List<RectF> lines:bibleRects)for(RectF page:lines){
+                RectF v=toView(page);
+                biblePaint.setStyle(Paint.Style.FILL);biblePaint.setColor((activity.accent&0xffffff)|0x24000000);canvas.drawRoundRect(v,3,3,biblePaint);
+                biblePaint.setColor(activity.accent);canvas.drawRect(v.left,v.bottom-stroke,v.right,v.bottom,biblePaint);
+            }
+        }
+        if(pageRefs.isEmpty())return;
+        RectF page=new RectF(0,0,getDrawable().getIntrinsicWidth(),getDrawable().getIntrinsicHeight());matrix.mapRect(page);
+        if(!page.intersect(0,0,getWidth(),getHeight())||page.width()<activity.dp(150)||page.height()<activity.dp(60))return;
+        bibleText.setTextSize(activity.dp(13));bibleText.setTypeface(ThemeStyle.BOLD);
+        int ink=AppPalette.contrast(Color.WHITE,activity.accent)>=3?Color.WHITE:0xff10141d;bibleText.setColor(ink);
+        String label=pageRefs.size()==1?pageRefs.get(0).title:pageRefs.size()+" "+AppLanguage.text(activity,"passagens bíblicas");
+        float icon=activity.dp(18),pad=activity.dp(12),height=activity.dp(36);
+        float width=Math.min(page.width()-activity.dp(24),bibleText.measureText(label)+icon+pad*2+activity.dp(7));
+        bibleBadge.set(page.right-activity.dp(12)-width,page.bottom-activity.dp(12)-height,page.right-activity.dp(12),page.bottom-activity.dp(12));
+        biblePaint.setStyle(Paint.Style.FILL);biblePaint.setColor((activity.accent&0xffffff)|0xee000000);
+        canvas.drawRoundRect(bibleBadge,height/2,height/2,biblePaint);
+        if(badgeIcon==null){badgeIcon=new Icons(activity,"book",ink);int size=(int)icon;badgeIcon.measure(MeasureSpec.makeMeasureSpec(size,MeasureSpec.EXACTLY),MeasureSpec.makeMeasureSpec(size,MeasureSpec.EXACTLY));badgeIcon.layout(0,0,size,size);}
+        canvas.save();canvas.translate(bibleBadge.left+pad,bibleBadge.centerY()-icon/2);badgeIcon.draw(canvas);canvas.restore();
+        canvas.save();canvas.clipRect(bibleBadge);
+        Paint.FontMetrics fm=bibleText.getFontMetrics();canvas.drawText(label,bibleBadge.left+pad+icon+activity.dp(7),bibleBadge.centerY()-(fm.ascent+fm.descent)/2,bibleText);canvas.restore();
+    }
+    /** A tap on an underlined citation or on the badge opens the quick reader instead of toggling the toolbar. */
+    boolean bibleTap(float x,float y){
+        if(x<0||getDrawable()==null)return false;
+        if(!bibleBadge.isEmpty()&&bibleBadge.contains(x,y)){BibleLinks.choose(activity,pageRefs);return true;}
+        if(glyphs==null)return false;
+        float slop=activity.dp(6);
+        for(int i=0;i<bibleRects.size()&&i<bibleRefs.size();i++)for(RectF page:bibleRects.get(i)){RectF v=toView(page);v.inset(-slop,-slop);if(v.contains(x,y)){BibleLinks.open(activity,bibleRefs.get(i));return true;}}
+        return false;
     }
 }

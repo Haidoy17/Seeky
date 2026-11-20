@@ -23,8 +23,13 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.27", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.28", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("book", "Passagens bíblicas ao toque", "Em PDF (também depois do OCR), Word, EPUB e texto: toque em \"Isaías 3.1-7, 12\", \"Jo 3,16\" ou \"Salmo 23\" e a passagem abre ali mesmo", false, () -> BibleLinks.query(a));
+        panel.action("copy", "Leitura rápida da passagem", "Copiar, partilhar, ouvir, capítulo inteiro com a passagem destacada, capítulo anterior e seguinte, comparar versões, guardar e tamanho do texto", false, () -> BibleLinks.query(a));
+        panel.action("bookmark", "Passagens guardadas", "As passagens que guardar ficam em Consultar passagem → Guardadas", false, () -> BibleLinks.saved(a));
+        panel.note("Formatos reconhecidos: 3:16, 3.16 e 3,16; intervalos (1-7), listas (1-7, 12), vários capítulos (3.16-4.2; 5.1), \"e seguintes\" (16ss), capítulos inteiros e livros com um só capítulo (Judas 3). Seleccione um texto e use Abrir passagem bíblica para os casos restantes.");
+        panel.section("Da 5.27");
         panel.action("audio", "Leitor de música reorganizado", "Capa · Letra · Fila; controlos na ordem habitual; Equalizador, Velocidade, Temporizador e Partilhar com nome; o resto no menu Mais", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
         panel.action("lyrics", "Letras online", "Procure e escolha a versão certa, ou copie do Google e volte: aplica-se sozinha. Copiar, colar e tamanho do texto", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
         panel.action("screenrotate", "Vídeo: rodar e ajustar", "Rodar o ecrã, rodar a imagem 90°, ajustar, preencher ou esticar; controlos que se escondem", false, () -> LibraryActivity.open(a, MediaLibrary.VIDEO));
