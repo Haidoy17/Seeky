@@ -43,6 +43,16 @@ final class BookCoverArt extends View {
             case "gelo": return new int[]{0xfff5f5f6, 0xffefeff1};
             case "carvao": return new int[]{0xff222223, 0xff2a2a2b};
             case "ciano": return new int[]{0xff1d97bd, 0xff2559c9, 0xff1f7fa6, 0xff3a4fd0};
+            case "ardosia": return new int[]{0xff565c69, 0xff4a4f5a, 0xffc9735e, 0xff4e7d68};
+            case "salvia": return new int[]{0xff5f7e7b, 0xff405a5c, 0xff7a7866, 0xff4f6a62};
+            case "nevoa": return new int[]{0xff6e7f9a, 0xff5d7f92, 0xff8a6f7a, 0xff4f5f7b};
+            case "hortela": return new int[]{0xff2c6975, 0xff3f8a7a, 0xff1f4f58, 0xff4d8f86};
+            case "pinheiro": return new int[]{0xff00412e, 0xff2f5d3f, 0xff4f7a45, 0xff1d4a36};
+            case "menta": return new int[]{0xff1b4332, 0xff2d6a4f, 0xff40916c, 0xff2f5f49};
+            case "petroleo": return new int[]{0xff4f6966, 0xff3f5553, 0xffb57f5a, 0xff5c7774};
+            case "quartzo": return new int[]{0xff4f7d75, 0xff3b6058, 0xff8a6f6b, 0xff5d7c76};
+            case "folha": return new int[]{0xff52805f, 0xff416b4e, 0xff6a8a5a, 0xff4d7562};
+            case "produtivo": return new int[]{0xff1f4e5f, 0xff163a47, 0xffc0741a, 0xff2d6375};
             default: return TONES;
         }
     }
