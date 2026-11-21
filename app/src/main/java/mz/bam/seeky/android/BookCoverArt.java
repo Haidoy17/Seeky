@@ -67,6 +67,9 @@ final class BookCoverArt extends View {
 
     float dp(float v) { return v * getResources().getDisplayMetrics().density; }
 
+    /** Narrowest cover that still shows the title (the bookcase uses narrower books than the grid). */
+    float titleMin = 96;
+    BookCoverArt titled(float minimumDp) { titleMin = minimumDp; return this; }
     @Override protected void onDraw(Canvas c) {
         float w = getWidth(), h = getHeight();
         if (w <= 0 || h <= 0) return;
@@ -75,7 +78,7 @@ final class BookCoverArt extends View {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(tone);
         c.drawRect(all, paint);
-        boolean small = w < dp(96);
+        boolean small = w < dp(titleMin);
         int ink;
         switch (style) {
             case "aurora": case "ouro": drawPaperLabel(c, w, h, small); return;
@@ -183,7 +186,7 @@ final class BookCoverArt extends View {
         float lineY = top + layout.getHeight() + dp(10);
         paint.setColor(0x99f4eee3);
         c.drawRect(w / 2 - dp(14), lineY, w / 2 + dp(14), lineY + Math.max(1f, dp(1)), paint);
-        if (h > dp(120)) {
+        if (h > dp(120) && lineY + dp(30) <= h * .74f) {
             text.setLetterSpacing(.12f);
             caption(c, author.toUpperCase(Locale.ROOT), w / 2, Math.min(h - inset - dp(14), lineY + dp(30)), w - pad * 2, 0xccf4eee3, Paint.Align.CENTER);
         }

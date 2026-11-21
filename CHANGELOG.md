@@ -1,5 +1,27 @@
 # Registo de alterações
 
+## 5.36.0 — 2026-11-21
+
+- **Estante de madeira** (inspirada no modelo enviado), agora o modo normal dos Livros:
+  - prateleiras com tábuas de fundo, veios, juntas, sombras da prateleira de cima, postes laterais
+    e frente da prateleira iluminada; as prateleiras vazias continuam até ao fundo do ecrã;
+  - livros de pé com lombada, bloco de folhas à direita, brilho suave e sombra; capas geradas
+    mostram o título mesmo nos livros estreitos; percentagem, menu ⋮ e estrela de favorito;
+  - madeiras: Nogueira, Carvalho, Cerejeira, Ébano e Laca branca (Ordenar e filtrar);
+  - 30 livros por página, com botões Anterior/Seguinte dentro da estante; seta ao lado de
+    "Todos os livros" para escolher grupos.
+- **Importar livros** (como no modelo enviado):
+  - Uma pasta (com ou sem subpastas, com caminho tipo /sdcard/Livros, pastas sugeridas —
+    Transferências, Documentos, WhatsApp, Telegram — e recentes, ou um navegador de pastas) ou
+    Escolher ficheiros;
+  - formatos a incluir, tamanho mínimo do ficheiro (20 KB por omissão), Favorito e Colecção;
+  - a pasta é verificada e importada logo, em segundo plano, sem passo extra; repetidos ignorados.
+- **Novos formatos de livro**, convertidos para EPUB ao importar ou ao abrir dos Ficheiros:
+  FB2 (também .fbz/.fb2.zip, com capa, notas e codificações antigas), MOBI/AZW/AZW3/PRC (sem DRM,
+  com compressão PalmDOC ou Huffman, imagens e capa), ODT, RTF, MHTML (páginas web guardadas) e CBZ
+  (banda desenhada, uma página por imagem). Livros com DRM mostram uma mensagem clara.
+  DJVU, CHM, UMD e CBR não são suportados.
+
 ## 5.35.0 — 2026-11-20
 
 - **10 temas novos**, criados a partir das paletas enviadas pelo autor:
