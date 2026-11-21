@@ -1,3 +1,12 @@
+## Seeky 5.36.0
+
+Instale **Seeky_5.36.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Estante de madeira** nos Livros, com cinco madeiras à escolha.
+- **Importar livros**: pasta (com subpastas), formatos, tamanho mínimo, favorito e colecção.
+- **Novos formatos**: FB2, MOBI, AZW3, PRC, ODT, RTF, MHTML e CBZ.
+
 ## Seeky 5.35.0
 
 Instale **Seeky_5.35.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

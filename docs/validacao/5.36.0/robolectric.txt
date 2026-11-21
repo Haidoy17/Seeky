@@ -1,0 +1,7 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.36.0
+1) realLibraryFiltersKeepDarkLabelsOnLightFields(mz.bam.seeky.android.ReaderContrast5152Test)
+Tests run: 462,  Failures: 1
+exit=1
+
+Falha esperada: o painel Organizar livros passou a ter 3 escolhas (nova: Madeira da estante); teste actualizado e repetido:
+ReaderContrast5152Test, Library536Test, BooksToolsTest, Presentation5190Test: OK (20 tests)

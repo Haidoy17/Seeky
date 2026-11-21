@@ -17,5 +17,5 @@ final class BookQuery {
         String[] orders={"title COLLATE NOCASE,id","author COLLATE NOCASE,title COLLATE NOCASE,id","created DESC,id DESC","updated DESC,id DESC","progress DESC,title COLLATE NOCASE,id"};
         where=sql.toString();args=parameters.isEmpty()?null:parameters.toArray(new String[0]);order=orders[Math.max(0,Math.min(orders.length-1,sort))];
     }
-    static boolean accepts(String name,String mime){String ext=MediaFormats.ext(name);return Arrays.asList("pdf","epub","docx","txt","md","htm","html").contains(ext)||Arrays.asList("application/pdf","application/epub+zip","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/plain","text/html").contains(mime);}
+    static boolean accepts(String name,String mime){String ext=MediaFormats.ext(name);return EbookConvert.supported(name)||Arrays.asList("pdf","epub","docx","txt","md","htm","html").contains(ext)||Arrays.asList("application/pdf","application/epub+zip","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/plain","text/html").contains(mime);}
 }

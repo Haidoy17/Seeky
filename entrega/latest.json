@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006200,
-  "versionName": "5.35.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.35.0.apk",
-  "sha256": "58ded3005f2b116439326a765cdc105807eedc89851cc45a93f8a106ab61e160",
-  "bytes": 13532142,
-  "notes": "10 temas novos a partir das suas paletas (Ardósia, Sálvia, Névoa, Hortelã, Pinheiro, Menta, Petróleo, Quartzo, Folha, Produtivo) e selector de cores com miniaturas."
+  "versionCode": 5006300,
+  "versionName": "5.36.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.36.0.apk",
+  "sha256": "c640d574b867cf2141e8872405b77100adf38b484a2df93ccac6c9d787d49fce",
+  "bytes": 13578173,
+  "notes": "Estante de madeira com cinco madeiras, novo Importar livros (pasta com subpastas, formatos, tamanho mínimo, favorito e colecção) e novos formatos de livro: FB2, MOBI, AZW3, PRC, ODT, RTF, MHTML e CBZ."
 }
