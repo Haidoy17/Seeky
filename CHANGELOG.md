@@ -1,5 +1,26 @@
 # Registo de alterações
 
+## 5.37.0 — 2026-11-22
+
+- **Letras para todos os áudios** do leitor de música:
+  - a letra é procurada sozinha ao abrir o leitor e a cada faixa nova (antes só ao abrir o
+    separador Letra);
+  - nomes limpos para a pesquisa (números de faixa, "Official Video", "[Lyric Video]", sites,
+    sublinhados, "feat."), várias tentativas (etiquetas, "Artista - Título" e o inverso) e
+    escolha segura: título, artista e duração têm de coincidir;
+  - segunda fonte: Lyrics.ovh (texto simples) quando a LRCLIB não tem.
+- **Transcrição com IA (Gemini)** quando não há letra — pregações, cultos, aulas, notas de voz e
+  músicas sem letra na internet:
+  - o som é descodificado no telefone, convertido para mono 16 kHz e enviado em partes de 6 min
+    (AAC 32 kb/s, cerca de 0,25 MB por minuto; WAV se o telefone não tiver codificador AAC);
+  - o Gemini escreve o que é dito ou cantado com os tempos; a letra fica sincronizada e aparece
+    aos poucos, parte a parte; corre em segundo plano (Tarefas) e pausa se a quota acabar;
+  - autorização pedida uma vez (Sempre automático / Só esta vez); modo Automático, Perguntar ou
+    Desligado e "só em Wi-Fi" no menu da biblioteca de música; nova tentativa automática no
+    máximo uma vez por dia por faixa.
+- **Letras para todas as músicas** (biblioteca de música → Mais): procura todas em segundo plano
+  e envia para transcrição as que faltarem (até 25 de cada vez).
+
 ## 5.36.0 — 2026-11-21
 
 - **Estante de madeira** (inspirada no modelo enviado), agora o modo normal dos Livros:

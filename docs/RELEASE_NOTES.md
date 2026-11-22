@@ -1,3 +1,12 @@
+## Seeky 5.37.0
+
+Instale **Seeky_5.37.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Letras para todos os áudios**: procura automática melhorada (LRCLIB e Lyrics.ovh).
+- **Transcrever com IA**: pregações, aulas e músicas sem letra ficam com letra sincronizada.
+- **Letras para todas as músicas** da biblioteca, em segundo plano.
+
 ## Seeky 5.36.0
 
 Instale **Seeky_5.36.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

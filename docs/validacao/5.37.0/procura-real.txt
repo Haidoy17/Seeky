@@ -1,0 +1,7 @@
+Procura real (LRCLIB e Lyrics.ovh) com Lyrics.online, 22/11/2026:
+01 - Hillsong United - Oceans (Where Feet May Fail) (Official Video).mp3 -> LRCLIB texto
+Coldplay - Yellow -> LRCLIB sincronizada
+Aline_Barros_-_Ressuscita-me_[Lyric Video].mp3 -> LRCLIB sincronizada
+AUD-20240101-WA0001.mp3 -> nada (fica para a transcrição)
+Coral da Igreja - Hino desconhecido do coral -> nada (fica para a transcrição)
+A transcrição com o Gemini foi testada com respostas simuladas (sem chave real neste ambiente).

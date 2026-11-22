@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006300,
-  "versionName": "5.36.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.36.0.apk",
-  "sha256": "c640d574b867cf2141e8872405b77100adf38b484a2df93ccac6c9d787d49fce",
-  "bytes": 13578173,
-  "notes": "Estante de madeira com cinco madeiras, novo Importar livros (pasta com subpastas, formatos, tamanho mínimo, favorito e colecção) e novos formatos de livro: FB2, MOBI, AZW3, PRC, ODT, RTF, MHTML e CBZ."
+  "versionCode": 5006400,
+  "versionName": "5.37.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.37.0.apk",
+  "sha256": "71956db28c487ddce21da8a062442e3b1b05d3c9c32807c51858b0b511e90b8a",
+  "bytes": 13599882,
+  "notes": "Letras para todos os áudios: procura automática melhorada (LRCLIB e Lyrics.ovh) e transcrição com IA (Gemini) para pregações, aulas e músicas sem letra, sincronizada e guardada."
 }

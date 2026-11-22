@@ -528,11 +528,31 @@ public final class LibraryActivity extends Activity {
         });
         if (!video()) {
             panel.action("tune", "Equalizador e efeitos", "10 bandas, graves, agudos, virtualização, volume", false, () -> EqualizerActivity.open(this));
-            panel.action("type", Lyrics.online(this) ? "Letras da internet: activo" : "Letras da internet: desligado", "LRCLIB · envia só título, artista, álbum e duração", false, () -> { Lyrics.setOnline(this, !Lyrics.online(this)); menu(); });
+            panel.action("type", Lyrics.online(this) ? "Letras da internet: activo" : "Letras da internet: desligado", "LRCLIB e Lyrics.ovh · envia só título, artista, álbum e duração", false, () -> { Lyrics.setOnline(this, !Lyrics.online(this)); menu(); });
+            String mode = TranscribeWork.mode(this);
+            panel.action("mic", "Transcrever com IA quando não há letra: " + AppLanguage.text(this, mode.equals("auto") ? "automático" : mode.equals("off") ? "desligado" : "perguntar"), TranscribeWork.ready(this) ? "Pregações, aulas e músicas sem letra · envia o som ao Gemini com a sua chave" : "Ligue primeiro a IA (Gemini) em Estudar com Seeky", false, () -> {
+                String next = mode.equals("ask") ? "auto" : mode.equals("auto") ? "off" : "ask";
+                TranscribeWork.setMode(this, next);
+                if (next.equals("auto")) TranscribeWork.prefs(this).edit().putBoolean("consent", true).apply();
+                menu();
+            });
+            boolean wifi = TranscribeWork.wifiOnly(this);
+            panel.action("wifi", wifi ? "Transcrição automática só em Wi-Fi: sim" : "Transcrição automática só em Wi-Fi: não", "Cerca de 0,25 MB enviados por minuto de áudio", false, () -> { TranscribeWork.setWifiOnly(this, !wifi); menu(); });
+            panel.action("lyrics", "Letras para todas as músicas", "Procura no telefone e na internet; transcreve as que faltarem, se quiser", false, this::allLyrics);
         }
         long[] totals = db.totals(kind);
         panel.note(UiRows.count(this, totals[0], video() ? "vídeo" : "faixa", video() ? "vídeos" : "faixas") + " · " + hours(totals[1]) + " · " + Rules.bytes(totals[2]));
         panel.show();
+    }
+
+    /** Lyrics for the whole library, in the background (Tarefas). */
+    void allLyrics() {
+        long count = db.totals(MediaLibrary.AUDIO)[0];
+        new UiDialog.Builder(this).setTitle("Letras para todas as músicas")
+                .setMessage(AppLanguage.text(this, "O Seeky procura a letra de cada uma das") + " " + count + " " + AppLanguage.text(this, "músicas: guardadas, ficheiros .lrc, letras incorporadas e internet. As que continuarem sem letra podem ser transcritas pela IA (até 25 de cada vez, para poupar a quota); as restantes são transcritas quando as ouvir, se a transcrição automática estiver ligada."))
+                .setPositiveButton("Procurar e transcrever", (d, w) -> { if (!TranscribeWork.ready(this)) PlusUi.toast(this, "Ligue a IA (Gemini) para transcrever; por agora só se procura."); else TranscribeWork.prefs(this).edit().putBoolean("consent", true).apply(); LyricsBatch.enqueue(this, TranscribeWork.ready(this)); })
+                .setNeutralButton("Só procurar", (d, w) -> LyricsBatch.enqueue(this, false))
+                .setNegativeButton("Cancelar", null).show();
     }
 
     void folders() {
