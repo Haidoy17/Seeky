@@ -23,8 +23,12 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.36", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.37", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("lyrics", "Letras para todos os áudios", "A letra é procurada sozinha ao tocar cada faixa: no telefone, na LRCLIB e no Lyrics.ovh, com o nome limpo (sem \"Official Video\", números de faixa…) e só se o título, o artista e a duração coincidirem", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.action("mic", "Transcrever com IA", "Pregações, aulas, notas de voz e músicas sem letra na internet: o Gemini escreve o que é dito ou cantado, com os tempos, e a letra aparece aos poucos, sincronizada", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.action("tasks", "Letras para toda a biblioteca", "Biblioteca de música → Mais → Letras para todas as músicas: procura todas e transcreve as que faltarem (até 25 de cada vez)", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
+        panel.section("Da 5.36");
         panel.action("book", "Estante de madeira", "Os livros ficam de pé em prateleiras, com lombada, folhas, sombras, percentagem e menu ⋮; escolha Nogueira, Carvalho, Cerejeira, Ébano ou Laca branca em Ordenar e filtrar", false, () -> { a.tab = "Livros"; a.render(); });
         panel.action("import", "Importar livros", "Uma pasta inteira (com ou sem subpastas) ou ficheiros escolhidos; formatos; tamanho mínimo; marcar como favorito e pôr numa colecção", false, () -> { a.tab = "Livros"; a.render(); if (a.books != null) a.books.pick(); });
         panel.action("document", "Novos formatos de livro", "FB2, MOBI, AZW3, PRC, ODT, RTF, MHTML e CBZ (banda desenhada) são convertidos para EPUB e abrem com todas as ferramentas do leitor", false, () -> { a.tab = "Livros"; a.render(); });

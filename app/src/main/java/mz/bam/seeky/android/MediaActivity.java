@@ -59,6 +59,12 @@ public final class MediaActivity extends Activity implements TextureView.Surface
     Lyrics.Result lyrics;
     int page = COVER, shownSerial = -1, lyricIndex = -2, fit, rotation, orientation, lyricSize = 20;
     String lyricsFor = "";
+    /** Transcription task of the shown track (id, state, message, progress, total) and whether it sounds like a talk. */
+    String[] transcription;
+    boolean speechTrack, refreshingLyrics;
+    TextView transcribeStatus;
+    java.util.concurrent.ExecutorService aiWorker;
+    final Runnable tasksChanged = this::onTasksChanged;
 
     final ServiceConnection connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName c, IBinder binder) {
@@ -300,6 +306,8 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         root.addView(status);
         setContentView(root);
         showPage(COVER);
+        // A letra é procurada logo (e, se escolhido, transcrita), mesmo antes de abrir o separador Letra.
+        handler.post(() -> { if (!isFinishing() && uri != null && lyricLines != null && lyricsFor.isEmpty()) loadLyrics(); });
     }
 
     void insets(View root) {
@@ -759,7 +767,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         lyrics = null;
         lyricsFor = "";
         loadFavorite();
-        if (page == LYRICS) loadLyrics();
+        if (!isVideo) loadLyrics();
     }
 
     // ---- letras ----
@@ -792,7 +800,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         bar.setHorizontalScrollBarEnabled(false);
         LinearLayout tools = new LinearLayout(this);
         tools.setPadding(dp(12), dp(2), dp(12), dp(6));
-        View[] items = {chip("globe", "Procurar online", this::searchOnline), chip("search", "Google", this::searchWeb), chip("paste", "Colar", this::pasteLyrics),
+        View[] items = {chip("mic", "Transcrever com IA", this::transcribe), chip("globe", "Procurar online", this::searchOnline), chip("search", "Google", this::searchWeb), chip("paste", "Colar", this::pasteLyrics),
                 chip("copy", "Copiar", this::copyLyrics), chip("edit", "Editar", this::editLyrics), chip("type", "A−", () -> resizeLyrics(-2)), chip("type", "A+", () -> resizeLyrics(2))};
         for (View v : items) { LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2); lp.rightMargin = dp(6); tools.addView(v, lp); }
         bar.addView(tools);
@@ -821,37 +829,127 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         lyricSource.setText(AppLanguage.text(this, "A procurar a letra…"));
         final String[] meta = trackMeta();
         final long duration = service != null ? service.duration() : 0;
+        final String file = name == null ? "" : name;
         new Thread(() -> {
             String t = meta[0], a = meta[1], al = "";
             MediaMetadataRetriever r = new MediaMetadataRetriever();
+            long length = duration;
             try {
                 r.setDataSource(this, target);
-                String mt = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE), ma = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST), mb = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                String mt = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE), ma = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST), mb = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM), md = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                 if (mt != null && !mt.trim().isEmpty()) t = mt.trim();
                 if (ma != null && !ma.trim().isEmpty()) a = ma.trim();
                 if (mb != null) al = mb.trim();
+                if (length <= 0 && md != null) try { length = Long.parseLong(md.trim()); } catch (NumberFormatException ignored) {}
             } catch (Exception ignored) {} finally { try { r.release(); } catch (Exception ignored) {} }
-            Lyrics.Result result = Lyrics.find(this, target, t, a, al, duration, Lyrics.online(this));
-            handler.post(() -> { if (!isFinishing() && target.toString().equals(lyricsFor)) showLyricsResult(result); });
+            Lyrics.Result result = Lyrics.find(this, target, t, a, al, length, Lyrics.online(this), file);
+            boolean speech = LyricsText.speech(t, file, length);
+            String[] state = null;
+            if (!result.found() || result.source.equals(TranscribeWork.PARTIAL)) {
+                state = TranscribeWork.status(this, target.toString());
+                if (!result.found() && TranscribeWork.prefs(this).getBoolean("consent", false) && TranscribeWork.automatic(this, target.toString())) {
+                    try { TranscribeWork.enqueue(this, target, file, t, length); state = TranscribeWork.status(this, target.toString()); }
+                    catch (Exception e) { AppDiagnostics.record(this, "transcribe-auto", e); }
+                }
+            }
+            final String[] task = state;
+            handler.post(() -> { if (!isFinishing() && target.toString().equals(lyricsFor)) { transcription = task; speechTrack = speech; showLyricsResult(result); } });
         }, "seeky-lyrics").start();
+    }
+
+    /** While a transcription runs: show each new piece of text and the progress, without blocking the screen. */
+    void onTasksChanged() {
+        if (isFinishing() || uri == null || refreshingLyrics || !uri.toString().equals(lyricsFor)) return;
+        if (transcription == null && (lyrics == null || lyrics.found())) return;
+        refreshingLyrics = true;
+        final Uri target = uri;
+        new Thread(() -> {
+            String[] state = TranscribeWork.status(this, target.toString());
+            Lyrics.Result saved = Lyrics.cached(this, target.toString());
+            handler.post(() -> {
+                refreshingLyrics = false;
+                if (isFinishing() || !target.toString().equals(lyricsFor)) return;
+                transcription = state;
+                boolean changed = saved != null && (lyrics == null || !lyrics.found() || !saved.source.equals(lyrics.source) || saved.synced.size() != lyrics.synced.size());
+                if (changed || saved == null && lyrics != null && !lyrics.found()) showLyricsResult(saved == null ? new Lyrics.Result() : saved);
+                else if (transcribeStatus != null) transcribeStatus.setText(statusText(state));
+            });
+        }, "seeky-lyrics-task").start();
+    }
+    String statusText(String[] s) {
+        if (s == null) return "";
+        if (TranscribeWork.busy(s)) return s[2].startsWith("A transcrever") ? AppLanguage.text(this, s[2]) : AppLanguage.text(this, "A transcrever com IA") + (s[2].isEmpty() || s[2].equals("Em espera") ? "…" : " · " + AppLanguage.text(this, s[2]));
+        if (s[1].equals("paused")) return AppLanguage.text(this, "Transcrição em pausa") + (s[2].isEmpty() ? "" : " · " + AppLanguage.text(this, s[2]));
+        if (s[1].equals("failed")) return AppLanguage.text(this, "A transcrição falhou") + (s[2].isEmpty() ? "" : ": " + AppLanguage.text(this, s[2]));
+        if (s[1].equals("complete")) return AppLanguage.text(this, s[2]);
+        return "";
+    }
+
+    /** "Transcrever com IA": needs the Gemini connection and, once, permission to send the audio. */
+    void transcribe() {
+        if (uri == null || isVideo) return;
+        if (!TranscribeWork.ready(this)) {
+            new UiDialog.Builder(this).setTitle("Transcrever com IA").setMessage(AppLanguage.text(this, "Para escrever a letra de qualquer áudio (pregações, aulas, músicas sem letra na internet), ligue o Seeky ao Gemini com uma chave gratuita do Google AI Studio. Depois toque outra vez em Transcrever com IA."))
+                    .setPositiveButton("Ligar a IA", (d, w) -> { if (aiWorker == null) aiWorker = java.util.concurrent.Executors.newSingleThreadExecutor(); SeekyAiSettings.show(this, new SeekyAiVault(this), aiWorker, () -> { if (TranscribeWork.ready(this)) transcribe(); }); })
+                    .setNegativeButton("Cancelar", null).show();
+            return;
+        }
+        if (!TranscribeWork.prefs(this).getBoolean("consent", false)) {
+            new UiDialog.Builder(this).setTitle("Transcrever com IA").setMessage(AppLanguage.text(this, "O som desta faixa é enviado ao Google Gemini, comprimido (cerca de 0,25 MB por minuto), com a sua chave, para escrever o que é dito ou cantado com os tempos. Usa a quota gratuita da sua conta. A letra fica guardada no telefone e acompanha a música. Em músicas protegidas por direitos de autor o Gemini pode recusar.\n\nQuer que o Seeky faça isto sozinho sempre que não encontrar a letra?"))
+                    .setPositiveButton("Sempre automático", (d, w) -> { TranscribeWork.prefs(this).edit().putBoolean("consent", true).apply(); TranscribeWork.setMode(this, "auto"); startTranscription(); })
+                    .setNeutralButton("Só esta vez", (d, w) -> { TranscribeWork.prefs(this).edit().putBoolean("consent", true).apply(); startTranscription(); })
+                    .setNegativeButton("Cancelar", null).show();
+            return;
+        }
+        startTranscription();
+    }
+    void startTranscription() {
+        final Uri target = uri;
+        final String file = name == null ? "" : name, title = trackMeta()[0];
+        final long duration = service != null ? service.duration() : 0;
+        if (TranscribeWork.wifiOnly(this) && !TranscribeWork.network(this)) toast("A transcrição está definida para Wi-Fi; começa mesmo assim porque pediu.");
+        new Thread(() -> {
+            String[] state = null;
+            try { TranscribeWork.enqueue(this, target, file, title, duration); state = TranscribeWork.status(this, target.toString()); }
+            catch (Exception e) { AppDiagnostics.record(this, "transcribe-start", e); }
+            final String[] task = state;
+            handler.post(() -> {
+                if (isFinishing() || !target.toString().equals(lyricsFor)) return;
+                if (task == null) { toast("Não foi possível iniciar a transcrição."); return; }
+                transcription = task;
+                if (page != LYRICS) showPage(LYRICS);
+                if (lyrics == null || !lyrics.found()) showLyricsResult(new Lyrics.Result());
+                toast("A transcrever em segundo plano: a letra aparece aos poucos.");
+            });
+        }, "seeky-transcribe").start();
     }
 
     void showLyricsResult(Lyrics.Result r) {
         lyrics = r;
         lyricLines.removeAllViews();
         lyricIndex = -2;
+        transcribeStatus = null;
         if (!r.found()) {
-            lyricSource.setText(AppLanguage.text(this, "Letra não encontrada"));
-            TextView t = text("Não encontrámos a letra desta música.", 16, palette.ink);
+            boolean running = TranscribeWork.busy(transcription);
+            lyricSource.setText(AppLanguage.text(this, running ? "A transcrever a letra com IA" : "Letra não encontrada"));
+            TextView t = text(running ? "A escrever a letra com IA…" : speechTrack ? "Este áudio parece uma pregação, aula ou conversa." : "Não encontrámos a letra desta música.", 16, palette.ink);
             t.setTypeface(ThemeStyle.BOLD);
             t.setPadding(0, dp(16), 0, dp(6));
             lyricLines.addView(t);
-            TextView how = text("Procure online e escolha a versão certa, ou abra o Google, copie a letra e volte: o Seeky aplica-a sozinho.", 14, palette.muted);
-            how.setPadding(0, 0, 0, dp(14));
+            String hint = running ? "Pode continuar a ouvir ou sair: a letra aparece aqui aos poucos, sincronizada com o áudio."
+                    : speechTrack ? "Estes áudios não têm letra na internet. Transcreva com IA: o Seeky escreve tudo o que é dito, com os tempos, e guarda."
+                    : "Transcreva com IA, procure online e escolha a versão certa, ou abra o Google, copie a letra e volte: o Seeky aplica-a sozinho.";
+            TextView how = text(hint, 14, palette.muted);
+            how.setPadding(0, 0, 0, dp(10));
             lyricLines.addView(how);
-            lyricLines.addView(bigButton("globe", "Procurar online", this::searchOnline));
+            String state = statusText(transcription);
+            if (!state.isEmpty()) { transcribeStatus = text(state, 13, running ? palette.accent : palette.muted); transcribeStatus.setPadding(0, 0, 0, dp(12)); lyricLines.addView(transcribeStatus); }
+            if (running) { lyricLines.addView(bigButton("tasks", "Ver tarefas em segundo plano", () -> TaskService.open(this))); return; }
+            lyricLines.addView(bigButton("mic", transcription != null && (transcription[1].equals("paused") || transcription[1].equals("failed")) ? "Retomar a transcrição com IA" : "Transcrever com IA", this::transcribe));
+            if (!speechTrack || transcription != null) lyricLines.addView(bigButton("globe", "Procurar online", this::searchOnline));
             lyricLines.addView(bigButton("search", "Procurar no Google e copiar", this::searchWeb));
             lyricLines.addView(bigButton("paste", "Colar letra copiada", this::pasteLyrics));
+            if (TranscribeWork.mode(this).equals("ask") && TranscribeWork.ready(this) && !TranscribeWork.prefs(this).getBoolean("consent", false)) { TextView auto = text("Dica: escolha \"Sempre automático\" e o Seeky transcreve sozinho tudo o que não tiver letra.", 12, palette.muted); auto.setPadding(0, dp(6), 0, 0); lyricLines.addView(auto); }
             return;
         }
         lyricSource.setText(AppLanguage.text(this, "Letra:") + " " + AppLanguage.text(this, r.source) + (r.isSynced() ? " · " + AppLanguage.text(this, "sincronizada") : ""));
@@ -871,6 +969,14 @@ public final class MediaActivity extends Activity implements TextureView.Surface
             t.setLineSpacing(dp(4), 1f);
             t.setTextIsSelectable(true);
             lyricLines.addView(t);
+        }
+        if (r.source.startsWith("Transcrição")) {
+            boolean partial = r.source.equals(TranscribeWork.PARTIAL);
+            String note = partial ? statusText(transcription) : "";
+            TextView foot = text((note.isEmpty() ? "" : note + "\n") + AppLanguage.text(this, partial ? "A letra continua a chegar enquanto a IA transcreve o resto do áudio." : "Transcrição automática: pode ter pequenos erros. Corrija em Editar."), 12, palette.muted);
+            foot.setPadding(0, dp(14), 0, dp(4));
+            if (partial) transcribeStatus = foot;
+            lyricLines.addView(foot);
         }
     }
 
@@ -1148,9 +1254,11 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         if (workspaceEpoch != WorkspaceEpoch.value) { finish(); return; }
         bound = bindService(new Intent(this, MediaPlaybackService.class), connection, BIND_AUTO_CREATE);
         UiPanel.visibility(this, true);
+        TaskEvents.add(tasksChanged);
     }
 
     protected void onStop() {
+        TaskEvents.remove(tasksChanged);
         handler.removeCallbacks(tick);
         if (service != null) service.attach(null);
         if (bound) { unbindService(connection); bound = false; }
@@ -1163,6 +1271,7 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         handler.removeCallbacksAndMessages(null);
         UiPanel.dismissAll(this);
         if (surface != null) { surface.release(); surface = null; }
+        if (aiWorker != null) aiWorker.shutdown();
         super.onDestroy();
     }
 

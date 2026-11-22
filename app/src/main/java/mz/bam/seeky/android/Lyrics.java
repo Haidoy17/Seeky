@@ -18,8 +18,9 @@ import org.json.JSONObject;
 /**
  * Letras das músicas, procuradas por esta ordem: letra guardada ou editada no Seeky, ficheiro
  * .lrc/.txt com o mesmo nome ao lado da música, letra incorporada no ficheiro (ID3 USLT, FLAC
- * LYRICS, MP4 ©lyr) e, se permitido, LRCLIB na internet (letras sincronizadas e gratuitas; só
- * envia título, artista, álbum e duração). O resultado fica guardado no telefone.
+ * LYRICS, MP4 ©lyr) e, se permitido, LRCLIB e Lyrics.ovh na internet (só envia título, artista,
+ * álbum e duração). O que não for encontrado pode ser transcrito pela IA (TranscribeWork). O
+ * resultado fica guardado no telefone.
  */
 final class Lyrics {
     static final Pattern TIME = Pattern.compile("\\[(\\d{1,3}):(\\d{1,2})(?:[.:](\\d{1,3}))?\\]");
@@ -135,7 +136,13 @@ final class Lyrics {
 
     // ---- procura ----
 
-    static Result find(Context c, Uri uri, String title, String artist, String album, long durationMs, boolean allowOnline) {
+    static Result find(Context c, Uri uri, String title, String artist, String album, long durationMs, boolean allowOnline) { return find(c, uri, title, artist, album, durationMs, allowOnline, null); }
+    /**
+     * Guardada → .lrc ao lado → incorporada → internet (várias tentativas com o nome limpo; só aceita
+     * resultados com título, artista e duração coerentes). Pregações, aulas e notas de voz não são
+     * procuradas como músicas: ficam para a transcrição automática.
+     */
+    static Result find(Context c, Uri uri, String title, String artist, String album, long durationMs, boolean allowOnline, String file) {
         Result r = cached(c, uri.toString());
         if (r != null) return r;
         String side = sidecar(uri);
@@ -143,12 +150,41 @@ final class Lyrics {
         String embedded = embedded(c, uri);
         if (embedded != null && !embedded.trim().isEmpty()) return result(embedded, "Incorporada no ficheiro");
         File none = new File(dir(c), key(uri.toString()) + ".none");
-        if (!allowOnline || title == null || title.trim().isEmpty() || (none.isFile() && System.currentTimeMillis() - none.lastModified() < 7 * 86400000L)) return new Result();
+        boolean nameless = (title == null || title.trim().isEmpty()) && (file == null || file.trim().isEmpty());
+        if (!allowOnline || nameless || LyricsText.speech(title, file, durationMs) || (none.isFile() && System.currentTimeMillis() - none.lastModified() < 7 * 86400000L)) return new Result();
         try {
-            Result net = lrclib(title, artist, album, durationMs);
-            if (net.found()) { store(c, uri.toString(), net.isSynced() ? lrcText(net) : net.text, "LRCLIB"); return net; }
+            Result net = online(title, artist, album, durationMs, file);
+            if (net.found()) { store(c, uri.toString(), net.isSynced() ? lrcText(net) : net.text, net.source); return net; }
             try { none.createNewFile(); none.setLastModified(System.currentTimeMillis()); } catch (IOException ignored) {}
         } catch (Exception ignored) {}
+        return new Result();
+    }
+    /** Procurado já e não encontrado na internet (nos últimos 7 dias). */
+    static boolean missing(Context c, String uri) { File none = new File(dir(c), key(uri) + ".none"); return none.isFile() && System.currentTimeMillis() - none.lastModified() < 7 * 86400000L; }
+
+    /** LRCLIB com até 3 tentativas (exacta e pesquisa), pesquisa livre e, por fim, Lyrics.ovh (texto simples). */
+    static Result online(String title, String artist, String album, long durationMs, String file) throws Exception {
+        List<LyricsText.Query> queries = LyricsText.queries(title, artist, file);
+        for (int i = 0; i < Math.min(3, queries.size()); i++) {
+            LyricsText.Query q = queries.get(i);
+            if (!q.artist.isEmpty()) {
+                String exact = get("https://lrclib.net/api/get?track_name=" + enc(q.title) + "&artist_name=" + enc(q.artist) + (i == 0 && album != null && !album.trim().isEmpty() ? "&album_name=" + enc(album) : "") + (durationMs > 0 ? "&duration=" + Math.round(durationMs / 1000.0) : ""));
+                if (exact != null) { JSONObject o = new JSONObject(exact); if (durationMs <= 0 || o.optDouble("duration", 0) <= 0 || Math.abs(o.optDouble("duration") * 1000 - durationMs) < 8000) { Result r = fromJson(o); if (r.found()) return r; } }
+            }
+            String search = get("https://lrclib.net/api/search?track_name=" + enc(q.title) + (q.artist.isEmpty() ? "" : "&artist_name=" + enc(q.artist)));
+            if (search != null) { JSONArray list = new JSONArray(search); int k = LyricsText.pick(candidates(list), q, durationMs); if (k >= 0) return fromJson(list.getJSONObject(k)); }
+        }
+        if (!queries.isEmpty()) {
+            LyricsText.Query q = queries.get(0);
+            String free = get("https://lrclib.net/api/search?q=" + enc((q.artist + " " + q.title).trim()));
+            if (free != null) { JSONArray list = new JSONArray(free); int k = LyricsText.pick(candidates(list), q, durationMs); if (k >= 0) return fromJson(list.getJSONObject(k)); }
+        }
+        for (LyricsText.Query q : queries) {
+            if (q.artist.isEmpty()) continue;
+            String body = get("https://api.lyrics.ovh/v1/" + enc(q.artist).replace("+", "%20") + "/" + enc(q.title).replace("+", "%20"));
+            if (body != null) { String text = new JSONObject(body).optString("lyrics", "").replace("\r\n", "\n").replaceFirst("^(?i)paroles de la chanson[^\n]*\n", "").trim(); if (text.length() >= 40) return result(text, "Lyrics.ovh"); }
+            break;
+        }
         return new Result();
     }
 
@@ -318,22 +354,17 @@ final class Lyrics {
 
     // ---- LRCLIB ----
 
-    static Result lrclib(String title, String artist, String album, long durationMs) throws Exception {
-        String q = "track_name=" + enc(title) + (artist == null || artist.isEmpty() ? "" : "&artist_name=" + enc(artist))
-                + (album == null || album.isEmpty() ? "" : "&album_name=" + enc(album)) + (durationMs > 0 ? "&duration=" + Math.round(durationMs / 1000.0) : "");
-        String body = get("https://lrclib.net/api/get?" + q);
-        if (body != null) return fromJson(new JSONObject(body));
-        String search = get("https://lrclib.net/api/search?track_name=" + enc(title) + (artist == null || artist.isEmpty() ? "" : "&artist_name=" + enc(artist)));
-        if (search == null) return new Result();
-        JSONArray list = new JSONArray(search);
-        JSONObject best = null;
+    static List<LyricsText.Candidate> candidates(JSONArray list) {
+        List<LyricsText.Candidate> out = new ArrayList<>();
         for (int i = 0; i < list.length(); i++) {
-            JSONObject o = list.getJSONObject(i);
-            if (best == null) best = o;
-            if (durationMs > 0 && Math.abs(o.optDouble("duration") * 1000 - durationMs) < 4000) { best = o; break; }
+            JSONObject o = list.optJSONObject(i);
+            if (o == null) { out.add(new LyricsText.Candidate("", "", 0, false, false)); continue; }
+            boolean synced = !o.isNull("syncedLyrics") && !o.optString("syncedLyrics").isEmpty(), plain = !o.isNull("plainLyrics") && !o.optString("plainLyrics").isEmpty();
+            out.add(new LyricsText.Candidate(o.optString("trackName", o.optString("name")), o.optString("artistName"), o.optDouble("duration", 0), synced, synced || plain || o.optBoolean("instrumental")));
         }
-        return best == null ? new Result() : fromJson(best);
+        return out;
     }
+    static Result lrclib(String title, String artist, String album, long durationMs) throws Exception { return online(title, artist, album, durationMs, null); }
 
     /** Um resultado da pesquisa online, para o utilizador escolher. */
     static final class Candidate {
@@ -403,7 +434,7 @@ final class Lyrics {
         try {
             int code = c.getResponseCode();
             if (code == 404) return null;
-            if (code != 200) throw new IOException("LRCLIB " + code);
+            if (code != 200) throw new IOException("Serviço de letras: HTTP " + code);
             try (InputStream in = new OpenLibraries.Limited(c.getInputStream(), 2 * 1024 * 1024)) {
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 PdfTools.copy(in, b);

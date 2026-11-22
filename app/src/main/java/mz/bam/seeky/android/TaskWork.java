@@ -9,6 +9,8 @@ final class TaskWork {
         case "model":case "ocr":OcrWork.run(c,job,db,control);break;
         case "summary":SummaryWork.run(c,job,db,control);break;
         case "bible":BibleWork.run(c,job,db,control);break;
+        case "transcribe":TranscribeWork.run(c,job,db,control);break;
+        case "lyrics":LyricsBatch.run(c,job,db,control);break;
         default:throw new java.io.IOException("Tipo de tarefa indisponível.");
     }}
     private TaskWork(){}
