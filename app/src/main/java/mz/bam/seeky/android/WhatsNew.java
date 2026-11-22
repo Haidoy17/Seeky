@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.37", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.38", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("star", "Jogo da Bíblia: 60 s e nível Lendário", "60 s em todos os níveis; Médio e Difícil mais profundos (completar passagens, quem disse, ordem dos acontecimentos) e o novo Lendário, com perguntas para meditar e explicação", false, () -> BibleGameActivity.open(a));
+        panel.action("note", "Bloco de notas", "Pastas, cores, fixar, tarefas, formatação, modelos (estudo OIA, sermão, devocional), ditar, ouvir, exportar e lixo; as passagens escritas ficam tocáveis e ligam ao estudo bíblico, aos livros e aos Estudos", false, () -> NotepadActivity.open(a));
+        panel.section("Da 5.37");
         panel.action("lyrics", "Letras para todos os áudios", "A letra é procurada sozinha ao tocar cada faixa: no telefone, na LRCLIB e no Lyrics.ovh, com o nome limpo (sem \"Official Video\", números de faixa…) e só se o título, o artista e a duração coincidirem", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
         panel.action("mic", "Transcrever com IA", "Pregações, aulas, notas de voz e músicas sem letra na internet: o Gemini escreve o que é dito ou cantado, com os tempos, e a letra aparece aos poucos, sincronizada", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));
         panel.action("tasks", "Letras para toda a biblioteca", "Biblioteca de música → Mais → Letras para todas as músicas: procura todas e transcreve as que faltarem (até 25 de cada vez)", false, () -> LibraryActivity.open(a, MediaLibrary.AUDIO));

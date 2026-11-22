@@ -35,6 +35,7 @@
   <activity android:name="mz.bam.seeky.android.LibraryActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.EqualizerActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
   <activity android:name="mz.bam.seeky.android.HighlightsActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize"/>
+  <activity android:name="mz.bam.seeky.android.NotepadActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.BibleStudyActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize"/>
   <activity android:name="mz.bam.seeky.android.BibleGameActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"/>
   <activity android:name="mz.bam.seeky.android.PhotoEditorActivity" android:exported="false" android:configChanges="orientation|screenSize|screenLayout" android:theme="@android:style/Theme.Material.NoActionBar" android:windowSoftInputMode="adjustResize"/>

@@ -18,11 +18,12 @@ import java.util.*;
 /** Jogo da Bíblia: ten timed questions per round, three levels, helps, spoken answers and a records table. */
 public final class BibleGameActivity extends Activity {
     static final int SPEECH=42;
-    static final int[] LEVEL_COLORS={0xff2e9d57,0xffd08a1e,0xffd9534f};
+    static final int[] LEVEL_COLORS={0xff2e9d57,0xffd08a1e,0xffd9534f,0xff7b3fbf};
     static final String[] LEVEL_TEXT={
         "Passagens famosas, histórias conhecidas e os dois Testamentos",
-        "Versículos dos livros mais lidos, a passagem certa de cada referência, ordem, grupos e autores",
-        "Qualquer livro, livro e capítulo, resposta escrita ou falada, capítulos e factos"};
+        "Qualquer versículo: livro e capítulo, resposta escrita ou falada, a passagem certa de cada referência, ordem e capítulos",
+        "Completar passagens, quem disse, ordem dos acontecimentos e perguntas que pedem raciocínio, com explicação",
+        "Para meditar: tipologia, citações do Antigo no Novo Testamento, doutrina, escrever a palavra que falta e o último de cada época"};
     Screens s;String state="menu";
     BibleGame game;List<BibleGame.Question> questions=new ArrayList<>();
     int level,index,score,correct,streak,bestStreak,lastPoints;long started,deadline,remaining;boolean answered,fiftyUsed,paused,bible;
@@ -42,7 +43,7 @@ public final class BibleGameActivity extends Activity {
     void menu(){
         state="menu";PlusUi.MAIN.removeCallbacks(tick);
         LinearLayout content=s.page();
-        content.addView(s.header("Jogo da Bíblia","10 perguntas · 3 níveis · recordes",this::finish));
+        content.addView(s.header("Jogo da Bíblia","10 perguntas · 4 níveis · 60 s por pergunta · recordes",this::finish));
         LinearLayout hero=s.column();hero.setPadding(s.dp(20),s.dp(20),s.dp(20),s.dp(20));
         GradientDrawable g=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{s.p.heroStart,s.p.heroEnd});g.setCornerRadius(s.dp(24));hero.setBackground(g);
         int ink=AppPalette.contrast(0xffffffff,s.p.heroStart)>=3?0xffffffff:0xff141820;
@@ -56,9 +57,9 @@ public final class BibleGameActivity extends Activity {
         s.addChip(more,s.chip("star","Recordes",false,()->records(level)));
         s.addChip(more,s.chip("info","Como jogar",false,this::howTo));
         content.addView(s.scroller(more),s.gap(16));
-        PlusUi.run(this,()->{int[] best=new int[3];boolean hasBible;try(BibleStudyStore st=new BibleStudyStore(this)){for(int l=0;l<3;l++){List<BibleStudyStore.Record> r=st.records(l,1);best[l]=r.isEmpty()?0:r.get(0).score;}}hasBible=new BibleStudyStore.Verses(this).available();
+        PlusUi.run(this,()->{int[] best=new int[BibleGame.LEVELS.length];boolean hasBible;try(BibleStudyStore st=new BibleStudyStore(this)){for(int l=0;l<BibleGame.LEVELS.length;l++){List<BibleStudyStore.Record> r=st.records(l,1);best[l]=r.isEmpty()?0:r.get(0).score;}}hasBible=new BibleStudyStore.Verses(this).available();
             PlusUi.post(this,()->{if(!state.equals("menu"))return;bible=hasBible;
-                for(int l=0;l<3;l++)levels.addView(levelCard(l,best[l]),s.gap(l==0?0:10));
+                for(int l=0;l<BibleGame.LEVELS.length;l++)levels.addView(levelCard(l,best[l]),s.gap(l==0?0:10));
                 if(!hasBible){LinearLayout c=s.card();c.addView(s.text("Sem Bíblia importada, o jogo usa histórias, livros e factos. Importe uma Bíblia para jogar também com versículos.",14,s.p.muted,false));c.addView(s.button("Descarregar uma Bíblia",false,()->BibleCatalog.show(this)),s.gap(10));note.addView(c,s.gap(14));}
             });});
     }
@@ -78,12 +79,17 @@ public final class BibleGameActivity extends Activity {
     void howTo(){
         new UiDialog.Builder(this).setTitle("Como jogar").setMessage(
             "• Cada partida tem 10 perguntas.\n"+
-            "• Fácil: 30 s; Médio: 25 s; Difícil: 20 s por pergunta.\n"+
-            "• Acerto: 100, 150 ou 200 pontos, mais um bónus pelo tempo que sobrar.\n"+
+            "• Todos os níveis: 60 s por pergunta. O que muda é a profundidade das perguntas.\n"+
+            "• Fácil: passagens famosas e histórias conhecidas.\n"+
+            "• Médio: qualquer versículo, livro e capítulo, respostas escritas.\n"+
+            "• Difícil: completar passagens, quem disse, a ordem dos acontecimentos e perguntas que pedem raciocínio.\n"+
+            "• Lendário: perguntas para meditar (tipologia, citações do Antigo no Novo Testamento, doutrina) e escrever a palavra que falta.\n"+
+            "• Depois de cada resposta aparece a explicação com a referência.\n"+
+            "• Acerto: 100, 150, 200 ou 300 pontos, mais um bónus pelo tempo que sobrar.\n"+
             "• 3 acertos seguidos ou mais: +20%.\n"+
             "• Ajuda 50/50: tira duas respostas erradas (uma vez por partida; a pergunta vale metade).\n"+
             "• Dizer: responda em voz alta com o nome do livro ou a letra da opção.\n"+
-            "• No Difícil, algumas respostas escrevem-se ou dizem-se: \"primeira aos coríntios\", \"Isaías\"…\n"+
+            "• Do Médio para cima, algumas respostas escrevem-se ou dizem-se: \"primeira aos coríntios\", \"Isaías\", ou a palavra que falta.\n"+
             "• No fim, guarde o seu nome no Recorde.").setPositiveButton("Entendi",null).show();
     }
 
@@ -113,11 +119,11 @@ public final class BibleGameActivity extends Activity {
         LinearLayout card=s.card();card.setPadding(s.dp(18),s.dp(16),s.dp(18),s.dp(18));
         TextView kind=s.text(kindLabel(q.kind),12,LEVEL_COLORS[level],true);kind.setAllCaps(true);kind.setLetterSpacing(.06f);card.addView(kind);
         TextView prompt=s.text(q.prompt,18,s.p.ink,true);prompt.setPadding(0,s.dp(6),0,0);card.addView(prompt);
-        if(!q.body.isEmpty()){TextView body=s.text(q.body,q.body.length()>160?18:21,s.p.ink,false);body.setTypeface(q.kind.equals("verse")||q.kind.equals("free")||q.kind.equals("chapter")||q.kind.equals("refverse")?Typeface.SERIF:Typeface.DEFAULT_BOLD);body.setPadding(0,s.dp(12),0,0);body.setLineSpacing(s.dp(3),1.08f);card.addView(body);}
+        if(!q.body.isEmpty()){TextView body=s.text(q.body,q.body.length()>160?18:21,s.p.ink,false);body.setTypeface(Arrays.asList("verse","free","chapter","refverse","blank","blankwrite","who").contains(q.kind)?Typeface.SERIF:Typeface.DEFAULT_BOLD);body.setPadding(0,s.dp(12),0,0);body.setLineSpacing(s.dp(3),1.08f);card.addView(body);}
         content.addView(card,s.gap(8));
         optionsBox=s.column();optionViews.clear();freeAnswer=null;
         if(q.free()){
-            freeAnswer=new EditText(this);freeAnswer.setHint(AppLanguage.text(this,"Nome do livro"));freeAnswer.setSingleLine(true);freeAnswer.setTextSize(18);freeAnswer.setTextColor(s.p.ink);freeAnswer.setHintTextColor(s.p.muted);freeAnswer.setBackground(s.round(s.p.surface,16));freeAnswer.setPadding(s.dp(16),s.dp(12),s.dp(16),s.dp(12));
+            freeAnswer=new EditText(this);freeAnswer.setHint(AppLanguage.text(this,q.word()?"Palavra que falta":"Nome do livro"));freeAnswer.setSingleLine(true);freeAnswer.setTextSize(18);freeAnswer.setTextColor(s.p.ink);freeAnswer.setHintTextColor(s.p.muted);freeAnswer.setBackground(s.round(s.p.surface,16));freeAnswer.setPadding(s.dp(16),s.dp(12),s.dp(16),s.dp(12));
             freeAnswer.setOnEditorActionListener((v,id,e)->{answer(freeAnswer.getText().toString());return true;});
             optionsBox.addView(freeAnswer,new LinearLayout.LayoutParams(-1,s.dp(56)));
             optionsBox.addView(s.button("Responder",true,()->answer(freeAnswer.getText().toString())),s.gap(10));
@@ -135,7 +141,7 @@ public final class BibleGameActivity extends Activity {
     }
     String kindLabel(String kind){
         switch(kind){case "verse":return AppLanguage.text(this,"Passagem → livro");case "free":return AppLanguage.text(this,"Escreva ou diga");case "chapter":return AppLanguage.text(this,"Livro e capítulo");case "refverse":return AppLanguage.text(this,"Referência → passagem");
-            case "story":return AppLanguage.text(this,"História");case "order":case "first":return AppLanguage.text(this,"Ordem dos livros");case "group":return AppLanguage.text(this,"Grupos de livros");case "author":return AppLanguage.text(this,"Autores");case "chapters":return AppLanguage.text(this,"Capítulos");case "testament":return AppLanguage.text(this,"Testamentos");default:return AppLanguage.text(this,"Sabia que…");}
+            case "story":return AppLanguage.text(this,"História");case "order":case "first":return AppLanguage.text(this,"Ordem dos livros");case "group":return AppLanguage.text(this,"Grupos de livros");case "author":return AppLanguage.text(this,"Autores");case "chapters":return AppLanguage.text(this,"Capítulos");case "testament":return AppLanguage.text(this,"Testamentos");case "blank":case "blankwrite":return AppLanguage.text(this,"Complete a passagem");case "who":return AppLanguage.text(this,"Quem disse?");case "sequence":return AppLanguage.text(this,"Ordem dos acontecimentos");case "deep":return AppLanguage.text(this,"Pense bem");case "reflect":return AppLanguage.text(this,"Para meditar");default:return AppLanguage.text(this,"Sabia que…");}
     }
     TextView option(char letter,String text){
         TextView b=s.text(letter+"   "+text,16,s.p.ink,true);b.setMinHeight(s.dp(56));b.setGravity(Gravity.CENTER_VERTICAL);b.setPadding(s.dp(16),s.dp(12),s.dp(16),s.dp(12));
@@ -249,7 +255,7 @@ public final class BibleGameActivity extends Activity {
     void records(int show,long highlight){
         state="records";level=show;LinearLayout content=s.page();
         content.addView(s.header("Recordes","Os 10 melhores de cada nível",this::menu));
-        LinearLayout tabs=s.row();for(int l=0;l<3;l++){final int ll=l;s.addChip(tabs,s.chip(null,BibleGame.LEVELS[l],l==show,()->records(ll,highlight)));}
+        LinearLayout tabs=s.row();for(int l=0;l<BibleGame.LEVELS.length;l++){final int ll=l;s.addChip(tabs,s.chip(null,BibleGame.LEVELS[l],l==show,()->records(ll,highlight)));}
         content.addView(s.scroller(tabs));
         LinearLayout list=s.column();content.addView(list,s.gap(12));
         PlusUi.run(this,()->{List<BibleStudyStore.Record> rows;try(BibleStudyStore st=new BibleStudyStore(this)){rows=st.records(show,10);}

@@ -1,5 +1,29 @@
 # Registo de alterações
 
+## 5.38.0 — 2026-11-22
+
+- **Jogo da Bíblia renovado**:
+  - 60 segundos por pergunta em todos os níveis; a dificuldade está no conteúdo;
+  - Médio passa a ter o conteúdo do antigo Difícil (qualquer versículo, livro e capítulo,
+    respostas escritas ou faladas);
+  - Difícil: completar passagens (escolha da palavra), "quem disse?", ordem dos acontecimentos
+    bíblicos e perguntas que pedem raciocínio, sempre com explicação e referência;
+  - novo nível **Lendário** (300 pontos): perguntas para meditar — tipologia (serpente de
+    bronze, cordeiro pascal), citações do Antigo no Novo Testamento, Paulo e Tiago sobre a fé,
+    nova aliança —, escrever a palavra que falta e "o último" de acontecimentos próximos.
+- **Bloco de notas** (novo):
+  - lista com procura, filtros (fixadas, tarefas, com passagens, ligadas a livros, pastas),
+    ordenação, cores e fixar; lixo com restaurar;
+  - editor com gravação automática, desfazer/refazer, negrito, itálico, títulos, listas,
+    tarefas, destaque, data, ditado por voz, ouvir a nota, partilhar, copiar e exportar (.md/.txt);
+  - modelos: estudo bíblico (OIA), sermão, devocional, lista de tarefas e resumo de livro;
+  - as passagens escritas (João 3:16, Rm 8.28, Salmo 23…) são reconhecidas: ficam tocáveis na
+    leitura, aparecem em "Passagens nesta nota", podem trazer o texto da Bíblia importada para a
+    nota e ser guardadas no estudo bíblico;
+  - ligação a livros (abre o livro) e a módulos dos Estudos — as notas aparecem também em
+    Estudos → Anotações; "Anotar" na leitura rápida de passagens e "Bloco de notas" no menu de
+    selecção do leitor.
+
 ## 5.37.0 — 2026-11-22
 
 - **Letras para todos os áudios** do leitor de música:

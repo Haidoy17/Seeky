@@ -98,7 +98,8 @@ public final class BibleStudyActivity extends Activity {
 
         content.addView(s.section("Mais"));
         content.addView(s.entry("bookmark","Passagens guardadas",d.saved==0?"Guarde passagens na leitura rápida":d.saved+" "+AppLanguage.text(this,d.saved==1?"passagem":"passagens"),this::savedList),s.gap(0));
-        content.addView(s.entry("star","Jogo da Bíblia","Passagens, livros e histórias em três níveis",()->BibleGameActivity.open(this)),s.gap(8));
+        content.addView(s.entry("star","Jogo da Bíblia","4 níveis, do Fácil ao Lendário · 60 s por pergunta",()->BibleGameActivity.open(this)),s.gap(8));
+        content.addView(s.entry("note","Bloco de notas","Estudos, sermões e devocionais · as passagens escritas ficam tocáveis",()->NotepadActivity.open(this)),s.gap(8));
         content.addView(s.entry("edit","As minhas marcações","Destaques, sublinhados e notas dos livros",()->HighlightsActivity.open(this,null)),s.gap(8));
         content.addView(s.entry("search","Consultar passagem","Isaías 3.1-7, 12 · Jo 3:16 · Salmo 23",()->BibleLinks.query(this)),s.gap(8));
     }
