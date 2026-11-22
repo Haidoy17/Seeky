@@ -23,8 +23,13 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.38", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.39", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("note", "Notas renovadas", "Notas e Tarefas, secções por data (Hoje, 7 dias…), vistas em lista, cartão e grelha, pesquisa em baixo, modelos, fundos de papel (linhas, quadriculado, pontos, cores), bloquear, lembrete e pôr no ecrã inicial", false, () -> NotepadActivity.open(a));
+        panel.action("type", "Texto rico nas notas", "Títulos H1–H4, negrito, itálico, sublinhado, riscado, destaque, 6 cores, alinhar, recuo, listas numeradas, tarefas, tabelas, imagens, câmara, desenhos e gravações de voz", false, () -> NotepadActivity.open(a));
+        panel.action("word", "Exportar para Word e PDF", "No menu ⋮ da nota: Exportar PDF, Exportar Word (.docx), Markdown ou texto, e Partilhar como PDF ou Word — com títulos, cores, listas, tabelas e imagens", false, () -> NotepadActivity.open(a));
+        panel.action("pdfbook", "Notas dentro dos livros", "No leitor, a ferramenta Notas escreve uma nota sem sair do livro (também a partir do texto seleccionado); as notas do livro aparecem ali e no Bloco de notas com o nome do livro", false, () -> { a.tab = "Livros"; a.render(); });
+        panel.section("Da 5.38");
         panel.action("star", "Jogo da Bíblia: 60 s e nível Lendário", "60 s em todos os níveis; Médio e Difícil mais profundos (completar passagens, quem disse, ordem dos acontecimentos) e o novo Lendário, com perguntas para meditar e explicação", false, () -> BibleGameActivity.open(a));
         panel.action("note", "Bloco de notas", "Pastas, cores, fixar, tarefas, formatação, modelos (estudo OIA, sermão, devocional), ditar, ouvir, exportar e lixo; as passagens escritas ficam tocáveis e ligam ao estudo bíblico, aos livros e aos Estudos", false, () -> NotepadActivity.open(a));
         panel.section("Da 5.37");

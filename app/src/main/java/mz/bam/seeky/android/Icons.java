@@ -101,7 +101,7 @@ final class Icons extends View {
             case "collapse":line(canvas,3,9,9,9,9,3);line(canvas,15,3,15,9,21,9);line(canvas,21,15,15,15,15,21);line(canvas,9,21,9,15,3,15);break;
             case "expand":line(canvas,9,3,3,3,3,9);line(canvas,15,3,21,3,21,9);line(canvas,21,15,21,21,15,21);line(canvas,9,21,3,21,3,15);break;
             case "close":line(canvas,6,6,18,18);line(canvas,18,6,6,18);break;
-            case "refresh":canvas.drawArc(4,4,20,20,35,290,false,p);line(canvas,20,4,20,10,14,10);break;
+            case "undo":{android.graphics.Path u=new android.graphics.Path();u.moveTo(4,8);u.lineTo(15,8);u.quadTo(20,8,20,13);u.quadTo(20,18,15,18);u.lineTo(9,18);canvas.drawPath(u,p);}line(canvas,8,4,4,8,8,12);break;case "redo":{android.graphics.Path u=new android.graphics.Path();u.moveTo(20,8);u.lineTo(9,8);u.quadTo(4,8,4,13);u.quadTo(4,18,9,18);u.lineTo(15,18);canvas.drawPath(u,p);}line(canvas,16,4,20,8,16,12);break;case "refresh":canvas.drawArc(4,4,20,20,35,290,false,p);line(canvas,20,4,20,10,14,10);break;
             case "scan":line(canvas,3,8,3,3,8,3);line(canvas,16,3,21,3,21,8);line(canvas,21,16,21,21,16,21);line(canvas,8,21,3,21,3,16);line(canvas,7,8,17,8);line(canvas,12,8,12,17);break;
             case "restore":canvas.drawArc(4,4,20,20,150,300,false,p);line(canvas,3,4,3,10,9,10);line(canvas,12,7,12,12,16,14);break;
             case "mic":canvas.drawRoundRect(9,3,15,15,3,3,p);canvas.drawArc(6,7,18,19,0,180,false,p);line(canvas,12,19,12,22);line(canvas,8,22,16,22);break;

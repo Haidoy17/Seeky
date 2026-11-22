@@ -25,7 +25,7 @@ public class Notepad538Test {
     @Test public void notesRecogniseScripturesTicksTasksAndLiveInEstudos()throws Exception{
         NotepadActivity a=launch(new Intent(app,NotepadActivity.class));
         String labels=BooksToolsTest.labels(root(a));
-        assertTrue(labels,labels.contains("Bloco de notas")&&labels.contains("Comece o seu bloco de notas")&&labels.contains("Lixo"));
+        assertTrue(labels,labels.contains("Todas as notas")&&labels.contains("Comece o seu bloco de notas")&&labels.contains("Tarefas"));
         capture(root(a),"bloco-vazio",800);
         // A passage sent from the passage viewer starts a new note.
         NotepadActivity n=launch(new Intent(app,NotepadActivity.class).putExtra("passage_title","João 3:16").putExtra("passage_text","Porque Deus amou o mundo de tal maneira…").putExtra("passage_version","Almeida"));
@@ -45,7 +45,7 @@ public class Notepad538Test {
         CharSequence shown=n.reading.getText();
         assertTrue("passagens tocáveis: "+spans(shown,BibleLinks.Link.class),spans(shown,BibleLinks.Link.class)>=3);
         assertFalse("sem marcas visíveis",shown.toString().contains("# O amor")||shown.toString().contains("[ ]"));
-        assertTrue(shown.toString().contains("☐ Orar pela família"));
+        assertTrue(shown.toString(),shown.toString().contains("☐")&&shown.toString().contains("Orar pela família"));
         ClickableSpan tick=null;for(ClickableSpan c:((Spanned)shown).getSpans(0,shown.length(),ClickableSpan.class))if(!(c instanceof BibleLinks.Link)){tick=c;break;}
         assertNotNull(tick);tick.onClick(n.reading);
         assertTrue(n.body.getText().toString().contains("[x] Orar pela família"));

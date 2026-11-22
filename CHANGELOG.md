@@ -1,5 +1,32 @@
 # Registo de alterações
 
+## 5.39.0 — 2026-11-22
+
+- **Bloco de notas renovado** (inspirado nas referências enviadas, adaptado ao Seeky):
+  - separadores **Notas** e **Tarefas** (todas as tarefas de todas as notas, para marcar ali);
+  - secções por data (Fixadas, Hoje, Ontem, 7 dias anteriores, 30 dias anteriores, meses);
+  - vistas em **lista**, **cartão** e **grelha** (com fita nas fixadas e miniatura da imagem);
+  - barra flutuante em baixo com pesquisa, **Modelos** e lápis para nova nota; pastas e lixo;
+  - editor com voltar, desfazer/refazer, ver/editar e menu ⋮; data, pasta, livro e lembrete à vista;
+  - barra de ferramentas flutuante: formatar (Aa), imagem, câmara, desenho, tarefa, passagem,
+    tabela, gravar voz, ditar e data.
+- **Texto rico**: títulos H1–H4, negrito, itálico, sublinhado, riscado, destaque, 6 cores,
+  alinhar à esquerda/centro/direita, recuo, listas numeradas e com marcas, tarefas, citações,
+  linhas divisórias e tabelas — formatado enquanto escreve.
+- **Imagens, desenhos e voz** dentro das notas (galeria, câmara, desenho à mão com cores e
+  borracha, gravação de áudio que toca na leitura).
+- Menu ⋮: fixar, **bloquear** (impressão digital/PIN do telefone), **fundo** (papel, linhas,
+  quadriculado, pontos, amarelo, lilás, céu, menta, noite), **lembrete** com notificação,
+  **adicionar ao ecrã inicial**, mover para pasta, ligar a livro ou módulo, etiquetas.
+- **Exportar e partilhar** como **PDF** e **Word (.docx)** — com títulos, cores, listas,
+  tabelas e imagens —, além de Markdown e texto.
+- **Notas dentro dos livros**: no leitor, a ferramenta **Notas** abre um painel para escrever
+  sem sair do livro (com formatação rápida, página/capítulo e o texto seleccionado), mostra as
+  notas desse livro e acrescenta a uma nota existente; na estante, ⋮ do livro → "Notas do livro"
+  e "Escrever uma nota sobre o livro"; no Bloco de notas, as notas aparecem com o nome do livro.
+- Jogo da Bíblia: as etiquetas "Passagem · livro" e "Referência · passagem" já não mostram um
+  símbolo estranho no lugar da seta.
+
 ## 5.38.0 — 2026-11-22
 
 - **Jogo da Bíblia renovado**:

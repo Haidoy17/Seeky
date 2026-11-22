@@ -50,7 +50,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         navigation=row();icon(navigation,"back","Anterior",()->turn(-1));pageLabel=a.text("",13);pageLabel.setGravity(Gravity.CENTER);pageLabel.setPadding(0,0,0,0);pageLabel.setOnClickListener(v->contents());navigation.addView(pageLabel,new LinearLayout.LayoutParams(0,a.dp(34),1));icon(navigation,"arrow","Seguinte",()->turn(1));dock.addView(navigation);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar bar){dragging=true;}public void onProgressChanged(SeekBar bar,int value,boolean user){if(user)pageLabel.setText((value+1)+" / "+count()+"  ("+ReaderAppearance.percent(value,count())+"%)");}public void onStopTrackingTouch(SeekBar bar){int target=bar.getProgress();dragging=false;go(target);}});
         actions=new HorizontalScrollView(a);actions.setHorizontalScrollBarEnabled(false);LinearLayout strip=row();toolStrip=strip;
-        action(strip,"type","Texto",this::textSettings);action(strip,"palette","Visualizar",this::visualSettings);action(strip,"rotate","Rotação",this::rotate);action(strip,"quiz","Estudar com Seeky",()->SeekyAi.reader(a,null));action(strip,"speaker","Ouvir",speech::show);action(strip,"share","Partilhar",this::share);action(strip,"note","Adicionar nota",this::addNote);action(strip,"expand","Tela cheia",this::toggleChrome);action(strip,"settings","Definições",this::settings);action(strip,"edit","Organizar",this::organize);actions.addView(strip);dock.addView(actions,new LinearLayout.LayoutParams(-1,a.dp(68)));a.root.addView(bottom);
+        action(strip,"type","Texto",this::textSettings);action(strip,"palette","Visualizar",this::visualSettings);action(strip,"rotate","Rotação",this::rotate);action(strip,"quiz","Estudar com Seeky",()->SeekyAi.reader(a,null));action(strip,"speaker","Ouvir",speech::show);action(strip,"share","Partilhar",this::share);action(strip,"note","Notas deste livro",this::addNote);action(strip,"expand","Tela cheia",this::toggleChrome);action(strip,"settings","Definições",this::settings);action(strip,"edit","Organizar",this::organize);actions.addView(strip);dock.addView(actions,new LinearLayout.LayoutParams(-1,a.dp(68)));a.root.addView(bottom);
         if(a.getIntent().getBooleanExtra("open_narrations",false))a.main.postDelayed(()->{if(!a.dead)speech.narration.manage();},350);
         modernise();responsive(a.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE);
         a.root.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r>l&&b>t&&compact!=(r-l>b-t))responsive(r-l>b-t);});
@@ -96,7 +96,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
         tools.add(new Object[]{"palette","Visualizar","Visualizar",(Runnable)this::visualSettings});
         tools.add(new Object[]{"rotate","Rotação","Rodar",(Runnable)this::rotate});
         tools.add(new Object[]{"edit","Marcações deste livro","Marcações",(Runnable)()->HighlightsActivity.open(a,a.uri.toString())});
-        tools.add(new Object[]{"note","Adicionar nota","Nota",(Runnable)this::addNote});
+        tools.add(new Object[]{"note","Notas deste livro","Notas",(Runnable)this::addNote});
         tools.add(new Object[]{"share","Partilhar","Partilhar",(Runnable)this::share});
         tools.add(new Object[]{"expand","Tela cheia","Ecrã cheio",(Runnable)this::toggleChrome});
         tools.add(new Object[]{"more","Mais ferramentas","Mais",(Runnable)this::more});
@@ -222,13 +222,7 @@ final class ReaderChrome implements SpeechEvents.Listener {
     void applyAppearance(){prefs.edit().putInt("reader_paper",a.readerTheme).apply();if(a.body!=null&&barColor!=0)a.body.setBackgroundColor(desk(a.readerTheme));if(floating!=null){boolean light=AppPalette.luminance(ReaderAppearance.paper(a.readerTheme))>0.5;for(int i=0;i<floating.getChildCount();i++){View b=floating.getChildAt(i);if(b.getBackground() instanceof GradientDrawable)((GradientDrawable)b.getBackground()).setColor(light?0xd9b9bcc2:0xd93a3d44);if(b instanceof FrameLayout&&((FrameLayout)b).getChildAt(0) instanceof Icons){Icons icon=(Icons)((FrameLayout)b).getChildAt(0);icon.setSymbol(icon.name,light?0xff3c3f45:0xffe8eaee);}}}applyText();if(a.pageList!=null)for(int n=0;n<a.pageList.getChildCount();n++){View page=a.pageList.getChildAt(n);if(page instanceof ReaderPageView)((ReaderPageView)page).appearance();}}
     void toggleChrome(){hidden=!hidden;top.setVisibility(hidden?View.GONE:View.VISIBLE);bottom.setVisibility(hidden?View.GONE:View.VISIBLE);floatingVisibility();a.main.removeCallbacks(footerTick);if(hidden)footerTick.run();else refreshFooter();a.applyReaderWindow();if(a.pageAdapter!=null)a.pageList.post(()->{if(!a.dead)a.pageAdapter.notifyDataSetChanged();});}
     void rotate(){int orientation=a.getResources().getConfiguration().orientation;a.setRequestedOrientation(orientation==android.content.res.Configuration.ORIENTATION_PORTRAIT?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);}
-    void addNote(){
-        UiPanel panel=new UiPanel(a,"Adicionar nota",null,"note");
-        long id=a.getIntent().getLongExtra("study_material",0);
-        if(id>0)panel.action("note","Nota desta página ou capítulo",null,false,()->StudyCapture.form(a,id,current(),"",0));
-        panel.action("edit","Anotar uma passagem",null,false,()->{if(a.kind.equals("pdf")&&!a.tools.pdfText)a.tools.pageText(current());else if(a.tools.ready())a.tools.note();});
-        panel.action("contents","Anotações do documento",null,false,()->a.tools.documentAnnotations());panel.show();
-    }
+    void addNote(){ReaderNotes.show(a,"");}
     void textSettings(){
         if(a.original!=null&&a.original.active&&a.kind.equals("epub")){epubSettings();return;}
         UiPanel panel=new UiPanel(a,"Texto",null,"type");

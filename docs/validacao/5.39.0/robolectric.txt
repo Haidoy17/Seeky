@@ -1,0 +1,5 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.39.0
+Tests run: 474, Failures: 1 (ReaderLayout5152Test: o teste ainda procurava o nome antigo "Adicionar nota" da ferramenta, agora "Notas deste livro"; teste actualizado)
+ReaderLayout5152Test repetido depois da correcção: OK (10 tests)
+Notepad539Test + Notepad538Test: OK (7 tests)
+exit=0
