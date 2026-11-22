@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006400,
-  "versionName": "5.37.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.37.0.apk",
-  "sha256": "71956db28c487ddce21da8a062442e3b1b05d3c9c32807c51858b0b511e90b8a",
-  "bytes": 13599882,
-  "notes": "Letras para todos os áudios: procura automática melhorada (LRCLIB e Lyrics.ovh) e transcrição com IA (Gemini) para pregações, aulas e músicas sem letra, sincronizada e guardada."
+  "versionCode": 5006500,
+  "versionName": "5.38.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.38.0.apk",
+  "sha256": "53ceff7a21ca898bc05998a68f44eb133a9dec6ca47e4bf3922ab7da3a2104db",
+  "bytes": 13645430,
+  "notes": "Jogo da Bíblia com 60 s em todos os níveis, níveis mais profundos e o novo nível Lendário; Bloco de notas completo ligado ao estudo bíblico, aos livros e aos Estudos, que reconhece as passagens bíblicas."
 }
