@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006600,
-  "versionName": "5.39.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.39.0.apk",
-  "sha256": "cd6770060ff72934a49130baaff84f1b70e0a853cc79e60ef6d53ee5fa2f8f5c",
-  "bytes": 13694132,
-  "notes": "Notas renovadas (Notas/Tarefas, lista/cartão/grelha, fundos, bloquear, lembrete, ecrã inicial), texto rico com imagens, desenhos e voz, exportar para PDF e Word, e notas dentro dos livros."
+  "versionCode": 5006700,
+  "versionName": "5.40.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.40.0.apk",
+  "sha256": "d598533210f5f632d5ece44d71a4dfded8e786dc55bc72f7e1eb053ee403b23f",
+  "bytes": 13704038,
+  "notes": "Seeky IA nas notas (resumir, corrigir, tópicos, perguntas, tarefas, passagens), espaçamento entre linhas e Bloco no painel de selecção do leitor (também no PDF página a página)."
 }

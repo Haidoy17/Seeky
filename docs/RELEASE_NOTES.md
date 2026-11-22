@@ -1,3 +1,12 @@
+## Seeky 5.40.0
+
+Instale **Seeky_5.40.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Seeky IA nas notas**: resumir, corrigir, organizar, perguntas, tarefas, passagens e mais.
+- **Espaçamento entre linhas** nas notas (também no PDF e no Word).
+- **Bloco** no painel de selecção do leitor, também no PDF página a página.
+
 ## Seeky 5.39.0
 
 Instale **Seeky_5.39.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

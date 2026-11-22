@@ -453,12 +453,12 @@ public final class NotepadActivity extends Activity {
         title = new EditText(this); title.setHint(tr("Título")); title.setText(n.title); title.setTextSize(28); title.setTypeface(ThemeStyle.BOLD); title.setTextColor(ink); title.setHintTextColor((muted & 0xffffff) | 0xaa000000); title.setBackground(null); title.setPadding(0, dp(8), 0, dp(4));
         title.addTextChangedListener(new SimpleWatcher(t -> changed()));
         page.addView(title);
-        body = new EditText(this); body.setText(n.body); body.setHint(tr("Escreva aqui… Passagens como João 3:16 são reconhecidas.")); body.setGravity(Gravity.TOP); body.setMinLines(12); body.setTextSize(17); body.setLineSpacing(dp(4), 1.06f); body.setTextColor(ink); body.setHintTextColor((muted & 0xffffff) | 0xaa000000);
+        body = new EditText(this); body.setText(n.body); body.setHint(tr("Escreva aqui… Passagens como João 3:16 são reconhecidas.")); body.setGravity(Gravity.TOP); body.setMinLines(12); body.setTextSize(17); body.setTextColor(ink); body.setHintTextColor((muted & 0xffffff) | 0xaa000000);
         body.setPadding(0, dp(6), 0, dp(40)); body.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setBackground(pp[4] != 0 ? new Pattern(n.paper, pp[4], body) : null);
         body.addTextChangedListener(new SimpleWatcher(t -> { if (!applying) { remember(); changed(); PlusUi.MAIN.removeCallbacks(restyle); PlusUi.MAIN.postDelayed(restyle, 160); } }));
         page.addView(body, new LinearLayout.LayoutParams(-1, -2));
-        reading = s.text("", 17, ink, false); reading.setLineSpacing(dp(4), 1.08f); reading.setPadding(0, dp(6), 0, dp(40)); reading.setVisibility(View.GONE);
+        reading = s.text("", 17, ink, false); applySpacing(); reading.setPadding(0, dp(6), 0, dp(40)); reading.setVisibility(View.GONE);
         page.addView(reading);
         passages = s.column(); page.addView(passages);
         info = s.text("", 12, muted, false); info.setPadding(0, dp(10), 0, 0); page.addView(info);
@@ -466,7 +466,7 @@ public final class NotepadActivity extends Activity {
         formatSheet = formatPanel(); formatSheet.setVisibility(View.GONE);
         editorRoot.addView(formatSheet);
         LinearLayout tools = s.row(); tools.setPadding(dp(6), 0, dp(6), 0);
-        String[][] buttons = {{"type", "Formatar", "format"}, {"image", "Imagem", "image"}, {"camera", "Câmara", "camera"}, {"edit", "Desenho", "draw"}, {"check", "Tarefa", "task"}, {"book", "Passagem", "passage"}, {"grid", "Tabela", "table"}, {"speaker", "Gravar voz", "record"}, {"mic", "Ditar", "dictate"}, {"calendar", "Data", "date"}};
+        String[][] buttons = {{"sparkle", "Seeky IA", "ai"}, {"type", "Formatar", "format"}, {"image", "Imagem", "image"}, {"camera", "Câmara", "camera"}, {"edit", "Desenho", "draw"}, {"check", "Tarefa", "task"}, {"book", "Passagem", "passage"}, {"grid", "Tabela", "table"}, {"speaker", "Gravar voz", "record"}, {"mic", "Ditar", "dictate"}, {"calendar", "Data", "date"}};
         for (String[] b : buttons) { FrameLayout f = new FrameLayout(this); f.addView(new Icons(this, b[0], s.p.ink), new FrameLayout.LayoutParams(dp(23), dp(23), Gravity.CENTER)); f.setContentDescription(tr(b[1])); f.setOnClickListener(v -> tool(b[2])); Motion.touch(f); tools.addView(f, new LinearLayout.LayoutParams(dp(52), dp(52))); }
         HorizontalScrollView hs = s.scroller(tools); hs.setBackground(s.round(s.p.surface, 28)); hs.setElevation(dp(6));
         FrameLayout bar = new FrameLayout(this); bar.setPadding(dp(14), dp(6), dp(14), dp(12)); bar.addView(hs, new FrameLayout.LayoutParams(-2, dp(56), Gravity.CENTER));
@@ -499,6 +499,18 @@ public final class NotepadActivity extends Activity {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(42), 1); lp.rightMargin = dp(6); colors.addView(a, lp);
         }
         sheet.addView(colors);
+        LinearLayout spacing = s.column(); spacing.setPadding(0, dp(10), 0, 0);
+        TextView sl = s.text("Espaçamento entre linhas", 12.5f, s.p.muted, true); sl.setPadding(dp(4), 0, 0, dp(6)); spacing.addView(sl);
+        LinearLayout opts = s.row(); opts.setBackground(s.round(s.p.tint, 14)); opts.setClipToOutline(true);
+        for (int[] o : SPACINGS) {
+            TextView t = s.text(o[0] == 0 ? tr("Normal") : String.format(Locale.ROOT, o[0] % 10 == 0 ? "%.1f" : "%.2f", o[0] / 100f).replace('.', ','), 14, note.spacing == o[0] ? s.p.onAccent : s.p.ink, true);
+            t.setGravity(Gravity.CENTER); if (note.spacing == o[0]) t.setBackground(s.round(s.p.accent, 12));
+            t.setContentDescription(tr("Espaçamento entre linhas") + " " + t.getText());
+            t.setOnClickListener(v -> { note.spacing = o[0]; dirty = true; saveNow(); applySpacing(); for (int k = 0; k < opts.getChildCount(); k++) { TextView x = (TextView) opts.getChildAt(k); boolean on = SPACINGS[k][0] == note.spacing; x.setTextColor(on ? s.p.onAccent : s.p.ink); x.setBackground(on ? s.round(s.p.accent, 12) : null); } });
+            Motion.touch(t); opts.addView(t, new LinearLayout.LayoutParams(0, dp(40), 1));
+        }
+        spacing.addView(opts, new LinearLayout.LayoutParams(-1, -2));
+        sheet.addView(spacing);
         FrameLayout wrap = new FrameLayout(this); wrap.setPadding(dp(10), 0, dp(10), dp(4)); wrap.addView(sheet, new FrameLayout.LayoutParams(-1, -2));
         LinearLayout holder = s.column(); holder.addView(wrap); return holder;
     }
@@ -509,6 +521,14 @@ public final class NotepadActivity extends Activity {
             case "number": return "Lista numerada"; case "list": return "Lista com marcas"; case "task": return "Lista de tarefas"; case "left": return "Alinhar à esquerda"; case "center": return "Centrar"; case "right": return "Alinhar à direita";
             case "quote": return "Citação"; case "mark": return "Destacar"; case "rule": return "Linha divisória"; case "nocolor": return "Tirar a cor"; default: return what;
         }
+    }
+    static final int[][] SPACINGS = {{0}, {100}, {115}, {150}, {200}};
+    /** Line spacing of the note in the editor and the reading view. */
+    void applySpacing() {
+        int sp = note == null ? 0 : note.spacing;
+        float mult = sp == 0 ? 1.06f : sp / 100f; int extra = sp == 0 ? dp(4) : dp(1);
+        if (body != null) { body.setLineSpacing(extra, mult); body.invalidate(); }
+        if (reading != null) reading.setLineSpacing(extra, sp == 0 ? 1.08f : mult);
     }
     void styleNow() { if (body == null) return; NotepadRender.style(this, body.getText(), s.p, ink, muted, Math.max(dp(120), getResources().getDisplayMetrics().widthPixels - dp(48))); }
     void updateContext() {
@@ -582,6 +602,7 @@ public final class NotepadActivity extends Activity {
             case "table": applyEdit(NotepadText.insert(text, b, NotepadText.table(3, 2), true)); return;
             case "date": applyEdit(NotepadText.insert(text, b, DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.SHORT).format(new Date()), false)); return;
             case "passage": askPassage(); return;
+            case "ai": saveNow(); NotepadAi.menu(this); return;
             case "dictate": dictate(); return;
             case "listen": listen(); return;
             case "image": try { startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE), GALLERY); } catch (Exception e) { toast("Não há galeria neste telefone."); } return;
@@ -682,6 +703,7 @@ public final class NotepadActivity extends Activity {
     void editorMenu() {
         saveNow();
         UiPanel p = new UiPanel(this, currentTitle(), tr("Criada") + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(note.created > 0 ? note.created : System.currentTimeMillis())) + (note.updated > 0 ? " · " + tr("editada") + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(note.updated)) : ""), "note");
+        p.action("sparkle", "Seeky IA", tr("Resumir, corrigir, organizar, perguntas, passagens"), false, () -> NotepadAi.menu(this));
         p.action("pin", note.pinned ? "Desafixar" : "Fixar no topo", null, false, () -> { note.pinned = !note.pinned; changed(); updateContext(); });
         p.action("lock", note.locked ? "Desbloquear" : "Bloquear", tr("Abre com impressão digital, rosto ou PIN do telefone"), false, this::toggleLock);
         p.action("palette", "Fundo da nota", tr("Papel, linhas, quadriculado, pontos, cores"), false, this::chooseBackground);
@@ -776,8 +798,8 @@ public final class NotepadActivity extends Activity {
     void write(String kind, OutputStream out) throws IOException {
         String t = title.getText().toString(), b = body.getText().toString();
         switch (kind) {
-            case "pdf": NotepadRender.pdf(this, NotepadText.title(t, b), b, out); break;
-            case "docx": out.write(NotepadExport.docx(NotepadText.title(t, b), b, ref -> NotepadMedia.forExport(this, ref))); break;
+            case "pdf": NotepadRender.pdf(this, NotepadText.title(t, b), b, out, note == null ? 0 : note.spacing); break;
+            case "docx": out.write(NotepadExport.docx(NotepadText.title(t, b), b, ref -> NotepadMedia.forExport(this, ref), note == null ? 0 : note.spacing)); break;
             case "md": out.write(NotepadText.markdown(t, b).getBytes(StandardCharsets.UTF_8)); break;
             default: out.write((NotepadText.title(t, b) + "\n\n" + NotepadText.plain(b)).getBytes(StandardCharsets.UTF_8));
         }

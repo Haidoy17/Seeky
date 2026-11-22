@@ -167,7 +167,8 @@ final class NotepadRender {
     }
 
     /** A4 PDF of a note: title, styled text, lists, tables and pictures, page numbers at the foot. */
-    static void pdf(Context c, String title, String body, OutputStream target) throws IOException {
+    static void pdf(Context c, String title, String body, OutputStream target) throws IOException { pdf(c, title, body, target, 0); }
+    static void pdf(Context c, String title, String body, OutputStream target, int spacing) throws IOException {
         int pageW = 595, pageH = 842, margin = 54, width = pageW - margin * 2;
         TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG); paint.setTextSize(11.5f); paint.setColor(0xff1f1f1f);
         SpannableStringBuilder text = new SpannableStringBuilder();
@@ -178,7 +179,7 @@ final class NotepadRender {
             Drawable dr = span.getDrawable(); Rect r = dr.getBounds();
             if (r.height() > pageH - margin * 2 - 40) { int h = pageH - margin * 2 - 40, w = Math.max(1, r.width() * h / Math.max(1, r.height())); dr.setBounds(0, 0, w, h); }
         }
-        StaticLayout layout = StaticLayout.Builder.obtain(text, 0, text.length(), paint, width).setLineSpacing(0, 1.18f).setIncludePad(true).build();
+        StaticLayout layout = StaticLayout.Builder.obtain(text, 0, text.length(), paint, width).setLineSpacing(0, spacing > 0 ? Math.max(1f, Math.min(3f, spacing / 100f * 1.05f)) : 1.18f).setIncludePad(true).build();
         PdfDocument doc = new PdfDocument();
         try {
             int line = 0, number = 0, lines = layout.getLineCount();

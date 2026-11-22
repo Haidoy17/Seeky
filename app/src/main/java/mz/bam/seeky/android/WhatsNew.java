@@ -23,8 +23,12 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.39", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.40", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("sparkle", "Seeky IA nas notas", "Botão ✨ no editor: resumir, corrigir o texto, organizar em tópicos, perguntas de estudo, extrair tarefas, passagens relacionadas, continuar a escrever ou pedir outra coisa — na nota inteira ou só no texto seleccionado", false, () -> NotepadActivity.open(a));
+        panel.action("type", "Espaçamento entre linhas", "No painel Aa da nota: Normal, 1,0, 1,15, 1,5 ou 2,0; também no PDF e no Word exportados", false, () -> NotepadActivity.open(a));
+        panel.action("edit", "Bloco no painel de selecção", "Seleccione texto no PDF (também página a página), EPUB, Word ou texto e toque em Bloco: a nota do livro abre com as palavras citadas", false, () -> { a.tab = "Livros"; a.render(); });
+        panel.section("Da 5.39");
         panel.action("note", "Notas renovadas", "Notas e Tarefas, secções por data (Hoje, 7 dias…), vistas em lista, cartão e grelha, pesquisa em baixo, modelos, fundos de papel (linhas, quadriculado, pontos, cores), bloquear, lembrete e pôr no ecrã inicial", false, () -> NotepadActivity.open(a));
         panel.action("type", "Texto rico nas notas", "Títulos H1–H4, negrito, itálico, sublinhado, riscado, destaque, 6 cores, alinhar, recuo, listas numeradas, tarefas, tabelas, imagens, câmara, desenhos e gravações de voz", false, () -> NotepadActivity.open(a));
         panel.action("word", "Exportar para Word e PDF", "No menu ⋮ da nota: Exportar PDF, Exportar Word (.docx), Markdown ou texto, e Partilhar como PDF ou Word — com títulos, cores, listas, tabelas e imagens", false, () -> NotepadActivity.open(a));

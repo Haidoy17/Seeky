@@ -118,6 +118,7 @@ public class Library536Test {
             assertEquals("epub",r.kind);assertNotNull("o FB2 abre como livro",r.book);assertEquals("Quincas Borba",r.book.title);assertTrue(r.book.chapters.size()>=2);
             assertNotNull(r.converted);assertTrue(r.converted.getName().endsWith(".epub"));
         }finally{rc.pause().stop().destroy();}
+        r.worker.awaitTermination(20,TimeUnit.SECONDS);
         assertFalse("cópia convertida apagada ao fechar",r.converted.exists());
     }
 }

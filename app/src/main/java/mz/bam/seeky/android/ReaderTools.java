@@ -46,7 +46,7 @@ final class ReaderTools {
   int[] r=selection();if(r==null)return;final int from=r[0],to=r[1];String text=draft.text.substring(from,to);
   if(what.equals("copy")){copy(false);if(mode!=null)mode.finish();return;}
   if(mode!=null)mode.finish();
-  if(what.equals("note"))noteRange(from,to);else if(what.equals("dictionary"))WordLookup.show(a,text);else if(what.equals("share"))ShareTools.text(a,text);
+  if(what.equals("note"))noteRange(from,to);else if(what.equals("notepad"))ReaderNotes.show(a,text);else if(what.equals("dictionary"))WordLookup.show(a,text);else if(what.equals("share"))ShareTools.text(a,text);
  }
  void markSelection(String kind,ActionMode mode){int[] r=selection();if(r==null)return;final int from=r[0],to=r[1];if(mode!=null)mode.finish();if(kind.equals("note"))noteRange(from,to);else markRange(from,to,kind);}
  void mark(String kind){int[] r=selection();if(r==null)return;markRange(r[0],r[1],kind);}

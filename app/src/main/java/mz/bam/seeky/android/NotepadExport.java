@@ -9,7 +9,9 @@ import java.util.zip.*;
 final class NotepadExport {
     interface Images { /** Bytes, width and height in pixels, and "png" or "jpeg"; null when missing. */ Object[] image(String ref); }
 
-    static byte[] docx(String title, String body, Images images) throws IOException {
+    static byte[] docx(String title, String body, Images images) throws IOException { return docx(title, body, images, 0); }
+    /** spacing: line spacing in percent (100 = single, 150, 200); 0 keeps the default (1,2). */
+    static byte[] docx(String title, String body, Images images, int spacing) throws IOException {
         List<NotepadDoc.Block> blocks = NotepadDoc.parse(body);
         StringBuilder doc = new StringBuilder();
         List<String[]> media = new ArrayList<>(); // {rId, target, type}
@@ -71,7 +73,7 @@ final class NotepadExport {
             put(zip, "docProps/core.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"><dc:title>" + esc(title == null ? "" : title.trim()) + "</dc:title><dc:creator>Seeky</dc:creator></cp:coreProperties>");
             put(zip, "word/document.xml", document);
             put(zip, "word/_rels/document.xml.rels", rels.toString());
-            put(zip, "word/styles.xml", STYLES);
+            put(zip, "word/styles.xml", spacing > 0 ? STYLES.replace("w:line=\"288\"", "w:line=\"" + Math.max(240, Math.min(720, spacing * 240 / 100)) + "\"") : STYLES);
             put(zip, "word/numbering.xml", numbering());
             for (Map.Entry<String, byte[]> f : files.entrySet()) { zip.putNextEntry(new ZipEntry(f.getKey())); zip.write(f.getValue()); zip.closeEntry(); }
         }

@@ -1,5 +1,17 @@
 # Registo de alterações
 
+## 5.40.0 — 2026-11-22
+
+- **Seeky IA nas notas** (botão ✨ no editor e no menu ⋮), com a chave Gemini do utilizador:
+  resumir, corrigir o texto, organizar em tópicos, perguntas de estudo, extrair tarefas,
+  passagens bíblicas relacionadas, continuar a escrever e pedido livre. Funciona na nota inteira
+  ou só no texto seleccionado; mostra a resposta antes de a inserir ou substituir, pode-se
+  desfazer, e as imagens e gravações da nota ficam sempre.
+- **Espaçamento entre linhas** no painel Aa (Normal, 1,0, 1,15, 1,5, 2,0), guardado em cada nota
+  e aplicado também na exportação para PDF e Word.
+- **Bloco** no painel de selecção do leitor (PDF página a página, EPUB e Word originais e texto):
+  abre o painel "Notas deste livro" com as palavras seleccionadas citadas.
+
 ## 5.39.0 — 2026-11-22
 
 - **Bloco de notas renovado** (inspirado nas referências enviadas, adaptado ao Seeky):

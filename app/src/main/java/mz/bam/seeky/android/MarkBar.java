@@ -20,7 +20,7 @@ final class MarkBar {
     interface Host {
         /** Mark the selection with this kind ("highlight-green", "underline-blue"…). */
         void mark(String kind);
-        /** "note", "copy", "dictionary", "share" or "more". */
+        /** "note", "notepad" (a note in the Bloco de notas), "copy", "dictionary", "share" or "more". */
         void action(String what);
         /** Selection bounds on screen, or null to sit at the bottom. */
         Rect anchor();
@@ -48,7 +48,7 @@ final class MarkBar {
         card.addView(row);
         View line=new View(a);line.setBackgroundColor((pal.ink&0xffffff)|0x1f000000);card.addView(line,new LinearLayout.LayoutParams(-1,dp(1)));
         LinearLayout actions=new LinearLayout(a);
-        String[][] items={{"note","Nota","note"},{"copy","Copiar","copy"},{"translate","Dicionário","dictionary"},{"share","Partilhar","share"},{"more","Mais","more"}};
+        String[][] items={{"note","Nota","note"},{"edit","Bloco","notepad"},{"copy","Copiar","copy"},{"translate","Dicionário","dictionary"},{"share","Partilhar","share"},{"more","Mais","more"}};
         for(String[] it:items){
             LinearLayout cell=new LinearLayout(a);cell.setOrientation(LinearLayout.VERTICAL);cell.setGravity(Gravity.CENTER);
             cell.addView(new Icons(a,it[0],pal.ink),new LinearLayout.LayoutParams(dp(20),dp(20)));
