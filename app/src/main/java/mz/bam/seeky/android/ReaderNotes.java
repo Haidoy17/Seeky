@@ -93,7 +93,7 @@ final class ReaderNotes {
                     NotepadStore.Note n = notes.get(i);
                     LinearLayout card = new LinearLayout(a); card.setOrientation(LinearLayout.VERTICAL); card.setPadding((int) (14 * d), (int) (11 * d), (int) (14 * d), (int) (11 * d)); card.setBackground(panel.shape(ThemeColors.blend(panel.surface, n.color == 0 ? panel.ink : n.color, n.color == 0 ? .04f : .18f), 14));
                     TextView t = new TextView(a); t.setText(n.shownTitle()); t.setTextSize(15); t.setTypeface(Typeface.DEFAULT_BOLD); t.setTextColor(panel.ink); t.setSingleLine(true); t.setEllipsize(TextUtils.TruncateAt.END); card.addView(t);
-                    String preview = n.locked ? "🔒 " + AppLanguage.text(a, "Nota bloqueada") : NotepadText.plain(n.body).replaceAll("\\s+", " ").trim();
+                    String preview = n.locked ? AppLanguage.text(a, "Nota bloqueada") : NotepadText.plain(n.body).replaceAll("\\s+", " ").trim();
                     if (!preview.isEmpty()) { TextView p = new TextView(a); p.setText(preview); p.setTextSize(13); p.setTextColor(panel.muted); p.setMaxLines(2); p.setEllipsize(TextUtils.TruncateAt.END); card.addView(p); }
                     TextView when = new TextView(a); when.setText((n.segment > 0 ? where(a, n.segment) + " · " : "") + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(n.updated))); when.setTextSize(11); when.setTextColor(panel.muted); when.setPadding(0, (int) (4 * d), 0, 0); card.addView(when);
                     card.setContentDescription(n.shownTitle());

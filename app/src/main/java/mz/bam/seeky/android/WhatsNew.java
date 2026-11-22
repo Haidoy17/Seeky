@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.40", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.41", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("note", "Novos ícones nas notas", "Um conjunto próprio, em dois tons, para a lista, o editor, a barra de ferramentas e o painel Aa (listas, alinhar, recuo, citação, destaque, tabela, gravação, desenho…); nos cartões, ícones mostram tarefas, passagens, imagens, gravações, lembrete e bloqueio", false, () -> NotepadActivity.open(a));
+        panel.section("Da 5.40");
         panel.action("sparkle", "Seeky IA nas notas", "Botão ✨ no editor: resumir, corrigir o texto, organizar em tópicos, perguntas de estudo, extrair tarefas, passagens relacionadas, continuar a escrever ou pedir outra coisa — na nota inteira ou só no texto seleccionado", false, () -> NotepadActivity.open(a));
         panel.action("type", "Espaçamento entre linhas", "No painel Aa da nota: Normal, 1,0, 1,15, 1,5 ou 2,0; também no PDF e no Word exportados", false, () -> NotepadActivity.open(a));
         panel.action("edit", "Bloco no painel de selecção", "Seleccione texto no PDF (também página a página), EPUB, Word ou texto e toque em Bloco: a nota do livro abre com as palavras citadas", false, () -> { a.tab = "Livros"; a.render(); });

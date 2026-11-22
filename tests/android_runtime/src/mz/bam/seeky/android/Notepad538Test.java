@@ -57,7 +57,7 @@ public class Notepad538Test {
         // The list shows the note with tasks and passages; trash and restore.
         NotepadActivity l=launch(new Intent(app,NotepadActivity.class));
         labels=BooksToolsTest.labels(root(l));
-        assertTrue(labels,labels.contains("João 3:16")&&labels.contains("☑ 1/2")&&labels.contains("📖"));
+        assertTrue(labels,labels.contains("João 3:16")&&labels.contains("1/2"));assertNotNull(PageTurnTest.findDescription(root(l),"Com passagens bíblicas"));
         capture(root(l),"bloco-lista",800);
         long id;try(StudyStore db=new StudyStore(app)){id=db.rows("notes",null,null,null,1).get(0).id();}
         NotepadStore.trash(app,id);

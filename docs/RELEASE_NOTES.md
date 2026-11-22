@@ -1,3 +1,10 @@
+## Seeky 5.41.0
+
+Instale **Seeky_5.41.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Novos ícones nas notas**, em dois tons e consistentes em todo o bloco de notas.
+
 ## Seeky 5.40.0
 
 Instale **Seeky_5.40.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

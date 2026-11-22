@@ -107,4 +107,21 @@ public class Notepad540Test {
         assertNotNull(input);assertTrue(input.getText().toString(),input.getText().toString().startsWith("> O nosso coração anda inquieto"));
         UiPanel.dismissAll(r);
     }
+
+    @Test public void everyNoteIconIsDrawn()throws Exception{
+        Activity a=Robolectric.buildActivity(Activity.class).setup().get();
+        int cols=6,cell=60,rows=(NoteIcons.NAMES.length+cols-1)/cols;
+        Bitmap sheet=Bitmap.createBitmap(cols*cell,rows*(cell+14),Bitmap.Config.ARGB_8888);Canvas board=new Canvas(sheet);board.drawColor(0xfffaf7f0);
+        Paint label=new Paint(Paint.ANTI_ALIAS_FLAG);label.setTextSize(9);label.setColor(0xff555555);label.setTextAlign(Paint.Align.CENTER);
+        for(int i=0;i<NoteIcons.NAMES.length;i++){
+            String name=NoteIcons.NAMES[i];View v=NoteIcons.of(a,name,0xff2f3a33);assertTrue(name,v instanceof NoteIcons);
+            v.measure(View.MeasureSpec.makeMeasureSpec(48,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(48,View.MeasureSpec.EXACTLY));v.layout(0,0,48,48);
+            Bitmap one=Bitmap.createBitmap(48,48,Bitmap.Config.ARGB_8888);v.draw(new Canvas(one));
+            int ink=0;for(int y=0;y<48;y++)for(int x=0;x<48;x++)if(Color.alpha(one.getPixel(x,y))>60)ink++;
+            assertTrue("o ícone "+name+" tem desenho ("+ink+")",ink>25);
+            int cx=(i%cols)*cell,cy=(i/cols)*(cell+14);board.drawBitmap(one,cx+6,cy+4,null);board.drawText(name,cx+cell/2f,cy+cell+6,label);
+        }
+        assertTrue("nomes desconhecidos usam os ícones gerais",NoteIcons.of(a,"settings",0xff000000) instanceof Icons);
+        try(FileOutputStream out=new FileOutputStream(System.getProperty("seeky.screenshot")+"-5410-icones-notas.png")){sheet.compress(Bitmap.CompressFormat.PNG,100,out);}
+    }
 }

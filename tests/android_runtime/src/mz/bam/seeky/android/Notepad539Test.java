@@ -51,7 +51,8 @@ public class Notepad539Test {
         assertTrue("imagem na edição",spans(live,NotepadRender.Picture.class)==1);
         n.tool("format");drain(n);
         assertEquals(View.VISIBLE,n.formatSheet.getVisibility());
-        String sheet=BooksToolsTest.labels(n.formatSheet);for(String s:new String[]{"H1","H4","Corpo","B","U","S","1.","☐"})assertTrue(s+" em "+sheet,sheet.contains(s));
+        String sheet=BooksToolsTest.labels(n.formatSheet);for(String s:new String[]{"H1","H4","Corpo","B","U","S"})assertTrue(s+" em "+sheet,sheet.contains(s));
+        for(String d:new String[]{"Lista numerada","Lista com marcas","Lista de tarefas","Centrar","Destacar","Aumentar recuo"})assertNotNull(d,PageTurnTest.findDescription(n.formatSheet,d));
         capture(root(n),"editor-formatar",1000);
         n.tool("format");
         // Reading view: no marks left, styled runs, picture.
@@ -93,7 +94,7 @@ public class Notepad539Test {
         NotepadStore.Note c=new NotepadStore.Note();c.title="Diário";c.body="Texto secreto";c.locked=true;c.color=NotepadStore.COLORS[3];long secret=NotepadStore.save(app,c);
         NotepadActivity l=launch(new Intent(app,NotepadActivity.class));
         String labels=BooksToolsTest.labels(root(l));
-        for(String s:new String[]{"Notas","Tarefas","Todas as notas","Fixadas","Hoje","Sermão de domingo","Compras","Nota bloqueada","☑ 1/2"})assertTrue(s+" em "+labels,labels.contains(s));
+        for(String s:new String[]{"Notas","Tarefas","Todas as notas","Fixadas","Hoje","Sermão de domingo","Compras","Nota bloqueada","1/2"})assertTrue(s+" em "+labels,labels.contains(s));
         assertFalse("o texto bloqueado não aparece",labels.contains("Texto secreto"));
         capture(root(l),"lista-cartoes",800);
         l.view="list";l.list();drain(l);capture(root(l),"lista-linhas",800);

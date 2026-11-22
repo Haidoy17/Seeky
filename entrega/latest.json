@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006700,
-  "versionName": "5.40.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.40.0.apk",
-  "sha256": "d598533210f5f632d5ece44d71a4dfded8e786dc55bc72f7e1eb053ee403b23f",
-  "bytes": 13704038,
-  "notes": "Seeky IA nas notas (resumir, corrigir, tópicos, perguntas, tarefas, passagens), espaçamento entre linhas e Bloco no painel de selecção do leitor (também no PDF página a página)."
+  "versionCode": 5006800,
+  "versionName": "5.41.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.41.0.apk",
+  "sha256": "cf6b83c9e822899edb11f3ad670cba327b22df7c202f70852d4ef4a7e4b155f1",
+  "bytes": 13710593,
+  "notes": "Novos ícones nas notas, em dois tons e consistentes em todo o bloco de notas (lista, editor, barra de ferramentas e painel Aa)."
 }

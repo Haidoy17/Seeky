@@ -1,5 +1,16 @@
 # Registo de alterações
 
+## 5.41.0 — 2026-11-22
+
+- **Novos ícones nas notas**: um conjunto próprio, em dois tons (contorno com preenchimento
+  suave), desenhado para o bloco de notas — lista, cartões e grelha, pastas, modelos, nova nota,
+  pesquisa, desfazer/refazer, ver, Seeky IA, formatar, imagem, câmara, desenho, tarefas, passagem,
+  tabela, gravar voz, ditar e data.
+- O painel Aa troca os símbolos de texto (⫷ ≡ ⫸ ❝ ▬) por ícones claros para listas, alinhamento,
+  recuo, citação, destaque, linha divisória e tirar a cor.
+- Nos cartões, os emojis dão lugar a ícones para tarefas feitas, passagens, imagens, gravações,
+  lembrete e nota bloqueada.
+
 ## 5.40.0 — 2026-11-22
 
 - **Seeky IA nas notas** (botão ✨ no editor e no menu ⋮), com a chave Gemini do utilizador:

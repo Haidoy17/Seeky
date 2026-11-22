@@ -96,7 +96,7 @@ public final class NotepadActivity extends Activity {
     int dp(float n) { return s.dp(n); }
     FrameLayout circle(String icon, String label, Runnable action) {
         FrameLayout f = new FrameLayout(this); f.setBackground(s.round(s.p.surface, 26)); f.setElevation(dp(2));
-        f.addView(new Icons(this, icon, s.p.ink), new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER));
+        f.addView(NoteIcons.of(this, icon, s.p.ink), new FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER));
         f.setContentDescription(tr(label)); f.setOnClickListener(v -> action.run()); Motion.touch(f); return f;
     }
 
@@ -115,7 +115,7 @@ public final class NotepadActivity extends Activity {
         for (String[] t : new String[][]{{"notes", "Notas"}, {"tasks", "Tarefas"}}) { TextView b = s.text(t[1], 15, tab.equals(t[0]) ? s.p.onAccent : s.p.ink, true); b.setGravity(Gravity.CENTER); b.setPadding(dp(18), 0, dp(18), 0); if (tab.equals(t[0])) b.setBackground(s.round(s.p.accent, 20)); b.setContentDescription(tr(t[1])); b.setOnClickListener(v -> { tab = t[0]; list(); }); Motion.touch(b); seg.addView(b, new LinearLayout.LayoutParams(-2, dp(40))); }
         FrameLayout segWrap = new FrameLayout(this); segWrap.addView(seg, new FrameLayout.LayoutParams(-2, -2, Gravity.CENTER));
         top.addView(segWrap, new LinearLayout.LayoutParams(0, -2, 1));
-        top.addView(circle(view.equals("grid") ? "grid" : view.equals("list") ? "queue" : "collection", "Visualização", this::viewMenu), new LinearLayout.LayoutParams(dp(48), dp(48)));
+        top.addView(circle(view.equals("grid") ? "grid" : view.equals("list") ? "list" : "cards", "Visualização", this::viewMenu), new LinearLayout.LayoutParams(dp(48), dp(48)));
         content.addView(top);
         TextView big = s.text(heading(), 32, s.p.ink, true); big.setTypeface(Screens.serif()); big.setPadding(dp(4), dp(14), 0, dp(2)); big.setMaxLines(2); big.setEllipsize(TextUtils.TruncateAt.END);
         content.addView(big);
@@ -123,13 +123,13 @@ public final class NotepadActivity extends Activity {
         // Floating bar: search · templates · new
         LinearLayout bar = s.row(); bar.setPadding(dp(16), 0, dp(16), dp(16));
         LinearLayout pill = s.row(); pill.setBackground(s.round(s.p.surface, 28)); pill.setElevation(dp(6)); pill.setPadding(dp(16), 0, dp(10), 0);
-        pill.addView(new Icons(this, "search", s.p.muted), new LinearLayout.LayoutParams(dp(20), dp(20)));
+        pill.addView(NoteIcons.of(this, "search", s.p.muted), new LinearLayout.LayoutParams(dp(20), dp(20)));
         EditText search = new EditText(this); search.setHint(tr(tab.equals("tasks") ? "Procurar tarefas" : "Pesquisar")); search.setText(query); search.setSingleLine(true); search.setBackground(null); search.setTextColor(s.p.ink); search.setHintTextColor(s.p.muted); search.setTextSize(16); search.setPadding(dp(10), 0, 0, 0);
         search.addTextChangedListener(new SimpleWatcher(t -> { query = t; drawList(); }));
         pill.addView(search, new LinearLayout.LayoutParams(0, -1, 1));
         bar.addView(pill, new LinearLayout.LayoutParams(0, dp(56), 1));
-        FrameLayout templates = circle("cards", "Modelos", this::newNote); LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(dp(56), dp(56)); tp.leftMargin = dp(10); bar.addView(templates, tp);
-        FrameLayout add = new FrameLayout(this); add.setBackground(s.round(s.p.accent, 28)); add.setElevation(dp(6)); add.addView(new Icons(this, "edit", s.p.onAccent), new FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER)); add.setContentDescription(tr(tab.equals("tasks") ? "Nova tarefa" : "Nova nota")); add.setOnClickListener(v -> { if (tab.equals("tasks")) newTask(); else editor(blank()); }); Motion.touch(add);
+        FrameLayout templates = circle("templates", "Modelos", this::newNote); LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(dp(56), dp(56)); tp.leftMargin = dp(10); bar.addView(templates, tp);
+        FrameLayout add = new FrameLayout(this); add.setBackground(s.round(s.p.accent, 28)); add.setElevation(dp(6)); add.addView(NoteIcons.of(this, "compose", s.p.onAccent), new FrameLayout.LayoutParams(dp(26), dp(26), Gravity.CENTER)); add.setContentDescription(tr(tab.equals("tasks") ? "Nova tarefa" : "Nova nota")); add.setOnClickListener(v -> { if (tab.equals("tasks")) newTask(); else editor(blank()); }); Motion.touch(add);
         LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(dp(56), dp(56)); ap.leftMargin = dp(10); bar.addView(add, ap);
         root.addView(bar, new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM));
         worker.execute(() -> { List<NotepadStore.Note> all = NotepadStore.all(this); PlusUi.post(this, () -> { if (!screen.equals("list")) return; notes = all; drawList(); }); });
@@ -223,25 +223,32 @@ public final class NotepadActivity extends Activity {
     }
     String when(long t) { return android.text.format.DateUtils.isToday(t) ? DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(t)) : new SimpleDateFormat("dd/MM", Locale.ROOT).format(new Date(t)); }
     String preview(NotepadStore.Note n) {
-        if (n.locked) return "🔒 " + tr("Nota bloqueada");
+        if (n.locked) return tr("Nota bloqueada");
         String p = NotepadText.plain(n.body).replaceAll("\\s+", " ").trim();
         String t = n.shownTitle(); if (n.title.trim().isEmpty() && p.startsWith(t)) p = p.substring(t.length()).trim();
         return p;
     }
-    String marks(NotepadStore.Note n) {
-        List<String> bits = new ArrayList<>();
-        int[] tasks = NotepadText.tasks(n.body); if (tasks[1] > 0) bits.add("☑ " + tasks[0] + "/" + tasks[1]);
-        if (n.body.contains("note-img:")) bits.add("🖼"); if (n.body.contains("note-audio:")) bits.add("🎙");
-        if (!BibleReferences.references(n.body).isEmpty()) bits.add("📖"); if (n.reminder > System.currentTimeMillis()) bits.add("⏰"); if (n.locked) bits.add("🔒");
-        return String.join("  ", bits);
+    /** Small icons for what a note holds: tasks done/total, passages, pictures, recordings, reminder, lock. */
+    View markRow(NotepadStore.Note n) {
+        LinearLayout row = s.row(); int[] tasks = NotepadText.tasks(n.body); long now = System.currentTimeMillis();
+        Object[][] marks = {{"checklist", tasks[1] > 0 ? tasks[0] + "/" + tasks[1] : null, tasks[1] > 0, "Tarefas feitas"}, {"passage", null, !n.locked && !BibleReferences.references(n.body).isEmpty(), "Com passagens bíblicas"}, {"image", null, !n.locked && n.body.contains("note-img:"), "Com imagens"}, {"wave", null, !n.locked && n.body.contains("note-audio:"), "Com gravações"}, {"clock", null, n.reminder > now, "Com lembrete"}, {"lock", null, n.locked, "Bloqueada"}};
+        for (Object[] m : marks) {
+            if (!(Boolean) m[2]) continue;
+            LinearLayout one = s.row(); one.setPadding(dp(5), 0, 0, 0);
+            one.addView(NoteIcons.of(this, (String) m[0], s.p.muted), new LinearLayout.LayoutParams(dp(15), dp(15)));
+            if (m[1] != null) { TextView t = s.text((String) m[1], 12, s.p.muted, false); t.setPadding(dp(3), 0, 0, 0); one.addView(t); }
+            one.setContentDescription(tr((String) m[3]) + (m[1] == null ? "" : " " + m[1])); one.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            row.addView(one);
+        }
+        return row.getChildCount() == 0 ? null : row;
     }
     TextView chip(String text) { TextView t = s.text(text, 12.5f, s.p.muted, false); t.setPadding(dp(7), dp(2), dp(7), dp(2)); t.setBackground(s.round(s.p.tint, 6)); return t; }
     View folderLine(NotepadStore.Note n) {
         LinearLayout r = s.row(); r.setPadding(0, dp(6), 0, 0);
-        r.addView(new Icons(this, !n.book().isEmpty() ? "pdfbook" : "folder", s.p.muted), new LinearLayout.LayoutParams(dp(16), dp(16)));
+        r.addView(NoteIcons.of(this, !n.book().isEmpty() ? "book" : "folder", s.p.muted), new LinearLayout.LayoutParams(dp(16), dp(16)));
         TextView f = s.text(!n.book().isEmpty() ? n.book() : n.folder.isEmpty() ? tr("Sem pasta") : n.folder, 13.5f, s.p.muted, false); f.setSingleLine(true); f.setEllipsize(TextUtils.TruncateAt.END); f.setPadding(dp(6), 0, dp(6), 0);
         r.addView(f, new LinearLayout.LayoutParams(0, -2, 1));
-        String m = marks(n); if (!m.isEmpty()) r.addView(s.text(m, 12, s.p.muted, false));
+        View m = markRow(n); if (m != null) r.addView(m);
         return r;
     }
     void bind(View v, NotepadStore.Note n) { v.setContentDescription(n.shownTitle()); v.setOnClickListener(x -> edit(n.id)); v.setOnLongClickListener(x -> { noteMenu(n); return true; }); Motion.touch(v); }
@@ -260,7 +267,7 @@ public final class NotepadActivity extends Activity {
         LinearLayout c = s.column(); c.setBackground(s.round(tint(n), 22)); c.setPadding(dp(16), dp(14), dp(16), dp(14));
         LinearLayout top = s.row();
         TextView t = s.text(n.shownTitle(), 18, s.p.ink, true); t.setMaxLines(2); t.setEllipsize(TextUtils.TruncateAt.END); top.addView(t, new LinearLayout.LayoutParams(0, -2, 1));
-        if (n.pinned) top.addView(new Icons(this, "pin", s.p.accent), new LinearLayout.LayoutParams(dp(18), dp(18)));
+        if (n.pinned) top.addView(NoteIcons.of(this, "pin", s.p.accent), new LinearLayout.LayoutParams(dp(18), dp(18)));
         c.addView(top);
         String pv = preview(n); if (!pv.isEmpty()) { TextView p = s.text(pv, 14, s.p.muted, false); p.setMaxLines(2); p.setEllipsize(TextUtils.TruncateAt.END); p.setPadding(0, dp(4), 0, 0); c.addView(p); }
         c.addView(folderLine(n));
@@ -273,7 +280,7 @@ public final class NotepadActivity extends Activity {
         TextView t = s.text(n.shownTitle(), 17, s.p.ink, true); t.setMaxLines(3); t.setEllipsize(TextUtils.TruncateAt.END); t.setPadding(0, 0, n.pinned ? dp(18) : 0, 0); c.addView(t);
         String pv = preview(n); if (!pv.isEmpty()) { TextView p = s.text(pv, 13.5f, s.p.muted, false); p.setMaxLines(3); p.setEllipsize(TextUtils.TruncateAt.END); p.setPadding(0, dp(4), 0, 0); c.addView(p); }
         Bitmap thumb = firstImage(n); if (thumb != null) { ImageView iv = new ImageView(this); iv.setImageBitmap(thumb); iv.setScaleType(ImageView.ScaleType.CENTER_CROP); iv.setClipToOutline(true); iv.setBackground(s.round(s.p.tint, 10)); LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, dp(80)); lp.topMargin = dp(8); c.addView(iv, lp); }
-        LinearLayout foot = s.row(); foot.setPadding(0, dp(10), 0, 0); foot.addView(chip(when(n.updated))); String m = marks(n); if (!m.isEmpty()) { TextView mk = s.text(m, 12, s.p.muted, false); mk.setPadding(dp(6), 0, 0, 0); foot.addView(mk); } c.addView(foot);
+        LinearLayout foot = s.row(); foot.setPadding(0, dp(10), 0, 0); foot.addView(chip(when(n.updated))); View m = markRow(n); if (m != null) { m.setPadding(dp(6), 0, 0, 0); foot.addView(m); } c.addView(foot);
         f.addView(c, new FrameLayout.LayoutParams(-1, -2));
         if (n.pinned) { View ribbon = new Ribbon(this, s.p.accent); f.addView(ribbon, new FrameLayout.LayoutParams(dp(18), dp(24), Gravity.TOP | Gravity.END)); ((FrameLayout.LayoutParams) ribbon.getLayoutParams()).rightMargin = dp(14); }
         bind(f, n); return f;
@@ -438,7 +445,7 @@ public final class NotepadActivity extends Activity {
         top.addView(circle("back", "Voltar", () -> { saveNow(); if (getIntent().getLongExtra("note", 0) > 0 && isTaskRoot()) list(); else if (getIntent().getLongExtra("note", 0) > 0 || getIntent().getBooleanExtra("new", false) || getIntent().hasExtra("passage_title")) finish(); else list(); }), new LinearLayout.LayoutParams(dp(48), dp(48)));
         top.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
         LinearLayout history = s.row(); history.setBackground(s.round(s.p.surface, 24)); history.setElevation(dp(2));
-        for (String[] h : new String[][]{{"undo", "Desfazer", "undo"}, {"redo", "Refazer", "redo"}}) { FrameLayout b = new FrameLayout(this); b.addView(new Icons(this, h[0], s.p.ink), new FrameLayout.LayoutParams(dp(20), dp(20), Gravity.CENTER)); b.setContentDescription(tr(h[1])); b.setOnClickListener(v -> tool(h[2])); Motion.touch(b); history.addView(b, new LinearLayout.LayoutParams(dp(48), dp(48))); }
+        for (String[] h : new String[][]{{"undo", "Desfazer", "undo"}, {"redo", "Refazer", "redo"}}) { FrameLayout b = new FrameLayout(this); b.addView(NoteIcons.of(this, h[0], s.p.ink), new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER)); b.setContentDescription(tr(h[1])); b.setOnClickListener(v -> tool(h[2])); Motion.touch(b); history.addView(b, new LinearLayout.LayoutParams(dp(48), dp(48))); }
         top.addView(history);
         LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(dp(48), dp(48)); gp.leftMargin = dp(8);
         top.addView(circle("eye", "Ver / editar", () -> tool("read")), gp);
@@ -466,8 +473,8 @@ public final class NotepadActivity extends Activity {
         formatSheet = formatPanel(); formatSheet.setVisibility(View.GONE);
         editorRoot.addView(formatSheet);
         LinearLayout tools = s.row(); tools.setPadding(dp(6), 0, dp(6), 0);
-        String[][] buttons = {{"sparkle", "Seeky IA", "ai"}, {"type", "Formatar", "format"}, {"image", "Imagem", "image"}, {"camera", "Câmara", "camera"}, {"edit", "Desenho", "draw"}, {"check", "Tarefa", "task"}, {"book", "Passagem", "passage"}, {"grid", "Tabela", "table"}, {"speaker", "Gravar voz", "record"}, {"mic", "Ditar", "dictate"}, {"calendar", "Data", "date"}};
-        for (String[] b : buttons) { FrameLayout f = new FrameLayout(this); f.addView(new Icons(this, b[0], s.p.ink), new FrameLayout.LayoutParams(dp(23), dp(23), Gravity.CENTER)); f.setContentDescription(tr(b[1])); f.setOnClickListener(v -> tool(b[2])); Motion.touch(f); tools.addView(f, new LinearLayout.LayoutParams(dp(52), dp(52))); }
+        String[][] buttons = {{"sparkle", "Seeky IA", "ai"}, {"format", "Formatar", "format"}, {"image", "Imagem", "image"}, {"camera", "Câmara", "camera"}, {"draw", "Desenho", "draw"}, {"checklist", "Tarefa", "task"}, {"passage", "Passagem", "passage"}, {"table", "Tabela", "table"}, {"wave", "Gravar voz", "record"}, {"mic", "Ditar", "dictate"}, {"calendar", "Data", "date"}};
+        for (String[] b : buttons) { FrameLayout f = new FrameLayout(this); f.addView(NoteIcons.of(this, b[0], s.p.ink), new FrameLayout.LayoutParams(dp(25), dp(25), Gravity.CENTER)); f.setContentDescription(tr(b[1])); f.setOnClickListener(v -> tool(b[2])); Motion.touch(f); tools.addView(f, new LinearLayout.LayoutParams(dp(52), dp(52))); }
         HorizontalScrollView hs = s.scroller(tools); hs.setBackground(s.round(s.p.surface, 28)); hs.setElevation(dp(6));
         FrameLayout bar = new FrameLayout(this); bar.setPadding(dp(14), dp(6), dp(14), dp(12)); bar.addView(hs, new FrameLayout.LayoutParams(-2, dp(56), Gravity.CENTER));
         editorRoot.addView(bar);
@@ -479,12 +486,13 @@ public final class NotepadActivity extends Activity {
         LinearLayout sheet = s.column(); sheet.setBackground(s.round(s.p.surface, 26)); sheet.setPadding(dp(14), dp(14), dp(14), dp(10)); sheet.setElevation(dp(8));
         String[][][] rows = {
             {{"H1", "h1"}, {"H2", "h2"}, {"H3", "h3"}, {"H4", "h4"}, {"Corpo", "h0"}},
-            {{"B", "bold"}, {"I", "italic"}, {"U", "under"}, {"S", "strike"}, {"→|", "indent"}, {"|←", "outdent"}},
-            {{"1.", "number"}, {"•", "list"}, {"☐", "task"}, {"⫷", "left"}, {"≡", "center"}, {"⫸", "right"}},
-            {{"❝", "quote"}, {"▬", "mark"}, {"—", "rule"}, {"⌫ cor", "nocolor"}}};
+            {{"B", "bold"}, {"I", "italic"}, {"U", "under"}, {"S", "strike"}, {"@marker", "mark"}, {"@nocolor", "nocolor"}},
+            {{"@numbers", "number"}, {"@bullets", "list"}, {"@checklist", "task"}, {"@quote", "quote"}, {"@rule", "rule"}},
+            {{"@align-l", "left"}, {"@align-c", "center"}, {"@align-r", "right"}, {"@outdent", "outdent"}, {"@indent", "indent"}}};
         for (String[][] row : rows) {
             LinearLayout r = s.row(); r.setBackground(s.round(s.p.tint, 14)); r.setClipToOutline(true);
             for (String[] b : row) {
+                if (b[0].startsWith("@")) { FrameLayout f = new FrameLayout(this); f.addView(NoteIcons.of(this, b[0].substring(1), s.p.ink), new FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER)); f.setContentDescription(tr(label(b[1]))); f.setOnClickListener(v -> tool(b[1])); Motion.touch(f); r.addView(f, new LinearLayout.LayoutParams(0, dp(46), 1)); continue; }
                 TextView t = s.text(b[0], b[0].length() > 2 ? 14 : 18, s.p.ink, true); t.setGravity(Gravity.CENTER);
                 if (b[1].equals("italic")) t.setTypeface(Typeface.create(Typeface.SERIF, Typeface.BOLD_ITALIC)); if (b[1].equals("under")) t.setPaintFlags(t.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG); if (b[1].equals("strike")) t.setPaintFlags(t.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 t.setContentDescription(tr(label(b[1]))); t.setOnClickListener(v -> tool(b[1])); Motion.touch(t);
@@ -536,14 +544,14 @@ public final class NotepadActivity extends Activity {
         contextRow.removeAllViews();
         List<Object[]> chips = new ArrayList<>();
         chips.add(new Object[]{"folder", note.folder.isEmpty() ? tr("Sem pasta") : note.folder, (Runnable) () -> chooseFolder(note.folder, f -> { note.folder = f; changed(); updateContext(); })});
-        if (!note.book().isEmpty()) chips.add(new Object[]{"pdfbook", note.book(), (Runnable) this::openBook});
+        if (!note.book().isEmpty()) chips.add(new Object[]{"book", note.book(), (Runnable) this::openBook});
         if (!note.subjectTitle.isEmpty()) chips.add(new Object[]{"course", note.subjectTitle, (Runnable) this::chooseSubject});
         if (note.reminder > System.currentTimeMillis()) chips.add(new Object[]{"clock", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(note.reminder)), (Runnable) this::reminder});
         if (note.locked) chips.add(new Object[]{"lock", tr("Bloqueada"), (Runnable) this::toggleLock});
         if (note.pinned) chips.add(new Object[]{"pin", tr("Fixada"), (Runnable) () -> { note.pinned = false; changed(); updateContext(); }});
         for (Object[] c : chips) {
             LinearLayout chip = s.row(); chip.setPadding(dp(8), dp(4), dp(10), dp(4)); chip.setBackground(s.round((ink & 0xffffff) | 0x14000000, 14));
-            chip.addView(new Icons(this, (String) c[0], muted), new LinearLayout.LayoutParams(dp(15), dp(15)));
+            chip.addView(NoteIcons.of(this, (String) c[0], muted), new LinearLayout.LayoutParams(dp(15), dp(15)));
             TextView t = s.text((String) c[1], 12.5f, muted, false); t.setSingleLine(true); t.setPadding(dp(5), 0, 0, 0); chip.addView(t);
             final Runnable r = (Runnable) c[2]; chip.setOnClickListener(v -> r.run()); Motion.touch(chip);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2); lp.rightMargin = dp(6); lp.topMargin = dp(6); contextRow.addView(chip, lp);
