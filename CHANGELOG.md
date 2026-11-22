@@ -1,5 +1,55 @@
 # Registo de alterações
 
+## 5.41.0 — 2026-11-22
+
+- **Novos ícones nas notas**: um conjunto próprio, em dois tons (contorno com preenchimento
+  suave), desenhado para o bloco de notas — lista, cartões e grelha, pastas, modelos, nova nota,
+  pesquisa, desfazer/refazer, ver, Seeky IA, formatar, imagem, câmara, desenho, tarefas, passagem,
+  tabela, gravar voz, ditar e data.
+- O painel Aa troca os símbolos de texto (⫷ ≡ ⫸ ❝ ▬) por ícones claros para listas, alinhamento,
+  recuo, citação, destaque, linha divisória e tirar a cor.
+- Nos cartões, os emojis dão lugar a ícones para tarefas feitas, passagens, imagens, gravações,
+  lembrete e nota bloqueada.
+
+## 5.40.0 — 2026-11-22
+
+- **Seeky IA nas notas** (botão ✨ no editor e no menu ⋮), com a chave Gemini do utilizador:
+  resumir, corrigir o texto, organizar em tópicos, perguntas de estudo, extrair tarefas,
+  passagens bíblicas relacionadas, continuar a escrever e pedido livre. Funciona na nota inteira
+  ou só no texto seleccionado; mostra a resposta antes de a inserir ou substituir, pode-se
+  desfazer, e as imagens e gravações da nota ficam sempre.
+- **Espaçamento entre linhas** no painel Aa (Normal, 1,0, 1,15, 1,5, 2,0), guardado em cada nota
+  e aplicado também na exportação para PDF e Word.
+- **Bloco** no painel de selecção do leitor (PDF página a página, EPUB e Word originais e texto):
+  abre o painel "Notas deste livro" com as palavras seleccionadas citadas.
+
+## 5.39.0 — 2026-11-22
+
+- **Bloco de notas renovado** (inspirado nas referências enviadas, adaptado ao Seeky):
+  - separadores **Notas** e **Tarefas** (todas as tarefas de todas as notas, para marcar ali);
+  - secções por data (Fixadas, Hoje, Ontem, 7 dias anteriores, 30 dias anteriores, meses);
+  - vistas em **lista**, **cartão** e **grelha** (com fita nas fixadas e miniatura da imagem);
+  - barra flutuante em baixo com pesquisa, **Modelos** e lápis para nova nota; pastas e lixo;
+  - editor com voltar, desfazer/refazer, ver/editar e menu ⋮; data, pasta, livro e lembrete à vista;
+  - barra de ferramentas flutuante: formatar (Aa), imagem, câmara, desenho, tarefa, passagem,
+    tabela, gravar voz, ditar e data.
+- **Texto rico**: títulos H1–H4, negrito, itálico, sublinhado, riscado, destaque, 6 cores,
+  alinhar à esquerda/centro/direita, recuo, listas numeradas e com marcas, tarefas, citações,
+  linhas divisórias e tabelas — formatado enquanto escreve.
+- **Imagens, desenhos e voz** dentro das notas (galeria, câmara, desenho à mão com cores e
+  borracha, gravação de áudio que toca na leitura).
+- Menu ⋮: fixar, **bloquear** (impressão digital/PIN do telefone), **fundo** (papel, linhas,
+  quadriculado, pontos, amarelo, lilás, céu, menta, noite), **lembrete** com notificação,
+  **adicionar ao ecrã inicial**, mover para pasta, ligar a livro ou módulo, etiquetas.
+- **Exportar e partilhar** como **PDF** e **Word (.docx)** — com títulos, cores, listas,
+  tabelas e imagens —, além de Markdown e texto.
+- **Notas dentro dos livros**: no leitor, a ferramenta **Notas** abre um painel para escrever
+  sem sair do livro (com formatação rápida, página/capítulo e o texto seleccionado), mostra as
+  notas desse livro e acrescenta a uma nota existente; na estante, ⋮ do livro → "Notas do livro"
+  e "Escrever uma nota sobre o livro"; no Bloco de notas, as notas aparecem com o nome do livro.
+- Jogo da Bíblia: as etiquetas "Passagem · livro" e "Referência · passagem" já não mostram um
+  símbolo estranho no lugar da seta.
+
 ## 5.38.0 — 2026-11-22
 
 - **Jogo da Bíblia renovado**:

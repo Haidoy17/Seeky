@@ -140,7 +140,7 @@ public final class BibleGameActivity extends Activity {
         deadline=SystemClock.uptimeMillis()+BibleGame.SECONDS[level]*1000L;paused=false;PlusUi.MAIN.post(tick);
     }
     String kindLabel(String kind){
-        switch(kind){case "verse":return AppLanguage.text(this,"Passagem → livro");case "free":return AppLanguage.text(this,"Escreva ou diga");case "chapter":return AppLanguage.text(this,"Livro e capítulo");case "refverse":return AppLanguage.text(this,"Referência → passagem");
+        switch(kind){case "verse":return AppLanguage.text(this,"Passagem · livro");case "free":return AppLanguage.text(this,"Escreva ou diga");case "chapter":return AppLanguage.text(this,"Livro e capítulo");case "refverse":return AppLanguage.text(this,"Referência · passagem");
             case "story":return AppLanguage.text(this,"História");case "order":case "first":return AppLanguage.text(this,"Ordem dos livros");case "group":return AppLanguage.text(this,"Grupos de livros");case "author":return AppLanguage.text(this,"Autores");case "chapters":return AppLanguage.text(this,"Capítulos");case "testament":return AppLanguage.text(this,"Testamentos");case "blank":case "blankwrite":return AppLanguage.text(this,"Complete a passagem");case "who":return AppLanguage.text(this,"Quem disse?");case "sequence":return AppLanguage.text(this,"Ordem dos acontecimentos");case "deep":return AppLanguage.text(this,"Pense bem");case "reflect":return AppLanguage.text(this,"Para meditar");default:return AppLanguage.text(this,"Sabia que…");}
     }
     TextView option(char letter,String text){

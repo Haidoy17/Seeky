@@ -23,8 +23,19 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.38", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.41", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("note", "Novos ícones nas notas", "Um conjunto próprio, em dois tons, para a lista, o editor, a barra de ferramentas e o painel Aa (listas, alinhar, recuo, citação, destaque, tabela, gravação, desenho…); nos cartões, ícones mostram tarefas, passagens, imagens, gravações, lembrete e bloqueio", false, () -> NotepadActivity.open(a));
+        panel.section("Da 5.40");
+        panel.action("sparkle", "Seeky IA nas notas", "Botão ✨ no editor: resumir, corrigir o texto, organizar em tópicos, perguntas de estudo, extrair tarefas, passagens relacionadas, continuar a escrever ou pedir outra coisa — na nota inteira ou só no texto seleccionado", false, () -> NotepadActivity.open(a));
+        panel.action("type", "Espaçamento entre linhas", "No painel Aa da nota: Normal, 1,0, 1,15, 1,5 ou 2,0; também no PDF e no Word exportados", false, () -> NotepadActivity.open(a));
+        panel.action("edit", "Bloco no painel de selecção", "Seleccione texto no PDF (também página a página), EPUB, Word ou texto e toque em Bloco: a nota do livro abre com as palavras citadas", false, () -> { a.tab = "Livros"; a.render(); });
+        panel.section("Da 5.39");
+        panel.action("note", "Notas renovadas", "Notas e Tarefas, secções por data (Hoje, 7 dias…), vistas em lista, cartão e grelha, pesquisa em baixo, modelos, fundos de papel (linhas, quadriculado, pontos, cores), bloquear, lembrete e pôr no ecrã inicial", false, () -> NotepadActivity.open(a));
+        panel.action("type", "Texto rico nas notas", "Títulos H1–H4, negrito, itálico, sublinhado, riscado, destaque, 6 cores, alinhar, recuo, listas numeradas, tarefas, tabelas, imagens, câmara, desenhos e gravações de voz", false, () -> NotepadActivity.open(a));
+        panel.action("word", "Exportar para Word e PDF", "No menu ⋮ da nota: Exportar PDF, Exportar Word (.docx), Markdown ou texto, e Partilhar como PDF ou Word — com títulos, cores, listas, tabelas e imagens", false, () -> NotepadActivity.open(a));
+        panel.action("pdfbook", "Notas dentro dos livros", "No leitor, a ferramenta Notas escreve uma nota sem sair do livro (também a partir do texto seleccionado); as notas do livro aparecem ali e no Bloco de notas com o nome do livro", false, () -> { a.tab = "Livros"; a.render(); });
+        panel.section("Da 5.38");
         panel.action("star", "Jogo da Bíblia: 60 s e nível Lendário", "60 s em todos os níveis; Médio e Difícil mais profundos (completar passagens, quem disse, ordem dos acontecimentos) e o novo Lendário, com perguntas para meditar e explicação", false, () -> BibleGameActivity.open(a));
         panel.action("note", "Bloco de notas", "Pastas, cores, fixar, tarefas, formatação, modelos (estudo OIA, sermão, devocional), ditar, ouvir, exportar e lixo; as passagens escritas ficam tocáveis e ligam ao estudo bíblico, aos livros e aos Estudos", false, () -> NotepadActivity.open(a));
         panel.section("Da 5.37");

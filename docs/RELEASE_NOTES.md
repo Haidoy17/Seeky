@@ -1,3 +1,31 @@
+## Seeky 5.41.0
+
+Instale **Seeky_5.41.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Novos ícones nas notas**, em dois tons e consistentes em todo o bloco de notas.
+
+## Seeky 5.40.0
+
+Instale **Seeky_5.40.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Seeky IA nas notas**: resumir, corrigir, organizar, perguntas, tarefas, passagens e mais.
+- **Espaçamento entre linhas** nas notas (também no PDF e no Word).
+- **Bloco** no painel de selecção do leitor, também no PDF página a página.
+
+## Seeky 5.39.0
+
+Instale **Seeky_5.39.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Notas renovadas**: Notas e Tarefas, secções por data, vistas em lista, cartão e grelha,
+  fundos de papel, bloquear, lembrete e atalho no ecrã inicial.
+- **Texto rico** (H1–H4, sublinhado, riscado, cores, alinhamento, listas numeradas, tabelas),
+  imagens, desenhos e gravações de voz.
+- **Exportar para PDF e Word (.docx)**.
+- **Notas dentro dos livros**: escreva no leitor sem sair do livro e encontre-as no Bloco de notas.
+
 ## Seeky 5.38.0
 
 Instale **Seeky_5.38.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

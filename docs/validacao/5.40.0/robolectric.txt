@@ -1,0 +1,5 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.40.0
+Tests run: 477, Failures: 1 (Library536Test: o teste verificava a limpeza da cópia convertida antes de o leitor terminar o trabalho em segundo plano; passou nas 2 repetições seguintes e o teste agora espera pelo fim desse trabalho)
+Library536Test depois da correcção: OK (6 tests)
+Notepad540Test + Notepad539Test + Notepad538Test: OK (10 tests)
+exit=0

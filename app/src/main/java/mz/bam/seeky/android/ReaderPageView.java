@@ -167,6 +167,7 @@ final class ReaderPageView extends ZoomImageView {
         if(glyphs==null)return;int from=Math.max(0,Math.min(selectionStart,selectionEnd)),to=Math.min(glyphs.text.length(),Math.max(selectionStart,selectionEnd));if(to<=from)return;
         String text=glyphs.text.substring(from,to);if(selectionMode!=null)selectionMode.finish();
         if(what.equals("note"))notePdf(from,to,text);
+        else if(what.equals("notepad"))ReaderNotes.show(activity,Highlights.clean(text));
         else if(what.equals("copy")){((android.content.ClipboardManager)activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(activity.name,Highlights.clean(text)));android.widget.Toast.makeText(activity,AppLanguage.text(activity,"Texto copiado."),android.widget.Toast.LENGTH_SHORT).show();}
         else if(what.equals("dictionary"))WordLookup.show(activity,Highlights.clean(text));
         else if(what.equals("share"))ShareTools.text(activity,Highlights.clean(text));

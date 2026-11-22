@@ -18,7 +18,7 @@ final class OriginalDocument {
   if(what.equals("note")){markSelection("note",mode);return;}
   selection(mode,(s,e,t)->{String text=Highlights.clean(t);
    if(what.equals("copy")){((android.content.ClipboardManager)a.getSystemService(android.content.Context.CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(a.name,text));PlusUi.toast(a,"Texto copiado.");}
-   else if(what.equals("dictionary"))WordLookup.show(a,text);else if(what.equals("share"))ShareTools.text(a,text);});
+   else if(what.equals("notepad"))ReaderNotes.show(a,text);else if(what.equals("dictionary"))WordLookup.show(a,text);else if(what.equals("share"))ShareTools.text(a,text);});
  }
  void hideMarkBar(){if(markBar!=null){markBar.dismiss();markBar=null;}}
  /** Reads the selected words' offsets, then closes the selection menu. */
