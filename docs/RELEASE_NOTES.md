@@ -1,3 +1,12 @@
+## Seeky 5.38.0
+
+Instale **Seeky_5.38.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Jogo da Bíblia**: 60 s em todos os níveis, níveis mais profundos e o novo nível Lendário.
+- **Bloco de notas** completo, ligado ao estudo bíblico, aos livros e aos Estudos, que reconhece
+  as passagens bíblicas escritas.
+
 ## Seeky 5.37.0
 
 Instale **Seeky_5.37.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

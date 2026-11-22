@@ -62,7 +62,7 @@ public final class BibleStudy529Test {
         s=BibleStudyCore.schedule(10,250,0,0);check(s[0]==0&&s[2]==600000L&&s[1]==230,"again in ten minutes");
         check(BibleStudyCore.memorised(21)&&!BibleStudyCore.memorised(20),"memorised after three weeks");
         // Quiz rounds.
-        for(int level=0;level<3;level++)for(int seed=0;seed<40;seed++){
+        for(int level=0;level<BibleGame.LEVELS.length;level++)for(int seed=0;seed<40;seed++){
             for(BibleGame.Verses source:new BibleGame.Verses[]{new Fake(),null}){
                 List<BibleGame.Question> round=new BibleGame(level,new Random(seed),source).round();
                 check(round.size()==BibleGame.ROUND,"ten questions level "+level+" seed "+seed+" bible "+(source!=null)+": "+round.size());
@@ -77,11 +77,28 @@ public final class BibleStudy529Test {
         List<BibleGame.Question> hard=new BibleGame(BibleGame.HARD,new Random(7),new Fake()).round();
         Set<String> kinds=new HashSet<>();for(BibleGame.Question q:hard)kinds.add(q.kind);
         check(kinds.contains("free")&&kinds.contains("chapter"),"hard level asks to write the book and the chapter: "+kinds);
+        for(int l=0;l<BibleGame.LEVELS.length;l++)check(BibleGame.SECONDS[l]==60,"60 s em todos os níveis");
+        check(BibleGame.LEVELS.length==4&&BibleGame.LEVELS[3].equals("Lendário"),"nível Lendário");
+        for(BibleGame.Verses source:new BibleGame.Verses[]{new Fake(),null}){
+            Set<String> hardKinds=new HashSet<>(),legendKinds=new HashSet<>();
+            for(int seed=0;seed<20;seed++){for(BibleGame.Question x:new BibleGame(BibleGame.HARD,new Random(seed),source).round())hardKinds.add(x.kind);for(BibleGame.Question x:new BibleGame(BibleGame.LEGEND,new Random(seed),source).round())legendKinds.add(x.kind);}
+            check(hardKinds.containsAll(Arrays.asList("blank","who","sequence","deep")),"Difícil: completar, quem disse, ordem e raciocínio: "+hardKinds);
+            check(legendKinds.containsAll(Arrays.asList("reflect","blankwrite","sequence","who"))&&!legendKinds.contains("story"),"Lendário: meditar e escrever a palavra: "+legendKinds);
+            for(int seed=0;seed<20;seed++)for(BibleGame.Question x:new BibleGame(BibleGame.LEGEND,new Random(seed),source).round()){
+                if(x.kind.startsWith("blank"))check(x.body.contains("____")&&!x.answer.isEmpty(),"espaço em branco: "+x.body);
+                if(!x.kind.equals("testament"))check(!x.explain.isEmpty(),"explicação depois de responder: "+x.kind);
+            }
+        }
+        BibleGame.Question word=new BibleGame.Question("blankwrite","","«O Senhor é o meu ____»",Collections.<String>emptyList(),"unigénito","","");
+        check(word.correct("Unigenito")&&word.correct(" unigénito. ")&&!word.correct("amado")&&word.shown().equals("unigénito"),"palavra escrita sem acentos e maiúsculas");
+        List<BibleGame.Question> seq=new ArrayList<>();for(int seed=0;seed<30;seed++)for(BibleGame.Question x:new BibleGame(BibleGame.HARD,new Random(seed),null).round())if(x.kind.equals("sequence"))seq.add(x);
+        for(BibleGame.Question x:seq){int right=Arrays.asList(BibleGame.EVENTS).indexOf(x.answer);for(String o:x.options)check(Arrays.asList(BibleGame.EVENTS).indexOf(o)>=right,"o primeiro acontecimento é a resposta: "+x.options+" → "+x.answer);}
+        check(!seq.isEmpty(),"perguntas de ordem");
         List<BibleGame.Question> easy=new BibleGame(BibleGame.EASY,new Random(3),new Fake()).round();
         int verses=0;for(BibleGame.Question q:easy)if(q.kind.equals("verse"))verses++;check(verses==4,"easy level uses famous verses");
         BibleGame.Question q=new BibleGame.Question("free","","",Collections.<String>emptyList(),"Primeira Coríntios","","");
         check(q.correct("primeira coríntios")&&q.correct("1 Co")&&!q.correct("Coríntios 2"),"spoken numbered book");
-        check(BibleGame.points(BibleGame.EASY,true,20,1,false)==140&&BibleGame.points(BibleGame.HARD,true,10,3,false)==312&&BibleGame.points(BibleGame.HARD,false,10,3,false)==0,"points");
+        check(BibleGame.points(BibleGame.LEGEND,true,0,0,false)==300&&BibleGame.points(BibleGame.EASY,true,20,1,false)==140&&BibleGame.points(BibleGame.HARD,true,10,3,false)==312&&BibleGame.points(BibleGame.HARD,false,10,3,false)==0,"points");
         check(BibleGame.points(BibleGame.MEDIUM,true,0,0,true)==75,"help halves the points");
         check(BibleGame.stars(10)==3&&BibleGame.stars(7)==2&&BibleGame.stars(5)==1&&BibleGame.stars(4)==0,"stars");
         check(BibleGame.display("Primeira Coríntios").equals("1 Coríntios")&&BibleGame.display("Terceira João").equals("3 João"),"display names");

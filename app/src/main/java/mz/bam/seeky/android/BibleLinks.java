@@ -237,6 +237,7 @@ final class BibleLinks {
             compareChip=chip(actions,"collection","Comparar versões",false,()->{compare=!compare;load();});
             chip(actions,"bookmark","Guardar",false,()->{save(a,ref,version,plain);PlusUi.toast(a,"Passagem guardada. Veja em Consultar passagem → Guardadas.");});
             chip(actions,"cards","Decorar",false,this::memorise);
+            chip(actions,"note","Anotar",false,()->{if(dialog!=null)dialog.dismiss();NotepadActivity.withPassage(a,ref.title,plain,version);});
             chip(actions,null,"A−",false,()->size(-1));
             chip(actions,null,"A+",false,()->size(1));
             meta=new TextView(a);meta.setTextSize(13);meta.setTextColor(colors.muted);
