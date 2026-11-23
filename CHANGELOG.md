@@ -1,5 +1,19 @@
 # Registo de alterações
 
+## 5.43.0 — 2026-11-23
+
+- **Gemini 4 Hydrogen** (`gemini-4-hydrogen`, o modelo mais recente da Google) no Seeky:
+  - aparece em **Ligação da IA → Modelo** como "Gemini 4 Hydrogen · mais recente" (antes do primeiro
+    teste, e depois sempre que a lista da chave o tiver);
+  - entra na lista de alternativas automáticas, a seguir a `gemini-3.5-flash-lite` e `gemini-3.5-flash`;
+  - os modelos Gemini 4 recebem `thinkingConfig.thinkingLevel = LOW` e espaço de pelo menos 2048
+    tokens, para o raciocínio não esgotar a resposta (o nível por defeito do Hydrogen é HIGH);
+  - se a API recusar a definição de raciocínio (HTTP 400), o pedido repete-se uma vez sem ela;
+  - se a chave não tiver quota gratuita para o modelo (HTTP 429 com "limit: 0"), o Seeky usa o
+    modelo seguinte e explica: "O Gemini 4 Hydrogen não tem quota gratuita nesta chave…". Um limite
+    de pedidos normal (429) continua a parar sem trocar de modelo.
+- O modelo automático continua a ser `gemini-3.5-flash-lite` (mais rápido e com mais quota gratuita).
+
 ## 5.42.0 — 2026-11-23
 
 - **IA (Gemini) a funcionar com chaves novas**: o modelo `gemini-2.5-flash-lite`, que estava fixo no

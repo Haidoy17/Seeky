@@ -1,8 +1,8 @@
 {
-  "versionCode": 5006900,
-  "versionName": "5.42.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.42.0.apk",
-  "sha256": "b03b6da32b044c55eed2a8bb0ecaebc839589b310842744a8898bf61bac21e25",
-  "bytes": 13716167,
-  "notes": "IA a funcionar com chaves Gemini novas: modelo gemini-3.5-flash-lite por defeito, escolha do modelo em Ligação da IA e mudança automática se a Google retirar um modelo."
+  "versionCode": 5007000,
+  "versionName": "5.43.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.43.0.apk",
+  "sha256": "e62b1b750ee4e9354cad9bff1504da4f5dfb6419f539bb0d8871b3ccdf0f31e6",
+  "bytes": 13717083,
+  "notes": "Gemini 4 Hydrogen: o modelo mais recente da Google em Ligação da IA → Modelo, com raciocínio rápido e mudança automática se a chave não tiver quota gratuita para ele."
 }

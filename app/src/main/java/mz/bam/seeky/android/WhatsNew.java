@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.42", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.43", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("sparkle", "Gemini 4 Hydrogen", "O modelo mais recente da Google pode ser escolhido em Ligação da IA → Modelo. O Seeky pede-lhe raciocínio rápido (nível baixo); se a sua chave não tiver quota gratuita para ele, usa outro modelo e explica porquê", false, () -> SeekyAi.open(a, 0));
+        panel.section("Da 5.42");
         panel.action("sparkle", "IA a funcionar com chaves novas", "O Seeky usa o gemini-3.5-flash-lite (o gemini-2.5-flash-lite já não aceita chaves novas). Em Ligação da IA pode escolher o modelo entre os que a sua chave tem; se a Google retirar um modelo, o Seeky passa sozinho ao seguinte e avisa", false, () -> SeekyAi.open(a, 0));
         panel.section("Da 5.41");
         panel.action("note", "Novos ícones nas notas", "Um conjunto próprio, em dois tons, para a lista, o editor, a barra de ferramentas e o painel Aa (listas, alinhar, recuo, citação, destaque, tabela, gravação, desenho…); nos cartões, ícones mostram tarefas, passagens, imagens, gravações, lembrete e bloqueio", false, () -> NotepadActivity.open(a));

@@ -1,3 +1,11 @@
+## Seeky 5.43.0
+
+Instale **Seeky_5.43.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Novidades
+- **Gemini 4 Hydrogen**: o modelo mais recente da Google pode ser escolhido em Ligação da IA → Modelo,
+  com raciocínio rápido e mudança automática se a chave não tiver quota gratuita para ele.
+
 ## Seeky 5.42.0
 
 Instale **Seeky_5.42.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

@@ -11,7 +11,14 @@ import java.util.*;
 final class SeekyAiModels {
     private SeekyAiModels() {}
     static final String DEFAULT = "gemini-3.5-flash-lite";
-    static final String[] FALLBACKS = {"gemini-3.5-flash-lite", "gemini-3.5-flash"};
+    /** The newest Gemini (12/11/2026): a thinking model, text output, may need paid quota on some keys. */
+    static final String NEWEST = "gemini-4-hydrogen";
+    static final String[] FALLBACKS = {"gemini-3.5-flash-lite", "gemini-3.5-flash", NEWEST};
+    /** Gemini 4 models think before answering: Seeky asks for the LOW level so answers stay quick and fit the token limit. */
+    static boolean thinks(String model) { return clean(model).startsWith("gemini-4"); }
+    static final String THINKING = "LOW";
+    /** What the model selector shows. */
+    static String label(String model) { String m = clean(model); return m.equals(NEWEST) ? "Gemini 4 Hydrogen · mais recente" : m; }
     static final int ATTEMPTS = 4;
 
     /** Where the choice is kept (the phone's settings); null in tests. */
@@ -83,11 +90,14 @@ final class SeekyAiModels {
         save();
     }
     /** The model that answered; when it is not the first one tried, the user is told. */
-    static synchronized void worked(String model, String first) {
+    static synchronized void worked(String model, String first) { worked(model, first, false); }
+    /** quota: the first model was refused for lack of free quota, not retired. */
+    static synchronized void worked(String model, String first, boolean quota) {
         String m = clean(model), f = clean(first);
-        if (!m.equals(f) && !f.isEmpty()) notice = switched(f, m);
+        if (!m.equals(f) && !f.isEmpty()) notice = quota ? noQuota(f, m) : switched(f, m);
         if (!m.equals(clean(working))) { working = m; save(); }
     }
+    static String noQuota(String gone, String now) { return "O " + label(gone) + " não tem quota gratuita nesta chave (a Google pode exigir um plano pago). O Seeky usou o " + now + "."; }
     static String switched(String gone, String now) { return "O modelo " + gone + " foi descontinuado ou não está disponível para esta chave. O Seeky mudou para o " + now + "."; }
     static String none(List<String> tried) { return "Gemini: nenhum modelo disponível para esta chave (tentados: " + String.join(", ", tried) + "). Abra Ligação da IA e toque em Testar e guardar para actualizar a lista de modelos."; }
     /** The change to tell the user, once. */
