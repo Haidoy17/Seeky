@@ -1,5 +1,15 @@
 # Registo de alterações
 
+## 5.45.0 — 2026-11-23
+
+- **Importar Bíblias com versículos agrupados**: paráfrases como *A Mensagem* juntam versículos
+  (por exemplo Génesis 1:1-2 num só) e deixam o seguinte sem texto. A importação parava com
+  "Versículo inválido: Génesis 1:2"; agora os versículos vazios são saltados (o texto está no
+  anterior) em MyBible, CSV/TSV, USFM e texto simples. Números de livro, capítulo ou versículo
+  errados e versículos demasiado longos continuam a parar a importação.
+- Uma importação que ficou em "Precisa de atenção" pode ser repetida em Tarefas → Retomar
+  pendentes e falhados.
+
 ## 5.44.0 — 2026-11-23
 
 - **Pastas das aplicações (Android/data e Android/obb)** no Explorar, para o Android 11 e mais

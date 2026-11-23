@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007100,
-  "versionName": "5.44.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.44.0.apk",
-  "sha256": "95082bb94147693e87911616ba40fad756dc6357b491d7498f53a3dcb8bb6d4f",
-  "bytes": 13755380,
-  "notes": "Pastas das aplicações (Android/data e Android/obb) no Explorar, com a aplicação gratuita Shizuku: ver, abrir, partilhar, copiar, importar, mudar o nome e apagar."
+  "versionCode": 5007200,
+  "versionName": "5.45.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.45.0.apk",
+  "sha256": "776c5fe5cbf061e3e55df3ae2315c8e703d52e68a9d125251ddb20059e0622da",
+  "bytes": 13756246,
+  "notes": "Bíblias com versículos agrupados (como A Mensagem) importam sem parar em Versículo inválido; e Pastas das aplicações (Android/data e Android/obb) com o Shizuku."
 }

@@ -1,3 +1,11 @@
+## Seeky 5.45.0
+
+Instale **Seeky_5.45.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Correcção
+- **Bíblias com versículos agrupados** (como A Mensagem) importam sem parar em
+  "Versículo inválido". Em Tarefas, toque na importação e em Retomar pendentes e falhados.
+
 ## Seeky 5.44.0
 
 Instale **Seeky_5.44.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

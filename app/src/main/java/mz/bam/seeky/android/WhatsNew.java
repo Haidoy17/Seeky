@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.44", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.45", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("book", "Bíblias com versículos agrupados", "Paráfrases como A Mensagem juntam versículos (por exemplo Génesis 1:1-2) e deixam o seguinte vazio: a importação já não pára aí. Se uma importação ficou em Precisa de atenção, abra Tarefas e toque em Retomar pendentes e falhados", false, () -> TaskService.open(a));
+        panel.section("Da 5.44");
         panel.action("shield", "Pastas das aplicações (Android/data e Android/obb)", "No Explorar → Pastas das aplicações: com a aplicação gratuita Shizuku, ver, abrir, partilhar, copiar para Transferências, importar, mudar o nome e apagar nas pastas que o Android 11+ esconde. O ecrã explica os 3 passos", false, () -> AppDataActivity.open(a));
         panel.section("Da 5.43");
         panel.action("sparkle", "Gemini 4 Hydrogen", "O modelo mais recente da Google pode ser escolhido em Ligação da IA → Modelo. O Seeky pede-lhe raciocínio rápido (nível baixo); se a sua chave não tiver quota gratuita para ele, usa outro modelo e explica porquê", false, () -> SeekyAi.open(a, 0));
