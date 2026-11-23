@@ -1,3 +1,11 @@
+## Seeky 5.42.0
+
+Instale **Seeky_5.42.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+
+### Correcção
+- **IA a funcionar com chaves Gemini novas**: modelo `gemini-3.5-flash-lite` por defeito, escolha do
+  modelo em Ligação da IA e mudança automática se a Google retirar um modelo.
+
 ## Seeky 5.41.0
 
 Instale **Seeky_5.41.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
