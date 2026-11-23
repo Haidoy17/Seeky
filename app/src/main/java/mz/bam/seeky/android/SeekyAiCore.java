@@ -5,7 +5,7 @@ import org.json.*;import java.util.*;
 /** Bounded text context and provider contracts. No document execution or simulated answers. */
 final class SeekyAiCore {
  static final int CONTEXT=12000,QUESTION=4000,ANSWER=14000,HISTORY=16000;
- static final String GEMINI="gemini",GEMINI_MODEL="gemini-2.5-flash-lite";
+ static final String GEMINI="gemini";
  static final class Message {final String role,text;Message(String role,String text){this.role=role;this.text=text;}}
  static final class Result {final String text;final boolean partial;Result(String text,boolean partial){this.text=text;this.partial=partial;}}
  static final class Slice {final int start,end;Slice(int start,int end){this.start=start;this.end=end;}}

@@ -61,7 +61,7 @@ final class NotepadAi {
                 if (key == null || key.isEmpty()) throw new IllegalStateException(AppLanguage.text(a, "Configure a chave em Estudar com Seeky."));
                 SeekyAiCore.Result r = clients.create().ask(SeekyAiCore.GEMINI, key, sent, a.currentTitle(), Collections.emptyList(), NotepadAiText.prompt(act.key, extra, english), english, call);
                 final String answer = r.text;
-                PlusUi.post(a, () -> { try { waiting.dismiss(); } catch (Exception ignored) {} if (!call.cancelled.get() && a.screen.equals("edit")) show(a, act, answer, body, part ? s : -1, part ? e : -1, english); });
+                PlusUi.post(a, () -> { try { waiting.dismiss(); } catch (Exception ignored) {} String switched = SeekyAiModels.takeNotice(); if (!switched.isEmpty()) PlusUi.toast(a, switched); if (!call.cancelled.get() && a.screen.equals("edit")) show(a, act, answer, body, part ? s : -1, part ? e : -1, english); });
             } catch (Exception ex) {
                 final String why = SeekyAiClient.redact(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage(), key);
                 PlusUi.post(a, () -> { try { waiting.dismiss(); } catch (Exception ignored) {} if (!call.cancelled.get()) PlusUi.toast(a, AppLanguage.text(a, "O Seeky IA não conseguiu responder") + ": " + why); });

@@ -1,5 +1,22 @@
 # Registo de alterações
 
+## 5.42.0 — 2026-11-23
+
+- **IA (Gemini) a funcionar com chaves novas**: o modelo `gemini-2.5-flash-lite`, que estava fixo no
+  código, já não aceita chaves criadas agora (HTTP 404). O modelo por defeito passa a
+  `gemini-3.5-flash-lite`.
+- O modelo deixa de estar fixo:
+  - **Ligação da IA** tem um seletor "Modelo" ("Automático (recomendado)" ou um modelo concreto);
+  - **Testar e guardar** pergunta à API (`GET /v1beta/models`, chave no cabeçalho) quais modelos a
+    chave tem e oferece só os que fazem `generateContent` (sem voz, imagem nem embeddings);
+  - se um modelo der 404 (ou 400 "não encontrado/não suportado"), o Seeky tenta o seguinte
+    automaticamente (`gemini-3.5-flash-lite` → `gemini-3.5-flash` → os da lista da chave) e passa a
+    usar o que funcionou;
+  - mensagem clara em vez do texto em bruto da Google: "O modelo … foi descontinuado ou não está
+    disponível para esta chave. O Seeky mudou para o …".
+- Vale para o assistente, os resumos, a IA nas notas e a transcrição de letras.
+- O relatório "Copiar erro" passa a indicar a versão real do Seeky e o modelo usado.
+
 ## 5.41.0 — 2026-11-22
 
 - **Novos ícones nas notas**: um conjunto próprio, em dois tons (contorno com preenchimento
