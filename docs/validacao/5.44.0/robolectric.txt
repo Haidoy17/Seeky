@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.44.0
+OK (481 tests)
+exit=0
+Nota: o Shizuku não existe no Robolectric. AppData544Test liga o cliente ao serviço SeekyShellService no mesmo processo (Binder local) e verifica os limites de caminhos; o funcionamento com o Shizuku real precisa de ser confirmado no telefone.

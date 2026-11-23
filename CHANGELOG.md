@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.44.0 — 2026-11-23
+
+- **Pastas das aplicações (Android/data e Android/obb)** no Explorar, para o Android 11 e mais
+  recentes, que as escondem de todas as aplicações mesmo com acesso a todos os ficheiros:
+  - funciona com a aplicação gratuita **Shizuku** (sem root): o ecrã guia os 3 passos — instalar
+    (Google Play ou GitHub), iniciar (depuração sem fios) e autorizar o Seeky — e verifica cada um;
+  - navegar pelas pastas de cada aplicação (com o nome da aplicação quando o Android o mostra),
+    filtrar, abrir, partilhar, copiar ficheiros ou pastas inteiras para Download/Seeky, importar
+    ficheiros para lá, criar pastas, mudar o nome e apagar (com confirmação);
+  - um pequeno serviço do Seeky corre dentro do Shizuku e só aceita caminhos em Android/data e
+    Android/obb (verificado no Seeky e outra vez no serviço); as duas pastas em si não podem ser
+    apagadas nem mudar de nome.
+- Biblioteca Shizuku-API 13.1.5 (Apache 2.0) incluída em `app/libs`, com origem e SHA-256 em
+  `docs/third_party.json`.
+
 ## 5.43.0 — 2026-11-23
 
 - **Gemini 4 Hydrogen** (`gemini-4-hydrogen`, o modelo mais recente da Google) no Seeky:
