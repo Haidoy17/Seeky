@@ -12,6 +12,8 @@ public final class BibleImportTest {
   try{parse("Isaías,5,6,Texto válido\nLinha ilegível sem referência\n");throw new AssertionError("Malformed CSV accepted");}catch(IOException expected){checks++;}
   try{BibleText.parse(new StringReader(text),(b,c,v,t)->{},()->true);throw new AssertionError("Cancel ignored");}catch(InterruptedIOException expected){checks++;}
   try{parse("Texto sem livro ou números");throw new AssertionError("Empty Bible accepted");}catch(IOException expected){checks++;}
+  List<String> joined=parse("GEN,1,1,Deus criou os céus e a terra.\nGEN,1,2,\nGEN,1,3,Haja luz.");check(joined.size()==2&&joined.get(1).startsWith("Génesis 1:3"),"empty joined verse is skipped, not fatal: "+joined);
+  List<String> usfm=parse("\\id GEN\n\\c 1\n\\v 1 No princípio.\n\\v 2\n\\v 3 Luz.");check(usfm.size()==2&&usfm.get(1).startsWith("Génesis 1:3"),"empty USFM verse is skipped: "+usfm);
   System.out.println("PASS "+checks+" Bible import regressions");
  }
 }

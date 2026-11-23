@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007000,
-  "versionName": "5.43.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.43.0.apk",
-  "sha256": "e62b1b750ee4e9354cad9bff1504da4f5dfb6419f539bb0d8871b3ccdf0f31e6",
-  "bytes": 13717083,
-  "notes": "Gemini 4 Hydrogen: o modelo mais recente da Google em Ligação da IA → Modelo, com raciocínio rápido e mudança automática se a chave não tiver quota gratuita para ele."
+  "versionCode": 5007200,
+  "versionName": "5.45.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.45.0.apk",
+  "sha256": "776c5fe5cbf061e3e55df3ae2315c8e703d52e68a9d125251ddb20059e0622da",
+  "bytes": 13756246,
+  "notes": "Bíblias com versículos agrupados (como A Mensagem) importam sem parar em Versículo inválido; e Pastas das aplicações (Android/data e Android/obb) com o Shizuku."
 }

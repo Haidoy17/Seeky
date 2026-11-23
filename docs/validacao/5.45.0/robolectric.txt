@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.45.0
+OK (482 tests)
+exit=0
+Inclui Bible5180Test.paraphraseWithJoinedVersesImportsAndSkipsTheEmptyOnes (módulo MyBible com Génesis 1:2 vazio).

@@ -1,0 +1,11 @@
+Verifies
+Verified using v1 scheme (JAR signing): true
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Signer #1 certificate DN: CN=Haidoy Carlos Mautempo, O=Seeky, C=MZ
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+zipalign -c -P 16 4: OK
+versionCode 5007200 · versionName 5.45.0
+SHA-256 do APK: 776c5fe5cbf061e3e55df3ae2315c8e703d52e68a9d125251ddb20059e0622da

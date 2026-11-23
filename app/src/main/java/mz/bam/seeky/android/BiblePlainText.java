@@ -34,5 +34,5 @@ class BiblePlainText {
    if(verse>0){if(pending.length()+line.length()+1>16000)throw new IOException("Não foi possível separar os versículos. Verifique o capítulo e os números de versículos.");pending+=" "+line;}
   }
  }
- void flush()throws Exception {if(verse>0){BibleText.emit(sink,book,chapter,verse,pending);if(++count>200000)throw new IOException("A Bíblia excede 200000 versículos.");verse=0;pending="";}}
+ void flush()throws Exception {if(verse>0){if(BibleText.emit(sink,book,chapter,verse,pending)&&++count>200000)throw new IOException("A Bíblia excede 200000 versículos.");verse=0;pending="";}}
 }

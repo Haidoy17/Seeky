@@ -1,22 +1,42 @@
 [
-  {
-    "name": "pdfbox-android-2.0.27.0.aar",
-    "url": "https://repo.maven.apache.org/maven2/com/tom-roush/pdfbox-android/2.0.27.0/pdfbox-android-2.0.27.0.aar",
-    "sha256": "30277f879cfd571db2a137582c95516a0d4ea6778e945519bc58ca93d57d88c7"
-  },
-  {
-    "name": "bcprov-jdk18on-1.86.jar",
-    "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcprov-jdk18on/1.86/bcprov-jdk18on-1.86.jar",
-    "sha256": "2af190b300cbb0b35e248ccf5f4a06b6072030aeb3da7a98ec73abe5b4cb371f"
-  },
-  {
-    "name": "bcpkix-jdk18on-1.86.jar",
-    "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcpkix-jdk18on/1.86/bcpkix-jdk18on-1.86.jar",
-    "sha256": "8d8b41a4b149bdae8d331f059a578870954d1e3ff29f8269a9eb3ee19a7e4ef7"
-  },
-  {
-    "name": "bcutil-jdk18on-1.86.jar",
-    "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcutil-jdk18on/1.86/bcutil-jdk18on-1.86.jar",
-    "sha256": "1c268e15f785aafb1e4670d8d6e5f856f69475e96c162dadcd1ff9b350e9139f"
-  }
+ {
+  "name": "pdfbox-android-2.0.27.0.aar",
+  "url": "https://repo.maven.apache.org/maven2/com/tom-roush/pdfbox-android/2.0.27.0/pdfbox-android-2.0.27.0.aar",
+  "sha256": "30277f879cfd571db2a137582c95516a0d4ea6778e945519bc58ca93d57d88c7"
+ },
+ {
+  "name": "bcprov-jdk18on-1.86.jar",
+  "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcprov-jdk18on/1.86/bcprov-jdk18on-1.86.jar",
+  "sha256": "2af190b300cbb0b35e248ccf5f4a06b6072030aeb3da7a98ec73abe5b4cb371f"
+ },
+ {
+  "name": "bcpkix-jdk18on-1.86.jar",
+  "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcpkix-jdk18on/1.86/bcpkix-jdk18on-1.86.jar",
+  "sha256": "8d8b41a4b149bdae8d331f059a578870954d1e3ff29f8269a9eb3ee19a7e4ef7"
+ },
+ {
+  "name": "bcutil-jdk18on-1.86.jar",
+  "url": "https://repo.maven.apache.org/maven2/org/bouncycastle/bcutil-jdk18on/1.86/bcutil-jdk18on-1.86.jar",
+  "sha256": "1c268e15f785aafb1e4670d8d6e5f856f69475e96c162dadcd1ff9b350e9139f"
+ },
+ {
+  "name": "shizuku-api-13.1.5.aar",
+  "url": "https://repo1.maven.org/maven2/dev/rikka/shizuku/api/13.1.5/api-13.1.5.aar",
+  "sha256": "4def9bde498ef8626614c2fc5db9af4749c86f16f6c33e3f5658d35e70bab59b"
+ },
+ {
+  "name": "shizuku-provider-13.1.5.aar",
+  "url": "https://repo1.maven.org/maven2/dev/rikka/shizuku/provider/13.1.5/provider-13.1.5.aar",
+  "sha256": "b0f18cd9812464ec171c53cac93a819fe411718a3965c311f01eb4de265381b3"
+ },
+ {
+  "name": "shizuku-aidl-13.1.5.aar",
+  "url": "https://repo1.maven.org/maven2/dev/rikka/shizuku/aidl/13.1.5/aidl-13.1.5.aar",
+  "sha256": "33fe7191cdd69fcb66d649264f3b0c47acb2f3d6343afc05b98dbbff6f221963"
+ },
+ {
+  "name": "shizuku-shared-13.1.5.aar",
+  "url": "https://repo1.maven.org/maven2/dev/rikka/shizuku/shared/13.1.5/shared-13.1.5.aar",
+  "sha256": "4659642c9339be0a26e9c65bb8648f7ad6d8f4a465f557993ccbc78802381635"
+ }
 ]

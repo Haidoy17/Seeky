@@ -16,7 +16,8 @@
  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
- <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent><package android:name="com.google.android.tts"/><package android:name="mz.bam.seeky.vozes"/></queries>
+ <uses-permission android:name="moe.shizuku.manager.permission.API_V23"/>
+ <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent><package android:name="com.google.android.tts"/><package android:name="mz.bam.seeky.vozes"/><package android:name="moe.shizuku.privileged.api"/><intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent></queries>
  <application android:name="mz.bam.seeky.android.SeekyApplication" android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false" android:label="${appLabel}" android:icon="@drawable/seeky" android:theme="@style/AppTheme" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:usesCleartextTraffic="false" android:supportsRtl="true">
   <service android:name="mz.bam.seeky.android.UpdateJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>
   <service android:name="mz.bam.seeky.android.AutoBackupJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"/>
@@ -24,6 +25,9 @@
   <activity android:name="mz.bam.seeky.android.NaturalVoicesActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.VoiceEnginesActivity" android:exported="false"/>
   <activity android:name="mz.bam.seeky.android.ApkInstallActivity" android:exported="false"/>
+  <activity android:name="mz.bam.seeky.android.AppDataActivity" android:exported="false" android:label="Pastas das aplicações"/>
+  <provider android:name="rikka.shizuku.ShizukuProvider" android:authorities="${applicationId}.shizuku" android:multiprocess="false" android:enabled="true" android:exported="true" android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+  <meta-data android:name="moe.shizuku.client.V3_SUPPORT" android:value="true"/>
   <activity android:name="mz.bam.seeky.android.IncomingActivity" android:exported="true" android:label="Seeky">
    <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="*/*"/></intent-filter>
    <intent-filter><action android:name="android.intent.action.SEND_MULTIPLE"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="*/*"/></intent-filter>
