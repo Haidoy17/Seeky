@@ -45,7 +45,7 @@ jobs:
         shell: pwsh
         run: |
           $dir = "$env:LOCALAPPDATA\Programs\Seeky"
-          & "$dir\runtime\bin\java.exe" -Dfile.encoding=UTF-8 --add-modules javafx.controls,javafx.web,javafx.media,javafx.swing -cp "$dir\app\*" mz.bam.seeky.android.DeskLauncher --self-test
+          & "$dir\runtime\bin\java.exe" '-Dfile.encoding=UTF-8' '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$dir\app\*" 'mz.bam.seeky.android.DeskLauncher' '--self-test'
           if ($LASTEXITCODE -ne 0) { throw "Autoteste falhou ($LASTEXITCODE)" }
           $p = Start-Process "$dir\Seeky.exe" -ArgumentList '--self-test' -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Seeky.exe --self-test terminou com $($p.ExitCode)" }
@@ -58,7 +58,7 @@ jobs:
           $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
           if ($hash -ne $manifest.sha256) { throw "SHA-256 do pacote não corresponde a latest.json" }
           Expand-Archive $zip.FullName -DestinationPath "$env:RUNNER_TEMP\app" -Force
-          & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" --add-modules javafx.controls,javafx.web,javafx.media,javafx.swing -cp "$env:RUNNER_TEMP\app\*" mz.bam.seeky.android.DeskLauncher --self-test
+          & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$env:RUNNER_TEMP\app\*" 'mz.bam.seeky.android.DeskLauncher' '--self-test'
           if ($LASTEXITCODE -ne 0) { throw "Autoteste do pacote de actualização falhou" }
       - name: Desinstalar
         shell: pwsh
