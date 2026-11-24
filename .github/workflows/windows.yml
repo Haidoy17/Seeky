@@ -50,6 +50,24 @@ jobs:
           $p = Start-Process "$dir\Seeky.exe" -ArgumentList '--self-test' -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Seeky.exe --self-test terminou com $($p.ExitCode)" }
           Write-Host "Seeky.exe --self-test: OK"
+      - name: Abrir as janelas no Windows e tirar capturas
+        shell: pwsh
+        run: |
+          $out = "$env:RUNNER_TEMP\capturas"
+          $p = Start-Process "$env:LOCALAPPDATA\Programs\Seeky\Seeky.exe" -ArgumentList "--screenshots=$out" -PassThru
+          $deadline = (Get-Date).AddMinutes(4)
+          while ((Get-Date) -lt $deadline -and (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count -lt 10) { Start-Sleep -Seconds 3 }
+          Start-Sleep -Seconds 3
+          Get-Process javaw -ErrorAction SilentlyContinue | Stop-Process -Force
+          $n = (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count
+          Write-Host "Capturas: $n"
+          if ($n -lt 10) { throw "O Seeky não abriu todas as janelas no Windows ($n capturas)" }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seeky-windows-capturas
+          path: ${{ runner.temp }}/capturas
+          retention-days: 14
       - name: Pacote de actualização (o que o Seeky descarrega sozinho)
         shell: pwsh
         run: |
