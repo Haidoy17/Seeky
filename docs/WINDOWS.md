@@ -17,18 +17,18 @@ perdem ao actualizar nem ao desinstalar.
 
 ## O que já tem
 
-- **Bíblia**: importar MyBible (.SQLite3), USX, USFM, CSV/TSV, texto e EPUB; ler por capítulo; procurar
-  passagens (João 3:16, Salmo 23) e palavras; copiar, ouvir, guardar para decorar, criar nota.
+- **Bíblia**: importar MyBible (.SQLite3), USX, USFM, CSV/TSV, texto e EPUB; ler por capítulo com os
+  **títulos de secção** do MyBible; **comentários** MyBible (.commentaries.SQLite3) com ✎ junto aos
+  versículos; procurar passagens (João 3:16, Salmo 23) e palavras; copiar, ouvir, decorar, criar nota.
 - **Estudo bíblico**: planos de leitura, leitura de hoje, sequência de dias, semana, decorar versículos
   com a mesma repetição espaçada do Android.
 - **Jogo da Bíblia**: Fácil, Médio, Difícil e Lendário, 60 s por pergunta, recordes.
 - **Bloco de notas**: o mesmo formato do Android (títulos, negrito, itálico, sublinhado, riscado, destaque,
   cores, listas, tarefas, citações, tabelas, imagens), pré-visualização, passagens tocáveis, exportar
   Word (.docx), PDF e Markdown, ouvir, pastas, fixar e **Seeky IA** (Gemini, chave protegida pelo Windows).
-- **Livros**: PDF (página a página, zoom), EPUB, Word, FB2, MOBI, AZW3, ODT, RTF, MHTML, CBZ e TXT, com
-  estante e ponto onde parou; nota do livro; ouvir; **marcações** com cores e notas (seleccionar texto),
-  páginas marcadas nos PDF e *As minhas marcações*; **Seeky IA** (resumir, explicar a selecção,
-  perguntas de estudo).
+- **Livros**: Estante, Grelha ou Lista, com capas; importar livros ou uma pasta com as subpastas; PDF
+  (página a página, zoom), EPUB, Word, FB2, MOBI, AZW3, ODT, RTF, MHTML, CBZ e TXT, com o ponto onde parou;
+  **marcações** com cores e notas, páginas marcadas nos PDF e *As minhas marcações*; **Seeky IA**.
 - **Foco**: Pomodoro por disciplina (25 + 5, 50 + 10, 15 + 3), visível na barra da janela, com o tempo
   de cada dia e de cada disciplina na semana.
 - **Notas do telemóvel**: Bloco de notas → Telemóvel → importar ou enviar um ficheiro `.seekynotes`
@@ -37,8 +37,10 @@ perdem ao actualizar nem ao desinstalar.
   Horário, transições e deslocamento suave.
 - **Ficheiros**: discos e pastas do utilizador, procurar por nome, abrir no Seeky ou no Windows, copiar,
   mover, mudar o nome, Reciclagem, nova pasta.
-- **Música e vídeo**: MP3, M4A/AAC, WAV, AIFF e MP4 (H.264), fila, letras sincronizadas (.lrc ao lado do
-  ficheiro ou LRCLIB).
+- **Música** e **Vídeos**, como no telemóvel: pastas adicionadas, Início (adicionadas recentemente, mais
+  ouvidas hoje/semana/mês/sempre, ouvidas recentemente, favoritas), Faixas, Álbuns, Artistas, Pastas,
+  Géneros e Anos; fila e letras sincronizadas (.lrc ou LRCLIB). Toca MP3, M4A/AAC, WAV, AIFF e MP4
+  (H.264); os outros vídeos abrem no leitor do Windows.
 - **Leitura em voz alta** com as vozes do Windows.
 
 ## Actualizações para os dois

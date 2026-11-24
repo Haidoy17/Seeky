@@ -1,5 +1,23 @@
 # Registo de alterações
 
+## 5.47.0 — 2026-11-24 (Android e Windows)
+
+- **Títulos de secção nas Bíblias MyBible** (Android e Windows): ao importar um módulo MyBible, os
+  títulos das tabelas `stories`/`subheadings` ("A criação", "O Sermão do Monte"…) aparecem antes dos
+  versículos na leitura, em vez de texto corrido. Numa Bíblia já importada, *Carregar títulos (MyBible)*
+  lê o módulo com títulos ou o ficheiro `.subheadings.SQLite3` (Android: Ferramentas → Bíblias
+  importadas → a Bíblia; Windows: Bíblia → Títulos e comentários).
+- **Seeky para Windows**:
+  - *Comentários MyBible* (`.commentaries.SQLite3`): carregados ao lado da Bíblia (ou à parte), com ✎
+    junto aos versículos e um painel com o comentário, Copiar e Nota; vários comentários à escolha;
+  - *Música* e *Vídeos* separados, como no telemóvel: pastas adicionadas (procuradas outra vez
+    sozinhas), Início com adicionadas recentemente, mais ouvidas (hoje, esta semana, este mês, sempre),
+    ouvidas recentemente e favoritas; Faixas, Álbuns, Artistas, Pastas, Géneros e Anos (etiquetas ID3 e
+    M4A); barra "a tocar" com fila e letra; vídeos que o Java não toca (MKV, AVI…) abrem no leitor do
+    Windows;
+  - *Livros* como no telemóvel: Estante de madeira, Grelha e Lista, capas (EPUB, CBZ, primeira página do
+    PDF, ou desenhadas com o título), Importar livros e Importar pasta e subpastas, procurar.
+
 ## 5.46.0 — 2026-11-24 (Android e Windows)
 
 - **Notas entre o telemóvel e o computador**: um ficheiro `.seekynotes` com as notas, as pastas, a

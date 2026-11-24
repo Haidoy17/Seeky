@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007300,
-  "versionName": "5.46.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.46.0.apk",
-  "sha256": "ff0268531fc6a8ccfada1ce4eb126491c139e74e48faa56b6ad59970005ff3ee",
-  "bytes": 13763948,
-  "notes": "Notas entre o telemóvel e o computador (.seekynotes) e o Seeky para Windows 5.46 com janela própria, temas, marcações, Foco e IA nos livros."
+  "versionCode": 5007400,
+  "versionName": "5.47.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.47.0.apk",
+  "sha256": "2968cc8d65ff2bf0a9bc313f2fa20fd146dc7712f768a6c0d684bbff7be2150f",
+  "bytes": 13768049,
+  "notes": "Títulos de secção nas Bíblias MyBible; Seeky para Windows com Música e Vídeos separados, Livros em estante/grelha/lista com capas e comentários MyBible."
 }

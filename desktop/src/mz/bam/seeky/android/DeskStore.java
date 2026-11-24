@@ -36,6 +36,14 @@ final class DeskStore implements AutoCloseable {
             s.execute("CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)");
             s.execute("CREATE TABLE IF NOT EXISTS marks(id INTEGER PRIMARY KEY,path TEXT NOT NULL,title TEXT NOT NULL DEFAULT '',chapter INTEGER NOT NULL,place TEXT NOT NULL DEFAULT '',text TEXT NOT NULL,color INTEGER NOT NULL,note TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL)");
             s.execute("CREATE INDEX IF NOT EXISTS marks_book ON marks(path,chapter)");
+            s.execute("CREATE TABLE IF NOT EXISTS titles(bible INTEGER NOT NULL,book TEXT NOT NULL,chapter INTEGER NOT NULL,verse INTEGER NOT NULL,ord INTEGER NOT NULL,text TEXT NOT NULL,PRIMARY KEY(bible,book,chapter,verse,ord))");
+            s.execute("CREATE TABLE IF NOT EXISTS commentaries(id INTEGER PRIMARY KEY,title TEXT NOT NULL,source TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL)");
+            s.execute("CREATE TABLE IF NOT EXISTS comments(commentary INTEGER NOT NULL,book TEXT NOT NULL,chapter INTEGER NOT NULL,verse INTEGER NOT NULL,chapter_to INTEGER NOT NULL,verse_to INTEGER NOT NULL,text TEXT NOT NULL)");
+            s.execute("CREATE INDEX IF NOT EXISTS comments_at ON comments(book,chapter)");
+            s.execute("CREATE TABLE IF NOT EXISTS tracks(path TEXT PRIMARY KEY,kind TEXT NOT NULL,title TEXT NOT NULL,artist TEXT NOT NULL DEFAULT '',album TEXT NOT NULL DEFAULT '',album_artist TEXT NOT NULL DEFAULT '',genre TEXT NOT NULL DEFAULT '',year INTEGER NOT NULL DEFAULT 0,track INTEGER NOT NULL DEFAULT 0,folder TEXT NOT NULL,size INTEGER NOT NULL DEFAULT 0,modified INTEGER NOT NULL DEFAULT 0,added INTEGER NOT NULL,favorite INTEGER NOT NULL DEFAULT 0,plays INTEGER NOT NULL DEFAULT 0,last_played INTEGER NOT NULL DEFAULT 0)");
+            s.execute("CREATE INDEX IF NOT EXISTS tracks_kind ON tracks(kind,title)");
+            s.execute("CREATE TABLE IF NOT EXISTS plays(path TEXT NOT NULL,at INTEGER NOT NULL)");
+            s.execute("CREATE INDEX IF NOT EXISTS plays_at ON plays(at)");
             s.execute("CREATE TABLE IF NOT EXISTS focus(id INTEGER PRIMARY KEY,day TEXT NOT NULL,subject TEXT NOT NULL DEFAULT '',minutes INTEGER NOT NULL,ended INTEGER NOT NULL)");
         }
     }

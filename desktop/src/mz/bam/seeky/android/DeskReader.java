@@ -2,7 +2,9 @@ package mz.bam.seeky.android;
 
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -29,28 +31,133 @@ final class DeskReader {
 
     VBox recentCard() {
         try {
-            List<Object[]> r = d.store.rows("SELECT path,title,position,total FROM books ORDER BY opened DESC LIMIT 1"); if (r.isEmpty()) return null;
+            List<Object[]> r = d.store.rows("SELECT path,title,position,total FROM books WHERE opened>0 ORDER BY opened DESC LIMIT 1"); if (r.isEmpty()) return null;
             Object[] b = r.get(0); int total = ((Number) b[3]).intValue(), pos = ((Number) b[2]).intValue();
             return DeskUi.card(DeskUi.heading("Continuar a ler"), DeskUi.text(b[1] + ""), DeskUi.muted(total > 0 ? (pos + 1) + " de " + total : ""), DeskUi.button("Abrir", true, () -> open(new File(b[0] + ""))));
         } catch (SQLException e) { return null; }
     }
+    static final String[] MODES = {"Estante", "Grelha", "Lista"};
+    String filter = "";
+    /** Livros as on the phone: wooden bookcase, grid of covers or list; import files or a folder with sub-folders. */
     Node view() {
         long marks = 0; try { marks = d.store.count("SELECT COUNT(*) FROM marks"); } catch (SQLException ignored) {}
-        VBox page = DeskUi.page(DeskUi.row(DeskUi.title("Livros"), DeskUi.grow(), DeskUi.button("Marcações" + (marks > 0 ? " · " + marks : ""), false, () -> d.show(DeskMarks.view(d))), DeskUi.button("Abrir livro", true, this::choose)));
-        List<Object[]> books; try { books = d.store.rows("SELECT path,title,kind,position,total FROM books ORDER BY opened DESC LIMIT 200"); } catch (SQLException e) { books = new ArrayList<>(); }
-        if (books.isEmpty()) page.getChildren().add(DeskUi.card(DeskUi.heading("A sua estante está vazia"), DeskUi.text("Abra um livro do computador: PDF, EPUB, Word, TXT, FB2, MOBI, AZW3, ODT, RTF ou CBZ. Fica aqui com o ponto onde parou."), DeskUi.button("Abrir livro", true, this::choose)));
-        FlowPane shelf = new FlowPane(14, 14);
-        for (Object[] b : books) {
-            File f = new File(b[0] + ""); int total = ((Number) b[4]).intValue(), pos = ((Number) b[3]).intValue();
-            ProgressBar p = new ProgressBar(total > 0 ? (pos + 1.0) / total : 0); p.setMaxWidth(Double.MAX_VALUE);
-            VBox card = DeskUi.card(DeskUi.icon("reader", 30), DeskUi.heading(b[1] + ""), DeskUi.muted((b[2] + "").toUpperCase(Locale.ROOT) + (f.exists() ? "" : " · ficheiro em falta")), p);
-            card.setPrefWidth(230); card.getStyleClass().add("tile"); DeskUi.lift(card);
-            card.setOnMouseClicked(e -> { if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) forget(f); else open(f); });
-            Tooltip.install(card, new Tooltip("Clique para continuar · botão direito para tirar da estante"));
-            shelf.getChildren().add(card);
+        int mode = Math.max(0, Math.min(2, Integer.parseInt(d.store.get("books_mode", "0"))));
+        MenuButton add = new MenuButton("Importar"); add.getStyleClass().add("primary");
+        MenuItem files = new MenuItem("Importar livros…"); files.setOnAction(e -> chooseMany());
+        MenuItem folder = new MenuItem("Importar pasta e subpastas…"); folder.setOnAction(e -> importFolder());
+        MenuItem one = new MenuItem("Abrir um livro…"); one.setOnAction(e -> choose());
+        add.getItems().addAll(files, folder, one);
+        HBox modes = new HBox(4); ToggleGroup group = new ToggleGroup();
+        for (int m = 0; m < MODES.length; m++) { final int mm = m; ToggleButton b = new ToggleButton(MODES[m]); b.setToggleGroup(group); b.getStyleClass().add("chip"); b.setSelected(m == mode); b.setOnAction(e -> { d.store.put("books_mode", mm + ""); d.open("reader"); }); modes.getChildren().add(b); }
+        TextField search = new TextField(filter); search.setPromptText("Procurar livros"); search.setPrefWidth(220);
+        VBox page = DeskUi.page(DeskUi.row(DeskUi.title("Livros"), DeskUi.grow(), search, DeskUi.button("Marcações" + (marks > 0 ? " · " + marks : ""), false, () -> d.show(DeskMarks.view(d))), add));
+        List<Object[]> books; try { books = d.store.rows("SELECT path,title,kind,position,total,opened FROM books ORDER BY opened DESC, title COLLATE NOCASE LIMIT 2000"); } catch (SQLException e) { books = new ArrayList<>(); }
+        Label count = DeskUi.muted((books.size() + (books.size() == 1 ? " livro" : " livros")).toUpperCase(Locale.ROOT)); count.getStyleClass().add("caps");
+        page.getChildren().add(DeskUi.row(count, DeskUi.grow(), modes));
+        if (books.isEmpty()) {
+            page.getChildren().add(DeskUi.card(DeskUi.heading("A sua estante está vazia"), DeskUi.text("Importe os livros do computador (PDF, EPUB, Word, TXT, FB2, MOBI, AZW3, ODT, RTF ou CBZ), um a um ou uma pasta inteira com as subpastas. Ficam aqui com a capa e o ponto onde parou."),
+                DeskUi.row(DeskUi.button("Importar pasta", true, this::importFolder), DeskUi.button("Importar livros", false, this::chooseMany))));
+            return DeskUi.scroll(page);
         }
-        page.getChildren().add(shelf);
+        VBox shelf = new VBox(); page.getChildren().add(shelf);
+        final List<Object[]> all = books;
+        Runnable draw = () -> {
+            String q = BibleGame.plain(search.getText().trim()); filter = search.getText();
+            List<Object[]> shown = new ArrayList<>(); for (Object[] b : all) if (q.isEmpty() || BibleGame.plain(b[1] + " " + new File(b[0] + "").getName()).contains(q)) shown.add(b);
+            shelf.getChildren().setAll(mode == 0 ? bookcase(shown, page) : mode == 1 ? grid(shown) : list(shown));
+        };
+        search.textProperty().addListener((o, a, b) -> draw.run());
+        draw.run();
         return DeskUi.scroll(page);
+    }
+    double progress(Object[] b) { int total = ((Number) b[4]).intValue(), pos = ((Number) b[3]).intValue(); long opened = ((Number) b[5]).longValue(); return opened == 0 || total <= 0 ? 0 : Math.min(1, (pos + 1.0) / total); }
+    void bind(Node n, File f) {
+        n.setOnMouseClicked(e -> { if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) open(f); });
+        MenuItem o = new MenuItem("Abrir"); o.setOnAction(e -> open(f));
+        MenuItem dir = new MenuItem("Abrir a pasta"); dir.setOnAction(e -> DeskFiles.system(f.getParentFile()));
+        MenuItem out = new MenuItem("Tirar da estante"); out.setOnAction(e -> forget(f));
+        ContextMenu menu = new ContextMenu(o, dir, out); n.setOnContextMenuRequested(e -> menu.show(n, e.getScreenX(), e.getScreenY()));
+        n.setCursor(javafx.scene.Cursor.HAND); DeskUi.lift(n);
+    }
+    /** Estante: covers standing on wooden planks, as many per shelf as fit. */
+    Node bookcase(List<Object[]> books, Region page) {
+        VBox caseBox = new VBox(); caseBox.getStyleClass().add("bookcase");
+        double coverW = 104;
+        int perRow = Math.max(3, (int) ((Math.max(700, d.content.getWidth() - 90)) / (coverW + 22)));
+        for (int start = 0; start < books.size(); start += perRow) {
+            HBox row = new HBox(22); row.setAlignment(Pos.BOTTOM_LEFT); row.setPadding(new Insets(18, 22, 0, 22));
+            for (int i = start; i < Math.min(books.size(), start + perRow); i++) {
+                Object[] b = books.get(i); File f = new File(b[0] + "");
+                StackPane book = new StackPane(DeskCovers.view(f, b[1] + "", coverW)); book.getStyleClass().add("shelf-book");
+                double p = progress(b);
+                if (p > 0) { Label pct = new Label(Math.round(p * 100) + "%"); pct.getStyleClass().add("cover-badge"); StackPane.setAlignment(pct, Pos.TOP_RIGHT); StackPane.setMargin(pct, new Insets(5)); book.getChildren().add(pct); }
+                Tooltip.install(book, new Tooltip(b[1] + (f.exists() ? "" : "\nFicheiro em falta")));
+                bind(book, f); row.getChildren().add(book);
+            }
+            Region plank = new Region(); plank.getStyleClass().add("plank"); plank.setMinHeight(16); plank.setMaxWidth(Double.MAX_VALUE);
+            caseBox.getChildren().addAll(row, plank);
+        }
+        return caseBox;
+    }
+    /** Grelha: covers with the title and progress under each. */
+    Node grid(List<Object[]> books) {
+        FlowPane grid = new FlowPane(18, 22);
+        for (Object[] b : books) {
+            File f = new File(b[0] + ""); double p = progress(b);
+            Label t = DeskUi.text(b[1] + ""); t.setMaxWidth(140); t.setWrapText(true); t.setMaxHeight(42); t.setStyle("-fx-font-size: 13px;");
+            ProgressBar bar = new ProgressBar(p); bar.setPrefWidth(140); bar.setMaxHeight(6); bar.getStyleClass().add("thin");
+            VBox cell = new VBox(6, DeskCovers.view(f, b[1] + "", 140), t, bar); cell.setPrefWidth(140);
+            if (!f.exists()) cell.getChildren().add(DeskUi.muted("Ficheiro em falta"));
+            bind(cell, f); grid.getChildren().add(cell);
+        }
+        return grid;
+    }
+    /** Lista: small cover, title, format, progress and when it was last read. */
+    Node list(List<Object[]> books) {
+        VBox list = new VBox(8);
+        for (Object[] b : books) {
+            File f = new File(b[0] + ""); double p = progress(b); long opened = ((Number) b[5]).longValue();
+            String when = opened == 0 ? "Por ler" : "Lido " + java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(new Date(opened));
+            VBox words = new VBox(3, DeskUi.heading(b[1] + ""), DeskUi.muted((b[2] + "").toUpperCase(Locale.ROOT) + " · " + when + (f.exists() ? "" : " · ficheiro em falta")));
+            ProgressBar bar = new ProgressBar(p); bar.setPrefWidth(220); bar.getStyleClass().add("thin"); words.getChildren().add(DeskUi.row(bar, DeskUi.muted(Math.round(p * 100) + "%")));
+            HBox.setHgrow(words, Priority.ALWAYS);
+            HBox row = new HBox(14, DeskCovers.view(f, b[1] + "", 48), words); row.setAlignment(Pos.CENTER_LEFT); row.getStyleClass().addAll("card", "tile"); row.setPadding(new Insets(10, 14, 10, 10));
+            bind(row, f); list.getChildren().add(row);
+        }
+        return list;
+    }
+    void chooseMany() {
+        FileChooser fc = new FileChooser(); fc.setTitle("Importar livros"); fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Livros", TYPES), new FileChooser.ExtensionFilter("Todos os ficheiros", "*.*"));
+        List<File> files = fc.showOpenMultipleDialog(d.stage); if (files == null || files.isEmpty()) return;
+        d.run("A importar livros…", () -> importBooks(d.store, files), n -> { d.open("reader"); d.status(n + (n == 1 ? " livro na estante." : " livros na estante.")); });
+    }
+    void importFolder() {
+        javafx.stage.DirectoryChooser c = new javafx.stage.DirectoryChooser(); c.setTitle("Importar pasta e subpastas");
+        File docs = new File(System.getProperty("user.home"), "Documents"); if (docs.isDirectory()) c.setInitialDirectory(docs);
+        File dir = c.showDialog(d.stage); if (dir == null) return;
+        d.run("A procurar livros em " + dir.getName() + "…", () -> importBooks(d.store, findBooks(dir)), n -> { d.open("reader"); DeskUi.info(n + (n == 1 ? " livro importado" : " livros importados"), n == 0 ? "Não encontrei livros nesta pasta nem nas subpastas." : "Estão na estante, com as capas."); });
+    }
+    /** Every book file in a folder and its sub-folders (hidden folders skipped, at most 20000). */
+    static List<File> findBooks(File dir) throws IOException {
+        List<File> out = new ArrayList<>();
+        java.nio.file.Files.walkFileTree(dir.toPath(), EnumSet.noneOf(java.nio.file.FileVisitOption.class), 24, new java.nio.file.SimpleFileVisitor<java.nio.file.Path>() {
+            @Override public java.nio.file.FileVisitResult preVisitDirectory(java.nio.file.Path p, java.nio.file.attribute.BasicFileAttributes a) { String n = p.getFileName() == null ? "" : p.getFileName().toString(); return !p.equals(dir.toPath()) && (n.startsWith(".") || n.startsWith("$")) ? java.nio.file.FileVisitResult.SKIP_SUBTREE : java.nio.file.FileVisitResult.CONTINUE; }
+            @Override public java.nio.file.FileVisitResult visitFile(java.nio.file.Path p, java.nio.file.attribute.BasicFileAttributes a) { if (a.isRegularFile() && accepts(p.getFileName().toString()) && a.size() > 0 && out.size() < 20000) out.add(p.toFile()); return java.nio.file.FileVisitResult.CONTINUE; }
+            @Override public java.nio.file.FileVisitResult visitFileFailed(java.nio.file.Path p, IOException e) { return java.nio.file.FileVisitResult.CONTINUE; }
+        });
+        return out;
+    }
+    /** Puts books on the shelf (already there: kept with their progress). Returns how many are new. */
+    static int importBooks(DeskStore store, List<File> files) throws SQLException {
+        int n = 0;
+        for (File f : files) {
+            if (!accepts(f.getName()) || store.count("SELECT COUNT(*) FROM books WHERE path=?", f.getPath()) > 0) continue;
+            String kind = f.getName().replaceFirst(".*\\.", "").toLowerCase(Locale.ROOT);
+            String title = kind.equals("epub") ? DeskCovers.epubTitle(f) : "";
+            if (title.isEmpty()) title = f.getName().replaceFirst("\\.[^.]+$", "").replace('_', ' ');
+            store.update("INSERT INTO books(path,title,kind,position,total,opened) VALUES(?,?,?,0,0,0)", f.getPath(), title, kind); n++;
+        }
+        return n;
     }
     void forget(File f) { if (DeskUi.confirm("Tirar da estante?", f.getName() + "\nO ficheiro não é apagado.")) { try { d.store.update("DELETE FROM books WHERE path=?", f.getPath()); } catch (SQLException ignored) {} d.open("reader"); } }
     void choose() {

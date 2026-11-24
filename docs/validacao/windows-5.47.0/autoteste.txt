@@ -1,0 +1,14 @@
+Seeky para Windows 5.47.0 — autoteste (tools/build_desktop.py, Linux, Java 21 + JavaFX 21)
+21 verificações, todas PASS, incluindo:
+PASS Bíblia MyBible com títulos e comentários
+PASS etiquetas das músicas (ID3 e M4A)
+PASS biblioteca de música (pastas, álbuns, mais ouvidas)
+PASS livros: importar pasta e capas (EPUB, PDF)
+PASS notas do telemóvel (.seekynotes)
+PASS marcações nos livros
+PASS temas do telemóvel
+PASS foco (Pomodoro)
+PASS 21 verificações do Seeky Desktop
+
+Capturas (desktop-*.png): 17 ecrãs tirados pelo próprio Seeky (--screenshots) em xvfb, entre eles
+Bíblia com títulos e comentário, Música (Início e Álbuns), Vídeos e Livros em Estante, Grelha e Lista.

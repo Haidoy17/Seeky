@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007300,
-  "versionName": "5.46.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.46.0-app.zip",
-  "sha256": "a36efd2cb9149ed56660d7f0d616d3ffa5c06c73a8f9217be8298381c4deaa5f",
-  "bytes": 8697093,
+  "versionCode": 5007400,
+  "versionName": "5.47.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.47.0-app.zip",
+  "sha256": "35aae085bb9338aeeb8119bec227802e1073734b53ea7b3a70e9deb297c1a71f",
+  "bytes": 8758807,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Janela própria com minimizar, maximizar e fechar; ecrãs mais limpos e fluidos; os temas do telemóvel; marcações com cores e notas nos livros; Seeky IA nos livros (resumir, explicar, perguntas); Foco (Pomodoro) por disciplina; notas entre o telemóvel e o computador."
+  "notes": "Música e Vídeos separados: pastas, faixas, álbuns, artistas, géneros, anos, ouvidas recentemente e mais ouvidas (hoje, semana, mês), como no telemóvel; Livros em estante, grelha ou lista, com capas e importar pasta e subpastas; Bíblia com títulos de secção e comentários MyBible."
 }

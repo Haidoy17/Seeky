@@ -64,7 +64,7 @@ final class DeskFiles {
         if (f.isDirectory()) { folder = f; d.open("files"); return; }
         String kind = MediaFormats.kind(f.getName(), null);
         if (DeskReader.accepts(f.getName())) { d.open("reader"); d.reader.open(f); }
-        else if (kind.equals("audio") || kind.equals("video")) { d.open("media"); d.media.play(Collections.singletonList(f), 0); }
+        else if (kind.equals("audio") || kind.equals("video")) d.media.playFiles(Collections.singletonList(f), 0);
         else system(f);
     }
     static void system(File f) { try { Desktop.getDesktop().open(f); } catch (Exception e) { DeskUi.info("Não foi possível abrir", e.getMessage()); } }

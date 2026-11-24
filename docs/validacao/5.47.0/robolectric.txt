@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.47.0
+OK (486 tests)
+exit=0
+Inclui Bible5180Test.myBibleSectionTitlesArePublishedAndCanBeLoadedLater e Bible529Test.sectionTitlesAppearBeforeTheirVersesWhenReading (títulos de secção MyBible).

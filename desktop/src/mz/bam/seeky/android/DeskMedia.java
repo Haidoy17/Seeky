@@ -15,63 +15,90 @@ import java.nio.file.Files;
 import java.util.*;
 import org.json.*;
 
-/** Música e vídeo: queue, controls, video in the window and synced lyrics (.lrc beside the file or LRCLIB). */
+/**
+ * The player shared by Música and Vídeos: queue, a "now playing" bar at the bottom of both screens,
+ * the video in the window, plays counted for "mais ouvidas" (after 30 seconds or at the end) and
+ * synced lyrics (.lrc beside the file, or LRCLIB).
+ */
 final class DeskMedia {
     final DeskMain d;
-    final List<File> queue = new ArrayList<>(); int index = -1;
+    final List<DeskLibrary.Track> queue = new ArrayList<>(); int index = -1;
     MediaPlayer player; final MediaView video = new MediaView();
-    final Label now = DeskUi.heading("Nada a tocar"), time = DeskUi.muted("0:00 / 0:00");
+    final Label now = DeskUi.heading("Nada a tocar"), who = DeskUi.muted(""), time = DeskUi.muted("0:00 / 0:00");
     final Slider seek = new Slider(0, 1, 0), volume = new Slider(0, 1, 0.8);
     final ListView<String> list = new ListView<>(); final ListView<String> lyricsView = new ListView<>();
     final List<long[]> lyricTimes = new ArrayList<>(); final Button play = DeskUi.iconButton("play", "Tocar / pausa", this::toggle);
-    boolean seeking;
+    boolean seeking, counted, lyricsOpen;
     DeskMedia(DeskMain d) {
-        this.d = d; video.setPreserveRatio(true); video.setFitHeight(360);
+        this.d = d; video.setPreserveRatio(true); video.setFitHeight(340);
         seek.valueChangingProperty().addListener((o, a, b) -> { seeking = b; if (!b && player != null) player.seek(player.getTotalDuration().multiply(seek.getValue())); });
         seek.setOnMouseReleased(e -> { if (player != null) player.seek(player.getTotalDuration().multiply(seek.getValue())); });
-        volume.valueProperty().addListener((o, a, b) -> { if (player != null) player.setVolume(b.doubleValue()); });
+        volume.valueProperty().addListener((o, a, b) -> { if (player != null) player.setVolume(b.doubleValue()); d.store.put("volume", String.format(Locale.ROOT, "%.2f", b.doubleValue())); });
+        try { volume.setValue(Double.parseDouble(d.store.get("volume", "0.8"))); } catch (Exception ignored) {}
         list.setOnMouseClicked(e -> { if (e.getClickCount() == 2 && list.getSelectionModel().getSelectedIndex() >= 0) start(list.getSelectionModel().getSelectedIndex()); });
         lyricsView.setPlaceholder(DeskUi.muted("Sem letra. Toque em Procurar letra."));
+        now.setWrapText(false); now.setMinWidth(60);
     }
-    static final String[] TYPES = {"*.mp3", "*.m4a", "*.aac", "*.wav", "*.aif", "*.aiff", "*.mp4", "*.m4v", "*.flv"};
-    Node view() {
-        VBox page = DeskUi.page(DeskUi.row(DeskUi.title("Música e vídeo"), DeskUi.grow(), DeskUi.button("Abrir ficheiros", true, this::chooseFiles), DeskUi.button("Abrir pasta", false, this::chooseFolder)));
-        HBox controls = DeskUi.row(DeskUi.iconButton("back", "Anterior", () -> start(index - 1)), play, DeskUi.button("›", false, () -> start(index + 1)), time, DeskUi.grow(), DeskUi.icon("speaker", 18), volume);
-        seek.setMaxWidth(Double.MAX_VALUE);
-        VBox player = DeskUi.card(now, video, seek, controls);
-        list.setPrefHeight(260); lyricsView.setPrefHeight(260);
-        VBox queueBox = new VBox(6, DeskUi.heading("Fila"), list), lyricsBox = new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics)), lyricsView);
-        HBox.setHgrow(queueBox, Priority.ALWAYS); HBox.setHgrow(lyricsBox, Priority.ALWAYS);
-        page.getChildren().addAll(player, new HBox(14, queueBox, lyricsBox));
-        refreshList();
-        return DeskUi.scroll(page);
+    String currentPath() { return index >= 0 && index < queue.size() ? queue.get(index).path : ""; }
+    boolean isVideo() { return player != null && index >= 0 && index < queue.size() && DeskLibrary.accepts(DeskLibrary.VIDEO, queue.get(index).path); }
+
+    /** The bar at the bottom of Música and Vídeos (null while nothing was played). */
+    boolean barShown;
+    Node bar() {
+        barShown = !queue.isEmpty();
+        if (queue.isEmpty()) return null;
+        seek.setMaxWidth(Double.MAX_VALUE); HBox.setHgrow(seek, Priority.ALWAYS); volume.setPrefWidth(110);
+        VBox words = new VBox(1, now, who); words.setMinWidth(120); words.setPrefWidth(260); words.setMaxWidth(320);
+        Button lyrics = DeskUi.iconButton("lyrics", "Letra", () -> { lyricsOpen = !lyricsOpen; d.open(d.current); });
+        Button queueB = DeskUi.iconButton("queue", "Fila", this::showQueue);
+        HBox controls = DeskUi.row(DeskUi.iconButton("prev", "Anterior", () -> start(index - 1)), play, DeskUi.iconButton("next", "Seguinte", () -> start(index + 1)));
+        HBox row = new HBox(14, words, controls, new VBox(2, seek, time), DeskUi.icon("speaker", 18), volume, queueB, lyrics); row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox.setHgrow(row.getChildren().get(2), Priority.ALWAYS);
+        VBox bar = new VBox(10, row); bar.getStyleClass().add("now-playing"); bar.setPadding(new javafx.geometry.Insets(10, 16, 10, 16));
+        if (lyricsOpen) { lyricsView.setPrefHeight(220); bar.getChildren().add(0, new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics)), lyricsView)); }
+        return bar;
     }
-    void chooseFiles() { FileChooser fc = new FileChooser(); fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Música e vídeo", TYPES)); List<File> f = fc.showOpenMultipleDialog(d.stage); if (f != null && !f.isEmpty()) play(f, 0); }
-    void chooseFolder() {
-        DirectoryChooser c = new DirectoryChooser(); File dir = c.showDialog(d.stage); if (dir == null) return;
-        List<File> found = new ArrayList<>(); File[] kids = dir.listFiles(); if (kids != null) for (File f : kids) for (String t : TYPES) if (f.getName().toLowerCase(Locale.ROOT).endsWith(t.substring(1))) found.add(f);
-        found.sort(Comparator.comparing(f -> f.getName().toLowerCase(Locale.ROOT))); if (found.isEmpty()) DeskUi.info("Sem música nesta pasta", dir.getPath()); else play(found, 0);
+    /** The video, above the list in Vídeos. */
+    Node videoCard() { video.fitWidthProperty().unbind(); VBox box = DeskUi.card(video); box.setAlignment(javafx.geometry.Pos.CENTER); return box; }
+    void showQueue() {
+        refreshList(); Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("Fila · " + queue.size()); DeskUi.style(dlg.getDialogPane());
+        list.setPrefSize(460, 380); dlg.getDialogPane().setContent(list); dlg.getDialogPane().getButtonTypes().add(ButtonType.CLOSE); dlg.show();
     }
-    void play(List<File> files, int at) { queue.clear(); queue.addAll(files); refreshList(); start(at); }
-    void refreshList() { List<String> names = new ArrayList<>(); for (File f : queue) names.add(f.getName()); list.setItems(FXCollections.observableArrayList(names)); if (index >= 0 && index < names.size()) list.getSelectionModel().select(index); }
+
+    void play(List<DeskLibrary.Track> tracks, int at) { queue.clear(); queue.addAll(tracks); refreshList(); start(at); }
+    void playNext(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(Math.min(queue.size(), index + 1), t); refreshList(); d.status("A seguir: " + t.title); }
+    void enqueue(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(t); refreshList(); d.status("Na fila: " + t.title); }
+    /** Files opened from Ficheiros. */
+    void playFiles(List<File> files, int at) {
+        List<DeskLibrary.Track> list = new ArrayList<>();
+        for (File f : files) { DeskLibrary.Track t = new DeskLibrary.Track(); t.path = f.getAbsolutePath(); DeskTags tags = DeskLibrary.accepts(DeskLibrary.AUDIO, f.getName()) ? DeskTags.read(f) : DeskLibrary.video(f); t.title = tags.title; t.artist = tags.artist; t.album = tags.album; list.add(t); }
+        play(list, at); d.open(DeskLibrary.accepts(DeskLibrary.VIDEO, files.get(at).getName()) ? "videos" : "music");
+    }
+    void refreshList() { List<String> names = new ArrayList<>(); for (DeskLibrary.Track t : queue) names.add(t.title + (t.artist.isEmpty() ? "" : " — " + t.artist)); list.setItems(FXCollections.observableArrayList(names)); if (index >= 0 && index < names.size()) list.getSelectionModel().select(index); }
     void start(int at) {
         if (queue.isEmpty() || at < 0 || at >= queue.size()) return;
-        stop(); index = at; File f = queue.get(at);
+        stop(); index = at; DeskLibrary.Track t = queue.get(at); File f = new File(t.path);
+        now.setText(t.title); who.setText(t.artist.isEmpty() ? t.album : t.artist + (t.album.isEmpty() ? "" : " · " + t.album));
+        if (!DeskLibrary.playable(f.getName())) { DeskFiles.system(f); DeskLibrary.played(d.store, t.path); d.status(f.getName() + " abriu no leitor do Windows."); return; }
         try {
-            Media m = new Media(f.toURI().toString()); player = new MediaPlayer(m); player.setVolume(volume.getValue());
-            video.setMediaPlayer(player); video.setVisible(MediaFormats.kind(f.getName(), null).equals("video")); video.setManaged(video.isVisible());
-            player.currentTimeProperty().addListener((o, a, t) -> tick(t));
-            player.setOnEndOfMedia(() -> start(index + 1));
+            Media m = new Media(f.toURI().toString()); player = new MediaPlayer(m); player.setVolume(volume.getValue()); counted = false;
+            video.setMediaPlayer(player);
+            player.currentTimeProperty().addListener((o, a, tm) -> tick(tm));
+            player.setOnEndOfMedia(() -> { count(); start(index + 1); });
             player.setOnError(() -> d.status("Não foi possível tocar " + f.getName() + ": " + player.getError().getMessage()));
             player.play(); play.setGraphic(DeskUi.icon("pause", 20));
-            now.setText(f.getName().replaceFirst("\\.[^.]+$", "")); refreshList(); loadLyrics(f); d.status("A tocar " + f.getName());
-        } catch (Exception e) { d.status("Formato não suportado: " + f.getName() + ". Use MP3, M4A, WAV ou MP4, ou abra-o com o Windows em Ficheiros."); }
+            refreshList(); loadLyrics(f);
+            if (isVideo() && (d.current.equals("music") || d.current.equals("videos"))) d.open("videos");
+            else if (d.current.equals("music") && !barShown) d.open("music");
+        } catch (Exception e) { d.status("Formato não suportado: " + f.getName() + ". Use MP3, M4A, WAV ou MP4, ou abra-o com o Windows."); }
     }
+    void count() { if (!counted && index >= 0 && index < queue.size()) { counted = true; DeskLibrary.played(d.store, queue.get(index).path); } }
     void toggle() { if (player == null) { if (!queue.isEmpty()) start(Math.max(0, index)); return; } if (player.getStatus() == MediaPlayer.Status.PLAYING) { player.pause(); play.setGraphic(DeskUi.icon("play", 20)); } else { player.play(); play.setGraphic(DeskUi.icon("pause", 20)); } }
     void stop() { if (player != null) { player.stop(); player.dispose(); player = null; } }
     static String clock(Duration t) { if (t == null || t.isUnknown()) return "0:00"; long s = (long) t.toSeconds(); return s / 60 + ":" + String.format(Locale.ROOT, "%02d", s % 60); }
     void tick(Duration t) {
         if (player == null) return; Duration total = player.getTotalDuration();
+        if (!counted && t.toSeconds() >= 30) count();
         time.setText(clock(t) + " / " + clock(total)); if (!seeking && total != null && total.toMillis() > 0) seek.setValue(t.toMillis() / total.toMillis());
         long ms = (long) t.toMillis(); int line = -1; for (int i = 0; i < lyricTimes.size(); i++) if (lyricTimes.get(i)[0] <= ms) line = i;
         if (line >= 0 && line != lyricsView.getSelectionModel().getSelectedIndex()) { lyricsView.getSelectionModel().select(line); lyricsView.scrollTo(Math.max(0, line - 3)); }
@@ -95,7 +122,7 @@ final class DeskMedia {
         lyricsView.setItems(FXCollections.observableArrayList(lines));
     }
     void findLyrics() {
-        if (index < 0) return; File f = queue.get(index); String title = LyricsText.clean(f.getName().replaceFirst("\\.[^.]+$", "")); long ms = player == null || player.getTotalDuration().isUnknown() ? 0 : (long) player.getTotalDuration().toMillis();
+        if (index < 0 || index >= queue.size()) return; DeskLibrary.Track tr = queue.get(index); File f = new File(tr.path); String title = LyricsText.clean((tr.artist.isEmpty() ? "" : tr.artist + " ") + tr.title); long ms = player == null || player.getTotalDuration().isUnknown() ? 0 : (long) player.getTotalDuration().toMillis();
         d.run("A procurar a letra de " + title + "…", () -> {
             HttpURLConnection c = (HttpURLConnection) new URL("https://lrclib.net/api/search?q=" + URLEncoder.encode(title, "UTF-8")).openConnection();
             c.setRequestProperty("User-Agent", "Seeky Desktop (https://github.com/Haidoy17/Seeky)"); c.setConnectTimeout(15000); c.setReadTimeout(20000);
