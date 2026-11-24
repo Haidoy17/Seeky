@@ -37,8 +37,9 @@ final class DeskReader {
         } catch (SQLException e) { return null; }
     }
     static final String[] MODES = {"Estante", "Grelha", "Lista"};
-    String filter = "";
-    /** Livros as on the phone: wooden bookcase, grid of covers or list; import files or a folder with sub-folders. */
+    String filter = ""; int page;
+    static final int SHELF_PAGE = 40, LIST_PAGE = 80;
+    /** Livros as on the phone: wooden bookcase, grid of covers or list, a page at a time; import files or a folder with sub-folders. */
     Node view() {
         long marks = 0; try { marks = d.store.count("SELECT COUNT(*) FROM marks"); } catch (SQLException ignored) {}
         int mode = Math.max(0, Math.min(2, Integer.parseInt(d.store.get("books_mode", "0"))));
@@ -48,27 +49,48 @@ final class DeskReader {
         MenuItem one = new MenuItem("Abrir um livro…"); one.setOnAction(e -> choose());
         add.getItems().addAll(files, folder, one);
         HBox modes = new HBox(4); ToggleGroup group = new ToggleGroup();
-        for (int m = 0; m < MODES.length; m++) { final int mm = m; ToggleButton b = new ToggleButton(MODES[m]); b.setToggleGroup(group); b.getStyleClass().add("chip"); b.setSelected(m == mode); b.setOnAction(e -> { d.store.put("books_mode", mm + ""); d.open("reader"); }); modes.getChildren().add(b); }
+        for (int m = 0; m < MODES.length; m++) { final int mm = m; ToggleButton b = new ToggleButton(MODES[m]); b.setToggleGroup(group); b.getStyleClass().add("chip"); b.setSelected(m == mode); b.setOnAction(e -> { d.store.put("books_mode", mm + ""); page = 0; d.open("reader"); }); modes.getChildren().add(b); }
         TextField search = new TextField(filter); search.setPromptText("Procurar livros"); search.setPrefWidth(220);
-        VBox page = DeskUi.page(DeskUi.row(DeskUi.title("Livros"), DeskUi.grow(), search, DeskUi.button("Marcações" + (marks > 0 ? " · " + marks : ""), false, () -> d.show(DeskMarks.view(d))), add));
-        List<Object[]> books; try { books = d.store.rows("SELECT path,title,kind,position,total,opened FROM books ORDER BY opened DESC, title COLLATE NOCASE LIMIT 2000"); } catch (SQLException e) { books = new ArrayList<>(); }
-        Label count = DeskUi.muted((books.size() + (books.size() == 1 ? " livro" : " livros")).toUpperCase(Locale.ROOT)); count.getStyleClass().add("caps");
-        page.getChildren().add(DeskUi.row(count, DeskUi.grow(), modes));
-        if (books.isEmpty()) {
-            page.getChildren().add(DeskUi.card(DeskUi.heading("A sua estante está vazia"), DeskUi.text("Importe os livros do computador (PDF, EPUB, Word, TXT, FB2, MOBI, AZW3, ODT, RTF ou CBZ), um a um ou uma pasta inteira com as subpastas. Ficam aqui com a capa e o ponto onde parou."),
+        VBox page0 = DeskUi.page(DeskUi.row(DeskUi.title("Livros"), DeskUi.grow(), search, DeskUi.button("Marcações" + (marks > 0 ? " · " + marks : ""), false, () -> d.show(DeskMarks.view(d))), add));
+        long all = 0; try { all = d.store.count("SELECT COUNT(*) FROM books"); } catch (SQLException ignored) {}
+        Label count = DeskUi.muted(""); count.getStyleClass().add("caps");
+        page0.getChildren().add(DeskUi.row(count, DeskUi.grow(), modes));
+        if (all == 0) {
+            page0.getChildren().add(DeskUi.card(DeskUi.heading("A sua estante está vazia"), DeskUi.text("Importe os livros do computador (PDF, EPUB, Word, TXT, FB2, MOBI, AZW3, ODT, RTF ou CBZ), um a um ou uma pasta inteira com as subpastas. Ficam aqui com a capa e o ponto onde parou."),
                 DeskUi.row(DeskUi.button("Importar pasta", true, this::importFolder), DeskUi.button("Importar livros", false, this::chooseMany))));
-            return DeskUi.scroll(page);
+            return DeskUi.scroll(page0);
         }
-        VBox shelf = new VBox(); page.getChildren().add(shelf);
-        final List<Object[]> all = books;
-        Runnable draw = () -> {
-            String q = BibleGame.plain(search.getText().trim()); filter = search.getText();
-            List<Object[]> shown = new ArrayList<>(); for (Object[] b : all) if (q.isEmpty() || BibleGame.plain(b[1] + " " + new File(b[0] + "").getName()).contains(q)) shown.add(b);
-            shelf.getChildren().setAll(mode == 0 ? bookcase(shown, page) : mode == 1 ? grid(shown) : list(shown));
+        VBox shelf = new VBox(); HBox pager = new HBox(10); pager.setAlignment(Pos.CENTER);
+        page0.getChildren().addAll(shelf, pager);
+        ScrollPane scroll = DeskUi.scroll(page0);
+        int per = mode == 2 ? LIST_PAGE : SHELF_PAGE;
+        Runnable[] draw = {null};
+        draw[0] = () -> {
+            String q = search.getText().trim(); filter = q;
+            String where = q.isEmpty() ? "" : " WHERE title LIKE ? OR path LIKE ?"; Object[] args = q.isEmpty() ? new Object[0] : new Object[]{"%" + q + "%", "%" + q + "%"};
+            long total = 0; List<Object[]> shown = new ArrayList<>();
+            try {
+                total = d.store.count("SELECT COUNT(*) FROM books" + where, args);
+                int pages = (int) Math.max(1, (total + per - 1) / per); page = Math.max(0, Math.min(page, pages - 1));
+                Object[] pa = Arrays.copyOf(args, args.length + 2); pa[args.length] = per; pa[args.length + 1] = page * per;
+                shown = d.store.rows("SELECT path,title,kind,position,total,opened FROM books" + where + " ORDER BY opened DESC, title COLLATE NOCASE LIMIT ? OFFSET ?", pa);
+            } catch (SQLException ignored) {}
+            count.setText((total + (total == 1 ? " livro" : " livros")).toUpperCase(Locale.ROOT));
+            DeskCovers.newPage();
+            shelf.getChildren().setAll(mode == 0 ? bookcase(shown, page0) : mode == 1 ? grid(shown) : list(shown));
+            int pages = (int) Math.max(1, (total + per - 1) / per);
+            pager.getChildren().clear();
+            if (pages > 1) {
+                Button prev = DeskUi.button("Anterior", false, () -> { page--; draw[0].run(); scroll.setVvalue(0); }), next = DeskUi.button("Seguinte", false, () -> { page++; draw[0].run(); scroll.setVvalue(0); });
+                prev.setDisable(page == 0); next.setDisable(page >= pages - 1);
+                pager.getChildren().addAll(prev, DeskUi.muted("Página " + (page + 1) + " de " + pages), next);
+            }
         };
-        search.textProperty().addListener((o, a, b) -> draw.run());
-        draw.run();
-        return DeskUi.scroll(page);
+        javafx.animation.PauseTransition later = new javafx.animation.PauseTransition(javafx.util.Duration.millis(250));
+        later.setOnFinished(e -> { page = 0; draw[0].run(); });
+        search.textProperty().addListener((o, a, b) -> later.playFromStart());
+        draw[0].run();
+        return scroll;
     }
     double progress(Object[] b) { int total = ((Number) b[4]).intValue(), pos = ((Number) b[3]).intValue(); long opened = ((Number) b[5]).longValue(); return opened == 0 || total <= 0 ? 0 : Math.min(1, (pos + 1.0) / total); }
     void bind(Node n, File f) {
@@ -135,7 +157,7 @@ final class DeskReader {
         javafx.stage.DirectoryChooser c = new javafx.stage.DirectoryChooser(); c.setTitle("Importar pasta e subpastas");
         File docs = new File(System.getProperty("user.home"), "Documents"); if (docs.isDirectory()) c.setInitialDirectory(docs);
         File dir = c.showDialog(d.stage); if (dir == null) return;
-        d.run("A procurar livros em " + dir.getName() + "…", () -> importBooks(d.store, findBooks(dir)), n -> { d.open("reader"); DeskUi.info(n + (n == 1 ? " livro importado" : " livros importados"), n == 0 ? "Não encontrei livros nesta pasta nem nas subpastas." : "Estão na estante, com as capas."); });
+        d.run("A procurar livros em " + dir.getName() + "…", () -> { List<File> found = findBooks(dir); d.status("A juntar " + found.size() + " livros à estante…"); return importBooks(d.store, found, seen -> d.status("A juntar à estante… " + seen + " de " + found.size())); }, n -> { page = 0; d.open("reader"); DeskUi.info(n + (n == 1 ? " livro importado" : " livros importados"), n == 0 ? "Não encontrei livros nesta pasta nem nas subpastas." : "Estão na estante, com as capas."); });
     }
     /** Every book file in a folder and its sub-folders (hidden folders skipped, at most 20000). */
     static List<File> findBooks(File dir) throws IOException {
@@ -148,15 +170,24 @@ final class DeskReader {
         return out;
     }
     /** Puts books on the shelf (already there: kept with their progress). Returns how many are new. */
-    static int importBooks(DeskStore store, List<File> files) throws SQLException {
-        int n = 0;
-        for (File f : files) {
-            if (!accepts(f.getName()) || store.count("SELECT COUNT(*) FROM books WHERE path=?", f.getPath()) > 0) continue;
-            String kind = f.getName().replaceFirst(".*\\.", "").toLowerCase(Locale.ROOT);
-            String title = kind.equals("epub") ? DeskCovers.epubTitle(f) : "";
-            if (title.isEmpty()) title = f.getName().replaceFirst("\\.[^.]+$", "").replace('_', ' ');
-            store.update("INSERT INTO books(path,title,kind,position,total,opened) VALUES(?,?,?,0,0,0)", f.getPath(), title, kind); n++;
-        }
+    static int importBooks(DeskStore store, List<File> files) throws SQLException { return importBooks(store, files, null); }
+    /** Puts books on the shelf in one transaction (already there: kept with their progress). Returns how many are new. */
+    static int importBooks(DeskStore store, List<File> files, java.util.function.IntConsumer progress) throws SQLException {
+        Set<String> have = new HashSet<>(); for (Object[] r : store.rows("SELECT path FROM books")) have.add(r[0] + "");
+        int n = 0, seen = 0; boolean auto = store.db.getAutoCommit(); store.db.setAutoCommit(false);
+        try (java.sql.PreparedStatement p = store.db.prepareStatement("INSERT OR IGNORE INTO books(path,title,kind,position,total,opened) VALUES(?,?,?,0,0,0)")) {
+            for (File f : files) {
+                seen++; if (progress != null && seen % 100 == 0) progress.accept(seen);
+                if (!accepts(f.getName()) || !have.add(f.getPath())) continue;
+                String kind = f.getName().replaceFirst(".*\\.", "").toLowerCase(Locale.ROOT);
+                String title = kind.equals("epub") ? DeskCovers.epubTitle(f) : "";
+                if (title.isEmpty()) title = f.getName().replaceFirst("\\.[^.]+$", "").replace('_', ' ');
+                p.setString(1, f.getPath()); p.setString(2, title); p.setString(3, kind); p.addBatch(); n++;
+                if (n % 500 == 0) p.executeBatch();
+            }
+            p.executeBatch(); store.db.commit();
+        } catch (SQLException e) { store.db.rollback(); throw e; }
+        finally { store.db.setAutoCommit(auto); }
         return n;
     }
     void forget(File f) { if (DeskUi.confirm("Tirar da estante?", f.getName() + "\nO ficheiro não é apagado.")) { try { d.store.update("DELETE FROM books WHERE path=?", f.getPath()); } catch (SQLException ignored) {} d.open("reader"); } }

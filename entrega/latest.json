@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007600,
-  "versionName": "5.49.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.49.0.apk",
-  "sha256": "f2ab813a04f2474036c8d1768c7e90aa4405b5a38fdc461bae1d81166060f3da",
-  "bytes": 13792658,
-  "notes": "Seeky ligado: o telemóvel e o Seeky para Windows sincronizam notas, leitura, estudo e música na mesma rede Wi-Fi e trocam ficheiros."
+  "versionCode": 5007610,
+  "versionName": "5.49.1",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.49.1.apk",
+  "sha256": "08d4d797cca543cec5fd732b6ac788f4f5249597c510b057f5fc53f83521332e",
+  "bytes": 13792680,
+  "notes": "Seeky para Windows: estante rápida com muitos livros. Android sem mudanças."
 }

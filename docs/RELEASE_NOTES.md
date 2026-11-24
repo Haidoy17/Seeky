@@ -1,3 +1,9 @@
+## Seeky 5.49.1
+
+- **Seeky para Windows**: a estante deixa de ficar lenta depois de importar uma pasta grande de livros
+  (páginas de 40 livros, capas só da página à vista, importação numa só vez).
+- Android: sem mudanças.
+
 ## Seeky 5.49.0
 
 Instale **Seeky_5.49.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
