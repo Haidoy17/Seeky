@@ -135,3 +135,12 @@
 .root-pane .progress-bar.thin .bar { -fx-background-insets: 0; -fx-padding: 2; }
 .root-pane .progress-bar.thin .track { -fx-background-insets: 0; }
 .caps { -fx-font-size: 11px; -fx-font-weight: bold; }
+/* Modo Flash: botão flutuante e painel. */
+.flash-bubble { -fx-background-color: -seeky-accent; -fx-background-radius: 100; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 14, 0.1, 0, 4); -fx-cursor: hand; }
+.flash-bubble .icon { -fx-stroke: -seeky-on-accent; -fx-stroke-width: 2.4; }
+.flash-bubble.lifted { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 24, 0.15, 0, 8); -fx-border-color: -seeky-on-accent; -fx-border-radius: 100; -fx-border-width: 2; }
+.flash-panel { -fx-background-color: -seeky-bg; -fx-background-radius: 22; -fx-border-color: -seeky-line; -fx-border-radius: 22; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 26, 0.1, 0, 8); }
+.flash-field { -fx-background-color: -seeky-surface; -fx-background-radius: 16; -fx-border-color: -seeky-line; -fx-border-radius: 16; }
+.flash-field .icon { -fx-stroke: -seeky-accent; }
+.root-pane .text-field.flash-input { -fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 15px; }
+.root-pane .toggle-button.chip.small { -fx-padding: 5 9; -fx-font-size: 12.5px; }

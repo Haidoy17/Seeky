@@ -10,8 +10,8 @@ android {
         applicationId 'mz.bam.seeky.v51'
         minSdk 26
         targetSdk 36
-        versionCode 5007400
-        versionName '5.47.0'
+        versionCode 5007500
+        versionName '5.48.0'
         manifestPlaceholders = [appLabel: 'Seeky']
     }
 

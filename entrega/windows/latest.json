@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007400,
-  "versionName": "5.47.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.47.0-app.zip",
-  "sha256": "35aae085bb9338aeeb8119bec227802e1073734b53ea7b3a70e9deb297c1a71f",
-  "bytes": 8758807,
+  "versionCode": 5007500,
+  "versionName": "5.48.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.48.0-app.zip",
+  "sha256": "b11bf31ddae6ccb61fb274ac37e3a53e637d2dab263201f999283e053c1d48ea",
+  "bytes": 8796217,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Música e Vídeos separados: pastas, faixas, álbuns, artistas, géneros, anos, ouvidas recentemente e mais ouvidas (hoje, semana, mês), como no telemóvel; Livros em estante, grelha ou lista, com capas e importar pasta e subpastas; Bíblia com títulos de secção e comentários MyBible."
+  "notes": "Botão Flash como no telemóvel: pesquisa por cima das outras janelas (Flash, Completa, Pastas; Tudo, PDF, Documentos, Imagens, Vídeos, Áudio), fica com a janela fechada e pode iniciar com o Windows."
 }

@@ -110,6 +110,12 @@ final class DeskSelfTest {
                 File epCover = DeskCovers.cover(ep), pdfCover = DeskCovers.cover(bookPdf), txtCover = DeskCovers.cover(new File(shelf, "texto.txt"));
                 java.awt.image.BufferedImage ci = epCover == null ? null : javax.imageio.ImageIO.read(epCover);
                 check(imported == 3 && again2 == 0 && ci != null && ci.getWidth() == DeskCovers.W && (ci.getRGB(120, 300) & 0xffffff) == 0x2f5d50 && pdfCover != null && txtCover == null && s.rows("SELECT title FROM books WHERE path=?", ep.getPath()).get(0)[0].equals("A fé que vence"), "livros: importar pasta e capas (EPUB, PDF)");
+                // Flash: índice FTS5 dos nomes, categorias e procura por início de palavra.
+                File docs = new File(home, "Docs"); new File(docs, "sub").mkdirs(); new File(docs, ".oculta").mkdirs();
+                for (String fn : new String[]{"Relatório final 2025.pdf", "sub/relatorio_vendas.xlsx", "sub/foto do relatório.jpg", "Planeamento.docx", ".oculta/relatorio secreto.pdf", "musica/Relato.mp3"}) { File f = new File(docs, fn); f.getParentFile().mkdirs(); Files.write(f.toPath(), new byte[10]); }
+                DeskFlashIndex idx = new DeskFlashIndex(new File(home, "indice-teste.db")); int indexed = idx.rebuild(Collections.singletonList(docs), () -> false);
+                List<DeskFlashIndex.Hit> rel = idx.search("relat", "Tudo", 20), pdfHits = idx.search("relat", "PDF", 20), two = idx.search("relat fin", "Tudo", 20), recent = idx.search("", "Imagens", 5);
+                check(indexed == 5 && rel.size() == 4 && pdfHits.size() == 1 && pdfHits.get(0).name.equals("Relatório final 2025.pdf") && two.size() == 1 && recent.size() == 1 && DeskFlashIndex.category("x.MKV").equals("Vídeos"), "Flash: índice e pesquisa (" + rel.size() + ")");
                 // Notas entre o telemóvel e o computador (.seekynotes), com imagem e sem repetir.
                 File img = new File(DeskNotes.media(), "img_teste.png"); Files.write(img.toPath(), new byte[]{(byte) 0x89, 'P', 'N', 'G', 1, 2, 3});
                 s.update("INSERT INTO notes(title,body,folder,created,updated) VALUES(?,?,?,?,?)", "Com imagem", "Texto\n![Imagem](note-img:img_teste.png)", "Sermões", 2, 3);

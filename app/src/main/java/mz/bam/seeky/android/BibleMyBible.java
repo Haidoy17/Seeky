@@ -25,5 +25,20 @@ final class BibleMyBible {
    return 0;
   }catch(SQLiteException e){throw new IOException("Não foi possível ler o módulo MyBible SQLite3: "+e.getMessage(),e);}
  }
+ interface Comments{void comment(String book,int chapter,int verse,int chapterTo,int verseTo,String text)throws Exception;}
+ /** A MyBible commentary module (.commentaries.SQLite3). Returns how many comments. */
+ static int comments(File file,Comments sink,BooleanSupplier stop)throws Exception{try(InputStream in=new FileInputStream(file)){byte[] head=new byte[16];if(in.read(head)!=16||!Arrays.equals(head,"SQLite format 3\000".getBytes("US-ASCII")))throw new IOException("O ficheiro não é um módulo MyBible SQLite3.");}
+  try(SQLiteDatabase db=SQLiteDatabase.openDatabase(file.getPath(),null,SQLiteDatabase.OPEN_READONLY|SQLiteDatabase.NO_LOCALIZED_COLLATORS)){
+   if(!table(db,"commentaries"))throw new IOException("Este ficheiro não é um módulo de comentários MyBible (.commentaries.SQLite3).");Set<String> cols=columns(db,"commentaries");if(!cols.containsAll(Arrays.asList("book_number","chapter_number_from","verse_number_from","text")))throw new IOException("O módulo de comentários não tem as colunas esperadas.");
+   String ct=cols.contains("chapter_number_to")?"chapter_number_to":"chapter_number_from",vt=cols.contains("verse_number_to")?"verse_number_to":"verse_number_from";
+   Map<Integer,String> names=new HashMap<>();if(table(db,"books")&&columns(db,"books").contains("book_number")){Set<String> fields=columns(db,"books");String longName=fields.contains("long_name")?"long_name":"''",shortName=fields.contains("short_name")?"short_name":"''";try(Cursor c=db.rawQuery("SELECT book_number,"+longName+","+shortName+" FROM books",null)){while(c.moveToNext()){String name=BibleText.code(clean(c.isNull(1)?"":c.getString(1)));if(name.isEmpty())name=BibleText.code(clean(c.isNull(2)?"":c.getString(2)));if(!name.isEmpty())names.put(c.getInt(0),name);}}}
+   int count=0;try(Cursor c=db.rawQuery("SELECT book_number,chapter_number_from,verse_number_from,"+ct+","+vt+",text FROM commentaries ORDER BY book_number,chapter_number_from,verse_number_from",null)){while(c.moveToNext()){if(stop.getAsBoolean())throw new InterruptedIOException("Importação cancelada.");String book=names.getOrDefault(c.getInt(0),standard(c.getInt(0)));if(book.isEmpty()||c.getType(5)!=Cursor.FIELD_TYPE_STRING)continue;String text=commentText(c.getString(5));if(text.isEmpty())continue;int ch=Math.max(1,c.getInt(1)),v=Math.max(0,c.getInt(2)),ch2=Math.max(ch,c.getInt(3)),v2=c.getInt(4);if(ch2==ch&&v2<v)v2=v;if(++count>300000)throw new IOException("Demasiados comentários no módulo.");sink.comment(book,ch,v,ch2,v2,text);}}
+   if(count==0)throw new IOException("O módulo não tem comentários de texto.");return count;
+  }catch(SQLiteException e){throw new IOException("Não foi possível ler o módulo MyBible SQLite3: "+e.getMessage(),e);}
+ }
+ /** The module's description ("info" table), used as the commentary's name. */
+ static String description(File file,String fallback){try(SQLiteDatabase db=SQLiteDatabase.openDatabase(file.getPath(),null,SQLiteDatabase.OPEN_READONLY|SQLiteDatabase.NO_LOCALIZED_COLLATORS)){if(table(db,"info"))try(Cursor c=db.rawQuery("SELECT value FROM info WHERE name='description'",null)){if(c.moveToFirst()&&!c.isNull(0)){String d=clean(c.getString(0));if(!d.isEmpty())return d;}}}catch(Exception ignored){}return fallback;}
+ /** Commentary HTML as readable text: paragraphs and line breaks kept, tags removed. */
+ static String commentText(String html)throws IOException{if(html.length()>400000)throw new IOException("Comentário demasiado longo.");String t=html.replaceAll("(?is)<(script|style)\\b[^>]*>.*?</\\1\\s*>","").replaceAll("(?i)<br\\s*/?>","\n").replaceAll("(?i)</p\\s*>|<p\\b[^>]*>","\n\n");StringBuilder out=new StringBuilder();for(String para:t.split("\n")){String c;try{c=clean(para);}catch(IOException e){continue;}if(!c.isEmpty()){if(out.length()>0)out.append('\n');out.append(c);}}return out.toString();}
  private BibleMyBible(){}
 }

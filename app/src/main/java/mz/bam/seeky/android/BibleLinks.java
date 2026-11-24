@@ -151,6 +151,8 @@ final class BibleLinks {
         String plain="",speakable="",version="",memory="";
         /** Section titles of the chosen Bible for the chapters shown ("chapter:verse" → titles). */
         Map<String,List<String>> titles=new HashMap<>();
+        /** Comments of the chosen MyBible commentary for the chapters shown. */
+        List<BibleComments.Comment> comments=new ArrayList<>();LinearLayout commentBox;
         TextToSpeech voice;
         /** Runs after "Marcar como lido" (the study plan refreshes its day). */
         Runnable onRead;
@@ -184,8 +186,9 @@ final class BibleLinks {
                 }
                 int lo=Integer.MAX_VALUE,hi=0;for(int[] r:ranges){lo=Math.min(lo,r[0]);hi=Math.max(hi,r[2]);}
                 final Map<String,List<String>> heads=chosen>0&&hi>0?BibleTitles.chapters(a,chosen,ref.book,lo,hi):new HashMap<>();
+                final List<BibleComments.Comment> notes=hi>0?BibleComments.chapters(a,ref.book,lo,hi):new ArrayList<>();
                 final long picked=chosen;final int last=(int)max;
-                PlusUi.post(a,()->{if(token==serial&&!a.isFinishing()){titles=heads;show(found,picked,passages,last);}});
+                PlusUi.post(a,()->{if(token==serial&&!a.isFinishing()){titles=heads;comments=notes;show(found,picked,passages,last);}});
             });
         }
         String name(long id){for(StudyStore.Row s:sources)if(s.id()==id)return s.s("title");return "";}
@@ -206,6 +209,7 @@ final class BibleLinks {
                     int start=out.length();
                     out.append(String.valueOf(v));out.setSpan(new StyleSpan(Typeface.BOLD),start,out.length(),0);out.setSpan(new ForegroundColorSpan(colors.accent),start,out.length(),0);out.setSpan(new RelativeSizeSpan(.78f),start,out.length(),0);
                     out.append(' ').append(value);
+                    if(e.getKey()==picked&&!compare){boolean noted=false;for(BibleComments.Comment m:comments)if(m.anchor(c)==v&&c>=m.chapter&&c<=m.chapterTo)noted=true;if(noted){int mark=out.length();out.append(" ✎");out.setSpan(new ForegroundColorSpan(colors.accent),mark,out.length(),0);}}
                     if(whole&&ref.explicit&&ref.contains(c,v))out.setSpan(new BackgroundColorSpan((colors.accent&0xffffff)|0x2e000000),start,out.length(),0);
                     out.append('\n');
                     copy.append(chapters&&!whole?c+":"+v:""+v).append(' ').append(value).append('\n');
@@ -217,7 +221,7 @@ final class BibleLinks {
             plain=copy.toString().trim();speakable=speak.toString();memory=mem.toString();
             String detail=compare?AppLanguage.text(a,"Comparação de")+" "+passages.size()+" "+AppLanguage.text(a,"versões"):version+" · "+(whole?AppLanguage.text(a,"capítulo")+" "+chapter+" "+AppLanguage.text(a,"completo"):count+" "+AppLanguage.text(a,count==1?"versículo":"versículos"));
             if(dialog==null)build();
-            meta.setText(detail);body.setText(out);
+            meta.setText(detail);body.setText(out);fillComments();
             fillVersions();
             wholeLabel.setText(AppLanguage.text(a,whole?"Só a passagem":"Capítulo inteiro"));
             ((View)wholeLabel.getParent()).setVisibility(ref.explicit?View.VISIBLE:View.GONE);
@@ -250,6 +254,7 @@ final class BibleLinks {
             body=new TextView(a);body.setTextColor(colors.ink);body.setTextSize(a.getSharedPreferences(PREFS,0).getFloat("bible_quick_size",17));
             body.setLineSpacing(dp(4),1.15f);body.setTextIsSelectable(true);body.setPadding(dp(2),dp(2),dp(2),dp(4));
             root.addView(body,new LinearLayout.LayoutParams(-1,-2));
+            commentBox=new LinearLayout(a);commentBox.setOrientation(LinearLayout.VERTICAL);root.addView(commentBox,new LinearLayout.LayoutParams(-1,-2));
             navigation=new LinearLayout(a);navigation.setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams np=new LinearLayout.LayoutParams(-1,-2);np.topMargin=dp(10);root.addView(navigation,np);
             dialog=new UiDialog.Builder(a).setTitle(ref.title).setView(root).setPositiveButton("Voltar à leitura",null).setOnDismissListener(d->quiet()).create();
@@ -269,6 +274,19 @@ final class BibleLinks {
             ((View)versions.getParent()).setVisibility(sources.size()>1?View.VISIBLE:View.GONE);
             if(sources.size()<2)return;
             for(StudyStore.Row s:sources){final long id=s.id();chip(versions,id==source&&!compare?"check":null,s.s("title"),id==source,()->{source=id;compare=false;a.getSharedPreferences(PREFS,0).edit().putLong("bible_quick_source",id).apply();load();});}
+        }
+        /** "Comentário": one card per comment of the chosen MyBible commentary, under the chapter. */
+        void fillComments(){
+            if(commentBox==null)return;commentBox.removeAllViews();if(compare||comments.isEmpty())return;
+            TextView head=new TextView(a);head.setText(AppLanguage.text(a,"Comentário")+" · "+BibleComments.title(a,BibleComments.chosen(a)));head.setTextColor(colors.muted);head.setTextSize(13);head.setTypeface(null,Typeface.BOLD);head.setPadding(dp(2),dp(14),0,dp(6));commentBox.addView(head);
+            for(BibleComments.Comment m:comments){
+                LinearLayout card=new LinearLayout(a);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(12),dp(10),dp(12),dp(10));android.graphics.drawable.GradientDrawable bg=new android.graphics.drawable.GradientDrawable();bg.setColor(colors.surface);bg.setCornerRadius(dp(14));bg.setStroke(dp(1),colors.line);card.setBackground(bg);
+                TextView where=new TextView(a);where.setText("✎ "+m.where());where.setTextColor(colors.accent);where.setTextSize(14);where.setTypeface(null,Typeface.BOLD);card.addView(where);
+                TextView text=new TextView(a);text.setText(m.text);text.setTextColor(colors.ink);text.setTextSize(14);text.setLineSpacing(dp(2),1.1f);text.setMaxLines(5);text.setEllipsize(android.text.TextUtils.TruncateAt.END);text.setPadding(0,dp(4),0,0);card.addView(text);
+                card.setContentDescription(AppLanguage.text(a,"Comentário")+" "+m.where());
+                card.setOnClickListener(v->new UiDialog.Builder(a).setTitle(m.where()).setMessage(m.text).setPositiveButton("Fechar",null).show());
+                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(8);commentBox.addView(card,lp);
+            }
         }
         void fillNavigation(){
             navigation.removeAllViews();

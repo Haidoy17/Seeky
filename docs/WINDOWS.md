@@ -33,6 +33,9 @@ perdem ao actualizar nem ao desinstalar.
   de cada dia e de cada disciplina na semana.
 - **Notas do telemóvel**: Bloco de notas → Telemóvel → importar ou enviar um ficheiro `.seekynotes`
   (o Android tem o mesmo em Bloco de notas → Pastas).
+- **Botão Flash**: o botão de pesquisa por cima das outras janelas, como no telemóvel (Flash, Completa,
+  Pastas; Tudo, PDF, Documentos, Imagens, Vídeos, Áudio); fica com a janela fechada (ícone junto ao
+  relógio), pode iniciar com o Windows e abre com Ctrl+K.
 - **Aspecto**: janela própria (minimizar, maximizar, fechar, redimensionar), os temas do telemóvel e
   Horário, transições e deslocamento suave.
 - **Ficheiros**: discos e pastas do utilizador, procurar por nome, abrir no Seeky ou no Windows, copiar,

@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.48.0
+OK (487 tests)
+exit=0
+Inclui Bible529Test.myBibleCommentariesAreMarkedAndShownUnderTheChapter (comentários MyBible).

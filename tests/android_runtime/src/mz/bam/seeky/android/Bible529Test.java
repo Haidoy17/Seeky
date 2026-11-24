@@ -183,6 +183,30 @@ public class Bible529Test {
         assertTrue(text,text.indexOf("Juízo sobre Jerusalém")<text.indexOf("Isaías três, versículo 1.")&&text.indexOf("Isaías três, versículo 3.")<text.indexOf("Governantes sem juízo")&&text.indexOf("Governantes sem juízo")<text.indexOf("Isaías três, versículo 4."));
         capture(ShadowDialog.getLatestDialog().getWindow().getDecorView(),"titulos",800);
     }
+    @Test public void myBibleCommentariesAreMarkedAndShownUnderTheChapter()throws Exception{
+        // 5.48: a .commentaries module; the commented verse gets ✎ and the comment shows under the chapter.
+        bible();BibleStudyActivity hub=launch(BibleStudyActivity.class);
+        java.io.File f=new java.io.File(a.getCacheDir(),"Exemplo.commentaries.SQLite3");
+        try(android.database.sqlite.SQLiteDatabase db=android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(f,null)){
+            db.execSQL("CREATE TABLE info(name TEXT,value TEXT)");db.execSQL("INSERT INTO info VALUES('description','Comentário de teste')");
+            db.execSQL("CREATE TABLE commentaries(book_number NUMERIC,chapter_number_from NUMERIC,verse_number_from NUMERIC,chapter_number_to NUMERIC,verse_number_to NUMERIC,marker TEXT,text TEXT)");
+            db.execSQL("INSERT INTO commentaries VALUES(290,3,2,3,3,'','<p><b>Os líderes</b> caem.</p><p>Juízo sobre Judá.</p>')");
+            db.execSQL("INSERT INTO commentaries VALUES(500,3,16,3,16,'','Outro livro.')");
+        }
+        long[] r=BibleComments.load(a,f,BibleMyBible.description(f,"x"),()->false);
+        assertEquals(2,r[1]);assertEquals("Comentário de teste",BibleComments.title(a,BibleComments.chosen(a)));
+        BibleLinks.readChapter(a,"Isaías",3,null);drain();
+        String text=dialog();
+        assertTrue(text,text.contains("Isaías três, versículo 2.\u00a0✎")&&text.contains("✎ Isaías 3:2–3")&&text.contains("Os líderes caem.\nJuízo sobre Judá.")&&text.contains("Comentário de teste"));
+        assertFalse(text,text.contains("Outro livro."));
+        capture(ShadowDialog.getLatestDialog().getWindow().getDecorView(),"comentarios",800);
+        a.getSharedPreferences(BibleComments.PREFS,0).edit().putBoolean("show",false).apply();
+        BibleLinks.readChapter(a,"Isaías",3,null);drain();
+        assertFalse(dialog().contains("Os líderes"));
+        java.io.File bad=new java.io.File(a.getCacheDir(),"naoe.SQLite3");try(android.database.sqlite.SQLiteDatabase db=android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(bad,null)){db.execSQL("CREATE TABLE verses(x INTEGER)");}
+        try{BibleComments.load(a,bad,"x",()->false);fail();}catch(java.io.IOException expected){}
+        assertEquals("um módulo errado não deixa comentários vazios",1,BibleComments.all(a).size());
+    }
     @Test public void theGamePlaysTenQuestionsAndKeepsTheNameInTheRecords()throws Exception{
         bible();
         BibleGameActivity game=launch(BibleGameActivity.class);

@@ -1,3 +1,12 @@
+## Seeky 5.48.0
+
+Instale **Seeky_5.48.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.48.0.
+
+### Novidades
+- **Comentários bíblicos MyBible** no telemóvel.
+- **Botão Flash** no Seeky para Windows, com a mesma pesquisa do telemóvel.
+
 ## Seeky 5.47.0
 
 Instale **Seeky_5.47.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
