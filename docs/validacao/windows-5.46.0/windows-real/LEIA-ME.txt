@@ -1,0 +1,7 @@
+Capturas tiradas num Windows verdadeiro (GitHub Actions, windows-latest, x64, ecrã 1024x768).
+Execução 45457842988 do fluxo .github/workflows/windows.yml:
+- instalação sem perguntas do Seeky-Setup-5.45.0-x64.exe;
+- actualização para a 5.46.0 como o Seeky faz (SHA-256, %LOCALAPPDATA%\Seeky\app, current.txt);
+- autoteste 17/17 (java.exe e Seeky.exe --self-test);
+- 13 ecrãs capturados pelo Seeky.exe já actualizado (estes ficheiros);
+- instalador confere com latest.json; desinstalação sem perguntas OK.

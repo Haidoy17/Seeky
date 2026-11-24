@@ -34,6 +34,9 @@ final class DeskStore implements AutoCloseable {
             s.execute("CREATE TABLE IF NOT EXISTS cards(id INTEGER PRIMARY KEY,reference TEXT NOT NULL,text TEXT NOT NULL,interval INTEGER NOT NULL DEFAULT 0,ease INTEGER NOT NULL DEFAULT 250,due INTEGER NOT NULL)");
             s.execute("CREATE TABLE IF NOT EXISTS records(level INTEGER NOT NULL,name TEXT NOT NULL,points INTEGER NOT NULL,correct INTEGER NOT NULL,played INTEGER NOT NULL)");
             s.execute("CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)");
+            s.execute("CREATE TABLE IF NOT EXISTS marks(id INTEGER PRIMARY KEY,path TEXT NOT NULL,title TEXT NOT NULL DEFAULT '',chapter INTEGER NOT NULL,place TEXT NOT NULL DEFAULT '',text TEXT NOT NULL,color INTEGER NOT NULL,note TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL)");
+            s.execute("CREATE INDEX IF NOT EXISTS marks_book ON marks(path,chapter)");
+            s.execute("CREATE TABLE IF NOT EXISTS focus(id INTEGER PRIMARY KEY,day TEXT NOT NULL,subject TEXT NOT NULL DEFAULT '',minutes INTEGER NOT NULL,ended INTEGER NOT NULL)");
         }
     }
     @Override public void close() { try { db.close(); } catch (SQLException ignored) {} }

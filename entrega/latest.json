@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007200,
-  "versionName": "5.45.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.45.0.apk",
-  "sha256": "776c5fe5cbf061e3e55df3ae2315c8e703d52e68a9d125251ddb20059e0622da",
-  "bytes": 13756246,
-  "notes": "Bíblias com versículos agrupados (como A Mensagem) importam sem parar em Versículo inválido; e Pastas das aplicações (Android/data e Android/obb) com o Shizuku."
+  "versionCode": 5007300,
+  "versionName": "5.46.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.46.0.apk",
+  "sha256": "ff0268531fc6a8ccfada1ce4eb126491c139e74e48faa56b6ad59970005ff3ee",
+  "bytes": 13763948,
+  "notes": "Notas entre o telemóvel e o computador (.seekynotes) e o Seeky para Windows 5.46 com janela própria, temas, marcações, Foco e IA nos livros."
 }

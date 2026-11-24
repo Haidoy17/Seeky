@@ -81,7 +81,6 @@ final class DeskBible {
             }
         } catch (SQLException e) { box.getChildren().add(DeskUi.muted(e.getMessage())); return; }
         box.getChildren().add(DeskUi.card(flow));
-        box.getChildren().add(DeskUi.muted("Clique num versículo para copiar, guardar para decorar ou criar uma nota."));
     }
     ContextMenu verseMenu(int verse, String text) {
         String ref = book + " " + chapter + ":" + verse;

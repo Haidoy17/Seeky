@@ -31,6 +31,8 @@ final class DeskUi {
         ICONS.put("back", "M15 5 L8 12 L15 19");
         ICONS.put("trash", "M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 20 H17 L18 7");
         ICONS.put("export", "M12 3 V15 M7 8 L12 3 L17 8 M5 14 V20 H19 V14");
+        ICONS.put("timer", "M12 21 A8 8 0 1 0 12 5 A8 8 0 1 0 12 21 Z M12 9 V13 L14.5 15 M9.5 2.5 H14.5 M18.5 5.5 L20 7");
+        ICONS.put("marker", "M6 3 H18 V21 L12 16.5 L6 21 Z");
         ICONS.put("update", "M4 12 A8 8 0 0 1 18 6.5 M20 4 V9 H15 M20 12 A8 8 0 0 1 6 17.5 M4 20 V15 H9");
     }
     static Node icon(String name, double size) {
@@ -54,16 +56,52 @@ final class DeskUi {
         Node ic = icon(icon, 26); StackPane badge = new StackPane(ic); badge.getStyleClass().add("badge"); badge.setMinSize(44, 44); badge.setMaxSize(44, 44);
         VBox words = new VBox(2, heading(title), muted(subtitle)); HBox.setHgrow(words, Priority.ALWAYS);
         HBox row = new HBox(14, badge, words); row.setAlignment(Pos.CENTER_LEFT); row.getStyleClass().addAll("card", "tile"); row.setPadding(new Insets(14));
-        row.setOnMouseClicked(e -> action.run()); row.setFocusTraversable(true);
+        row.setOnMouseClicked(e -> action.run()); row.setFocusTraversable(true); lift(row);
         row.setOnKeyPressed(e -> { if (e.getCode() == javafx.scene.input.KeyCode.ENTER || e.getCode() == javafx.scene.input.KeyCode.SPACE) action.run(); });
         return row;
     }
-    static ScrollPane scroll(Node content) { ScrollPane s = new ScrollPane(content); s.setFitToWidth(true); s.getStyleClass().add("page-scroll"); return s; }
+    static ScrollPane scroll(Node content) { ScrollPane s = new ScrollPane(content); s.setFitToWidth(true); s.getStyleClass().add("page-scroll"); smooth(s); return s; }
+    /** Wheel scrolling that glides instead of jumping (the same distance, eased over ~200 ms). */
+    static void smooth(ScrollPane s) {
+        double[] target = {-1};
+        javafx.animation.Timeline[] anim = {null};
+        s.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+            if (e.getDeltaY() == 0 || e.isControlDown()) return;
+            Node c = s.getContent(); if (c == null) return;
+            double extra = c.getBoundsInLocal().getHeight() - s.getViewportBounds().getHeight(); if (extra <= 0) return;
+            double from = anim[0] != null && anim[0].getStatus() == javafx.animation.Animation.Status.RUNNING && target[0] >= 0 ? target[0] : s.getVvalue();
+            double pixels = e.getTextDeltaYUnits() == javafx.scene.input.ScrollEvent.VerticalTextScrollUnits.PAGES ? e.getTextDeltaY() * s.getViewportBounds().getHeight() : e.getDeltaY() * 1.6;
+            target[0] = Math.max(0, Math.min(1, from - pixels / extra));
+            if (anim[0] != null) anim[0].stop();
+            anim[0] = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.millis(220), new javafx.animation.KeyValue(s.vvalueProperty(), target[0], javafx.animation.Interpolator.EASE_OUT)));
+            anim[0].play(); e.consume();
+        });
+    }
+    /** A gentle rise on hover for clickable cards. */
+    static void lift(Node n) {
+        javafx.animation.ScaleTransition up = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(140), n);
+        n.setOnMouseEntered(e -> { up.stop(); up.setToX(1.012); up.setToY(1.012); up.playFromStart(); });
+        n.setOnMouseExited(e -> { up.stop(); up.setToX(1); up.setToY(1); up.playFromStart(); });
+    }
+    /** Lays cells in as many columns as fit (1 to 3), recalculated when the window is resized. */
+    static void responsive(GridPane grid, java.util.List<Node> cells, double minWidth) {
+        int[] cols = {0};
+        Runnable layout = () -> {
+            double w = grid.getWidth() > 0 ? grid.getWidth() : 900;
+            int n = (int) Math.max(1, Math.min(3, Math.floor((w + grid.getHgap()) / (minWidth + grid.getHgap()))));
+            if (n == cols[0]) return; cols[0] = n;
+            grid.getChildren().clear(); grid.getColumnConstraints().clear();
+            for (int i = 0; i < n; i++) { ColumnConstraints c = new ColumnConstraints(); c.setPercentWidth(100.0 / n); c.setHgrow(Priority.ALWAYS); grid.getColumnConstraints().add(c); }
+            for (int i = 0; i < cells.size(); i++) grid.add(cells.get(i), i % n, i / n);
+        };
+        layout.run();
+        grid.widthProperty().addListener((o, a, b) -> layout.run());
+    }
     static VBox page(Node... children) { VBox v = new VBox(14, children); v.setPadding(new Insets(24, 28, 28, 28)); v.getStyleClass().add("page"); return v; }
     static HBox row(Node... children) { HBox h = new HBox(10, children); h.setAlignment(Pos.CENTER_LEFT); return h; }
     static Region grow() { Region r = new Region(); HBox.setHgrow(r, Priority.ALWAYS); return r; }
     static void info(String title, String message) { Alert a = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK); a.setHeaderText(title); a.setTitle("Seeky"); style(a.getDialogPane()); a.showAndWait(); }
     static boolean confirm(String title, String message) { Alert a = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK, ButtonType.CANCEL); a.setHeaderText(title); a.setTitle("Seeky"); style(a.getDialogPane()); return a.showAndWait().filter(b -> b == ButtonType.OK).isPresent(); }
     static String ask(String title, String prompt, String value) { TextInputDialog d = new TextInputDialog(value == null ? "" : value); d.setHeaderText(title); d.setContentText(prompt); d.setTitle("Seeky"); style(d.getDialogPane()); return d.showAndWait().map(String::trim).filter(s -> !s.isEmpty()).orElse(null); }
-    static void style(DialogPane p) { if (DeskMain.instance != null) { p.getStylesheets().setAll(DeskMain.instance.scene.getStylesheets()); p.getStyleClass().addAll(DeskMain.instance.root.getStyleClass()); } }
+    static void style(DialogPane p) { if (DeskMain.instance != null) { p.getStylesheets().setAll(DeskMain.instance.scene.getStylesheets()); p.getStyleClass().addAll(DeskMain.instance.root.getStyleClass()); p.setStyle(DeskMain.instance.root.getStyle()); } }
 }

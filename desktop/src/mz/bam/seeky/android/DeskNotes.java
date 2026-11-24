@@ -24,7 +24,7 @@ final class DeskNotes {
     Node view() {
         VBox page = DeskUi.page();
         TextField search = new TextField(filter); search.setPromptText("Pesquisar nas notas"); HBox.setHgrow(search, Priority.ALWAYS);
-        page.getChildren().add(DeskUi.row(DeskUi.title("Bloco de notas"), DeskUi.grow(), DeskUi.button("Modelos", false, this::templates), DeskUi.button("Nova nota", true, () -> edit(0, "", ""))));
+        page.getChildren().add(DeskUi.row(DeskUi.title("Bloco de notas"), DeskUi.grow(), transferMenu(), DeskUi.button("Modelos", false, this::templates), DeskUi.button("Nova nota", true, () -> edit(0, "", ""))));
         page.getChildren().add(search);
         VBox list = new VBox(10); page.getChildren().add(list);
         Runnable draw = () -> { filter = search.getText(); fill(list); };
@@ -50,6 +50,59 @@ final class DeskNotes {
         }
         if (shown == 0) list.getChildren().add(DeskUi.card(DeskUi.heading(rows.isEmpty() ? "Comece o seu bloco de notas" : "Nenhuma nota encontrada"), DeskUi.text("Escreva ideias, sermões, estudos e tarefas, com títulos, cores, listas e tabelas. Passagens como João 3:16 são reconhecidas.")));
     }
+    /** Notas entre o telemóvel e o computador (.seekynotes). */
+    MenuButton transferMenu() {
+        MenuButton m = new MenuButton("Telemóvel");
+        MenuItem in = new MenuItem("Importar notas do telemóvel…"); in.setOnAction(e -> importNotes());
+        MenuItem out = new MenuItem("Enviar notas para o telemóvel…"); out.setOnAction(e -> exportNotes());
+        m.getItems().addAll(in, out); return m;
+    }
+    void exportNotes() {
+        FileChooser fc = new FileChooser(); fc.setTitle("Enviar notas para o telemóvel"); fc.setInitialFileName(NotesTransfer.fileName());
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Notas do Seeky", "*" + NotesTransfer.EXTENSION)); File f = fc.showSaveDialog(d.stage); if (f == null) return;
+        d.run("A preparar as notas…", () -> { int n = exportTo(d.store, f); return n; }, n -> DeskUi.info(n + (n == 1 ? " nota pronta" : " notas prontas"), "Passe o ficheiro para o telemóvel (cabo, email, Drive, WhatsApp…) e abra-o no Seeky: Bloco de notas → Pastas → Importar notas do computador."));
+    }
+    static int exportTo(DeskStore store, File f) throws Exception {
+        List<NotesTransfer.Item> items = new ArrayList<>();
+        for (Object[] r : store.rows("SELECT title,body,folder,pinned,book,created,updated FROM notes ORDER BY updated DESC")) {
+            NotesTransfer.Item i = new NotesTransfer.Item(); i.title = r[0] + ""; i.body = r[1] + ""; i.folder = r[2] + ""; i.pinned = ((Number) r[3]).intValue() == 1; i.source = r[4] + ""; i.created = ((Number) r[5]).longValue(); i.updated = ((Number) r[6]).longValue();
+            items.add(i);
+        }
+        byte[] data = NotesTransfer.write(items, name -> { File m = new File(media(), name); try { return m.isFile() && m.length() <= NotesTransfer.MAX_MEDIA ? Files.readAllBytes(m.toPath()) : null; } catch (IOException e) { return null; } }, "windows");
+        Files.write(f.toPath(), data); return items.size();
+    }
+    void importNotes() {
+        FileChooser fc = new FileChooser(); fc.setTitle("Importar notas do telemóvel");
+        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Notas do Seeky", "*" + NotesTransfer.EXTENSION, "*.json"), new FileChooser.ExtensionFilter("Todos os ficheiros", "*.*"));
+        File f = fc.showOpenDialog(d.stage); if (f == null) return;
+        d.run("A importar as notas…", () -> importFrom(d.store, f), r -> { DeskUi.info(r[0] + (r[0] == 1 ? " nota importada" : " notas importadas"), r[1] > 0 ? r[1] + (r[1] == 1 ? " já existia e não foi repetida." : " já existiam e não foram repetidas.") : "Estão no Bloco de notas."); d.open("notes"); });
+    }
+    /** {added, skipped} */
+    static int[] importFrom(DeskStore store, File f) throws Exception {
+        if (f.length() > NotesTransfer.MAX_FILE) throw new IOException("Ficheiro de notas acima de 64 MB.");
+        NotesTransfer.Parsed parsed = NotesTransfer.read(Files.readAllBytes(f.toPath()));
+        Set<String> have = new HashSet<>(); for (Object[] r : store.rows("SELECT title,body FROM notes")) have.add(NotesTransfer.key(r[0] + "", r[1] + ""));
+        Set<String> taken = new HashSet<>(); String[] names = media().list(); if (names != null) taken.addAll(Arrays.asList(names));
+        Map<String, String> renamed = new HashMap<>(); int added = 0, skipped = 0;
+        for (NotesTransfer.Item i : parsed.notes) {
+            if (!have.add(NotesTransfer.key(i.title, i.body))) { skipped++; continue; }
+            String body = i.body;
+            for (String name : NotesTransfer.media(body)) {
+                byte[] bytes = parsed.media.get(name); if (bytes == null) continue;
+                String target = renamed.get(name);
+                if (target == null) {
+                    File m = new File(media(), name);
+                    if (m.isFile() && !Arrays.equals(Files.readAllBytes(m.toPath()), bytes)) { target = NotesTransfer.fresh(name, taken); m = new File(media(), target); } else target = name;
+                    if (!m.isFile()) Files.write(m.toPath(), bytes);
+                    taken.add(target); renamed.put(name, target);
+                }
+                if (!target.equals(name)) body = NotesTransfer.rename(body, name, target);
+            }
+            store.update("INSERT INTO notes(title,body,folder,pinned,book,created,updated) VALUES(?,?,?,?,?,?,?)", i.title, body, i.folder, i.pinned ? 1 : 0, i.source, i.created, i.updated);
+            added++;
+        }
+        return new int[]{added, skipped};
+    }
     void templates() {
         ChoiceDialog<String> c = new ChoiceDialog<>(); for (String[] t : NotepadText.TEMPLATES) c.getItems().add(t[0]); c.setSelectedItem(c.getItems().get(0)); c.setHeaderText("Modelos"); c.setTitle("Seeky"); DeskUi.style(c.getDialogPane());
         c.showAndWait().ifPresent(name -> { for (String[] t : NotepadText.TEMPLATES) if (t[0].equals(name)) edit(0, "", t[1]); });
@@ -62,14 +115,14 @@ final class DeskNotes {
         TextField title = new TextField(title0); title.setPromptText("Título"); title.getStyleClass().add("note-title");
         TextArea body = new TextArea(body0); body.setWrapText(true); body.getStyleClass().add("note-body"); body.setPromptText("Escreva aqui… Passagens como João 3:16 são reconhecidas.");
         WebView preview = new WebView(); preview.setContextMenuEnabled(false);
-        Label info = DeskUi.muted("");
+        Label info = DeskUi.muted(""); String[] saved = {""};
         FlowPane passages = new FlowPane(6, 6);
         PauseTransition later = new PauseTransition(Duration.millis(500));
         Runnable refresh = () -> {
             boolean dark = d.root.getStyleClass().contains("dark");
             preview.getEngine().loadContent(DeskNotesHtml.html(title.getText(), body.getText(), media(), dark, 0));
             int[] t = NotepadText.tasks(body.getText());
-            info.setText(NotepadText.words(body.getText()) + " palavras · ~" + NotepadText.minutes(body.getText()) + " min" + (t[1] > 0 ? " · ☑ " + t[0] + "/" + t[1] : ""));
+            info.setText(NotepadText.words(body.getText()) + " palavras · ~" + NotepadText.minutes(body.getText()) + " min" + (t[1] > 0 ? " · ☑ " + t[0] + "/" + t[1] : "") + (saved[0].isEmpty() ? "" : " · " + saved[0]));
             passages.getChildren().clear(); Set<String> seen = new LinkedHashSet<>();
             for (BibleReferences.Reference r : BibleReferences.references(title.getText() + "\n" + body.getText())) if (seen.add(r.title)) passages.getChildren().add(DeskUi.button(r.title, false, () -> passage(r)));
         };
@@ -79,10 +132,10 @@ final class DeskNotes {
             try {
                 if (note[0] == 0) note[0] = d.store.update("INSERT INTO notes(title,body,created,updated) VALUES(?,?,?,?)", t, b, now, now);
                 else d.store.update("UPDATE notes SET title=?,body=?,updated=? WHERE id=?", t, b, now, note[0]);
-                d.status("Nota guardada · " + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(now)));
+                saved[0] = "Guardada às " + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(now));
             } catch (SQLException e) { d.status(e.getMessage()); }
         };
-        later.setOnFinished(e -> { refresh.run(); save.run(); });
+        later.setOnFinished(e -> { save.run(); refresh.run(); });
         body.textProperty().addListener((o, a, b) -> later.playFromStart()); title.textProperty().addListener((o, a, b) -> later.playFromStart());
         preview.getEngine().locationProperty().addListener((o, a, url) -> { if (url != null && url.startsWith("seeky:")) { BibleReferences.Reference r = BibleReferences.lookup(url.substring(6).replace("%20", " ")); if (r != null) passage(r); refresh.run(); } });
         // Formatting

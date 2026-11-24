@@ -1,5 +1,30 @@
 # Registo de alterações
 
+## 5.46.0 — 2026-11-24 (Android e Windows)
+
+- **Notas entre o telemóvel e o computador**: um ficheiro `.seekynotes` com as notas, as pastas, a
+  cor, o espaçamento, o livro e as imagens. No Android: Bloco de notas → Pastas → *Enviar notas para o
+  computador* (partilhar ou guardar num ficheiro) e *Importar notas do computador*. No Windows: Bloco
+  de notas → Telemóvel. As notas que já existem não são repetidas; as bloqueadas ficam só no telemóvel;
+  uma imagem com o mesmo nome e outro conteúdo recebe um nome novo.
+- **Seeky para Windows — 2.ª etapa**:
+  - janela própria nas cores do Seeky, com minimizar, maximizar e fechar, arrastar, duplo clique para
+    maximizar e redimensionar pelas margens (lembra se estava maximizada);
+  - ecrãs limpos: sem "para Windows", sem o texto por baixo de "Boa tarde" e sem a barra com o caminho
+    da pasta; os avisos aparecem num canto e desaparecem sozinhos;
+  - mais fluido: transição entre ecrãs, deslocamento suave, cartões que se adaptam à largura (1 a 3
+    colunas) e barras de deslocamento finas;
+  - os temas do telemóvel (Areia, Floresta, Aurora, Ouro, Néon, Vidro, Gelo, Carvão, Ciano e as dez
+    paletas) e Horário;
+  - marcações nos livros: seleccionar texto mostra cores, Nota, Copiar, Ouvir e Explicar; páginas
+    marcadas nos PDF; *As minhas marcações* com procura e filtro por cor;
+  - Seeky IA nos livros: resumir o capítulo ou a página, explicar a selecção, perguntas de estudo e
+    perguntas livres, com *Guardar como nota*;
+  - Foco: Pomodoro (25 + 5, 50 + 10, 15 + 3) por disciplina, que continua enquanto usa o resto do
+    Seeky e aparece na barra da janela, com o tempo de cada dia e de cada disciplina na semana.
+- O instalador do Windows só é trocado quando o Java, o `Seeky.exe` ou o instalador mudam; quem o
+  instalar recebe logo a versão nova pelo pacote de actualização (`entrega/windows/latest.json`).
+
 ## Seeky para Windows 5.45.0 — 2026-11-24
 
 - **Primeira versão do Seeky para Windows (64 bits)**, com o mesmo número de versão do Android e o mesmo

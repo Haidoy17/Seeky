@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007200,
-  "versionName": "5.45.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.45.0-app.zip",
-  "sha256": "c23392055a82cd2e742a11bf425e84c96c90958abd2d99272093628ae94c7b4e",
-  "bytes": 8645631,
+  "versionCode": 5007300,
+  "versionName": "5.46.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.46.0-app.zip",
+  "sha256": "a36efd2cb9149ed56660d7f0d616d3ffa5c06c73a8f9217be8298381c4deaa5f",
+  "bytes": 8697093,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Primeira versão do Seeky para Windows: Bíblia e estudo bíblico, jogo da Bíblia, bloco de notas com Seeky IA, livros, ficheiros, música e vídeo."
+  "notes": "Janela própria com minimizar, maximizar e fechar; ecrãs mais limpos e fluidos; os temas do telemóvel; marcações com cores e notas nos livros; Seeky IA nos livros (resumir, explicar, perguntas); Foco (Pomodoro) por disciplina; notas entre o telemóvel e o computador."
 }

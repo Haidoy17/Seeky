@@ -1,0 +1,24 @@
+Seeky para Windows 5.46.0 — autoteste (tools/build_desktop.py, Linux, Java 21 + JavaFX 21)
+PASS versão 5.46.0
+PASS referências bíblicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+PASS importar Bíblia CSV (versículo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS notas do telemóvel (.seekynotes)
+PASS marcações nos livros
+PASS jogo da Bíblia (10 perguntas)
+PASS temas do telemóvel
+PASS foco (Pomodoro)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS 17 verificações do Seeky Desktop
+
+Capturas (desktop-*.png): 13 ecrãs tirados pelo próprio Seeky (--screenshots) em xvfb.
+O fluxo .github/workflows/windows.yml instala o instalador publicado num Windows verdadeiro,
+aplica o pacote de actualização 5.46.0 como o Seeky faz (SHA-256, %LOCALAPPDATA%\Seeky\app,
+current.txt), corre o autoteste e tira as capturas com o Seeky.exe.

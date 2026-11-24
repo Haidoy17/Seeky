@@ -42,7 +42,7 @@ final class DeskMedia {
         list.setPrefHeight(260); lyricsView.setPrefHeight(260);
         VBox queueBox = new VBox(6, DeskUi.heading("Fila"), list), lyricsBox = new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics)), lyricsView);
         HBox.setHgrow(queueBox, Priority.ALWAYS); HBox.setHgrow(lyricsBox, Priority.ALWAYS);
-        page.getChildren().addAll(player, new HBox(14, queueBox, lyricsBox), DeskUi.muted("Formatos: MP3, M4A/AAC, WAV, AIFF e vídeo MP4 (H.264). Para outros (FLAC, MKV…), use Ficheiros → Abrir com o Windows."));
+        page.getChildren().addAll(player, new HBox(14, queueBox, lyricsBox));
         refreshList();
         return DeskUi.scroll(page);
     }
@@ -65,7 +65,7 @@ final class DeskMedia {
             player.setOnError(() -> d.status("Não foi possível tocar " + f.getName() + ": " + player.getError().getMessage()));
             player.play(); play.setGraphic(DeskUi.icon("pause", 20));
             now.setText(f.getName().replaceFirst("\\.[^.]+$", "")); refreshList(); loadLyrics(f); d.status("A tocar " + f.getName());
-        } catch (Exception e) { d.status("Formato não suportado: " + f.getName()); }
+        } catch (Exception e) { d.status("Formato não suportado: " + f.getName() + ". Use MP3, M4A, WAV ou MP4, ou abra-o com o Windows em Ficheiros."); }
     }
     void toggle() { if (player == null) { if (!queue.isEmpty()) start(Math.max(0, index)); return; } if (player.getStatus() == MediaPlayer.Status.PLAYING) { player.pause(); play.setGraphic(DeskUi.icon("play", 20)); } else { player.play(); play.setGraphic(DeskUi.icon("pause", 20)); } }
     void stop() { if (player != null) { player.stop(); player.dispose(); player = null; } }

@@ -64,7 +64,7 @@ def slim_sqlite(src, dst):
             zout.writestr(i, zin.read(n))
 
 def main():
-    a = argparse.ArgumentParser(); a.add_argument('--cache', default=str(ROOT / 'build/desktop-cache')); a.add_argument('--screenshots'); a.add_argument('--package', action='store_true'); a.add_argument('--notes', default='')
+    a = argparse.ArgumentParser(); a.add_argument('--cache', default=str(ROOT / 'build/desktop-cache')); a.add_argument('--screenshots'); a.add_argument('--package', action='store_true'); a.add_argument('--notes', default=''); a.add_argument('--installer', action='store_true', help='publica também o instalador em entrega/windows (só quando o Java, o Seeky.exe ou o instalador mudam)')
     args = a.parse_args()
     cache = Path(args.cache); cache.mkdir(parents=True, exist_ok=True)
     out = ROOT / 'build/desktop'; shutil.rmtree(out, ignore_errors=True); (out / 'classes').mkdir(parents=True)
@@ -110,14 +110,23 @@ def main():
     run(['x86_64-w64-mingw32-gcc', '-O2', '-municode', '-mwindows', '-o', stage / 'Seeky.exe', DESK / 'launcher/seeky_launcher.c', out / 'seeky.res', '-lshlwapi'])
     (stage / 'LEIA-ME.txt').write_text(f'Seeky {name} para Windows (64 bits)\r\n\r\nOs seus dados ficam em %APPDATA%\\Seeky.\r\nAs actualizações chegam pelo próprio Seeky (Definições → Actualizações).\r\nJava: Azul Zulu 21 com JavaFX (GPLv2 com Classpath Exception), em runtime\\.\r\n', encoding='utf-8')
     dest = ROOT / 'entrega/windows'; dest.mkdir(parents=True, exist_ok=True)
-    installer = dest / f'Seeky-Setup-{name}-x64.exe'
-    run(['makensis', '-V2', f'-DVERSION={name}', f'-DSTAGE={stage}', f'-DOUT={installer}', DESK / 'installer/seeky.nsi'])
+    built = out / f'Seeky-Setup-{name}-x64.exe'
+    run(['makensis', '-V2', f'-DVERSION={name}', f'-DSTAGE={stage}', f'-DOUT={built}', DESK / 'installer/seeky.nsi'])
+    # O instalador (≈ 66 MB, com o Java) só é trocado no repositório quando o Java, o Seeky.exe ou o
+    # instalador mudam: quem o instalar recebe logo a versão nova pelo pacote de actualização.
+    if args.installer:
+        for old in dest.glob('Seeky-Setup-*-x64.exe'): old.unlink()
+        shutil.copy(built, dest / built.name)
+    published = sorted(dest.glob('Seeky-Setup-*-x64.exe'), key=lambda f: [int(x) for x in re.findall(r'\d+', f.name)])
+    installer = published[-1] if published else built
+    for old in dest.glob('Seeky-Desktop-*-app.zip'):
+        if old.name != f'Seeky-Desktop-{name}-app.zip': old.unlink()
     pkg = dest / f'Seeky-Desktop-{name}-app.zip'
     with zipfile.ZipFile(pkg, 'w', zipfile.ZIP_DEFLATED) as z:
         for f in sorted(app.iterdir()): z.write(f, f.name)
     latest = {'versionCode': code, 'versionName': name, 'app': f'https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/{pkg.name}', 'sha256': sha(pkg), 'bytes': pkg.stat().st_size,
               'installer': f'https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/{installer.name}', 'installerSha256': sha(installer), 'notes': args.notes}
     (dest / 'latest.json').write_text(json.dumps(latest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print(json.dumps({'installer': str(installer), 'installer_bytes': installer.stat().st_size, 'app': str(pkg), 'app_bytes': pkg.stat().st_size}, indent=1))
+    print(json.dumps({'installer': str(installer), 'installer_built': str(built), 'installer_bytes': installer.stat().st_size, 'app': str(pkg), 'app_bytes': pkg.stat().st_size}, indent=1))
 
 if __name__ == '__main__': main()
