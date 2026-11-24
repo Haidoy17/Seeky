@@ -28,7 +28,7 @@ public class Presentation5190Test {
     @Test public void morePageOffersTheNewFeatures() throws Exception {
         a.tab = "Ferramentas"; a.render(); f.drain();
         String labels = BooksToolsTest.labels(a.shell);
-        assertTrue(labels.contains("Novidades da 5.47"));
+        assertTrue(labels.contains("Novidades da 5.48"));
         assertTrue(labels.contains("Bloqueio da aplicação"));
         assertTrue(labels.contains("Cópia automática"));
     }

@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.47", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.48", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("contents", "Comentários bíblicos MyBible", "Ferramentas → Bíblias importadas → Comentários bíblicos: carregue um ficheiro .commentaries. Na leitura, os versículos comentados levam ✎ e o comentário aparece por baixo do capítulo", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_bibles", true)));
+        panel.action("flash", "Botão Flash no computador", "O Seeky para Windows 5.48 tem o mesmo botão flutuante de pesquisa: Flash, Completa e Pastas, com Tudo, PDF, Documentos, Imagens, Vídeos e Áudio", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
+        panel.section("Da 5.47");
         panel.action("contents", "Títulos de secção nas Bíblias MyBible", "Ao importar um módulo MyBible, os títulos (\"A criação\", \"O Sermão do Monte\"…) aparecem antes dos versículos na leitura. Numa Bíblia já importada: Ferramentas → Bíblias importadas → a Bíblia → Carregar títulos (o módulo com títulos ou o ficheiro .subheadings)", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_bibles", true)));
         panel.action("pdf", "Seeky para Windows 5.47", "Música e Vídeos separados, com álbuns, artistas, anos e mais ouvidas como no telemóvel; Livros em estante, grelha ou lista com capas; Bíblia com títulos e comentários MyBible", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
         panel.section("Da 5.46");

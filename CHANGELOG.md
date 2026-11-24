@@ -1,5 +1,20 @@
 # Registo de alterações
 
+## 5.48.0 — 2026-11-24 (Android e Windows)
+
+- **Modo Flash no Seeky para Windows**, como no telemóvel: um botão redondo por cima das outras janelas
+  (arrasta-se, encosta à margem, menu com o botão direito) que abre o painel de pesquisa:
+  - *Flash* (instantâneo, pelo índice dos nomes das pastas do utilizador), *Completa* (também notas,
+    livros, marcações, músicas e a Bíblia, incluindo passagens como "João 3:16") e *Pastas* (procura
+    agora no disco); filtros Tudo, PDF, Documentos, Imagens, Vídeos e Áudio; Recentes quando está vazio;
+  - abrir no Seeky (livros, música, vídeo) ou no Windows, abrir a pasta, copiar o caminho;
+  - continua com a janela fechada (ícone junto ao relógio: Abrir Seeky, Pesquisar, Sair), pode
+    iniciar com o Windows só com o botão, abre com Ctrl+K e um segundo arranque mostra o Seeky aberto;
+  - Definições → Botão Flash: tamanho, margem, índice (pastas a juntar, actualizar agora).
+- **Comentários bíblicos MyBible no telemóvel** (Ferramentas → Bíblias importadas → Comentários
+  bíblicos): versículos comentados com ✎ e o comentário por baixo do capítulo; vários comentários,
+  escolher, esconder e remover.
+
 ## 5.47.0 — 2026-11-24 (Android e Windows)
 
 - **Títulos de secção nas Bíblias MyBible** (Android e Windows): ao importar um módulo MyBible, os

@@ -1,0 +1,2 @@
+Seeky para Windows 5.48.0 — autoteste: 22 verificações PASS, incluindo "Flash: índice e pesquisa".
+18 capturas, entre elas desktop-flash.png (painel do botão Flash a procurar "relat").

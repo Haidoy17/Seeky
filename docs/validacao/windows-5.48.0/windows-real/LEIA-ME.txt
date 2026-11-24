@@ -1,0 +1,2 @@
+Capturas num Windows verdadeiro (execução 45488717224): instalador 5.45.0, actualização para a 5.48.0 como o Seeky faz, autoteste 22/22, 18 ecrãs incluindo o painel do botão Flash.
+(Os cantos pretos de desktop-flash.png são só da captura: o painel é transparente nos cantos.)

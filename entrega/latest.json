@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007400,
-  "versionName": "5.47.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.47.0.apk",
-  "sha256": "2968cc8d65ff2bf0a9bc313f2fa20fd146dc7712f768a6c0d684bbff7be2150f",
-  "bytes": 13768049,
-  "notes": "Títulos de secção nas Bíblias MyBible; Seeky para Windows com Música e Vídeos separados, Livros em estante/grelha/lista com capas e comentários MyBible."
+  "versionCode": 5007500,
+  "versionName": "5.48.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.48.0.apk",
+  "sha256": "db5a551de27482c7d1fee07f7ccf1c9ae8513568606e2054a76de9b5d0e3c342",
+  "bytes": 13768632,
+  "notes": "Comentários bíblicos MyBible no telemóvel; botão Flash no Seeky para Windows."
 }

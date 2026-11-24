@@ -7,6 +7,8 @@ public final class DeskLauncher {
         // O Seeky fala português: datas e números em português mesmo num Windows noutra língua.
         if (!"pt".equals(java.util.Locale.getDefault().getLanguage())) java.util.Locale.setDefault(java.util.Locale.forLanguageTag("pt-PT"));
         if (java.util.Arrays.asList(args).contains("--self-test")) { System.exit(DeskSelfTest.run() ? 0 : 1); return; }
+        // Só um Seeky de cada vez: um segundo arranque mostra o que já está aberto (ou o seu Flash).
+        if (!java.util.Arrays.toString(args).contains("--screenshots") && DeskTray.handOver(String.join(" ", args))) { System.exit(0); return; }
         javafx.application.Application.launch(DeskMain.class, args);
     }
 }

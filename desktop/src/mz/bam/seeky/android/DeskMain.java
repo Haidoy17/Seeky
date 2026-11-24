@@ -33,13 +33,13 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
-    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos;
+    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash;
 
 
     @Override public void start(Stage stage) throws Exception {
         instance = this; this.stage = stage;
         store = new DeskStore();
-        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO);
+        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this);
         root = new BorderPane();
         root.getStyleClass().add("root-pane"); theme(store.get("theme", DeskThemes.DEFAULT));
         nav.getStyleClass().add("nav"); nav.setPadding(new Insets(18, 12, 18, 12)); nav.setPrefWidth(232);
@@ -70,17 +70,33 @@ public final class DeskMain extends Application {
         try { stage.getIcons().add(new Image(DeskMain.class.getResourceAsStream("/seeky.png"))); } catch (Exception ignored) {}
         stage.setScene(scene); stage.setMinWidth(760); stage.setMinHeight(520);
         if (DeskThemes.SCHEDULE.equals(store.get("theme", ""))) { javafx.animation.Timeline schedule = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.minutes(5), e -> { if (DeskThemes.SCHEDULE.equals(store.get("theme", ""))) theme(DeskThemes.SCHEDULE); })); schedule.setCycleCount(javafx.animation.Animation.INDEFINITE); schedule.play(); }
-        stage.setOnCloseRequest(e -> { focus.stop(); store.put("maximized", window.maximized ? "1" : "0"); DeskSpeech.stop(); media.stop(); store.close(); worker.shutdownNow(); Platform.exit(); });
+        stage.setOnCloseRequest(e -> {
+            store.put("maximized", window.maximized ? "1" : "0");
+            // Com "Manter o Flash quando fechar", a janela esconde-se e o botão continua (ícone junto ao relógio).
+            if (flash.enabled() && "1".equals(store.get("flash_keep", "1")) && !getParameters().getNamed().containsKey("screenshots")) { e.consume(); stage.hide(); DeskTray.show(this); if (!"1".equals(store.get("flash_told", "0"))) { store.put("flash_told", "1"); DeskTray.tell("O Seeky continua no botão Flash. Para sair: ícone do Seeky junto ao relógio → Sair."); } return; }
+            quit();
+        });
         open(store.get("last", "home"));
-        stage.show();
+        boolean flashOnly = getParameters().getUnnamed().contains("--flash");
+        Platform.setImplicitExit(false);
+        scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> flash.open(""));
+        if (!flashOnly) stage.show();
+        if (getParameters().getNamed().get("screenshots") == null) { DeskTray.listen(this); flash.show(); if (flashOnly) DeskTray.show(this); }
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
     java.io.File demoBook;
+    /** Leaves for good: stops sound, timers and the Flash, closes the data. */
+    void quit() {
+        try { focus.stop(); DeskSpeech.stop(); media.stop(); flash.hide(); DeskTray.remove(); store.close(); worker.shutdownNow(); } catch (Exception ignored) {}
+        Platform.exit(); System.exit(0);
+    }
+    /** Shows the main window (from the Flash, the tray icon or a second start). */
+    void bringToFront() { if (!stage.isShowing()) stage.show(); if (stage.isIconified()) stage.setIconified(false); stage.toFront(); stage.requestFocus(); }
     void demo() {
         try {
             if (store.bible() == 0) {
@@ -112,6 +128,12 @@ public final class DeskMain extends Application {
                 store.update("UPDATE books SET position=3,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 3600000, books.get(1).getPath());
                 store.update("UPDATE books SET position=8,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 7200000, books.get(3).getPath());
             }
+            java.io.File docs = DeskStore.folder("exemplo/documentos");
+            if (!new java.io.File(docs, "Relatório anual 2025.pdf").isFile()) {
+                String[] names = {"Relatório anual 2025.pdf", "Relatório de vendas.xlsx", "Relatório do projecto Seeky.docx", "Fotos do retiro/relatório-foto.jpg", "Planeamento 2026.docx", "Sermão de domingo.pdf", "Música/Relato de fé.mp3"};
+                for (String n : names) { java.io.File f = new java.io.File(docs, n); f.getParentFile().mkdirs(); java.nio.file.Files.write(f.toPath(), new byte[1200 + n.length() * 97]); }
+            }
+            flash.index.rebuild(Collections.singletonList(docs), () -> false);
             if (store.count("SELECT COUNT(*) FROM notes") == 0) store.update("INSERT INTO notes(title,body,folder,created,updated) VALUES(?,?,?,?,?)", "Sermão de domingo", "## Fé\nLer Hebreus 11:1 e João 3:16.\n[ ] Preparar slides\n[x] Escolher hinos", "Sermões", System.currentTimeMillis(), System.currentTimeMillis());
         } catch (Exception e) { System.out.println("demo: " + e); }
     }
@@ -120,14 +142,15 @@ public final class DeskMain extends Application {
         dir.mkdirs();
         if (left.isEmpty()) { Platform.exit(); System.exit(0); return; }
         String id = left.remove(0);
-        if (id.equals("book")) reader.open(demoBook, 0, 0);
+        if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
+        else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
         else if (id.equals("music-albums")) { music.tab = "Álbuns"; open("music"); music.tab = "Início"; }
         else if (id.equals("notes-edit")) notes.edit(0, "Estudo: o amor de Deus", "# O amor de Deus\nLer **João 3:16** e Romanos 5:8.\n\n- Deus amou o mundo\n- Deu o seu Filho\n\n[ ] Orar pela família\n[x] Ler 1 João 4\n\n> Porque Deus amou o mundo de tal maneira…");
         else open(id);
         javafx.animation.PauseTransition wait = new javafx.animation.PauseTransition(javafx.util.Duration.millis(1500));
         wait.setOnFinished(e -> {
-            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage(scene.snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
+            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage((id.equals("flash") ? flash.panelScene : scene).snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); if (id.equals("flash")) flash.panel.hide(); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
             if (id.equals("notes")) left.add(0, "notes-edit");
             screenshots(dir, left);
         });
