@@ -33,13 +33,13 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
-    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus;
+    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos;
 
 
     @Override public void start(Stage stage) throws Exception {
         instance = this; this.stage = stage;
         store = new DeskStore();
-        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this);
+        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO);
         root = new BorderPane();
         root.getStyleClass().add("root-pane"); theme(store.get("theme", DeskThemes.DEFAULT));
         nav.getStyleClass().add("nav"); nav.setPadding(new Insets(18, 12, 18, 12)); nav.setPrefWidth(232);
@@ -47,7 +47,7 @@ public final class DeskMain extends Application {
         VBox head = new VBox(0, brand); head.setPadding(new Insets(0, 10, 16, 10));
         nav.getChildren().add(head);
         item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("game", "Jogo da Bíblia", "game");
-        item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("media", "Música e vídeo", "music");
+        item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video");
         Region gap = new Region(); VBox.setVgrow(gap, Priority.ALWAYS); nav.getChildren().add(gap);
         item("settings", "Definições", "settings");
         // Avisos discretos no canto (sem barra de estado): aparecem e desaparecem sozinhos.
@@ -76,7 +76,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "book", "marks", "focus", "files", "media", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -84,9 +84,7 @@ public final class DeskMain extends Application {
     void demo() {
         try {
             if (store.bible() == 0) {
-                java.io.File f = java.io.File.createTempFile("seeky-demo", ".csv");
-                java.nio.file.Files.write(f.toPath(), ("GEN,1,1,\"No princípio, Deus criou os céus e a terra.\"\nGEN,1,2,A terra estava sem forma e vazia.\nGEN,1,3,Deus disse: Haja luz. E houve luz.\nJHN,3,16,Porque Deus amou o mundo de tal maneira que deu o seu Filho unigénito.\nPSA,23,1,\"O Senhor é o meu pastor; nada me faltará.\"\nPSA,23,2,Faz-me descansar em verdes pastos.\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                DeskBible.importFile(store, f, "Exemplo (teste)", () -> false); f.delete();
+                DeskBible.importFile(store, DeskSelfTest.myBible(DeskStore.folder("exemplo")), "Exemplo (teste)", () -> false);
                 bible.book = "Génesis"; bible.chapter = 1;
             }
             demoBook = new java.io.File(DeskStore.home(), "O caminho da fé.txt");
@@ -97,6 +95,23 @@ public final class DeskMain extends Application {
                 store.update("INSERT INTO focus(day,subject,minutes,ended) VALUES(?,?,?,?)", BibleStudyCore.day(System.currentTimeMillis()), "Estudo bíblico", 50, System.currentTimeMillis());
                 store.update("INSERT INTO focus(day,subject,minutes,ended) VALUES(?,?,?,?)", BibleStudyCore.day(System.currentTimeMillis() - 86400000L), "Leitura", 25, System.currentTimeMillis() - 86400000L);
             }
+            if (store.count("SELECT COUNT(*) FROM tracks") == 0) {
+                java.io.File m = DeskStore.folder("exemplo/musica"); List<java.io.File> songs = new ArrayList<>();
+                String[][] demoSongs = {{"Grande é o Senhor", "Coro Seeky", "Louvores", "2019", "Gospel"}, {"Rocha eterna", "Coro Seeky", "Louvores", "2019", "Gospel"}, {"Aleluia", "Banda da Fé", "Ao vivo em Maputo", "2021", "Gospel"}, {"Graça", "Ana Mabunda", "Caminho", "2023", "Pop"}, {"Luz do mundo", "Ana Mabunda", "Caminho", "2023", "Pop"}, {"Salmo 23", "Banda da Fé", "Ao vivo em Maputo", "2021", "Gospel"}};
+                for (int i = 0; i < demoSongs.length; i++) songs.add(DeskSelfTest.mp3(m, "faixa" + i + ".mp3", demoSongs[i][0], demoSongs[i][1], demoSongs[i][2], demoSongs[i][3], demoSongs[i][4], (i % 2 + 1) + ""));
+                DeskLibrary.addFiles(store, DeskLibrary.AUDIO, songs);
+                for (int i = 0; i < 5; i++) DeskLibrary.played(store, songs.get(0).getAbsolutePath()); for (int i = 0; i < 3; i++) DeskLibrary.played(store, songs.get(3).getAbsolutePath()); DeskLibrary.played(store, songs.get(2).getAbsolutePath());
+                store.update("UPDATE tracks SET favorite=1 WHERE path=?", songs.get(3).getAbsolutePath());
+            }
+            if (store.count("SELECT COUNT(*) FROM books") <= 1) {
+                java.io.File shelf = DeskStore.folder("exemplo/livros"); List<java.io.File> books = new ArrayList<>();
+                Object[][] demoBooks = {{"Confissões", 0x6b2f3f}, {"O peregrino", 0x2f4f6b}, {"Cartas de esperança", 0x7a5a2f}, {"Graça abundante", 0x2f5d50}, {"A cidade de Deus", 0x3f4b7a}, {"Mere christianity", 0x5b3a6b}, {"Salmos para cada dia", 0x4a6b3a}};
+                for (int i = 0; i < demoBooks.length; i++) books.add(DeskSelfTest.epub(shelf, "livro" + i + ".epub", (String) demoBooks[i][0], (Integer) demoBooks[i][1]));
+                java.io.File pdf = new java.io.File(shelf, "Estudo de Romanos.pdf"); try (java.io.OutputStream o = new java.io.FileOutputStream(pdf)) { DeskPdf.note("Estudo de Romanos", "# Estudo de Romanos\nCapítulo 1 a 8: a justiça de Deus.", shelf, o); } books.add(pdf);
+                DeskReader.importBooks(store, books);
+                store.update("UPDATE books SET position=3,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 3600000, books.get(1).getPath());
+                store.update("UPDATE books SET position=8,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 7200000, books.get(3).getPath());
+            }
             if (store.count("SELECT COUNT(*) FROM notes") == 0) store.update("INSERT INTO notes(title,body,folder,created,updated) VALUES(?,?,?,?,?)", "Sermão de domingo", "## Fé\nLer Hebreus 11:1 e João 3:16.\n[ ] Preparar slides\n[x] Escolher hinos", "Sermões", System.currentTimeMillis(), System.currentTimeMillis());
         } catch (Exception e) { System.out.println("demo: " + e); }
     }
@@ -106,6 +121,8 @@ public final class DeskMain extends Application {
         if (left.isEmpty()) { Platform.exit(); System.exit(0); return; }
         String id = left.remove(0);
         if (id.equals("book")) reader.open(demoBook, 0, 0);
+        else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
+        else if (id.equals("music-albums")) { music.tab = "Álbuns"; open("music"); music.tab = "Início"; }
         else if (id.equals("notes-edit")) notes.edit(0, "Estudo: o amor de Deus", "# O amor de Deus\nLer **João 3:16** e Romanos 5:8.\n\n- Deus amou o mundo\n- Deu o seu Filho\n\n[ ] Orar pela família\n[x] Ler 1 João 4\n\n> Porque Deus amou o mundo de tal maneira…");
         else open(id);
         javafx.animation.PauseTransition wait = new javafx.animation.PauseTransition(javafx.util.Duration.millis(1500));
@@ -131,7 +148,8 @@ public final class DeskMain extends Application {
             case "notes": view = notes.view(); break;
             case "reader": view = reader.view(); break;
             case "files": view = files.view(); break;
-            case "media": view = media.view(); break;
+            case "music": case "media": view = music.view(); id = "music"; break;
+            case "videos": view = videos.view(); break;
             case "focus": view = focus.view(); break;
             case "marks": view = DeskMarks.view(this); id = "reader"; break;
             case "settings": view = DeskSettings.view(this); break;
@@ -163,7 +181,8 @@ public final class DeskMain extends Application {
             {"note", "Bloco de notas", "Texto rico, tarefas, passagens, Word, PDF e Seeky IA", "notes"},
             {"reader", "Livros", "PDF, EPUB, Word, TXT e outros formatos", "reader"},
             {"folder", "Ficheiros", "Explorar discos, procurar e organizar", "files"},
-            {"music", "Música e vídeo", "Leitor com fila e letras sincronizadas", "media"},
+            {"music", "Música", "Faixas, álbuns, artistas, anos e mais ouvidas", "music"},
+            {"video", "Vídeos", "Pastas, vistos recentemente e favoritos", "videos"},
             {"timer", "Foco", "Pomodoro por disciplina e tempo de estudo da semana", "focus"},
             {"marker", "Marcações", "Tudo o que realçou nos livros, com as suas notas", "marks"},
             {"settings", "Definições", "Tema, IA, voz e actualizações", "settings"}};

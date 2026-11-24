@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.46", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.47", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("contents", "Títulos de secção nas Bíblias MyBible", "Ao importar um módulo MyBible, os títulos (\"A criação\", \"O Sermão do Monte\"…) aparecem antes dos versículos na leitura. Numa Bíblia já importada: Ferramentas → Bíblias importadas → a Bíblia → Carregar títulos (o módulo com títulos ou o ficheiro .subheadings)", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_bibles", true)));
+        panel.action("pdf", "Seeky para Windows 5.47", "Música e Vídeos separados, com álbuns, artistas, anos e mais ouvidas como no telemóvel; Livros em estante, grelha ou lista com capas; Bíblia com títulos e comentários MyBible", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
+        panel.section("Da 5.46");
         panel.action("share", "Notas entre o telemóvel e o computador", "Bloco de notas → Pastas → Enviar notas para o computador: um ficheiro .seekynotes com todas as notas, pastas e imagens, que o Seeky para Windows importa. O contrário também: Importar notas do computador. Notas repetidas não são duplicadas e as bloqueadas ficam só no telemóvel", false, () -> a.startActivity(new android.content.Intent(a, NotepadActivity.class)));
         panel.action("pdf", "Seeky para Windows (64 bits)", "O Seeky também existe para o computador, com as mesmas actualizações: Bíblia, estudo, notas com IA, livros com marcações, Foco (Pomodoro), ficheiros e música. Instalador em entrega/windows no GitHub do Seeky", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
         panel.section("Da 5.45");

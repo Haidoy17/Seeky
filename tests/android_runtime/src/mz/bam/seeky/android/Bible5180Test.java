@@ -48,6 +48,23 @@ public class Bible5180Test {
   w.run(job("AMensagem.SQLite3",f));
   assertEquals(3,published());assertEquals("Deus disse: Luz! E a luz apareceu.",verse("Génesis",1,3));assertEquals("Deus chamou à luz Dia.",verse("Génesis",1,5));
  }
+ @Test public void myBibleSectionTitlesArePublishedAndCanBeLoadedLater()throws Exception{
+  // 5.47: "stories" inside the module become section titles of the Bible; a .subheadings file can replace them later.
+  File f=new File(w.app.getCacheDir(),"Titulos.SQLite3");try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(f,null)){db.execSQL("CREATE TABLE verses(book_number INTEGER,chapter INTEGER,verse INTEGER,text TEXT)");
+   db.execSQL("INSERT INTO verses VALUES(10,1,1,'No princípio criou Deus os céus e a terra.')");db.execSQL("INSERT INTO verses VALUES(10,1,2,'A terra era sem forma.')");db.execSQL("INSERT INTO verses VALUES(10,1,26,'Façamos o homem.')");
+   db.execSQL("CREATE TABLE stories(book_number INTEGER,chapter INTEGER,verse INTEGER,order_if_several INTEGER,title TEXT)");db.execSQL("INSERT INTO stories VALUES(10,1,1,0,'A criação')");db.execSQL("INSERT INTO stories VALUES(10,1,26,0,'O <i>ser humano</i>')");}
+  w.run(job("Titulos.SQLite3",f));
+  assertEquals(3,published());long source;try(PlusStore db=new PlusStore(w.app)){source=db.rows("bible_sources",null,null,"id DESC",1).get(0).id();}
+  Map<String,List<String>> titles=BibleTitles.chapters(w.app,source,"Génesis",1,1);
+  assertEquals(Collections.singletonList("A criação"),titles.get("1:1"));assertEquals(Collections.singletonList("O ser humano"),titles.get("1:26"));
+  File sub=new File(w.app.getCacheDir(),"Titulos.subheadings.SQLite3");try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(sub,null)){db.execSQL("CREATE TABLE subheadings(book_number INTEGER,chapter INTEGER,verse INTEGER,order_if_several INTEGER,subheading TEXT)");db.execSQL("INSERT INTO subheadings VALUES(10,1,1,0,'No princípio')");db.execSQL("INSERT INTO subheadings VALUES(10,1,1,1,'Os seis dias')");}
+  assertEquals(2,BibleTitles.load(w.app,source,sub,()->false));
+  assertEquals(Arrays.asList("No princípio","Os seis dias"),BibleTitles.chapters(w.app,source,"Génesis",1,1).get("1:1"));
+  File empty=new File(w.app.getCacheDir(),"semtitulos.SQLite3");try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(empty,null)){db.execSQL("CREATE TABLE verses(book_number INTEGER,chapter INTEGER,verse INTEGER,text TEXT)");}
+  try{BibleTitles.load(w.app,source,empty,()->false);fail();}catch(java.io.IOException expected){}
+  assertEquals("a falha não apaga os títulos que já existiam",2,BibleTitles.count(w.app,source));
+  BibleTitles.delete(w.app,source);assertEquals(0,BibleTitles.count(w.app,source));
+ }
  @Test public void completeLargeModulePublishesThirtyThreeThousandVerses()throws Exception{File f=new File(w.app.getCacheDir(),"large.SQLite3");try(SQLiteDatabase db=SQLiteDatabase.openOrCreateDatabase(f,null)){db.execSQL("CREATE TABLE verses(book_number INTEGER,chapter INTEGER,verse INTEGER,text TEXT)");db.beginTransaction();try(SQLiteStatement insert=db.compileStatement("INSERT INTO verses VALUES(?,?,?,?)")){for(int b=1;b<=66;b++)for(int c=1;c<=10;c++)for(int v=1;v<=50;v++){insert.bindLong(1,b*10);insert.bindLong(2,c);insert.bindLong(3,v);insert.bindString(4,"Versículo de ensaio "+b+" "+c+":"+v);insert.executeInsert();}db.setTransactionSuccessful();}finally{db.endTransaction();}}w.run(job("large.SQLite3",f));assertEquals(33000,published());assertEquals("Versículo de ensaio 29 10:50",verse("Isaías",10,50));}
  public static class Tree extends DocumentsProvider{
   public boolean onCreate(){return true;}public Cursor queryRoots(String[] p){return new MatrixCursor(new String[]{"root_id","document_id"});}public boolean isChildDocument(String p,String c){return c.startsWith(p+"/");}

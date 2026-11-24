@@ -1,3 +1,14 @@
+## Seeky 5.47.0
+
+Instale **Seeky_5.47.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.47.0.
+
+### Novidades
+- **Títulos de secção nas Bíblias MyBible**, no telemóvel e no computador; *Carregar títulos* para
+  Bíblias já importadas.
+- **Seeky para Windows**: comentários MyBible; Música e Vídeos separados com álbuns, artistas, anos e
+  mais ouvidas; Livros em estante, grelha ou lista, com capas e importar pasta.
+
 ## Seeky 5.46.0
 
 Instale **Seeky_5.46.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

@@ -172,6 +172,17 @@ public class Bible529Test {
         assertTrue(labels(hub).contains("Certo!"));
     }
 
+    @Test public void sectionTitlesAppearBeforeTheirVersesWhenReading()throws Exception{
+        // 5.47: MyBible titles are drawn as headings inside the chapter, before the verse they belong to.
+        bible();BibleStudyActivity hub=launch(BibleStudyActivity.class);
+        long source;try(PlusStore db=new PlusStore(a)){source=db.rows("bible_sources",null,null,"id DESC",1).get(0).id();}
+        try(BibleTitles t=new BibleTitles(a)){t.getWritableDatabase().insert("titles",null,BibleTitles.row(source,"Isaías",3,1,0,"Juízo sobre Jerusalém"));t.getWritableDatabase().insert("titles",null,BibleTitles.row(source,"Isaías",3,4,0,"Governantes sem juízo"));}
+        BibleLinks.readChapter(a,"Isaías",3,null);drain();
+        String text=dialog();
+        assertTrue(text,text.contains("Juízo sobre Jerusalém")&&text.contains("Governantes sem juízo"));
+        assertTrue(text,text.indexOf("Juízo sobre Jerusalém")<text.indexOf("Isaías três, versículo 1.")&&text.indexOf("Isaías três, versículo 3.")<text.indexOf("Governantes sem juízo")&&text.indexOf("Governantes sem juízo")<text.indexOf("Isaías três, versículo 4."));
+        capture(ShadowDialog.getLatestDialog().getWindow().getDecorView(),"titulos",800);
+    }
     @Test public void theGamePlaysTenQuestionsAndKeepsTheNameInTheRecords()throws Exception{
         bible();
         BibleGameActivity game=launch(BibleGameActivity.class);

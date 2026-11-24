@@ -14,5 +14,16 @@ final class BibleMyBible {
    int count=0;try(Cursor c=db.rawQuery("SELECT book_number,chapter,verse,text FROM verses ORDER BY book_number,chapter,verse",null)){while(c.moveToNext()){if(stop.getAsBoolean())throw new InterruptedIOException("Importação MyBible cancelada.");pulse.run();int number=c.getInt(0),chapter=c.getInt(1),verse=c.getInt(2);if(chapter==0||verse==0)continue;String book=names.getOrDefault(number,standard(number));if(book.isEmpty())throw new IOException("Livro MyBible desconhecido: "+number+". O módulo precisa de nomes de livros reconhecidos.");if(c.getType(3)!=Cursor.FIELD_TYPE_STRING)throw new IOException("O módulo usa versículos comprimidos ou num formato não suportado.");if(count>=200000)throw new IOException("A Bíblia excede 200000 versículos.");if(BibleText.emit(sink,book,chapter,verse,clean(c.getString(3))))count++;}}if(count==0)throw new IOException("O módulo MyBible não contém versículos de texto.");return count;
   }catch(SQLiteException e){throw new IOException("Não foi possível ler o módulo MyBible SQLite3: "+e.getMessage(),e);}
  }
+ interface Titles{void title(String book,int chapter,int verse,int order,String text)throws Exception;}
+ /** Section titles of a MyBible module: "stories" (inside Bibles), "subheadings" (.subheadings.SQLite3) or "headings". Returns how many. */
+ static int titles(File file,Titles sink,BooleanSupplier stop)throws Exception{try(SQLiteDatabase db=SQLiteDatabase.openDatabase(file.getPath(),null,SQLiteDatabase.OPEN_READONLY|SQLiteDatabase.NO_LOCALIZED_COLLATORS)){
+   Map<Integer,String> names=new HashMap<>();if(table(db,"books")&&columns(db,"books").contains("book_number")){Set<String> fields=columns(db,"books");String longName=fields.contains("long_name")?"long_name":"''",shortName=fields.contains("short_name")?"short_name":"''";try(Cursor c=db.rawQuery("SELECT book_number,"+longName+","+shortName+" FROM books",null)){while(c.moveToNext()){String name=BibleText.code(clean(c.isNull(1)?"":c.getString(1)));if(name.isEmpty())name=BibleText.code(clean(c.isNull(2)?"":c.getString(2)));if(!name.isEmpty())names.put(c.getInt(0),name);}}}
+   String[][] kinds={{"stories","title"},{"subheadings","subheading"},{"headings","heading"},{"subheadings","title"}};
+   for(String[] k:kinds){if(!table(db,k[0]))continue;Set<String> cols=columns(db,k[0]);if(!cols.containsAll(Arrays.asList("book_number","chapter","verse",k[1])))continue;String order=cols.contains("order_if_several")?"order_if_several":"0";int count=0;
+    try(Cursor c=db.rawQuery("SELECT book_number,chapter,verse,"+order+","+k[1]+" FROM "+k[0]+" ORDER BY book_number,chapter,verse,"+order,null)){while(c.moveToNext()){if(stop.getAsBoolean())throw new InterruptedIOException("Importação cancelada.");String book=names.getOrDefault(c.getInt(0),standard(c.getInt(0)));if(book.isEmpty()||c.getType(4)!=Cursor.FIELD_TYPE_STRING)continue;String text;try{text=clean(c.getString(4));}catch(IOException e){continue;}if(text.isEmpty()||text.length()>400)continue;if(++count>100000)throw new IOException("Demasiados títulos no módulo.");sink.title(book,Math.max(1,c.getInt(1)),Math.max(1,c.getInt(2)),c.getInt(3),text);}}
+    if(count>0)return count;}
+   return 0;
+  }catch(SQLiteException e){throw new IOException("Não foi possível ler o módulo MyBible SQLite3: "+e.getMessage(),e);}
+ }
  private BibleMyBible(){}
 }

@@ -33,6 +33,13 @@ final class DeskUi {
         ICONS.put("export", "M12 3 V15 M7 8 L12 3 L17 8 M5 14 V20 H19 V14");
         ICONS.put("timer", "M12 21 A8 8 0 1 0 12 5 A8 8 0 1 0 12 21 Z M12 9 V13 L14.5 15 M9.5 2.5 H14.5 M18.5 5.5 L20 7");
         ICONS.put("marker", "M6 3 H18 V21 L12 16.5 L6 21 Z");
+        ICONS.put("video", "M3 6 H16 V18 H3 Z M16 10 L21 7 V17 L16 14");
+        ICONS.put("person", "M12 12 A4 4 0 1 0 12 4 A4 4 0 1 0 12 12 Z M4.5 20.5 Q5.5 14.5 12 14.5 Q18.5 14.5 19.5 20.5");
+        ICONS.put("disc", "M12 21 A9 9 0 1 0 12 3 A9 9 0 1 0 12 21 Z M12 14.5 A2.5 2.5 0 1 0 12 9.5 A2.5 2.5 0 1 0 12 14.5 Z");
+        ICONS.put("next", "M5 4 L15 12 L5 20 Z M19 4 V20");
+        ICONS.put("prev", "M19 4 L9 12 L19 20 Z M5 4 V20");
+        ICONS.put("queue", "M4 6 H20 M4 12 H20 M4 18 H13 M17 15 L21 18 L17 21 Z");
+        ICONS.put("lyrics", "M5 4 H19 V16 H10 L6 20 V16 H5 Z M8.5 8.5 H15.5 M8.5 12 H13.5");
         ICONS.put("update", "M4 12 A8 8 0 0 1 18 6.5 M20 4 V9 H15 M20 12 A8 8 0 0 1 6 17.5 M4 20 V15 H9");
     }
     static Node icon(String name, double size) {

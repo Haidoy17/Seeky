@@ -149,6 +149,8 @@ final class BibleLinks {
         List<StudyStore.Row> sources=Collections.emptyList();
         UiDialog dialog;LinearLayout versions,navigation;TextView meta,body,wholeLabel,voiceLabel,compareChip;
         String plain="",speakable="",version="",memory="";
+        /** Section titles of the chosen Bible for the chapters shown ("chapter:verse" → titles). */
+        Map<String,List<String>> titles=new HashMap<>();
         TextToSpeech voice;
         /** Runs after "Marcar como lido" (the study plan refreshes its day). */
         Runnable onRead;
@@ -180,8 +182,10 @@ final class BibleLinks {
                         max=DatabaseUtils.longForQuery(db.getReadableDatabase(),"SELECT IFNULL(MAX(chapter),0) FROM bible_verses WHERE source=? AND book=?",new String[]{""+chosen,ref.book});
                     }
                 }
+                int lo=Integer.MAX_VALUE,hi=0;for(int[] r:ranges){lo=Math.min(lo,r[0]);hi=Math.max(hi,r[2]);}
+                final Map<String,List<String>> heads=chosen>0&&hi>0?BibleTitles.chapters(a,chosen,ref.book,lo,hi):new HashMap<>();
                 final long picked=chosen;final int last=(int)max;
-                PlusUi.post(a,()->{if(token==serial&&!a.isFinishing())show(found,picked,passages,last);});
+                PlusUi.post(a,()->{if(token==serial&&!a.isFinishing()){titles=heads;show(found,picked,passages,last);}});
             });
         }
         String name(long id){for(StudyStore.Row s:sources)if(s.id()==id)return s.s("title");return "";}
@@ -198,6 +202,7 @@ final class BibleLinks {
                 for(StudyStore.Row row:rows.subList(0,Math.min(500,rows.size()))){
                     int c=(int)row.n("chapter"),v=(int)row.n("verse");String value=row.s("value").trim();
                     if(chapters&&c!=shown&&!whole){heading(out,AppLanguage.text(a,"Capítulo")+" "+c,.95f);shown=c;}
+                    if(e.getKey()==picked&&!compare)for(String title:titles.getOrDefault(c+":"+v,Collections.emptyList())){if(out.length()>0&&out.charAt(out.length()-1)=='\n'&&out.length()>1)out.append('\n');heading(out,title,1.0f);}
                     int start=out.length();
                     out.append(String.valueOf(v));out.setSpan(new StyleSpan(Typeface.BOLD),start,out.length(),0);out.setSpan(new ForegroundColorSpan(colors.accent),start,out.length(),0);out.setSpan(new RelativeSizeSpan(.78f),start,out.length(),0);
                     out.append(' ').append(value);
