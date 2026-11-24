@@ -1,0 +1,68 @@
+name: Windows
+
+# Seeky para Windows: compila e testa no Linux (como no computador de desenvolvimento) e, numa máquina
+# Windows verdadeira, instala o instalador publicado em entrega/windows e corre "Seeky.exe --self-test".
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['desktop/**', 'tools/build_desktop.py', 'entrega/windows/**', 'app/src/main/java/**', '.github/workflows/windows.yml']
+  pull_request:
+    paths: ['desktop/**', 'tools/build_desktop.py', 'entrega/windows/**', 'app/src/main/java/**', '.github/workflows/windows.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compilar o Seeky Desktop e correr o autoteste
+        run: python3 tools/build_desktop.py --cache "$RUNNER_TEMP/desktop-cache"
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar sem perguntas (como um utilizador)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem entrega/windows/Seeky-Setup-*-x64.exe | Sort-Object LastWriteTime | Select-Object -Last 1
+          Write-Host "Instalador: $($setup.Name) ($([math]::Round($setup.Length/1MB,1)) MB)"
+          $p = Start-Process $setup.FullName -ArgumentList '/S' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "O instalador terminou com $($p.ExitCode)" }
+          $dir = "$env:LOCALAPPDATA\Programs\Seeky"
+          foreach ($f in 'Seeky.exe','runtime\bin\javaw.exe','app\seeky-desktop.jar','Desinstalar.exe') { if (!(Test-Path "$dir\$f")) { throw "Falta $f" } }
+          if (!(Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Seeky\Seeky.lnk")) { throw "Falta o atalho no menu Iniciar" }
+      - name: Autoteste pelo Seeky.exe
+        shell: pwsh
+        run: |
+          $dir = "$env:LOCALAPPDATA\Programs\Seeky"
+          & "$dir\runtime\bin\java.exe" -Dfile.encoding=UTF-8 --add-modules javafx.controls,javafx.web,javafx.media,javafx.swing -cp "$dir\app\*" mz.bam.seeky.android.DeskLauncher --self-test
+          if ($LASTEXITCODE -ne 0) { throw "Autoteste falhou ($LASTEXITCODE)" }
+          $p = Start-Process "$dir\Seeky.exe" -ArgumentList '--self-test' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Seeky.exe --self-test terminou com $($p.ExitCode)" }
+          Write-Host "Seeky.exe --self-test: OK"
+      - name: Pacote de actualização (o que o Seeky descarrega sozinho)
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem entrega/windows/Seeky-Desktop-*-app.zip | Select-Object -Last 1
+          $manifest = Get-Content entrega/windows/latest.json -Raw | ConvertFrom-Json
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $manifest.sha256) { throw "SHA-256 do pacote não corresponde a latest.json" }
+          Expand-Archive $zip.FullName -DestinationPath "$env:RUNNER_TEMP\app" -Force
+          & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" --add-modules javafx.controls,javafx.web,javafx.media,javafx.swing -cp "$env:RUNNER_TEMP\app\*" mz.bam.seeky.android.DeskLauncher --self-test
+          if ($LASTEXITCODE -ne 0) { throw "Autoteste do pacote de actualização falhou" }
+      - name: Desinstalar
+        shell: pwsh
+        run: |
+          $p = Start-Process "$env:LOCALAPPDATA\Programs\Seeky\Desinstalar.exe" -ArgumentList '/S' -Wait -PassThru
+          Start-Sleep -Seconds 5
+          if (Test-Path "$env:LOCALAPPDATA\Programs\Seeky\Seeky.exe") { throw "A desinstalação deixou o Seeky.exe" }

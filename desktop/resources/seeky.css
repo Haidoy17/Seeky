@@ -1,0 +1,71 @@
+/* Seeky Desktop — the Seeky look on Windows: dark (gold) and light (sage) themes. */
+.root-pane.dark { -seeky-bg: #1c1c1c; -seeky-surface: #262626; -seeky-raised: #2f2f2f; -seeky-ink: #eeeae2; -seeky-muted: #a8a39a; -seeky-accent: #d6b24c; -seeky-on-accent: #1c1c1c; -seeky-line: #3a3a3a; }
+.root-pane.light { -seeky-bg: #f2eee6; -seeky-surface: #fbf8f2; -seeky-raised: #ffffff; -seeky-ink: #23231f; -seeky-muted: #6b675e; -seeky-accent: #3d5a40; -seeky-on-accent: #ffffff; -seeky-line: #ddd6c8; }
+
+.root-pane { -fx-background-color: -seeky-bg; -fx-font-family: "Segoe UI", "Roboto", "Arial"; -fx-font-size: 14px; }
+.root-pane .label, .root-pane .radio-button, .root-pane .check-box { -fx-text-fill: -seeky-ink; }
+.nav { -fx-background-color: -seeky-surface; -fx-border-color: transparent -seeky-line transparent transparent; }
+.brand { -fx-font-family: "Georgia", "Cambria", serif; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -seeky-accent !important; }
+.nav-item { -fx-background-color: transparent; -fx-text-fill: -seeky-ink; -fx-font-size: 14.5px; -fx-padding: 10 14; -fx-background-radius: 12; -fx-cursor: hand; }
+.nav-item:hover { -fx-background-color: -seeky-raised; }
+.nav-item.selected { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; }
+.nav-item.selected .icon { -fx-stroke: -seeky-on-accent; }
+.icon { -fx-fill: transparent; -fx-stroke: -seeky-ink; -fx-stroke-width: 1.8; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; }
+.page { -fx-background-color: -seeky-bg; }
+.page-scroll, .page-scroll > .viewport { -fx-background-color: -seeky-bg; -fx-background: -seeky-bg; }
+.title { -fx-font-family: "Georgia", "Cambria", serif; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -seeky-ink; }
+.heading { -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -seeky-ink; }
+.muted { -fx-text-fill: -seeky-muted !important; -fx-font-size: 13px; }
+.body { -fx-text-fill: -seeky-ink; -fx-font-size: 14.5px; }
+.card { -fx-background-color: -seeky-surface; -fx-background-radius: 18; -fx-border-color: -seeky-line; -fx-border-radius: 18; -fx-border-width: 1; }
+.tile { -fx-cursor: hand; }
+.tile:hover { -fx-background-color: -seeky-raised; -fx-border-color: -seeky-accent; }
+.badge { -fx-background-color: -seeky-raised; -fx-background-radius: 14; }
+.badge .icon { -fx-stroke: -seeky-accent; }
+.button { -fx-cursor: hand; -fx-background-radius: 12; -fx-padding: 8 16; -fx-font-size: 13.5px; }
+.button.primary { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; -fx-font-weight: bold; }
+.button.primary .icon { -fx-stroke: -seeky-on-accent; }
+.button.secondary, .root-pane .button, .root-pane .menu-button, .root-pane .combo-box, .root-pane .spinner { -fx-background-color: -seeky-raised; -fx-text-fill: -seeky-ink; -fx-border-color: -seeky-line; -fx-border-radius: 12; -fx-background-radius: 12; }
+.button.primary { -fx-border-color: transparent; }
+.button.round { -fx-background-radius: 22; -fx-border-radius: 22; -fx-padding: 8; }
+.root-pane .text-field, .root-pane .text-area, .root-pane .password-field { -fx-background-color: -seeky-surface; -fx-text-fill: -seeky-ink; -fx-prompt-text-fill: -seeky-muted; -fx-border-color: -seeky-line; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 9 12; -fx-highlight-fill: -seeky-accent; -fx-highlight-text-fill: -seeky-on-accent; }
+.root-pane .text-area .content { -fx-background-color: -seeky-surface; }
+.root-pane .combo-box .list-cell, .root-pane .menu-button .label { -fx-text-fill: -seeky-ink; }
+.root-pane .list-view, .root-pane .table-view { -fx-background-color: -seeky-surface; -fx-border-color: -seeky-line; -fx-background-radius: 12; -fx-border-radius: 12; }
+.root-pane .list-cell, .root-pane .table-row-cell { -fx-background-color: -seeky-surface; -fx-text-fill: -seeky-ink; }
+.root-pane .list-cell:selected, .root-pane .table-row-cell:selected { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; }
+.root-pane .table-row-cell .text { -fx-fill: -seeky-ink; }
+.root-pane .table-row-cell:selected .text { -fx-fill: -seeky-on-accent; }
+.root-pane .column-header, .root-pane .column-header-background { -fx-background-color: -seeky-raised; }
+.root-pane .column-header .label { -fx-text-fill: -seeky-muted; }
+.root-pane .tool-bar { -fx-background-color: -seeky-surface; -fx-background-radius: 12; }
+.root-pane .split-pane { -fx-background-color: -seeky-line; -fx-padding: 0; }
+.root-pane .progress-bar .bar { -fx-background-color: -seeky-accent; -fx-background-radius: 6; }
+.root-pane .progress-bar .track { -fx-background-color: -seeky-raised; -fx-background-radius: 6; }
+.root-pane .slider .thumb { -fx-background-color: -seeky-accent; }
+.root-pane .slider .track { -fx-background-color: -seeky-raised; }
+.status { -fx-background-color: -seeky-surface; -fx-text-fill: -seeky-muted !important; -fx-font-size: 12px; }
+.scripture .verse-number { -fx-fill: -seeky-accent; -fx-font-size: 12px; -fx-font-weight: bold; }
+.scripture .verse-text { -fx-fill: -seeky-ink; -fx-font-family: "Georgia", "Cambria", serif; -fx-font-size: 19px; }
+.scripture .verse-text:hover { -fx-fill: -seeky-accent; -fx-cursor: hand; }
+.result { -fx-padding: 8 12; -fx-background-color: -seeky-surface; -fx-background-radius: 10; -fx-cursor: hand; }
+.result:hover { -fx-background-color: -seeky-raised; }
+.day, .day-done { -fx-background-radius: 20; -fx-font-weight: bold; }
+.day { -fx-background-color: -seeky-raised; -fx-text-fill: -seeky-muted !important; }
+.day-done { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent !important; }
+.clock { -fx-text-fill: -seeky-accent !important; -fx-font-size: 22px; }
+.note-title { -fx-font-size: 20px; -fx-font-weight: bold; }
+.note-body { -fx-font-family: "Cascadia Code", "Consolas", monospace; -fx-font-size: 14.5px; }
+.dialog-pane { -fx-background-color: -seeky-surface; }
+.dialog-pane .label { -fx-text-fill: -seeky-ink; }
+.dialog-pane .header-panel { -fx-background-color: -seeky-raised; }
+
+/* Regras mais específicas que ".root-pane .button" (vêm depois de propósito). */
+.root-pane .button.nav-item { -fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: -seeky-ink; }
+.root-pane .button.nav-item:hover { -fx-background-color: -seeky-raised; }
+.root-pane .button.nav-item.selected { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; }
+.root-pane .button.primary, .dialog-pane .button.primary { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; -fx-border-color: transparent; }
+.root-pane .button.primary:hover { -fx-opacity: 0.9; }
+.root-pane .combo-box > .list-cell, .root-pane .combo-box > .list-cell:selected { -fx-background-color: transparent; -fx-text-fill: -seeky-ink; }
+.root-pane .combo-box-popup .list-view .list-cell { -fx-background-color: -seeky-surface; -fx-text-fill: -seeky-ink; }
+.root-pane .combo-box-popup .list-view .list-cell:hover, .root-pane .combo-box-popup .list-view .list-cell:selected { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; }
