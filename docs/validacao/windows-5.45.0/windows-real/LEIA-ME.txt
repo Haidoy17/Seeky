@@ -1,0 +1,8 @@
+Capturas tiradas num Windows verdadeiro (GitHub Actions, windows-latest, x64),
+com o Seeky instalado pelo instalador Seeky-Setup-5.45.0-x64.exe em modo silencioso.
+Execução 45431218522 do fluxo .github/workflows/windows.yml:
+- instalação sem perguntas, ficheiros e atalhos verificados;
+- autoteste 13/13 com java.exe e com Seeky.exe --self-test;
+- 10 ecrãs capturados (estes ficheiros);
+- pacote de actualização: SHA-256 conferido e autoteste OK;
+- desinstalação sem perguntas OK.
