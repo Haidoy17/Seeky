@@ -26,7 +26,15 @@ perdem ao actualizar nem ao desinstalar.
   cores, listas, tarefas, citações, tabelas, imagens), pré-visualização, passagens tocáveis, exportar
   Word (.docx), PDF e Markdown, ouvir, pastas, fixar e **Seeky IA** (Gemini, chave protegida pelo Windows).
 - **Livros**: PDF (página a página, zoom), EPUB, Word, FB2, MOBI, AZW3, ODT, RTF, MHTML, CBZ e TXT, com
-  estante e ponto onde parou; nota do livro; ouvir.
+  estante e ponto onde parou; nota do livro; ouvir; **marcações** com cores e notas (seleccionar texto),
+  páginas marcadas nos PDF e *As minhas marcações*; **Seeky IA** (resumir, explicar a selecção,
+  perguntas de estudo).
+- **Foco**: Pomodoro por disciplina (25 + 5, 50 + 10, 15 + 3), visível na barra da janela, com o tempo
+  de cada dia e de cada disciplina na semana.
+- **Notas do telemóvel**: Bloco de notas → Telemóvel → importar ou enviar um ficheiro `.seekynotes`
+  (o Android tem o mesmo em Bloco de notas → Pastas).
+- **Aspecto**: janela própria (minimizar, maximizar, fechar, redimensionar), os temas do telemóvel e
+  Horário, transições e deslocamento suave.
 - **Ficheiros**: discos e pastas do utilizador, procurar por nome, abrir no Seeky ou no Windows, copiar,
   mover, mudar o nome, Reciclagem, nova pasta.
 - **Música e vídeo**: MP3, M4A/AAC, WAV, AIFF e MP4 (H.264), fila, letras sincronizadas (.lrc ao lado do
@@ -39,8 +47,9 @@ Cada versão do Seeky sai para Android e Windows com o **mesmo número** (o de `
 
 1. Subir `versionCode`/`versionName` em `app/build.gradle` (como sempre).
 2. Gerar o APK assinado e publicá-lo em `entrega/` (como sempre).
-3. `python3 tools/build_desktop.py --package --notes "…"` gera `entrega/windows/latest.json`, o pacote de
-   actualização `Seeky-Desktop-<versão>-app.zip` (≈ 9 MB) e o instalador.
+3. `python3 tools/build_desktop.py --package --notes "…"` gera `entrega/windows/latest.json` e o pacote de
+   actualização `Seeky-Desktop-<versão>-app.zip` (≈ 9 MB); o instalador fica em `build/desktop` e só é
+   publicado em `entrega/windows` com `--installer` (quando o Java, o `Seeky.exe` ou o instalador mudam).
 4. O Seeky para Windows lê `entrega/windows/latest.json` no `main` (no arranque, no máximo a cada 6 horas,
    ou em Definições → Procurar actualizações), descarrega só o pacote da aplicação, verifica o SHA-256 e
    instala-o em `%LOCALAPPDATA%\Seeky\app\<versão>`; o `Seeky.exe` passa a usá-lo no arranque seguinte.
@@ -61,8 +70,8 @@ python3 tools/build_desktop.py --package            # + Seeky.exe, instalador e 
 
 As bibliotecas vêm do Maven Central e o Java para Windows da Azul (Zulu 21 com JavaFX), todos fixados por
 SHA-256 no script. O fluxo `.github/workflows/windows.yml` compila no Linux e, numa máquina Windows
-verdadeira, instala o instalador sem perguntas, corre `Seeky.exe --self-test`, testa o pacote de
-actualização e desinstala.
+verdadeira, instala o instalador sem perguntas, aplica o pacote de actualização como o Seeky faz, corre
+`Seeky.exe --self-test`, tira capturas dos ecrãs e desinstala.
 
 ## Componentes de terceiros do Seeky para Windows
 

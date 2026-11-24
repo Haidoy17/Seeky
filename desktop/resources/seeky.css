@@ -69,3 +69,41 @@
 .root-pane .combo-box > .list-cell, .root-pane .combo-box > .list-cell:selected { -fx-background-color: transparent; -fx-text-fill: -seeky-ink; }
 .root-pane .combo-box-popup .list-view .list-cell { -fx-background-color: -seeky-surface; -fx-text-fill: -seeky-ink; }
 .root-pane .combo-box-popup .list-view .list-cell:hover, .root-pane .combo-box-popup .list-view .list-cell:selected { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; }
+
+/* Janela própria: barra de título, botões e moldura. */
+.root-pane.window { -fx-border-color: -seeky-line; -fx-border-width: 1; }
+.title-bar { -fx-background-color: -seeky-bg; }
+.window-button { -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 0; -fx-border-radius: 0; -fx-padding: 0; -fx-min-width: 46; -fx-pref-width: 46; -fx-min-height: 34; -fx-pref-height: 34; -fx-cursor: default; }
+.root-pane .button.window-button { -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 0; -fx-border-radius: 0; }
+.root-pane .button.window-button:hover { -fx-background-color: -seeky-raised; }
+.root-pane .button.window-button.close:hover { -fx-background-color: #c42b1c; }
+.root-pane .button.window-button.close:hover .icon { -fx-stroke: white; }
+.window-button .icon { -fx-stroke-width: 2.4; }
+/* Aviso no canto (substitui a barra de estado). */
+.toast { -fx-background-color: -seeky-raised; -fx-text-fill: -seeky-ink !important; -fx-background-radius: 12; -fx-border-color: -seeky-line; -fx-border-radius: 12; -fx-font-size: 13px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 18, 0, 0, 4); }
+/* Menus com destaque (Seeky IA) e botões de cor. */
+.root-pane .menu-button.primary { -fx-background-color: -seeky-accent; -fx-border-color: transparent; }
+.root-pane .menu-button.primary > .label, .root-pane .menu-button.primary .label { -fx-text-fill: -seeky-on-accent; -fx-font-weight: bold; }
+.root-pane .menu-button.primary .icon, .root-pane .menu-button.primary .arrow { -fx-stroke: -seeky-on-accent; -fx-background-color: -seeky-on-accent; }
+.root-pane .button.dot { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 2; -fx-background-radius: 20; }
+.root-pane .button.dot:hover { -fx-background-color: -seeky-raised; }
+.selection-bar { -fx-background-color: -seeky-surface; -fx-background-radius: 16; -fx-border-color: -seeky-line; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 20, 0, 0, 6); }
+/* Foco */
+.focus-clock { -fx-font-size: 56px; -fx-font-weight: bold; -fx-text-fill: -seeky-ink !important; -fx-font-family: "Segoe UI", "Roboto", sans-serif; }
+.focus-track { -fx-fill: transparent; -fx-stroke: -seeky-raised; -fx-stroke-width: 12; }
+.focus-ring { -fx-fill: transparent; -fx-stroke: -seeky-accent; -fx-stroke-width: 12; -fx-stroke-line-cap: round; }
+.focus-chip { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent !important; -fx-background-radius: 12; -fx-padding: 3 12; -fx-font-weight: bold; -fx-cursor: hand; }
+.focus-bar { -fx-background-color: -seeky-raised; -fx-background-radius: 8; -fx-border-color: -seeky-line; -fx-border-radius: 8; }
+.focus-bar-today { -fx-background-color: -seeky-accent; -fx-background-radius: 8; }
+/* Barras de deslocamento finas, na cor do tema. */
+.root-pane .scroll-bar, .dialog-pane .scroll-bar { -fx-background-color: transparent; -fx-padding: 2; }
+.root-pane .scroll-bar .thumb, .dialog-pane .scroll-bar .thumb { -fx-background-color: -seeky-line; -fx-background-radius: 6; }
+.root-pane .scroll-bar .thumb:hover, .root-pane .scroll-bar .thumb:pressed { -fx-background-color: -seeky-muted; }
+.root-pane .scroll-bar .increment-button, .root-pane .scroll-bar .decrement-button, .dialog-pane .scroll-bar .increment-button, .dialog-pane .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
+.root-pane .scroll-bar .increment-arrow, .root-pane .scroll-bar .decrement-arrow, .dialog-pane .scroll-bar .increment-arrow, .dialog-pane .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
+.root-pane .scroll-pane > .corner { -fx-background-color: transparent; }
+/* Caixas de escolha editáveis. */
+.root-pane .combo-box .arrow-button { -fx-background-color: transparent; }
+.root-pane .combo-box .arrow { -fx-background-color: -seeky-muted; }
+.root-pane .combo-box .text-field { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6 10; }
+.root-pane .menu-button .arrow { -fx-background-color: -seeky-muted; }

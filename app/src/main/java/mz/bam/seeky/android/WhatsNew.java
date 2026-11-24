@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.45", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.46", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("share", "Notas entre o telemóvel e o computador", "Bloco de notas → Pastas → Enviar notas para o computador: um ficheiro .seekynotes com todas as notas, pastas e imagens, que o Seeky para Windows importa. O contrário também: Importar notas do computador. Notas repetidas não são duplicadas e as bloqueadas ficam só no telemóvel", false, () -> a.startActivity(new android.content.Intent(a, NotepadActivity.class)));
+        panel.action("pdf", "Seeky para Windows (64 bits)", "O Seeky também existe para o computador, com as mesmas actualizações: Bíblia, estudo, notas com IA, livros com marcações, Foco (Pomodoro), ficheiros e música. Instalador em entrega/windows no GitHub do Seeky", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
+        panel.section("Da 5.45");
         panel.action("book", "Bíblias com versículos agrupados", "Paráfrases como A Mensagem juntam versículos (por exemplo Génesis 1:1-2) e deixam o seguinte vazio: a importação já não pára aí. Se uma importação ficou em Precisa de atenção, abra Tarefas e toque em Retomar pendentes e falhados", false, () -> TaskService.open(a));
         panel.section("Da 5.44");
         panel.action("shield", "Pastas das aplicações (Android/data e Android/obb)", "No Explorar → Pastas das aplicações: com a aplicação gratuita Shizuku, ver, abrir, partilhar, copiar para Transferências, importar, mudar o nome e apagar nas pastas que o Android 11+ esconde. O ecrã explica os 3 passos", false, () -> AppDataActivity.open(a));

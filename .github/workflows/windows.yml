@@ -41,6 +41,24 @@ jobs:
           $dir = "$env:LOCALAPPDATA\Programs\Seeky"
           foreach ($f in 'Seeky.exe','runtime\bin\javaw.exe','app\seeky-desktop.jar','Desinstalar.exe') { if (!(Test-Path "$dir\$f")) { throw "Falta $f" } }
           if (!(Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Seeky\Seeky.lnk")) { throw "Falta o atalho no menu Iniciar" }
+      - name: Actualizar como o Seeky faz (pacote de entrega/windows)
+        shell: pwsh
+        run: |
+          # O mesmo que Definições → Procurar actualizações: verifica o SHA-256, instala em
+          # %LOCALAPPDATA%\Seeky\app\<versão> e escreve current.txt; o Seeky.exe passa a usá-la.
+          $manifest = Get-Content entrega/windows/latest.json -Raw | ConvertFrom-Json
+          $zip = Get-Item "entrega/windows/Seeky-Desktop-$($manifest.versionName)-app.zip"
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $manifest.sha256) { throw "SHA-256 do pacote não corresponde a latest.json" }
+          $apps = "$env:LOCALAPPDATA\Seeky\app"
+          New-Item -ItemType Directory -Force "$apps\$($manifest.versionName)" | Out-Null
+          Expand-Archive $zip.FullName -DestinationPath "$apps\$($manifest.versionName)" -Force
+          [IO.File]::WriteAllText("$apps\current.txt", $manifest.versionName)
+          $out = & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" '-Dfile.encoding=UTF-8' '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$apps\$($manifest.versionName)\*" 'mz.bam.seeky.android.DeskLauncher' '--self-test'
+          $out | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "Autoteste da versão actualizada falhou" }
+          if (-not ($out -match "PASS versão $([regex]::Escape($manifest.versionName))")) { throw "A versão actualizada não é $($manifest.versionName)" }
+          Write-Host "Actualizado para $($manifest.versionName)"
       - name: Autoteste pelo Seeky.exe
         shell: pwsh
         run: |
@@ -68,16 +86,13 @@ jobs:
           name: seeky-windows-capturas
           path: ${{ runner.temp }}/capturas
           retention-days: 14
-      - name: Pacote de actualização (o que o Seeky descarrega sozinho)
+      - name: Instalador publicado coincide com latest.json
         shell: pwsh
         run: |
-          $zip = Get-ChildItem entrega/windows/Seeky-Desktop-*-app.zip | Select-Object -Last 1
           $manifest = Get-Content entrega/windows/latest.json -Raw | ConvertFrom-Json
-          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
-          if ($hash -ne $manifest.sha256) { throw "SHA-256 do pacote não corresponde a latest.json" }
-          Expand-Archive $zip.FullName -DestinationPath "$env:RUNNER_TEMP\app" -Force
-          & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$env:RUNNER_TEMP\app\*" 'mz.bam.seeky.android.DeskLauncher' '--self-test'
-          if ($LASTEXITCODE -ne 0) { throw "Autoteste do pacote de actualização falhou" }
+          $setup = Get-Item ("entrega/windows/" + ($manifest.installer -split '/')[-1])
+          $hash = (Get-FileHash $setup.FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $manifest.installerSha256) { throw "SHA-256 do instalador não corresponde a latest.json" }
       - name: Desinstalar
         shell: pwsh
         run: |

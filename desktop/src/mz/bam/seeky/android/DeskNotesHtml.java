@@ -31,12 +31,13 @@ final class DeskNotesHtml {
     }
     static String html(String title, String body, File media, boolean dark, int spacing) {
         StringBuilder b = new StringBuilder("<!doctype html><html><head><meta charset=\"utf-8\"><style>");
-        String ink = dark ? "#eeeae2" : "#23231f", muted = dark ? "#a8a39a" : "#6b675e", accent = dark ? "#d6b24c" : "#3d5a40", bg = dark ? "#232323" : "#fbf8f2", line = dark ? "#3a3a3a" : "#ddd6c8";
+        DeskThemes.Theme t = DeskThemes.current; dark = !t.light;
+        String ink = DeskThemes.hex(t.ink), muted = DeskThemes.hex(t.muted), accent = DeskThemes.hex(t.accent), bg = DeskThemes.hex(t.surface), line = DeskThemes.hex(t.line);
         b.append("body{font-family:'Segoe UI',Roboto,Arial,sans-serif;font-size:16px;color:").append(ink).append(";background:").append(bg).append(";padding:22px 30px;line-height:").append(spacing > 0 ? spacing / 100.0 * 1.25 : 1.5).append("}")
          .append("h1{font-size:28px;margin:14px 0 6px}h2{font-size:23px;margin:12px 0 6px}h3{font-size:19px}h4{font-size:17px}")
          .append("blockquote{border-left:4px solid ").append(accent).append(";margin:8px 0;padding:4px 14px;color:").append(muted).append("}")
          .append("mark{background:#f6d36555;color:inherit}a.passage{color:").append(accent).append(";text-decoration:none;border-bottom:1px dotted}")
-         .append("table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid ").append(line).append(";padding:6px 10px}th{background:").append(dark ? "#2e2e2e" : "#efe9dc").append("}")
+         .append("table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid ").append(line).append(";padding:6px 10px}th{background:").append(DeskThemes.hex(t.raised())).append("}")
          .append("hr{border:none;border-top:1px solid ").append(line).append(";margin:14px 0}img{max-width:100%;border-radius:8px}.task{list-style:none;margin-left:-22px}.done{color:").append(muted).append(";text-decoration:line-through}")
          .append(".title{font-size:30px;font-weight:700;margin:0 0 12px}</style></head><body>");
         if (title != null && !title.trim().isEmpty()) b.append("<div class=\"title\">").append(esc(title)).append("</div>");

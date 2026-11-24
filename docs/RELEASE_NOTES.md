@@ -1,3 +1,14 @@
+## Seeky 5.46.0
+
+Instale **Seeky_5.46.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.46.0.
+
+### Novidades
+- **Notas entre o telemóvel e o computador**: Bloco de notas → Pastas → Enviar notas para o computador
+  e Importar notas do computador (ficheiro `.seekynotes`, com pastas e imagens, sem repetir notas).
+- **Seeky para Windows**: janela com minimizar, maximizar e fechar; ecrãs mais limpos e fluidos; os
+  temas do telemóvel; marcações com cores e notas nos livros; Seeky IA nos livros; Foco (Pomodoro).
+
 ## Seeky 5.45.0
 
 Instale **Seeky_5.45.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

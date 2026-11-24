@@ -38,7 +38,7 @@ import java.util.concurrent.Executors;
  * Word, Markdown and text. Bible references are recognised and notes link to books and Estudos.
  */
 public final class NotepadActivity extends Activity {
-    static final int DICTATE = 51, EXPORT = 52, GALLERY = 54, CAMERA = 55;
+    static final int DICTATE = 51, EXPORT = 52, GALLERY = 54, CAMERA = 55, TRANSFER_OUT = 56, TRANSFER_IN = 57;
     Screens s;
     final ExecutorService worker = Executors.newSingleThreadExecutor();
     String screen = "list", tab = "notes", filter = "all", query = "", sort = "updated", view = "card";
@@ -161,8 +161,39 @@ public final class NotepadActivity extends Activity {
                 for (String f : folders) p.action(filter.equals("folder:" + f) ? "check" : "folder", f, count(f) + "", false, () -> { filter = "folder:" + f; tab = "notes"; list(); });
                 p.action("add", "Nova pasta…", null, false, () -> ask("Nova pasta", "Nome da pasta", "", name -> { filter = "folder:" + name; toast("Pasta criada: guarde uma nota nela."); NotepadStore.Note n = blank(); n.folder = name; editor(n); }));
                 p.action("trash", "Lixo", bin + "", false, this::trash);
+                p.action("share", "Enviar notas para o computador", tr("Ficheiro .seekynotes para o Seeky no Windows"), false, this::sendToComputer);
+                p.action("import", "Importar notas do computador", tr("Ficheiro .seekynotes do Seeky no Windows"), false, this::importFromComputer);
                 p.show();
             });
+        });
+    }
+    // ---- notas entre o telemóvel e o computador (.seekynotes) ----
+    void sendToComputer() {
+        UiPanel p = new UiPanel(this, "Enviar notas para o computador", tr("Abra o ficheiro no Seeky para Windows: Bloco de notas → Telemóvel → Importar"), "share");
+        p.action("share", "Partilhar", tr("Email, Drive, WhatsApp, Bluetooth…"), false, () -> worker.execute(() -> {
+            try {
+                NotepadTransfer.Result r = new NotepadTransfer.Result(); byte[] data = NotepadTransfer.export(this, r);
+                File f = ShareTools.temp(this, NotesTransfer.fileName()); java.nio.file.Files.write(f.toPath(), data);
+                PlusUi.post(this, () -> { if (r.locked > 0) toast(r.locked + " " + tr(r.locked == 1 ? "nota bloqueada ficou só no telemóvel." : "notas bloqueadas ficaram só no telemóvel.")); ShareTools.send(this, ShareTools.tempUri(this, f), f.getName(), NotesTransfer.MIME); });
+            } catch (Exception e) { AppDiagnostics.record(this, "notes-transfer", e); PlusUi.post(this, () -> toast("Não foi possível preparar as notas.")); }
+        }));
+        p.action("folder", "Guardar num ficheiro", tr("Escolha a pasta (por exemplo, Transferências ou Drive)"), false, () -> { try { startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType(NotesTransfer.MIME).putExtra(Intent.EXTRA_TITLE, NotesTransfer.fileName()), TRANSFER_OUT); } catch (Exception e) { toast("Não há onde guardar ficheiros neste telefone."); } });
+        p.show();
+    }
+    void importFromComputer() { try { startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), TRANSFER_IN); } catch (Exception e) { toast("Não há onde escolher ficheiros neste telefone."); } }
+    void transferResult(int request, Uri uri) {
+        worker.execute(() -> {
+            try {
+                if (request == TRANSFER_OUT) {
+                    NotepadTransfer.Result r = new NotepadTransfer.Result(); byte[] data = NotepadTransfer.export(this, r);
+                    try (OutputStream out = getContentResolver().openOutputStream(uri)) { if (out == null) throw new IOException(); out.write(data); }
+                    PlusUi.post(this, () -> toast(r.added + " " + tr(r.added == 1 ? "nota guardada para o computador." : "notas guardadas para o computador.")));
+                } else {
+                    byte[] data; try (InputStream in = getContentResolver().openInputStream(uri)) { if (in == null) throw new IOException(); data = ContentText.read(in, NotesTransfer.MAX_FILE + 1); }
+                    NotepadTransfer.Result r = NotepadTransfer.restore(this, data);
+                    PlusUi.post(this, () -> { toast(r.added + " " + tr(r.added == 1 ? "nota importada" : "notas importadas") + (r.skipped > 0 ? " · " + r.skipped + " " + tr("já existiam") : "")); list(); });
+                }
+            } catch (Exception e) { AppDiagnostics.record(this, "notes-transfer", e); String m = e.getMessage(); PlusUi.post(this, () -> toast(m == null || m.isEmpty() ? tr("Não foi possível concluir.") : m)); }
         });
     }
     int count(String folder) { int n = 0; for (NotepadStore.Note x : notes) if (x.folder.equals(folder)) n++; return n; }
@@ -844,6 +875,7 @@ public final class NotepadActivity extends Activity {
             String current = body.getText().toString(); int at = Math.max(0, body.getSelectionEnd());
             applyEdit(NotepadText.insert(current, at, (at > 0 && !Character.isWhitespace(current.charAt(at - 1)) ? " " : "") + heard.get(0), false));
         }
+        if ((request == TRANSFER_OUT || request == TRANSFER_IN) && result == RESULT_OK && data != null && data.getData() != null) { transferResult(request, data.getData()); return; }
         if (request == EXPORT && result == RESULT_OK && data != null && data.getData() != null) {
             Uri target = data.getData(); final String kind = exportKind;
             worker.execute(() -> { try (OutputStream out = getContentResolver().openOutputStream(target)) { if (out == null) throw new IOException(); write(kind, out); PlusUi.post(this, () -> toast("Nota exportada.")); } catch (Exception e) { AppDiagnostics.record(this, "notepad-export", e); PlusUi.post(this, () -> toast("Não foi possível exportar a nota.")); } });

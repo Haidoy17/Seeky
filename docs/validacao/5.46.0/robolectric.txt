@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.46.0
+OK (484 tests)
+exit=0
+Inclui Notepad546Test (enviar notas para o computador e importar notas do computador: imagens, pastas, notas bloqueadas e sem repetir) e Presentation5190Test (Novidades da 5.46).
