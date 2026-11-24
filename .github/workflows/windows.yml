@@ -57,7 +57,7 @@ jobs:
           $out = & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" '-Dfile.encoding=UTF-8' '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$apps\$($manifest.versionName)\*" 'mz.bam.seeky.android.DeskLauncher' '--self-test'
           $out | Write-Host
           if ($LASTEXITCODE -ne 0) { throw "Autoteste da versão actualizada falhou" }
-          if (-not ($out -match "PASS versão $([regex]::Escape($manifest.versionName))")) { throw "A versão actualizada não é $($manifest.versionName)" }
+          if (-not ($out -match "^PASS vers\S+ $([regex]::Escape($manifest.versionName))$")) { throw "A versão actualizada não é $($manifest.versionName)" }
           Write-Host "Actualizado para $($manifest.versionName)"
       - name: Autoteste pelo Seeky.exe
         shell: pwsh
