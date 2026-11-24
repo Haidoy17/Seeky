@@ -1,0 +1,3 @@
+Capturas tiradas num Windows verdadeiro (GitHub Actions, windows-latest, x64, ecrã 1024x768).
+Execução 45484671157: instalador 5.45.0, actualização para a 5.47.0 como o Seeky faz, autoteste 21/21,
+17 ecrãs (Bíblia com títulos e comentário, Música, Álbuns, Vídeos, Livros em Estante/Grelha/Lista…), desinstalação OK.
