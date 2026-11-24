@@ -1,0 +1,1 @@
+Capturas num Windows verdadeiro (execução 45492677098): instalador 5.45.0, actualização para a 5.49.0 como o Seeky faz, autoteste 23/23 (com o servidor do Seeky ligado a funcionar no Windows), 19 ecrãs incluindo o ecrã Telemóvel.

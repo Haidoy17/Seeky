@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007500,
-  "versionName": "5.48.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.48.0.apk",
-  "sha256": "db5a551de27482c7d1fee07f7ccf1c9ae8513568606e2054a76de9b5d0e3c342",
-  "bytes": 13768632,
-  "notes": "Comentários bíblicos MyBible no telemóvel; botão Flash no Seeky para Windows."
+  "versionCode": 5007600,
+  "versionName": "5.49.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.49.0.apk",
+  "sha256": "f2ab813a04f2474036c8d1768c7e90aa4405b5a38fdc461bae1d81166060f3da",
+  "bytes": 13792658,
+  "notes": "Seeky ligado: o telemóvel e o Seeky para Windows sincronizam notas, leitura, estudo e música na mesma rede Wi-Fi e trocam ficheiros."
 }

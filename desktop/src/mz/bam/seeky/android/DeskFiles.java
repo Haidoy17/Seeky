@@ -76,8 +76,9 @@ final class DeskFiles {
         MenuItem copy = new MenuItem("Copiar para…"); copy.setOnAction(e -> transfer(sel, false));
         MenuItem move = new MenuItem("Mover para…"); move.setOnAction(e -> transfer(sel, true));
         MenuItem rename = new MenuItem("Mudar o nome"); rename.setOnAction(e -> { if (sel.size() == 1) rename(sel.get(0)); });
+        MenuItem phone = new MenuItem("Enviar para o telemóvel"); phone.setOnAction(e -> d.sync.send(sel));
         MenuItem trash = new MenuItem("Enviar para a Reciclagem"); trash.setOnAction(e -> trash(sel));
-        return new ContextMenu(open, windows, show, new SeparatorMenuItem(), copy, move, rename, new SeparatorMenuItem(), trash);
+        return new ContextMenu(open, windows, show, new SeparatorMenuItem(), phone, copy, move, rename, new SeparatorMenuItem(), trash);
     }
     void transfer(List<File> files, boolean move) {
         if (files.isEmpty()) return; DirectoryChooser c = new DirectoryChooser(); c.setTitle(move ? "Mover para" : "Copiar para"); File to = c.showDialog(d.stage); if (to == null) return;

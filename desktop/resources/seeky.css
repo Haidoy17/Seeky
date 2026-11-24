@@ -144,3 +144,5 @@
 .flash-field .icon { -fx-stroke: -seeky-accent; }
 .root-pane .text-field.flash-input { -fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 15px; }
 .root-pane .toggle-button.chip.small { -fx-padding: 5 9; -fx-font-size: 12.5px; }
+/* Telemóvel: código de emparelhamento. */
+.pair-code { -fx-font-size: 46px; -fx-font-weight: bold; -fx-text-fill: -seeky-accent !important; -fx-font-family: "Consolas", "Cascadia Mono", monospace; -fx-padding: 4 0; }

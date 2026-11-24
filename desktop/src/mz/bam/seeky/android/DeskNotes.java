@@ -159,7 +159,7 @@ final class DeskNotes {
         MenuItem listen = new MenuItem("Ouvir a nota"); listen.setOnAction(e -> DeskSpeech.toggle(d, NotepadText.plain(title.getText() + "\n" + body.getText())));
         MenuItem pin = new MenuItem("Fixar / desafixar"); pin.setOnAction(e -> { save.run(); try { d.store.update("UPDATE notes SET pinned=1-pinned WHERE id=?", note[0]); } catch (SQLException ignored) {} });
         MenuItem folder = new MenuItem("Mover para pasta…"); folder.setOnAction(e -> { save.run(); String f = DeskUi.ask("Pasta", "Nome da pasta (vazio para nenhuma)", ""); try { d.store.update("UPDATE notes SET folder=? WHERE id=?", f == null ? "" : f, note[0]); } catch (SQLException ignored) {} });
-        MenuItem delete = new MenuItem("Apagar"); delete.setOnAction(e -> { if (note[0] != 0 && DeskUi.confirm("Apagar esta nota?", "Não pode ser desfeito.")) { try { d.store.update("DELETE FROM notes WHERE id=?", note[0]); } catch (SQLException ignored) {} later.stop(); d.open("notes"); } });
+        MenuItem delete = new MenuItem("Apagar"); delete.setOnAction(e -> { if (note[0] != 0 && DeskUi.confirm("Apagar esta nota?", "Não pode ser desfeito.")) { try { d.store.update("DELETE FROM notes WHERE id=?", note[0]); DeskSync.deleted(d.store, note[0]); } catch (SQLException ignored) {} later.stop(); d.open("notes"); } });
         more.getItems().addAll(word, pdf, md, new SeparatorMenuItem(), listen, pin, folder, new SeparatorMenuItem(), delete);
         Button ai = new Button("Seeky IA", DeskUi.icon("sparkle", 18)); ai.getStyleClass().add("primary"); ai.setOnAction(e -> DeskAi.menu(d, body, title));
         HBox top = DeskUi.row(back, title, ai, more); HBox.setHgrow(title, Priority.ALWAYS);

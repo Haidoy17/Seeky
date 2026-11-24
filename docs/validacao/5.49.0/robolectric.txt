@@ -1,0 +1,4 @@
+Bateria Robolectric completa (tests/android_runtime/run.py), 5.49.0
+OK (489 tests)
+exit=0
+Inclui Link549Test: emparelhar (código errado recusado, código usado uma vez), sincronizar notas nos dois sentidos (bloqueadas ficam no telemóvel), capítulos lidos, versículos para decorar, apagar nos dois lados, ficheiros nos dois sentidos, painel Seeky no computador.

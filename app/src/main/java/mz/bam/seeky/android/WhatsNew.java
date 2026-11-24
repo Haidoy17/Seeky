@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.48", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.49", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("phone", "Seeky no computador", "Ferramentas → Seeky no computador: ligue o telemóvel ao Seeky para Windows na mesma rede Wi-Fi (código de 6 números). Notas, onde ficou a leitura, capítulos lidos, versículos para decorar, recordes e músicas favoritas ficam iguais nos dois; também envia e recebe ficheiros. Sincroniza sozinho ao abrir o Seeky", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
+        panel.section("Da 5.48");
         panel.action("contents", "Comentários bíblicos MyBible", "Ferramentas → Bíblias importadas → Comentários bíblicos: carregue um ficheiro .commentaries. Na leitura, os versículos comentados levam ✎ e o comentário aparece por baixo do capítulo", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_bibles", true)));
         panel.action("flash", "Botão Flash no computador", "O Seeky para Windows 5.48 tem o mesmo botão flutuante de pesquisa: Flash, Completa e Pastas, com Tudo, PDF, Documentos, Imagens, Vídeos e Áudio", false, () -> { try { a.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Haidoy17/Seeky/tree/main/entrega/windows"))); } catch (Exception ignored) {} });
         panel.section("Da 5.47");

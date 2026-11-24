@@ -42,6 +42,7 @@ final class DeskUi {
         ICONS.put("lyrics", "M5 4 H19 V16 H10 L6 20 V16 H5 Z M8.5 8.5 H15.5 M8.5 12 H13.5");
         ICONS.put("image", "M4 5 H20 V19 H4 Z M4 16 L9 11 L13 15 L16 12 L20 16 M15.5 8.5 A1.5 1.5 0 1 0 15.5 8.49 Z");
         ICONS.put("power", "M12 3 V12 M7 6.5 A7.5 7.5 0 1 0 17 6.5");
+        ICONS.put("phone", "M7 2.5 H17 Q18.5 2.5 18.5 4 V20 Q18.5 21.5 17 21.5 H7 Q5.5 21.5 5.5 20 V4 Q5.5 2.5 7 2.5 Z M10.5 18.5 H13.5");
         ICONS.put("update", "M4 12 A8 8 0 0 1 18 6.5 M20 4 V9 H15 M20 12 A8 8 0 0 1 6 17.5 M4 20 V15 H9");
     }
     static Node icon(String name, double size) {
