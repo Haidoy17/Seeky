@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007500,
-  "versionName": "5.48.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.48.0-app.zip",
-  "sha256": "b11bf31ddae6ccb61fb274ac37e3a53e637d2dab263201f999283e053c1d48ea",
-  "bytes": 8796217,
+  "versionCode": 5007600,
+  "versionName": "5.49.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.49.0-app.zip",
+  "sha256": "d0142ebcaf42be1882cf6b4f9b6d7db06084596c8dc767101254207993683ad1",
+  "bytes": 8842858,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Botão Flash como no telemóvel: pesquisa por cima das outras janelas (Flash, Completa, Pastas; Tudo, PDF, Documentos, Imagens, Vídeos, Áudio), fica com a janela fechada e pode iniciar com o Windows."
+  "notes": "Seeky ligado: o telemóvel e o computador sincronizam notas, leitura, estudo bíblico e música na mesma rede Wi-Fi e trocam ficheiros (ecrã Telemóvel)."
 }

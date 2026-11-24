@@ -107,6 +107,7 @@ final class NotepadStore extends SQLiteOpenHelper {
     }
     /** Moves a note to the recycle bin (removed from Estudos too). */
     static void trash(Context c, long id) throws Exception {
+        PhoneSync.noteDeleted(c, id);
         try (StudyStore db = new StudyStore(c); NotepadStore pad = new NotepadStore(c)) {
             StudyStore.Row r = db.get("notes", id);
             if (r == null) return;

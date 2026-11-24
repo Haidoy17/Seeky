@@ -1,5 +1,22 @@
 # Registo de alterações
 
+## 5.49.0 — 2026-11-24 (Android e Windows)
+
+- **Seeky ligado — o telemóvel e o computador juntos, na mesma rede Wi-Fi, sem internet nem conta**:
+  - ligar uma vez com o código de 6 números que aparece no computador (Seeky → Telemóvel); no
+    telemóvel: Ferramentas → Seeky no computador → Ligar ao computador (o computador é encontrado
+    sozinho, ou escreve-se o endereço);
+  - ficam iguais nos dois: notas (a versão mais recente de cada uma, com pastas, cores e imagens; as
+    apagadas ficam apagadas; as bloqueadas nunca saem do telemóvel), onde ficou a leitura de cada livro
+    (o mesmo ficheiro), capítulos lidos, versículos para decorar, recordes do jogo, músicas favoritas e
+    audições (mais ouvidas);
+  - ficheiros: do telemóvel para o computador (Transferências\Seeky) e do computador para o telemóvel
+    (Enviar para o telemóvel em Ficheiros, no Flash ou no ecrã Telemóvel → Transferências/Seeky);
+  - o telemóvel sincroniza sozinho ao abrir o Seeky (no máximo a cada 10 minutos) e com Sincronizar
+    agora; se o endereço do computador mudar, volta a encontrá-lo;
+  - tudo cifrado (AES-GCM) numa ligação própria; só telemóveis emparelhados sincronizam; o computador
+    pode desligar um telemóvel.
+
 ## 5.48.0 — 2026-11-24 (Android e Windows)
 
 - **Modo Flash no Seeky para Windows**, como no telemóvel: um botão redondo por cima das outras janelas

@@ -33,6 +33,9 @@ perdem ao actualizar nem ao desinstalar.
   de cada dia e de cada disciplina na semana.
 - **Notas do telemóvel**: Bloco de notas → Telemóvel → importar ou enviar um ficheiro `.seekynotes`
   (o Android tem o mesmo em Bloco de notas → Pastas).
+- **Telemóvel (Seeky ligado)**: liga o telemóvel com um código de 6 números; notas, leitura, estudo
+  bíblico e música ficam iguais nos dois; ficheiros nos dois sentidos (Transferências\Seeky). Na primeira
+  vez o Windows pode perguntar se permite o Seeky na rede: escolha redes privadas.
 - **Botão Flash**: o botão de pesquisa por cima das outras janelas, como no telemóvel (Flash, Completa,
   Pastas; Tudo, PDF, Documentos, Imagens, Vídeos, Áudio); fica com a janela fechada (ícone junto ao
   relógio), pode iniciar com o Windows e abre com Ctrl+K.

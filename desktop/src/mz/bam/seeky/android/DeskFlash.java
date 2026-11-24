@@ -149,7 +149,8 @@ final class DeskFlash {
                     MenuItem folder = new MenuItem("Abrir a pasta"); folder.setOnAction(e -> DeskFiles.system(r.file.getParentFile()));
                     MenuItem windows = new MenuItem("Abrir no Windows"); windows.setOnAction(e -> DeskFiles.system(r.file));
                     MenuItem copy = new MenuItem("Copiar o caminho"); copy.setOnAction(e -> DeskBible.copy(r.file.getAbsolutePath()));
-                    setContextMenu(new ContextMenu(folder, windows, copy));
+                    MenuItem phone = new MenuItem("Enviar para o telemóvel"); phone.setOnAction(e -> d.sync.send(Collections.singletonList(r.file)));
+                    setContextMenu(new ContextMenu(folder, windows, copy, phone));
                 } else setContextMenu(null);
             }
         });

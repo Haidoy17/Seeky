@@ -33,13 +33,13 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
-    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash;
+    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync;
 
 
     @Override public void start(Stage stage) throws Exception {
         instance = this; this.stage = stage;
         store = new DeskStore();
-        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this);
+        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this); sync = new DeskSync(this, store); DeskSync.schema(store);
         root = new BorderPane();
         root.getStyleClass().add("root-pane"); theme(store.get("theme", DeskThemes.DEFAULT));
         nav.getStyleClass().add("nav"); nav.setPadding(new Insets(18, 12, 18, 12)); nav.setPrefWidth(232);
@@ -47,7 +47,7 @@ public final class DeskMain extends Application {
         VBox head = new VBox(0, brand); head.setPadding(new Insets(0, 10, 16, 10));
         nav.getChildren().add(head);
         item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("game", "Jogo da Bíblia", "game");
-        item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video");
+        item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video"); item("phone", "Telemóvel", "phone");
         Region gap = new Region(); VBox.setVgrow(gap, Priority.ALWAYS); nav.getChildren().add(gap);
         item("settings", "Definições", "settings");
         // Avisos discretos no canto (sem barra de estado): aparecem e desaparecem sozinhos.
@@ -81,18 +81,18 @@ public final class DeskMain extends Application {
         Platform.setImplicitExit(false);
         scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> flash.open(""));
         if (!flashOnly) stage.show();
-        if (getParameters().getNamed().get("screenshots") == null) { DeskTray.listen(this); flash.show(); if (flashOnly) DeskTray.show(this); }
+        if (getParameters().getNamed().get("screenshots") == null) { DeskTray.listen(this); flash.show(); if (sync.enabled()) sync.start(); if (flashOnly) DeskTray.show(this); }
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
     java.io.File demoBook;
     /** Leaves for good: stops sound, timers and the Flash, closes the data. */
     void quit() {
-        try { focus.stop(); DeskSpeech.stop(); media.stop(); flash.hide(); DeskTray.remove(); store.close(); worker.shutdownNow(); } catch (Exception ignored) {}
+        try { sync.stop(); focus.stop(); DeskSpeech.stop(); media.stop(); flash.hide(); DeskTray.remove(); store.close(); worker.shutdownNow(); } catch (Exception ignored) {}
         Platform.exit(); System.exit(0);
     }
     /** Shows the main window (from the Flash, the tray icon or a second start). */
@@ -173,6 +173,7 @@ public final class DeskMain extends Application {
             case "files": view = files.view(); break;
             case "music": case "media": view = music.view(); id = "music"; break;
             case "videos": view = videos.view(); break;
+            case "phone": view = sync.view(); break;
             case "focus": view = focus.view(); break;
             case "marks": view = DeskMarks.view(this); id = "reader"; break;
             case "settings": view = DeskSettings.view(this); break;

@@ -72,6 +72,70 @@ final class DeskSelfTest {
         }
         return f;
     }
+    /** A phone kept in memory, merging like the real one. */
+    static final class FakePhone implements SyncClient.Local {
+        final SyncState st = new SyncState();
+        public SyncState state(long since) { SyncState c = new SyncState(); c.notes.addAll(st.notes); c.deleted.putAll(st.deleted); c.progress.addAll(st.progress); c.readings.addAll(st.readings); c.cards.addAll(st.cards); return c; }
+        public SyncState.Changes apply(SyncState pc) {
+            SyncState.Changes ch = SyncState.merge(st, pc);
+            for (Map.Entry<String, String> e : ch.relink.entrySet()) for (SyncState.Note n : st.notes) if (n.uuid.equals(e.getKey())) n.uuid = e.getValue();
+            for (SyncState.Note n : ch.upsert) { st.notes.removeIf(x -> x.uuid.equals(n.uuid)); st.notes.add(n); }
+            st.notes.removeIf(x -> ch.delete.contains(x.uuid)); st.deleted.putAll(ch.tombs);
+            for (SyncState.Progress p : ch.progress) { st.progress.removeIf(x -> x.key().equals(p.key())); st.progress.add(p); }
+            for (String[] r : ch.readings) st.readings.add(SyncState.reading(r[0], r[1], Integer.parseInt(r[2])));
+            return ch;
+        }
+        SyncState.Note note(String uuid) { for (SyncState.Note n : st.notes) if (n.uuid.equals(uuid)) return n; return null; }
+    }
+    static boolean syncTest(DeskStore s, File home) throws Exception {
+        String realHome = System.getProperty("user.home"); System.setProperty("user.home", home.getPath());
+        DeskSync host = new DeskSync(null, s); DeskSync.schema(s);
+        SyncServer server = new SyncServer(host, 0, 0); server.start();
+        try {
+            String phoneId = SyncState.uuid(); FakePhone phone = new FakePhone();
+            host.newCode(); String code = host.code(), wrong = code.equals("000000") ? "111111" : "000000";
+            boolean refused; try { SyncClient.pair("127.0.0.1", server.port(), phoneId, "Telemóvel de teste", wrong); refused = false; } catch (IOException e) { refused = e.getMessage().contains("Código errado"); }
+            SyncClient.Computer pc = SyncClient.pair("127.0.0.1", server.port(), phoneId, "Telemóvel de teste", code);
+            boolean codeGone = host.code() == null && pc.token.length == 32;
+            // PC has a note and a book read to page 5; the phone has its own note, the same book at page 8 (later) and a chapter read.
+            long pcNote = s.update("INSERT INTO notes(title,body,created,updated) VALUES(?,?,?,?)", "Do computador", "Texto PC", 1000, 2000);
+            File book = new File(home, "Livro sincronizado.pdf"); Files.write(book.toPath(), new byte[3000]);
+            s.update("INSERT OR REPLACE INTO books(path,title,kind,position,total,opened) VALUES(?,?,?,?,?,?)", book.getPath(), "Livro", "pdf", 5, 40, 5000L);
+            SyncState.Note a = new SyncState.Note(); a.uuid = SyncState.uuid(); a.title = "Do telemóvel"; a.body = "Texto do telemóvel ![f](note-img:img_sync.png)"; a.created = 1500; a.updated = 3000; phone.st.notes.add(a);
+            SyncState.Progress p = new SyncState.Progress(); p.name = "Livro sincronizado.pdf"; p.bytes = 3000; p.kind = "pdf"; p.position = 8; p.total = 40; p.at = 9000; phone.st.progress.add(p);
+            phone.st.readings.add(SyncState.reading("2026-11-20", "João", 3));
+            SyncClient.Local withMedia = new SyncClient.Local() {
+                public SyncState state(long since) throws Exception { SyncState st = phone.state(since); st.media.put("img_sync.png", new byte[]{9, 8, 7}); return st; }
+                public SyncState.Changes apply(SyncState c) throws Exception { return phone.apply(c); }
+            };
+            SyncClient.Result r1 = SyncClient.sync(pc, phoneId, "Telemóvel de teste", withMedia, 0);
+            String pcUuid = DeskSync.uuidOf(s, pcNote);
+            boolean first = r1.notesThere == 1 && phone.note(pcUuid) != null && s.count("SELECT COUNT(*) FROM notes WHERE title='Do telemóvel'") == 1
+                && new File(DeskNotes.media(), "img_sync.png").isFile() && s.count("SELECT position FROM books WHERE path=?", book.getPath()) == 8
+                && s.count("SELECT COUNT(*) FROM readings WHERE book='João' AND chapter=3") == 1;
+            // Edited on the phone later; deleted on the computer.
+            phone.note(pcUuid).body = "Editado no telemóvel"; phone.note(pcUuid).updated = 99999;
+            long phoneNoteHere = DeskSync.localOf(s, a.uuid); s.update("DELETE FROM notes WHERE id=?", phoneNoteHere); DeskSync.deleted(s, phoneNoteHere);
+            SyncClient.sync(pc, phoneId, "Telemóvel de teste", phone, 1);
+            boolean second = s.rows("SELECT body FROM notes WHERE id=?", pcNote).get(0)[0].equals("Editado no telemóvel") && phone.note(a.uuid) == null;
+            // A third sync changes nothing.
+            SyncClient.Result r3 = SyncClient.sync(pc, phoneId, "Telemóvel de teste", phone, 2);
+            boolean quiet = r3.notesThere == 0 && r3.notesHere == 0;
+            // Files: phone → computer (Transferências\Seeky) and computer → phone (outbox).
+            byte[] data = new byte[700000]; new Random(3).nextBytes(data);
+            String saved = SyncClient.send(pc, phoneId, "Telemóvel de teste", "foto da reunião.jpg", data.length, new ByteArrayInputStream(data));
+            boolean upload = Arrays.equals(Files.readAllBytes(new File(DeskSync.inbox(), saved).toPath()), data);
+            File out = new File(home, "para o telemóvel.pdf"); Files.write(out.toPath(), data);
+            s.update("INSERT INTO sync_outbox(id,path,name,size,added) VALUES(?,?,?,?,?)", SyncState.uuid(), out.getPath(), out.getName(), out.length(), 1L);
+            ByteArrayOutputStream got = new ByteArrayOutputStream(); String[] gotName = {""};
+            int received = SyncClient.receive(pc, phoneId, "Telemóvel de teste", new SyncClient.Sink() { public OutputStream open(String n, long size) { gotName[0] = n; return got; } public void done(String n, boolean ok) {} });
+            boolean download = received == 1 && gotName[0].equals("para o telemóvel.pdf") && Arrays.equals(got.toByteArray(), data) && host.outbox().isEmpty();
+            // A forgotten phone cannot sync any more.
+            host.forget(phoneId); boolean locked; try { SyncClient.sync(pc, phoneId, "x", phone, 3); locked = false; } catch (IOException e) { locked = e.getMessage().contains("já não está ligado"); }
+            System.out.println("  ligado: recusa=" + refused + " código=" + codeGone + " 1.ª=" + first + " 2.ª=" + second + " calma=" + quiet + " envio=" + upload + " receber=" + download + " esquecido=" + locked);
+            return refused && codeGone && first && second && quiet && upload && download && locked;
+        } finally { server.close(); System.setProperty("user.home", realHome); }
+    }
     static boolean run() {
         try {
             File home = Files.createTempDirectory("seeky-selftest").toFile(); System.setProperty("seeky.home", home.getPath());
@@ -127,6 +191,8 @@ final class DeskSelfTest {
                 DeskMarks.add(s, "livro.txt", "Livro", 0, "Parte 1", "amou o mundo", DeskMarks.COLORS[1], "nota");
                 String painted = DeskMarks.paint("Porque Deus amou o mundo de tal maneira.", DeskMarks.list(s, "livro.txt", 0));
                 check(painted.contains("<mark id='m") && painted.contains(">amou o mundo</mark>") && DeskMarks.paint("<a href=\"x\">amou o mundo</a>", DeskMarks.list(s, "livro.txt", 0)).contains("<mark"), "marcações nos livros");
+                // Seeky ligado: emparelhar com o código, juntar notas/leitura/estudo, apagar, ficheiros nos dois sentidos.
+                check(syncTest(s, home), "Seeky ligado (emparelhar, sincronizar, ficheiros)");
                 List<BibleGame.Question> q = new BibleGame(BibleGame.EASY, new Random(1), DeskStudy.verses(s)).round(); check(q.size() == BibleGame.ROUND, "jogo da Bíblia (" + q.size() + " perguntas)");
             }
             check(DeskThemes.ALL.size() >= 21 && DeskThemes.find("Petróleo").css().contains("-seeky-accent: #f7c9a1") && DeskThemes.find(DeskThemes.SCHEDULE) != null, "temas do telemóvel");

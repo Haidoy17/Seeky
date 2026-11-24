@@ -1,0 +1,2 @@
+Seeky para Windows 5.49.0 — autoteste: 23 verificações PASS, incluindo "Seeky ligado (emparelhar, sincronizar, ficheiros)": servidor real em 127.0.0.1 com um telemóvel simulado — código errado recusado, código usado uma vez, notas/imagem/leitura/capítulos juntos, edição e apagamento propagados, terceira sincronização sem mudanças, ficheiros nos dois sentidos, telemóvel desligado deixa de sincronizar.
+19 capturas, entre elas desktop-phone.png.

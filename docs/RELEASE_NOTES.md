@@ -1,3 +1,13 @@
+## Seeky 5.49.0
+
+Instale **Seeky_5.49.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.49.0.
+
+### Novidades
+- **Seeky ligado**: o telemóvel e o Seeky para Windows sincronizam notas, leitura, estudo bíblico e
+  música na mesma rede Wi-Fi, e trocam ficheiros. Telemóvel: Ferramentas → Seeky no computador.
+  Computador: Telemóvel.
+
 ## Seeky 5.48.0
 
 Instale **Seeky_5.48.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
