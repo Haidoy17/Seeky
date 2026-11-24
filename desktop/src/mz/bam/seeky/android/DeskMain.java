@@ -169,7 +169,7 @@ public final class DeskMain extends Application {
             {"settings", "Definições", "Tema, IA, voz e actualizações", "settings"}};
         List<Node> cells = new ArrayList<>();
         for (Object[] t : tiles) { Node tile = DeskUi.tile((String) t[0], (String) t[1], (String) t[2], () -> open((String) t[3])); GridPane.setHgrow(tile, Priority.ALWAYS); ((Region) tile).setMaxWidth(Double.MAX_VALUE); cells.add(tile); }
-        DeskUi.responsive(grid, cells, 380);
+        DeskUi.responsive(grid, cells, 300);
         page.getChildren().add(grid);
         VBox today = study.todayCard(); if (today != null) page.getChildren().add(today);
         VBox recent = reader.recentCard(); if (recent != null) page.getChildren().add(recent);

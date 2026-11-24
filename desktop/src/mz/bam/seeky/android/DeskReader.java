@@ -75,7 +75,8 @@ final class DeskReader {
     /** The reading bar: back, title, extra controls, previous/next, listen, mark, Seeky IA, note. */
     HBox bar(String title, Label where, Runnable prev, Runnable next, Runnable listen, Node... extra) {
         Button back = DeskUi.iconButton("back", "Voltar à estante", () -> { DeskSpeech.stop(); d.open("reader"); });
-        Label t = DeskUi.heading(title); HBox.setHgrow(t, Priority.ALWAYS); t.setMaxWidth(Double.MAX_VALUE);
+        Label t = DeskUi.heading(title); HBox.setHgrow(t, Priority.ALWAYS); t.setMaxWidth(Double.MAX_VALUE); t.setWrapText(false); t.setMinWidth(60); t.setTooltip(new Tooltip(title));
+        where.setMinWidth(Region.USE_PREF_SIZE);
         HBox row = DeskUi.row(back, t); row.getChildren().addAll(extra);
         row.getChildren().addAll(DeskUi.iconButton("back", "Anterior", prev), where, nextButton(next), DeskUi.iconButton("speaker", "Ouvir", listen));
         return row;
@@ -97,7 +98,7 @@ final class DeskReader {
         return p + NotepadAiText.FORMAT_PT;
     }
     MenuButton aiMenu(String title, java.util.function.Supplier<String> place, java.util.function.Supplier<String> whole, java.util.function.Supplier<String> selection) {
-        MenuButton m = new MenuButton("Seeky IA", DeskUi.icon("sparkle", 18)); m.getStyleClass().add("primary");
+        MenuButton m = new MenuButton("Seeky IA", DeskUi.icon("sparkle", 18)); m.getStyleClass().add("primary"); m.setMinWidth(Region.USE_PREF_SIZE);
         for (String[] a : AI) {
             MenuItem i = new MenuItem(a[1]);
             i.setOnAction(e -> {
@@ -205,7 +206,7 @@ final class DeskReader {
         int[] at = {Math.min(Math.max(0, start), book.texts.size() - 1)};
         WebView web = new WebView();
         Label where = DeskUi.muted("");
-        ComboBox<String> toc = new ComboBox<>(); toc.getItems().addAll(book.names); toc.setPrefWidth(220);
+        ComboBox<String> toc = new ComboBox<>(); toc.getItems().addAll(book.names); toc.setPrefWidth(200); toc.setMinWidth(120);
         String[] selected = {""};
         List<Runnable> afterLoad = new ArrayList<>();
         web.getEngine().getLoadWorker().stateProperty().addListener((o, a, s) -> { if (s == Worker.State.SUCCEEDED) { List<Runnable> run = new ArrayList<>(afterLoad); afterLoad.clear(); for (Runnable r : run) r.run(); } });

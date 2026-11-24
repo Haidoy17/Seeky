@@ -2,8 +2,8 @@
   "versionCode": 5007300,
   "versionName": "5.46.0",
   "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.46.0-app.zip",
-  "sha256": "a66ffcf435393e3db4d83276b17f218275ca41a0c58e26991da7bb3cfbafdb4f",
-  "bytes": 8697010,
+  "sha256": "a36efd2cb9149ed56660d7f0d616d3ffa5c06c73a8f9217be8298381c4deaa5f",
+  "bytes": 8697093,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
   "notes": "Janela própria com minimizar, maximizar e fechar; ecrãs mais limpos e fluidos; os temas do telemóvel; marcações com cores e notas nos livros; Seeky IA nos livros (resumir, explicar, perguntas); Foco (Pomodoro) por disciplina; notas entre o telemóvel e o computador."
