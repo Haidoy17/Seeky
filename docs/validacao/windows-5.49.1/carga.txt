@@ -1,0 +1,3 @@
+Prova de carga: 3009 livros na estante (3000 cópias de EPUB/PDF de exemplo).
+Abertura + 19 ecrãs: 34 s com poucos livros e 34 s com 3009. Estante, grelha e lista em páginas (40/40/80).
+Autoteste 23/23.

@@ -1,5 +1,17 @@
 # Registo de alterações
 
+## 5.49.1 — 2026-11-24 (Android e Windows)
+
+- **Seeky para Windows rápido com muitos livros**: depois de importar uma pasta grande, a estante e o
+  programa ficavam lentos. Agora:
+  - a estante e a grelha mostram 40 livros de cada vez (a lista 80), com Anterior/Seguinte;
+  - as capas preparam-se só para a página à vista, uma de cada vez, e as pendentes de outra página são
+    canceladas; PDF acima de 150 MB ficam com a capa desenhada; os PDF abrem-se sem ocupar a memória;
+  - a procura de livros é feita na base de dados e espera que acabe de escrever;
+  - a importação de pastas grava tudo numa só vez e mostra o progresso.
+  - Prova: 3009 livros na estante, o mesmo tempo de abertura que com poucos.
+- Android: sem mudanças (o mesmo número de versão nos dois).
+
 ## 5.49.0 — 2026-11-24 (Android e Windows)
 
 - **Seeky ligado — o telemóvel e o computador juntos, na mesma rede Wi-Fi, sem internet nem conta**:

@@ -26,7 +26,12 @@ import javax.imageio.ImageIO;
  */
 final class DeskCovers {
     private DeskCovers() {}
-    static final ExecutorService WORK = Executors.newFixedThreadPool(2, r -> { Thread t = new Thread(r, "seeky-capas"); t.setDaemon(true); t.setPriority(Thread.MIN_PRIORITY); return t; });
+    /** One background thread; when the page changes, the covers still waiting for the old page are dropped. */
+    static final ExecutorService WORK = Executors.newSingleThreadExecutor(r -> { Thread t = new Thread(r, "seeky-capas"); t.setDaemon(true); t.setPriority(Thread.MIN_PRIORITY); return t; });
+    static final java.util.concurrent.atomic.AtomicInteger PAGE = new java.util.concurrent.atomic.AtomicInteger();
+    static final long MAX_PDF = 150L << 20;
+    /** A new page of books is on the screen: covers asked for earlier are no longer needed. */
+    static void newPage() { PAGE.incrementAndGet(); }
     static final Map<String, Image> MEMORY = Collections.synchronizedMap(new LinkedHashMap<String, Image>(64, .75f, true) { protected boolean removeEldestEntry(Map.Entry<String, Image> e) { return size() > 300; } });
     static final int W = 240, H = 360;
     static final int[] TONES = {0xff7b3f2f, 0xff2f5d50, 0xff3f4b7a, 0xff6b4f2a, 0xff5b3a6b, 0xff2f4f6b, 0xff7a5a2f, 0xff4a6b3a, 0xff6b2f3f, 0xff3a5a6b};
@@ -46,10 +51,12 @@ final class DeskCovers {
         box.getChildren().add(drawn(title, f.getName(), width, height));
         Image known = MEMORY.get(f.getAbsolutePath());
         if (known != null) { box.getChildren().add(image(known, width, height)); return box; }
+        int page = PAGE.get();
         WORK.execute(() -> {
+            if (page != PAGE.get()) return;
             try {
                 File png = cover(f); if (png == null) return;
-                Image img = new Image(png.toURI().toString(), W, H, true, true);
+                Image img = new Image(png.toURI().toString(), Math.max(60, width * 1.5), Math.max(90, height * 1.5), true, true);
                 if (img.isError()) return; MEMORY.put(f.getAbsolutePath(), img);
                 javafx.application.Platform.runLater(() -> box.getChildren().add(image(img, width, height)));
             } catch (Throwable ignored) {}
@@ -77,7 +84,7 @@ final class DeskCovers {
         try {
             if (n.endsWith(".epub")) img = epub(f);
             else if (n.endsWith(".cbz")) img = cbz(f);
-            else if (n.endsWith(".pdf")) img = pdf(f);
+            else if (n.endsWith(".pdf") && f.length() <= MAX_PDF) img = pdf(f);
             else if (EbookConvert.supported(f.getName()) && !n.endsWith(".docx")) { File conv = new File(DeskStore.folder("convertidos"), EbookConvert.epubName(f.getName())); if (conv.isFile()) img = epub(conv); }
         } catch (Throwable ignored) {}
         if (img == null) { no.createNewFile(); return null; }
@@ -134,7 +141,7 @@ final class DeskCovers {
         }
     }
     static BufferedImage pdf(File f) throws Exception {
-        try (org.apache.pdfbox.pdmodel.PDDocument doc = org.apache.pdfbox.pdmodel.PDDocument.load(f)) {
+        try (org.apache.pdfbox.pdmodel.PDDocument doc = org.apache.pdfbox.pdmodel.PDDocument.load(f, org.apache.pdfbox.io.MemoryUsageSetting.setupTempFileOnly())) {
             if (doc.getNumberOfPages() == 0) return null;
             org.apache.pdfbox.pdmodel.common.PDRectangle box = doc.getPage(0).getCropBox();
             float dpi = (float) Math.max(20, Math.min(110, 72.0 * H / Math.max(1, box.getHeight())));
