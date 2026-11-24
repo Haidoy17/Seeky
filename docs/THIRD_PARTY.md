@@ -3,6 +3,7 @@
 - PdfBox-Android 2.0.27.0, de Tom Roush / Apache PDFBox: `app/libs/pdfbox-android-2.0.27.0.jar` foi extraído sem alteração de classes do AAR Maven Central. Recursos originais do AAR em `app/src/main/assets/com/tom_roush`. Licença Apache 2.0 e NOTICE em `app/src/main/assets/licenses`.
 - Bouncy Castle bcprov/bcpkix/bcutil 1.86, JDK 1.8+: JARs originais em `app/libs`. Licença em `app/src/main/assets/licenses/LICENSE_BouncyCastle.md`. Dependências da biblioteca PDF; não há ferramenta de edição/assinatura criptográfica no Seeky.
 - Shizuku-API 13.1.5 (api, provider, aidl, shared), de RikkaApps: `app/libs/shizuku-*-13.1.5.jar` são os `classes.jar` sem alteração dos AAR do Maven Central. Licença Apache 2.0 (`app/src/main/assets/licenses/Apache-2.0.txt`). Só é usada quando o utilizador abre "Pastas das aplicações" e tem a aplicação Shizuku a funcionar; o serviço do Seeky nesse processo só aceita caminhos em Android/data e Android/obb.
+- Seeky para Windows: componentes e licenças em `docs/WINDOWS.md` (Zulu/OpenJFX, PDFBox, SQLite JDBC, SLF4J, JSON-java, NSIS); versões e SHA-256 em `tools/build_desktop.py`.
 - URLs de origem e SHA-256 em `third_party.json`. As bibliotecas já estão incluídas no código-fonte distribuído; a compilação não as descarrega.
 
 O motor PDF é usado apenas sob pedido para extrair texto de páginas no leitor. A descoberta normal não passa a abrir todos os PDFs. A renderização visual continua a usar o PdfRenderer do Android. Não foi adicionado OCR.

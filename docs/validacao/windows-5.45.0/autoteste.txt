@@ -1,0 +1,14 @@
+PASS versão 5.45.0
+PASS referências bíblicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+PASS importar Bíblia CSV (versículo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS jogo da Bíblia (10 perguntas)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS 13 verificações do Seeky Desktop

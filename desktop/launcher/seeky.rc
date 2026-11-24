@@ -1,0 +1,25 @@
+#include <winver.h>
+1 ICON "seeky.ico"
+1 VERSIONINFO
+FILEVERSION     SEEKY_V1,SEEKY_V2,SEEKY_V3,0
+PRODUCTVERSION  SEEKY_V1,SEEKY_V2,SEEKY_V3,0
+FILEOS          0x40004
+FILETYPE        0x1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "081604B0"
+    BEGIN
+      VALUE "CompanyName", "Seeky"
+      VALUE "FileDescription", "Seeky para Windows"
+      VALUE "FileVersion", SEEKY_VERSION
+      VALUE "ProductName", "Seeky"
+      VALUE "ProductVersion", SEEKY_VERSION
+      VALUE "OriginalFilename", "Seeky.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0816, 1200
+  END
+END

@@ -1,5 +1,19 @@
 # Registo de alterações
 
+## Seeky para Windows 5.45.0 — 2026-11-24
+
+- **Primeira versão do Seeky para Windows (64 bits)**, com o mesmo número de versão do Android e o mesmo
+  núcleo (Bíblias, referências, estudo, jogo, formato das notas, Word, IA, livros):
+  - Bíblia (importar MyBible, USX, USFM, CSV/TSV, texto e EPUB; ler, procurar, copiar, ouvir);
+  - Estudo bíblico (planos, leitura de hoje, sequência, decorar versículos) e Jogo da Bíblia (4 níveis);
+  - Bloco de notas com pré-visualização, passagens, Word, PDF, Markdown e Seeky IA;
+  - Livros (PDF, EPUB, Word, FB2, MOBI, AZW3, ODT, RTF, MHTML, CBZ, TXT) com estante e progresso;
+  - Ficheiros (discos, procurar, copiar, mover, Reciclagem) e Música e vídeo com letras;
+  - leitura em voz alta com as vozes do Windows; temas escuro e claro.
+- Instalador por utilizador (`entrega/windows/Seeky-Setup-5.45.0-x64.exe`, com Java incluído) e
+  actualizações automáticas pelo próprio programa (`entrega/windows/latest.json`).
+- Ver `docs/WINDOWS.md`.
+
 ## 5.45.0 — 2026-11-23
 
 - **Importar Bíblias com versículos agrupados**: paráfrases como *A Mensagem* juntam versículos
