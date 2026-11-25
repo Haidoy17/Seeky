@@ -164,3 +164,4 @@
 .root-pane .hyperlink { -fx-text-fill: -seeky-accent; -fx-border-color: transparent; }
 .root-pane .date-picker > .arrow-button { -fx-background-color: -seeky-raised; -fx-background-radius: 0 12 12 0; }
 .root-pane .date-picker > .arrow-button > .arrow { -fx-background-color: -seeky-ink; }
+.course-stripe { -fx-background-color: -seeky-accent; -fx-background-radius: 6; }

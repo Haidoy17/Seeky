@@ -1,5 +1,19 @@
 # Registo de alterações
 
+## 5.52.0 — 2026-11-25 (Android e Windows)
+
+- **Estudos no Windows organizados como no telemóvel: Curso › Módulo ou Disciplina.**
+  - Novo separador *Cursos* (antes das disciplinas): cada curso com descrição, número de módulos e
+    disciplinas e cartões para rever; *Sem curso* junta o que ainda não tem curso.
+  - Página do curso com *Módulos* e *Disciplinas* em separado; *Criar › Curso…* e
+    *Criar › Módulo ou disciplina…* (nome, tipo e curso, ou um curso novo).
+  - Cada módulo/disciplina mostra o caminho (Curso › Módulo) e pode mudar de nome, tipo ou curso.
+  - O curso escrito à mão na 5.50 passa automaticamente a um curso a sério.
+- **Seeky ligado** leva os cursos (com descrição), o curso de cada módulo/disciplina e o tipo, nos dois
+  sentidos; apagar um curso num lado apaga-o no outro (os módulos e disciplinas ficam, sem curso).
+- **Plano de estudo da Seeky IA** (Android e Windows): escolha o curso (ou crie um) e se cria um módulo
+  ou uma disciplina.
+
 ## 5.51.0 — 2026-11-25 (Android e Windows)
 
 - **Seeky IA mais forte**, com o mesmo núcleo nos dois (`SeekyAiDeep`):

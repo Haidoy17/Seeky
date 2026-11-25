@@ -1,0 +1,5 @@
+Verifies
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+versionCode 5007900 · versionName 5.52.0
+SHA-256 do APK: 0845a6ad6873878bad28142a18222fa15d08bd1d7929cb316c1c7dc4f89c5b0b
+Testes: núcleo OK; IA (host) OK; Robolectric completo 494 testes OK (inclui Link549Test.coursesWithModulesAndSubjectsTravelBothWays e Ai551Test com curso e tipo).

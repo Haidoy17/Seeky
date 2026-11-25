@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007800,
-  "versionName": "5.51.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.51.0.apk",
-  "sha256": "4b7593e9717dd5afcd6e0639637a6d7059aedec00109b1fbbfc0a93ef60f34d1",
-  "bytes": 13815467,
-  "notes": "Seeky IA mais forte: perguntar a vários materiais, resumir um livro inteiro e plano de estudo a partir de um tema."
+  "versionCode": 5007900,
+  "versionName": "5.52.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.52.0.apk",
+  "sha256": "0845a6ad6873878bad28142a18222fa15d08bd1d7929cb316c1c7dc4f89c5b0b",
+  "bytes": 13818506,
+  "notes": "Estudos: Curso › Módulos e Disciplinas também no computador; o Seeky ligado leva os cursos."
 }

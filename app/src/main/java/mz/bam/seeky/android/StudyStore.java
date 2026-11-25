@@ -39,7 +39,7 @@ final class StudyStore extends SQLiteOpenHelper {
  static ContentValues values(Object... pairs){ContentValues v=new ContentValues();for(int i=0;i<pairs.length;i+=2){String k=(String)pairs[i];Object x=pairs[i+1];if(x instanceof Integer)v.put(k,(Integer)x);else if(x instanceof Long)v.put(k,(Long)x);else v.put(k,String.valueOf(x));}return v;}
  long save(String t,long id,ContentValues v){current();table(t);if(v.containsKey("subject")&&v.getAsLong("subject")!=0&&get("subjects",v.getAsLong("subject"))==null)throw new IllegalArgumentException("Módulo indisponível.");if(t.equals("subjects")){if(v.containsKey("course")&&v.getAsLong("course")!=0&&get("courses",v.getAsLong("course"))==null)throw new IllegalArgumentException("Curso indisponível.");if(v.containsKey("kind")&&!Arrays.asList("module","subject").contains(v.getAsString("kind")))throw new IllegalArgumentException("Tipo de módulo inválido.");}if(id==0)return t.equals("materials")?insertMaterial(v):getWritableDatabase().insertOrThrow(t,null,v);if(getWritableDatabase().update(t,v,"id=?",new String[]{""+id})!=1)throw new IllegalStateException("Este registo já não existe.");return id;}
  void delete(String t,long id){current();
-  if(t.equals("cards")||t.equals("questions")||t.equals("tasks")||t.equals("subjects"))PhoneSync.studyDeleted(context,this,t,id);
+  if(t.equals("cards")||t.equals("questions")||t.equals("tasks")||t.equals("subjects")||t.equals("courses"))PhoneSync.studyDeleted(context,this,t,id);
   table(t);SQLiteDatabase d=getWritableDatabase();boolean own=!d.inTransaction();if(own)d.beginTransaction();
   try{
    if(Arrays.asList("notes","cards","questions","tasks").contains(t)){
