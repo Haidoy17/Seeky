@@ -1,0 +1,6 @@
+Windows Server 2025 (GitHub Actions, execução 45601682598), Seeky actualizado de 5.45.0 para 5.54.0:
+  edge-ponte: página=true host=404 código=404 fala=true fim=true
+  edge: 321 vozes naturais (por ex. Microsoft Duarte Online (Natural) - Portuguese (Portugal))
+PASS 30 verificações do Seeky Desktop
+Edge fechado depois do autoteste (nenhum processo do Edge com o perfil do Seeky ficou aberto)
+Capturas: 26
