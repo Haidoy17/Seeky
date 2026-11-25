@@ -69,7 +69,7 @@ final class SyncClient {
             SyncState computer = SyncState.parse(ch.text()); computer.receiveMedia(ch);
             SyncState.Changes here = local.apply(computer);
             ch.send("{\"req\":\"bye\"}");
-            Result r = new Result(); r.notesThere = there.optInt("notes"); r.otherThere = there.optInt("other"); r.notesHere = here.notes(); r.otherHere = here.progress.size() + here.readings.size() + here.cards.size() + here.records.size() + here.plays.size() + here.favorites.size();
+            Result r = new Result(); r.notesThere = there.optInt("notes"); r.otherThere = there.optInt("other"); r.notesHere = here.notes(); r.otherHere = here.progress.size() + here.readings.size() + here.cards.size() + here.records.size() + here.plays.size() + here.favorites.size() + here.study();
             return r;
         }
     }

@@ -1,5 +1,18 @@
 # Registo de alterações
 
+## 5.50.0 — 2026-11-25 (Android e Windows)
+
+- **Estudos no Seeky para Windows**, como no telemóvel:
+  - *Hoje*: cartões para rever, tarefas de hoje e atrasadas, tempo de estudo, próximos prazos;
+  - *Disciplinas* com cor; dentro de cada uma: Cartões, Perguntas, Materiais (ficheiros ou livros da
+    estante, abrir no leitor), Tarefas e Notas (ficam no Bloco de notas); estudar com o Foco;
+  - *Cartões* com a mesma revisão espaçada do telemóvel (Outra vez, Difícil, Recordei, Fácil);
+  - *Perguntas* de escolha múltipla ou de resposta livre, com resultado guardado;
+  - *Agenda* de tarefas com prazo e prioridade; *Progresso* por disciplina;
+  - **Seeky IA** cria cartões e perguntas de escolha múltipla a partir de um material ou de um texto.
+- **Seeky ligado com Estudos** (Android e Windows): disciplinas, cartões, perguntas e tarefas ficam iguais
+  nos dois (a versão mais recente de cada; o que se apaga num lado é apagado no outro).
+
 ## 5.49.1 — 2026-11-24 (Android e Windows)
 
 - **Seeky para Windows rápido com muitos livros**: depois de importar uma pasta grande, a estante e o

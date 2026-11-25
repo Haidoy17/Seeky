@@ -74,6 +74,7 @@ final class DeskSync implements SyncServer.Host {
             st.execute("CREATE TABLE IF NOT EXISTS sync_outbox(id TEXT PRIMARY KEY,path TEXT NOT NULL,name TEXT NOT NULL,size INTEGER NOT NULL,added INTEGER NOT NULL)");
             for (String c : new String[]{"color INTEGER NOT NULL DEFAULT 0", "spacing INTEGER NOT NULL DEFAULT 0"}) try { st.execute("ALTER TABLE notes ADD COLUMN " + c); } catch (SQLException exists) {}
         } catch (SQLException ignored) {}
+        DeskStudies.schema(s);
     }
     /** Remembers a deleted note so the phone deletes it too. */
     static void deleted(DeskStore s, long note) {
@@ -102,6 +103,12 @@ final class DeskSync implements SyncServer.Host {
         for (Object[] r : s.rows("SELECT name,level,points,correct,played FROM records")) { SyncState.Record x = new SyncState.Record(); x.name = r[0] + ""; x.level = ((Number) r[1]).intValue(); x.points = ((Number) r[2]).intValue(); x.correct = ((Number) r[3]).intValue(); x.at = ((Number) r[4]).longValue(); st.records.add(x); }
         for (Object[] r : s.rows("SELECT t.artist,t.title,p.at FROM plays p JOIN tracks t ON t.path=p.path WHERE t.kind='audio' AND p.at>?", Math.max(0, since - 86400000L))) { SyncState.Play p = new SyncState.Play(); p.song = SyncState.song(r[0] + "", r[1] + ""); p.at = ((Number) r[2]).longValue(); st.plays.add(p); }
         for (Object[] r : s.rows("SELECT artist,title FROM tracks WHERE kind='audio' AND favorite=1")) st.favorites.add(SyncState.song(r[0] + "", r[1] + ""));
+        Map<Long, String> names = new HashMap<>();
+        for (Object[] r : s.rows("SELECT id,title,color,created,updated FROM st_subjects")) { SyncState.Subject x = new SyncState.Subject(); x.title = r[1] + ""; x.color = ((Number) r[2]).intValue(); x.created = ((Number) r[3]).longValue(); x.updated = ((Number) r[4]).longValue(); st.subjects.add(x); names.put(((Number) r[0]).longValue(), x.title); }
+        for (Object[] r : s.rows("SELECT subject,front,back,due,interval,reps,lapses,updated FROM st_cards")) { SyncState.StudyCard x = new SyncState.StudyCard(); x.subject = names.getOrDefault(((Number) r[0]).longValue(), ""); x.front = r[1] + ""; x.back = r[2] + ""; x.due = ((Number) r[3]).longValue(); x.interval = ((Number) r[4]).intValue(); x.reps = ((Number) r[5]).intValue(); x.lapses = ((Number) r[6]).intValue(); x.updated = ((Number) r[7]).longValue(); st.studyCards.add(x); }
+        for (Object[] r : s.rows("SELECT subject,prompt,answer,choices,correct,explanation,updated FROM st_questions")) { SyncState.Question x = new SyncState.Question(); x.subject = names.getOrDefault(((Number) r[0]).longValue(), ""); x.prompt = r[1] + ""; x.answer = r[2] + ""; x.choices = r[3] + ""; x.correct = ((Number) r[4]).intValue(); x.explanation = r[5] + ""; x.updated = ((Number) r[6]).longValue(); st.questions.add(x); }
+        for (Object[] r : s.rows("SELECT subject,title,due,estimate,priority,done,updated FROM st_tasks")) { SyncState.Task x = new SyncState.Task(); x.subject = names.getOrDefault(((Number) r[0]).longValue(), ""); x.title = r[1] + ""; x.due = ((Number) r[2]).longValue(); x.estimate = ((Number) r[3]).intValue(); x.priority = ((Number) r[4]).intValue(); x.done = ((Number) r[5]).intValue() == 1; x.updated = ((Number) r[6]).longValue(); st.tasks.add(x); }
+        for (Object[] r : s.rows("SELECT key,at FROM sync_gone")) st.gone.put(r[0] + "", ((Number) r[1]).longValue());
         return st;
     }
     /** Brings the phone's changes into this computer, in one transaction. */
@@ -131,10 +138,32 @@ final class DeskSync implements SyncServer.Host {
                     for (SyncState.Play p : ch.plays) { String path = paths.get(p.song); if (path == null) continue; s.update("INSERT INTO plays(path,at) VALUES(?,?)", path, p.at); s.update("UPDATE tracks SET plays=plays+1,last_played=MAX(last_played,?) WHERE path=?", p.at, path); }
                     for (String f : ch.favorites) { String path = paths.get(f); if (path != null) s.update("UPDATE tracks SET favorite=1 WHERE path=?", path); }
                 }
+                applyStudy(s, ch);
                 s.db.commit(); return ch;
             } catch (Exception e) { s.db.rollback(); throw e; }
             finally { s.db.setAutoCommit(auto); }
         }
+    }
+    /** Estudos from the phone: subjects by name, then cards, questions and tasks (newest wins), then deletions. */
+    static void applyStudy(DeskStore s, SyncState.Changes ch) throws SQLException {
+        if (ch.study() == 0 && ch.goneTombs.isEmpty()) return;
+        Map<String, Long> subjects = new HashMap<>(); for (Object[] r : s.rows("SELECT id,title FROM st_subjects")) subjects.put(SyncState.norm(r[1] + ""), ((Number) r[0]).longValue());
+        for (SyncState.Subject x : ch.subjects) { Long id = subjects.get(SyncState.norm(x.title)); if (id != null) s.update("UPDATE st_subjects SET title=?,color=?,updated=? WHERE id=?", x.title, x.color, x.updated, id); else subjects.put(SyncState.norm(x.title), s.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", x.title, x.color, x.created, x.updated)); }
+        java.util.function.Function<String, Long> subjectId = t -> { if (t == null || t.trim().isEmpty()) return 0L; Long id = subjects.get(SyncState.norm(t)); if (id != null) return id; try { long n = s.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", t, DeskStudies.COLORS[subjects.size() % DeskStudies.COLORS.length], System.currentTimeMillis(), 0L); subjects.put(SyncState.norm(t), n); return n; } catch (SQLException e) { return 0L; } };
+        Map<Long, String> names = new HashMap<>(); for (Map.Entry<String, Long> e : subjects.entrySet()) names.put(e.getValue(), e.getKey());
+        Map<String, Long> cards = new HashMap<>(), questions = new HashMap<>(), tasks = new HashMap<>();
+        for (Object[] r : s.rows("SELECT st_cards.id,COALESCE(st_subjects.title,''),front FROM st_cards LEFT JOIN st_subjects ON st_subjects.id=st_cards.subject")) cards.put("card:" + SyncState.studyKey(r[1] + "", r[2] + ""), ((Number) r[0]).longValue());
+        for (Object[] r : s.rows("SELECT st_questions.id,COALESCE(st_subjects.title,''),prompt FROM st_questions LEFT JOIN st_subjects ON st_subjects.id=st_questions.subject")) questions.put("question:" + SyncState.studyKey(r[1] + "", r[2] + ""), ((Number) r[0]).longValue());
+        for (Object[] r : s.rows("SELECT st_tasks.id,COALESCE(st_subjects.title,''),st_tasks.title,due FROM st_tasks LEFT JOIN st_subjects ON st_subjects.id=st_tasks.subject")) tasks.put("task:" + SyncState.taskKey(r[1] + "", r[2] + "", ((Number) r[3]).longValue()), ((Number) r[0]).longValue());
+        for (SyncState.StudyCard x : ch.studyCards) { Long id = cards.get(x.key()); if (id != null) s.update("UPDATE st_cards SET back=?,due=?,interval=?,reps=?,lapses=?,updated=? WHERE id=?", x.back, x.due, x.interval, x.reps, x.lapses, x.updated, id); else s.update("INSERT INTO st_cards(subject,front,back,due,interval,reps,lapses,updated) VALUES(?,?,?,?,?,?,?,?)", subjectId.apply(x.subject), x.front, x.back, x.due, x.interval, x.reps, x.lapses, x.updated); }
+        for (SyncState.Question x : ch.questions) { Long id = questions.get(x.key()); if (id != null) s.update("UPDATE st_questions SET answer=?,choices=?,correct=?,explanation=?,updated=? WHERE id=?", x.answer, x.choices, x.correct, x.explanation, x.updated, id); else s.update("INSERT INTO st_questions(subject,prompt,answer,choices,correct,explanation,updated) VALUES(?,?,?,?,?,?,?)", subjectId.apply(x.subject), x.prompt, x.answer, x.choices, x.correct, x.explanation, x.updated); }
+        for (SyncState.Task x : ch.tasks) { Long id = tasks.get(x.key()); if (id != null) s.update("UPDATE st_tasks SET estimate=?,priority=?,done=?,updated=? WHERE id=?", x.estimate, x.priority, x.done ? 1 : 0, x.updated, id); else s.update("INSERT INTO st_tasks(subject,title,due,estimate,priority,done,updated) VALUES(?,?,?,?,?,?,?)", subjectId.apply(x.subject), x.title, x.due, x.estimate, x.priority, x.done ? 1 : 0, x.updated); }
+        for (String k : ch.remove) {
+            Long id = k.startsWith("card:") ? cards.get(k) : k.startsWith("question:") ? questions.get(k) : k.startsWith("task:") ? tasks.get(k) : null;
+            if (id != null) s.update("DELETE FROM " + (k.startsWith("card:") ? "st_cards" : k.startsWith("question:") ? "st_questions" : "st_tasks") + " WHERE id=?", id);
+            if (k.startsWith("subject:")) { Long sid = subjects.get(k.substring(8)); if (sid != null) { for (String t : new String[]{"st_cards", "st_questions", "st_tasks", "st_quiz"}) s.update("UPDATE " + t + " SET subject=0 WHERE subject=?", sid); s.update("UPDATE notes SET subject=0 WHERE subject=?", sid); s.update("DELETE FROM st_materials WHERE subject=?", sid); s.update("DELETE FROM st_subjects WHERE id=?", sid); } }
+        }
+        for (Map.Entry<String, Long> t : ch.goneTombs.entrySet()) s.update("INSERT OR REPLACE INTO sync_gone(key,at) VALUES(?,?)", t.getKey(), t.getValue());
     }
     @Override public SyncState.Changes apply(String device, SyncState phone) throws Exception { return merge(s, phone); }
     @Override public SyncState state(String device, long since) throws Exception { synchronized (s) { SyncState st = export(s, since); st.device = id(); st.name = name(); return st; } }

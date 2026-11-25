@@ -33,20 +33,20 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
-    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync;
+    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync; DeskStudies studies;
 
 
     @Override public void start(Stage stage) throws Exception {
         instance = this; this.stage = stage;
         store = new DeskStore();
-        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this); sync = new DeskSync(this, store); DeskSync.schema(store);
+        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this); sync = new DeskSync(this, store); DeskSync.schema(store); studies = new DeskStudies(this);
         root = new BorderPane();
         root.getStyleClass().add("root-pane"); theme(store.get("theme", DeskThemes.DEFAULT));
         nav.getStyleClass().add("nav"); nav.setPadding(new Insets(18, 12, 18, 12)); nav.setPrefWidth(232);
         Label brand = new Label("Seeky"); brand.getStyleClass().add("brand");
         VBox head = new VBox(0, brand); head.setPadding(new Insets(0, 10, 16, 10));
         nav.getChildren().add(head);
-        item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("game", "Jogo da Bíblia", "game");
+        item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("studies", "Estudos", "course"); item("game", "Jogo da Bíblia", "game");
         item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video"); item("phone", "Telemóvel", "phone");
         Region gap = new Region(); VBox.setVgrow(gap, Priority.ALWAYS); nav.getChildren().add(gap);
         item("settings", "Definições", "settings");
@@ -85,7 +85,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-subject", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -134,6 +134,20 @@ public final class DeskMain extends Application {
                 for (String n : names) { java.io.File f = new java.io.File(docs, n); f.getParentFile().mkdirs(); java.nio.file.Files.write(f.toPath(), new byte[1200 + n.length() * 97]); }
             }
             flash.index.rebuild(Collections.singletonList(docs), () -> false);
+            if (store.count("SELECT COUNT(*) FROM st_subjects") == 0) {
+                long now = System.currentTimeMillis();
+                long teo = store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "Teologia Sistemática", DeskStudies.COLORS[0], now, now);
+                long eng = store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "Inglês", DeskStudies.COLORS[1], now, now);
+                store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "História da Igreja", DeskStudies.COLORS[2], now, now);
+                String[][] cards = {{"O que é a graça?", "O favor de Deus que não merecemos."}, {"O que significa justificação?", "Ser declarado justo diante de Deus pela fé."}, {"Quantos livros tem a Bíblia protestante?", "66 livros."}};
+                for (int i = 0; i < cards.length; i++) store.update("INSERT INTO st_cards(subject,front,back,due,interval,reps,updated) VALUES(?,?,?,?,?,?,?)", teo, cards[i][0], cards[i][1], now - (i == 2 ? -3 * 86400000L : 0), i == 2 ? 3 : 0, i == 2 ? 1 : 0, now);
+                store.update("INSERT INTO st_cards(subject,front,back,due,updated) VALUES(?,?,?,?,?)", eng, "Faith", "Fé", now, now);
+                store.update("INSERT INTO st_questions(subject,prompt,answer,choices,correct,explanation,updated) VALUES(?,?,?,?,?,?,?)", teo, "Quem escreveu a carta aos Romanos?", "Paulo", "[\"Pedro\",\"Paulo\",\"João\",\"Tiago\"]", 1, "Romanos 1:1", now);
+                store.update("INSERT INTO st_tasks(subject,title,due,priority,updated) VALUES(?,?,?,?,?)", teo, "Ler o capítulo 3 de Grudem", now, 2, now);
+                store.update("INSERT INTO st_tasks(subject,title,due,priority,updated) VALUES(?,?,?,?,?)", eng, "Rever o vocabulário da semana", now + 2 * 86400000L, 1, now);
+                store.update("INSERT INTO st_tasks(subject,title,due,priority,updated) VALUES(?,?,?,?,?)", teo, "Resumo sobre a Reforma", now - 86400000L, 1, now);
+                if (demoBook != null) store.update("INSERT OR IGNORE INTO st_materials(subject,path,title,added) VALUES(?,?,?,?)", teo, demoBook.getPath(), "O caminho da fé", now);
+            }
             if (store.count("SELECT COUNT(*) FROM notes") == 0) store.update("INSERT INTO notes(title,body,folder,created,updated) VALUES(?,?,?,?,?)", "Sermão de domingo", "## Fé\nLer Hebreus 11:1 e João 3:16.\n[ ] Preparar slides\n[x] Escolher hinos", "Sermões", System.currentTimeMillis(), System.currentTimeMillis());
         } catch (Exception e) { System.out.println("demo: " + e); }
     }
@@ -145,6 +159,7 @@ public final class DeskMain extends Application {
         if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
+        else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }
         else if (id.equals("music-albums")) { music.tab = "Álbuns"; open("music"); music.tab = "Início"; }
         else if (id.equals("notes-edit")) notes.edit(0, "Estudo: o amor de Deus", "# O amor de Deus\nLer **João 3:16** e Romanos 5:8.\n\n- Deus amou o mundo\n- Deu o seu Filho\n\n[ ] Orar pela família\n[x] Ler 1 João 4\n\n> Porque Deus amou o mundo de tal maneira…");
         else open(id);
@@ -174,6 +189,7 @@ public final class DeskMain extends Application {
             case "music": case "media": view = music.view(); id = "music"; break;
             case "videos": view = videos.view(); break;
             case "phone": view = sync.view(); break;
+            case "studies": view = studies.view(); break;
             case "focus": view = focus.view(); break;
             case "marks": view = DeskMarks.view(this); id = "reader"; break;
             case "settings": view = DeskSettings.view(this); break;
@@ -202,6 +218,7 @@ public final class DeskMain extends Application {
             {"book", "Bíblia", "Ler, procurar passagens e importar Bíblias", "bible"},
             {"study", "Estudo bíblico", "Plano de leitura, sequência e versículos para decorar", "study"},
             {"game", "Jogo da Bíblia", "Quatro níveis, 60 s por pergunta, recordes", "game"},
+            {"course", "Estudos", "Disciplinas, cartões, perguntas, tarefas e Seeky IA", "studies"},
             {"note", "Bloco de notas", "Texto rico, tarefas, passagens, Word, PDF e Seeky IA", "notes"},
             {"reader", "Livros", "PDF, EPUB, Word, TXT e outros formatos", "reader"},
             {"folder", "Ficheiros", "Explorar discos, procurar e organizar", "files"},

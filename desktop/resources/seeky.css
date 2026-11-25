@@ -146,3 +146,9 @@
 .root-pane .toggle-button.chip.small { -fx-padding: 5 9; -fx-font-size: 12.5px; }
 /* Telemóvel: código de emparelhamento. */
 .pair-code { -fx-font-size: 46px; -fx-font-weight: bold; -fx-text-fill: -seeky-accent !important; -fx-font-family: "Consolas", "Cascadia Mono", monospace; -fx-padding: 4 0; }
+/* Caixas de seleção, datas e respostas dos cartões. */
+.root-pane .check-box .box, .dialog-pane .check-box .box { -fx-background-color: -seeky-raised; -fx-border-color: -seeky-muted; -fx-border-radius: 5; -fx-background-radius: 5; }
+.root-pane .check-box:selected .box, .dialog-pane .check-box:selected .box { -fx-background-color: -seeky-accent; -fx-border-color: -seeky-accent; }
+.root-pane .check-box:selected .mark, .dialog-pane .check-box:selected .mark { -fx-background-color: -seeky-on-accent; }
+.dialog-pane .date-picker .arrow-button { -fx-background-color: -seeky-raised; }
+.study-answer { -fx-font-size: 18px; }

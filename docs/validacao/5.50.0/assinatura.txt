@@ -1,0 +1,5 @@
+Verifies
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+versionCode 5007700 · versionName 5.50.0
+SHA-256 do APK: 22e0f988242f2c606e6c9c45de740e913126350e493af8ebe55c131ae3d1e17a
+Testes: núcleo OK; Robolectric 490 testes OK (inclui Link549Test com Estudos nos dois sentidos).

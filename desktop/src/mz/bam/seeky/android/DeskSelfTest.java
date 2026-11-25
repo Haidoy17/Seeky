@@ -191,6 +191,17 @@ final class DeskSelfTest {
                 DeskMarks.add(s, "livro.txt", "Livro", 0, "Parte 1", "amou o mundo", DeskMarks.COLORS[1], "nota");
                 String painted = DeskMarks.paint("Porque Deus amou o mundo de tal maneira.", DeskMarks.list(s, "livro.txt", 0));
                 check(painted.contains("<mark id='m") && painted.contains(">amou o mundo</mark>") && DeskMarks.paint("<a href=\"x\">amou o mundo</a>", DeskMarks.list(s, "livro.txt", 0)).contains("<mark"), "marcações nos livros");
+                // Estudos: o que a Seeky IA devolve passa a cartões e perguntas de escolha múltipla; revisão espaçada como no telemóvel.
+                DeskStudies.schema(s); long subj = s.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "Teologia", 0, 1L, 1L);
+                int[] made = DeskStudies.save(s, subj, "Pergunta: O que é a graça?\nResposta: Favor imerecido.\n\nPergunta: Quem escreveu Romanos?\nResposta: Paulo.\n\nPERGUNTAS\nQ: Quantos evangelhos há?\nA) 2\nB) 3\nC) 4\nD) 5\nCerta: C\nPorquê: Mateus, Marcos, Lucas e João.\nQ: Sem opções\nCerta: A");
+                StudySchedule.Next good = StudySchedule.next(0, 0, 0, 0, 2), retry = StudySchedule.next(0, 3, 2, 0, 0);
+                check(made[0] == 2 && made[1] == 1 && s.rows("SELECT answer,correct FROM st_questions").get(0)[0].equals("4") && good.interval == 1 && retry.interval == 0, "estudos: cartões e perguntas da IA, revisão espaçada");
+                SyncState pcSide = new SyncState(), phoneSide = new SyncState();
+                SyncState.StudyCard sc = new SyncState.StudyCard(); sc.subject = "Teologia"; sc.front = "O que é a graça?"; sc.back = "Favor"; sc.updated = 10; pcSide.studyCards.add(sc);
+                SyncState.StudyCard newer = new SyncState.StudyCard(); newer.subject = "teologia"; newer.front = "O que é a  graça?"; newer.back = "Favor imerecido"; newer.updated = 20; phoneSide.studyCards.add(newer);
+                SyncState.Task gone = new SyncState.Task(); gone.subject = "Teologia"; gone.title = "Ler"; gone.due = 0; gone.updated = 5; pcSide.tasks.add(gone); phoneSide.gone.put(gone.key(), 50L);
+                SyncState.Changes sch = SyncState.merge(pcSide, phoneSide);
+                check(sch.studyCards.size() == 1 && sch.studyCards.get(0).back.equals("Favor imerecido") && sch.remove.contains(gone.key()) && SyncState.merge(phoneSide, pcSide).studyCards.isEmpty(), "estudos: juntar com o telemóvel (mais recente, apagadas)");
                 // Seeky ligado: emparelhar com o código, juntar notas/leitura/estudo, apagar, ficheiros nos dois sentidos.
                 check(syncTest(s, home), "Seeky ligado (emparelhar, sincronizar, ficheiros)");
                 List<BibleGame.Question> q = new BibleGame(BibleGame.EASY, new Random(1), DeskStudy.verses(s)).round(); check(q.size() == BibleGame.ROUND, "jogo da Bíblia (" + q.size() + " perguntas)");

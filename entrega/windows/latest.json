@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007610,
-  "versionName": "5.49.1",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.49.1-app.zip",
-  "sha256": "e3f357a19fc423d857841d74a643f008661515ffe9468971eae9ed4c9349dbc6",
-  "bytes": 8844803,
+  "versionCode": 5007700,
+  "versionName": "5.50.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.50.0-app.zip",
+  "sha256": "8e81d74ec3ccd85c30970755cda6b3012ec8a95e5cf1f76b82a4ab1bd1cc5134",
+  "bytes": 8877764,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Estante rápida com muitos livros: páginas de 40, capas só da página à vista, importação de pastas numa só vez."
+  "notes": "Estudos completos: disciplinas, cartões com revisão espaçada, perguntas, tarefas, notas e Seeky IA; sincronizam com o telemóvel."
 }

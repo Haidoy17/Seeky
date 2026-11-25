@@ -22,6 +22,9 @@ perdem ao actualizar nem ao desinstalar.
   versículos; procurar passagens (João 3:16, Salmo 23) e palavras; copiar, ouvir, decorar, criar nota.
 - **Estudo bíblico**: planos de leitura, leitura de hoje, sequência de dias, semana, decorar versículos
   com a mesma repetição espaçada do Android.
+- **Estudos**: Hoje, Disciplinas (cartões, perguntas, materiais, tarefas, notas), Cartões com revisão
+  espaçada, Perguntas, Agenda, Progresso e Seeky IA para criar cartões e perguntas; sincroniza com o
+  telemóvel.
 - **Jogo da Bíblia**: Fácil, Médio, Difícil e Lendário, 60 s por pergunta, recordes.
 - **Bloco de notas**: o mesmo formato do Android (títulos, negrito, itálico, sublinhado, riscado, destaque,
   cores, listas, tarefas, citações, tabelas, imagens), pré-visualização, passagens tocáveis, exportar

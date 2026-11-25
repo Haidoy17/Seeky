@@ -1,3 +1,13 @@
+## Seeky 5.50.0
+
+Instale **Seeky_5.50.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.50.0.
+
+### Novidades
+- **Estudos no Seeky para Windows**: disciplinas, cartões com revisão espaçada, perguntas, tarefas,
+  materiais, notas, progresso e Seeky IA para criar cartões e perguntas.
+- **Seeky ligado** junta também os Estudos entre o telemóvel e o computador.
+
 ## Seeky 5.49.1
 
 - **Seeky para Windows**: a estante deixa de ficar lenta depois de importar uma pasta grande de livros

@@ -54,7 +54,24 @@ final class PhoneSync implements SyncClient.Local {
         long local(String uuid) { try (Cursor r = getReadableDatabase().rawQuery("SELECT local FROM ids WHERE kind='note' AND uuid=?", new String[]{uuid})) { return r.moveToFirst() ? r.getLong(0) : 0; } }
         void link(long local, String uuid) { getWritableDatabase().delete("ids", "kind='note' AND uuid=?", new String[]{uuid}); ContentValues v = new ContentValues(); v.put("kind", "note"); v.put("local", local); v.put("uuid", uuid); getWritableDatabase().insertWithOnConflict("ids", null, v, SQLiteDatabase.CONFLICT_REPLACE); }
         void tomb(String uuid, long at) { ContentValues v = new ContentValues(); v.put("kind", "note"); v.put("uuid", uuid); v.put("at", at); getWritableDatabase().insertWithOnConflict("deleted", null, v, SQLiteDatabase.CONFLICT_REPLACE); }
+        void gone(String key, long at) { ContentValues v = new ContentValues(); v.put("kind", "study"); v.put("uuid", key); v.put("at", at); getWritableDatabase().insertWithOnConflict("deleted", null, v, SQLiteDatabase.CONFLICT_REPLACE); }
+        Map<String, Long> goneMap() { Map<String, Long> out = new LinkedHashMap<>(); try (Cursor r = getReadableDatabase().rawQuery("SELECT uuid,at FROM deleted WHERE kind='study'", null)) { while (r.moveToNext()) out.put(r.getString(0), r.getLong(1)); } return out; }
         Map<String, Long> tombs() { Map<String, Long> out = new LinkedHashMap<>(); try (Cursor r = getReadableDatabase().rawQuery("SELECT uuid,at FROM deleted WHERE kind='note'", null)) { while (r.moveToNext()) out.put(r.getString(0), r.getLong(1)); } return out; }
+    }
+    /** A subject, card, question or task was deleted in Estudos: the computer deletes it too. */
+    static void studyDeleted(Context c, StudyStore db, String table, long id) {
+        try {
+            StudyStore.Row r = db.get(table, id); if (r == null) return; String key = null;
+            String subject = ""; if (!table.equals("subjects") && r.n("subject") > 0) { StudyStore.Row s = db.get("subjects", r.n("subject")); if (s != null) subject = s.s("title"); }
+            switch (table) {
+                case "subjects": key = "subject:" + SyncState.norm(r.s("title")); break;
+                case "cards": key = "card:" + SyncState.studyKey(subject, r.s("front")); break;
+                case "questions": key = "question:" + SyncState.studyKey(subject, r.s("prompt")); break;
+                case "tasks": key = "task:" + SyncState.taskKey(subject, r.s("title"), r.n("due")); break;
+                default:
+            }
+            if (key != null) try (Ids ids = new Ids(c)) { ids.gone(key, System.currentTimeMillis()); }
+        } catch (Exception ignored) {}
     }
     /** A note went to the bin: the computer removes it too at the next sync. */
     static void noteDeleted(Context c, long id) {
@@ -88,6 +105,14 @@ final class PhoneSync implements SyncClient.Local {
             try (Cursor r = d.rawQuery("SELECT title,text,interval,ease,due FROM cards", null)) { while (r.moveToNext()) { SyncState.Card x = new SyncState.Card(); x.reference = r.getString(0); x.text = r.getString(1); x.interval = r.getInt(2); x.ease = r.getInt(3); x.due = r.getLong(4); st.cards.add(x); } }
             try (Cursor r = d.rawQuery("SELECT name,level,score,correct,at FROM records", null)) { while (r.moveToNext()) { SyncState.Record x = new SyncState.Record(); x.name = r.getString(0); x.level = r.getInt(1); x.points = r.getInt(2); x.correct = r.getInt(3); x.at = r.getLong(4); st.records.add(x); } }
         } catch (Exception ignored) {}
+        try (StudyStore db = new StudyStore(c)) {
+            SQLiteDatabase d = db.getReadableDatabase(); Map<Long, String> names = new HashMap<>();
+            try (Cursor r = d.rawQuery("SELECT id,title,color,created FROM subjects", null)) { while (r.moveToNext()) { SyncState.Subject x = new SyncState.Subject(); x.title = r.getString(1); x.color = r.getInt(2) & 0xffffff; x.created = r.getLong(3); x.updated = x.created; st.subjects.add(x); names.put(r.getLong(0), x.title); } }
+            try (Cursor r = d.rawQuery("SELECT subject,front,back,due,interval,reps,lapses,updated FROM cards WHERE suspended=0", null)) { while (r.moveToNext()) { SyncState.StudyCard x = new SyncState.StudyCard(); x.subject = names.getOrDefault(r.getLong(0), ""); x.front = r.getString(1); x.back = r.getString(2); x.due = r.getLong(3); x.interval = r.getInt(4); x.reps = r.getInt(5); x.lapses = r.getInt(6); x.updated = r.getLong(7); st.studyCards.add(x); } }
+            try (Cursor r = d.rawQuery("SELECT subject,prompt,answer,choices,correct,explanation,updated FROM questions", null)) { while (r.moveToNext()) { SyncState.Question x = new SyncState.Question(); x.subject = names.getOrDefault(r.getLong(0), ""); x.prompt = r.getString(1); x.answer = r.getString(2); x.choices = r.getString(3); x.correct = r.getInt(4); x.explanation = r.getString(5); x.updated = r.getLong(6); st.questions.add(x); } }
+            try (Cursor r = d.rawQuery("SELECT subject,title,due,estimate,priority,done,updated FROM tasks", null)) { while (r.moveToNext()) { SyncState.Task x = new SyncState.Task(); x.subject = names.getOrDefault(r.getLong(0), ""); x.title = r.getString(1); x.due = r.getLong(2); x.estimate = r.getInt(3); x.priority = r.getInt(4); x.done = r.getInt(5) == 1; x.updated = r.getLong(6); st.tasks.add(x); } }
+        } catch (Exception ignored) {}
+        try (Ids ids = new Ids(c)) { st.gone.putAll(ids.goneMap()); } catch (Exception ignored) {}
         try (MediaLibrary m = new MediaLibrary(c)) {
             SQLiteDatabase d = m.getReadableDatabase();
             try (Cursor r = d.rawQuery("SELECT t.artist,t.title,p.at FROM plays p JOIN tracks t ON t.uri=p.uri WHERE t.kind='audio' AND p.at>?", new String[]{"" + Math.max(0, since - 86400000L)})) { while (r.moveToNext()) { SyncState.Play x = new SyncState.Play(); x.song = SyncState.song(r.getString(0), r.getString(1)); x.at = r.getLong(2); st.plays.add(x); } }
@@ -147,8 +172,32 @@ final class PhoneSync implements SyncClient.Local {
                 d.setTransactionSuccessful();
             } finally { d.endTransaction(); }
         }
-        if (ch.notes() > 0 || !ch.cards.isEmpty() || !ch.readings.isEmpty()) StudyEvents.changed();
+        if (ch.study() > 0 || !ch.goneTombs.isEmpty()) applyStudy(ch);
+        if (ch.notes() > 0 || !ch.cards.isEmpty() || !ch.readings.isEmpty() || ch.study() > 0) StudyEvents.changed();
         return ch;
+    }
+
+    /** Estudos from the computer: subjects by name, cards/questions/tasks (newest wins), deletions. */
+    void applyStudy(SyncState.Changes ch) throws Exception {
+        try (StudyStore db = new StudyStore(c); Ids ids = new Ids(c)) {
+            SQLiteDatabase d = db.getWritableDatabase(); Map<String, Long> subjects = new HashMap<>();
+            try (Cursor r = d.rawQuery("SELECT id,title FROM subjects", null)) { while (r.moveToNext()) subjects.put(SyncState.norm(r.getString(1)), r.getLong(0)); }
+            for (SyncState.Subject x : ch.subjects) { if (!subjects.containsKey(SyncState.norm(x.title))) subjects.put(SyncState.norm(x.title), db.save("subjects", 0, StudyStore.values("title", x.title, "color", x.color | 0xff000000, "created", x.created > 0 ? x.created : System.currentTimeMillis()))); else d.execSQL("UPDATE subjects SET title=?,color=? WHERE id=?", new Object[]{x.title, x.color | 0xff000000, subjects.get(SyncState.norm(x.title))}); }
+            java.util.function.Function<String, Long> subjectId = t -> { if (t == null || t.trim().isEmpty()) return 0L; Long id = subjects.get(SyncState.norm(t)); if (id != null) return id; long n = db.save("subjects", 0, StudyStore.values("title", t, "color", 0xff3f6b4f, "created", System.currentTimeMillis())); subjects.put(SyncState.norm(t), n); return n; };
+            Map<String, Long> cards = new HashMap<>(), questions = new HashMap<>(), tasks = new HashMap<>();
+            try (Cursor r = d.rawQuery("SELECT c.id,COALESCE(s.title,''),c.front FROM cards c LEFT JOIN subjects s ON s.id=c.subject", null)) { while (r.moveToNext()) cards.put("card:" + SyncState.studyKey(r.getString(1), r.getString(2)), r.getLong(0)); }
+            try (Cursor r = d.rawQuery("SELECT q.id,COALESCE(s.title,''),q.prompt FROM questions q LEFT JOIN subjects s ON s.id=q.subject", null)) { while (r.moveToNext()) questions.put("question:" + SyncState.studyKey(r.getString(1), r.getString(2)), r.getLong(0)); }
+            try (Cursor r = d.rawQuery("SELECT t.id,COALESCE(s.title,''),t.title,t.due FROM tasks t LEFT JOIN subjects s ON s.id=t.subject", null)) { while (r.moveToNext()) tasks.put("task:" + SyncState.taskKey(r.getString(1), r.getString(2), r.getLong(3)), r.getLong(0)); }
+            for (SyncState.StudyCard x : ch.studyCards) { Long id = cards.get(x.key()); android.content.ContentValues v = StudyStore.values("back", x.back, "due", x.due, "interval", x.interval, "reps", x.reps, "lapses", x.lapses, "updated", x.updated); if (id != null) d.update("cards", v, "id=?", new String[]{"" + id}); else { v.put("subject", subjectId.apply(x.subject)); v.put("front", x.front); db.save("cards", 0, v); } }
+            for (SyncState.Question x : ch.questions) { Long id = questions.get(x.key()); android.content.ContentValues v = StudyStore.values("answer", x.answer, "choices", x.choices, "correct", x.correct, "explanation", x.explanation, "updated", x.updated); if (id != null) d.update("questions", v, "id=?", new String[]{"" + id}); else { v.put("subject", subjectId.apply(x.subject)); v.put("prompt", x.prompt); db.save("questions", 0, v); } }
+            for (SyncState.Task x : ch.tasks) { Long id = tasks.get(x.key()); android.content.ContentValues v = StudyStore.values("estimate", x.estimate, "priority", x.priority, "done", x.done ? 1 : 0, "updated", x.updated); if (id != null) d.update("tasks", v, "id=?", new String[]{"" + id}); else { v.put("subject", subjectId.apply(x.subject)); v.put("title", x.title); v.put("due", x.due); db.save("tasks", 0, v); } }
+            for (String k : ch.remove) {
+                Long id = k.startsWith("card:") ? cards.get(k) : k.startsWith("question:") ? questions.get(k) : k.startsWith("task:") ? tasks.get(k) : k.startsWith("subject:") ? subjects.get(k.substring(8)) : null;
+                if (id == null) continue;
+                try { if (k.startsWith("subject:")) db.deleteSubject(id); else db.delete(k.startsWith("card:") ? "cards" : k.startsWith("question:") ? "questions" : "tasks", id); } catch (Exception ignored) {}
+            }
+            for (Map.Entry<String, Long> t : ch.goneTombs.entrySet()) ids.gone(t.getKey(), t.getValue());
+        }
     }
 
     // ================================================================ rede
