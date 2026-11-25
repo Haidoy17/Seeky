@@ -74,12 +74,12 @@ jobs:
           $out = "$env:RUNNER_TEMP\capturas"
           $p = Start-Process "$env:LOCALAPPDATA\Programs\Seeky\Seeky.exe" -ArgumentList "--screenshots=$out" -PassThru
           $deadline = (Get-Date).AddMinutes(4)
-          while ((Get-Date) -lt $deadline -and (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count -lt 19) { Start-Sleep -Seconds 3 }
+          while ((Get-Date) -lt $deadline -and (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count -lt 21) { Start-Sleep -Seconds 3 }
           Start-Sleep -Seconds 3
           Get-Process javaw -ErrorAction SilentlyContinue | Stop-Process -Force
           $n = (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count
           Write-Host "Capturas: $n"
-          if ($n -lt 19) { throw "O Seeky não abriu todas as janelas no Windows ($n capturas)" }
+          if ($n -lt 21) { throw "O Seeky não abriu todas as janelas no Windows ($n capturas)" }
       - uses: actions/upload-artifact@v4
         if: always()
         with:

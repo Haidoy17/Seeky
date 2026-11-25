@@ -87,7 +87,7 @@ final class SyncServer implements Closeable {
                     SyncState phone = SyncState.parse(ch.text()); phone.receiveMedia(ch);
                     SyncState.Changes changes = host.apply(device, phone);
                     SyncState mine = host.state(device, phone.since);
-                    ch.send(new JSONObject().put("notes", changes.notes()).put("other", changes.progress.size() + changes.readings.size() + changes.cards.size() + changes.records.size() + changes.plays.size() + changes.favorites.size()).toString());
+                    ch.send(new JSONObject().put("notes", changes.notes()).put("other", changes.progress.size() + changes.readings.size() + changes.cards.size() + changes.records.size() + changes.plays.size() + changes.favorites.size() + changes.study()).toString());
                     ch.send(mine.json().toString()); mine.sendMedia(ch);
                     host.synced(device, deviceName, changes);
                     break;

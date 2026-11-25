@@ -24,9 +24,13 @@ public class Link549Test {
             st.notes.removeIf(x->ch.delete.contains(x.uuid));st.deleted.putAll(ch.tombs);
             for(String[] r:ch.readings)st.readings.add(SyncState.reading(r[0],r[1],Integer.parseInt(r[2])));
             for(SyncState.Card c:ch.cards){st.cards.removeIf(x->x.reference.equals(c.reference));st.cards.add(c);}
+            for(SyncState.Subject x:ch.subjects){st.subjects.removeIf(y->y.key().equals(x.key()));st.subjects.add(x);}
+            for(SyncState.StudyCard x:ch.studyCards){st.studyCards.removeIf(y->y.key().equals(x.key()));st.studyCards.add(x);}
+            for(SyncState.Task x:ch.tasks){st.tasks.removeIf(y->y.key().equals(x.key()));st.tasks.add(x);}
+            st.studyCards.removeIf(y->ch.remove.contains(y.key()));st.tasks.removeIf(y->ch.remove.contains(y.key()));st.gone.putAll(ch.goneTombs);
             return ch;
         }
-        public synchronized SyncState state(String device,long since){SyncState c=new SyncState();c.notes.addAll(st.notes);c.deleted.putAll(st.deleted);c.readings.addAll(st.readings);c.cards.addAll(st.cards);return c;}
+        public synchronized SyncState state(String device,long since){SyncState c=new SyncState();c.notes.addAll(st.notes);c.deleted.putAll(st.deleted);c.readings.addAll(st.readings);c.cards.addAll(st.cards);c.subjects.addAll(st.subjects);c.studyCards.addAll(st.studyCards);c.tasks.addAll(st.tasks);c.gone.putAll(st.gone);return c;}
         public void synced(String d,String n,SyncState.Changes ch){}
         public synchronized List<String[]> outbox(){return new ArrayList<>(queue);}
         public File outboxFile(String id){return outbox;}
@@ -73,6 +77,34 @@ public class Link549Test {
             byte[] data=new byte[300000];new Random(5).nextBytes(data);
             String saved=SyncClient.send(PhoneSync.computer(app),PhoneSync.device(app),"Telemóvel","foto.jpg",data.length,new ByteArrayInputStream(data));
             assertArrayEquals(data,Files.readAllBytes(new File(pc.inbox,saved).toPath()));
+        }finally{server.close();}
+    }
+
+    @Test public void studiesTravelBothWays()throws Exception{
+        // 5.50: subjects, cards and tasks of Estudos; deletions on either side.
+        FakePc pc=new FakePc(app.getCacheDir());SyncServer server=new SyncServer(pc,0,0);server.start();
+        try{
+            PhoneSync.remember(app,SyncClient.pair("127.0.0.1",server.port(),PhoneSync.device(app),"Telemóvel","123456"));
+            long now=System.currentTimeMillis(),subject,card,task;
+            try(StudyStore db=new StudyStore(app)){
+                subject=db.save("subjects",0,StudyStore.values("title","Teologia","color",0xff3f6b4f,"created",now));
+                card=db.save("cards",0,StudyStore.values("subject",subject,"front","O que é a graça?","back","Favor imerecido","due",now,"updated",now));
+                task=db.save("tasks",0,StudyStore.values("subject",subject,"title","Ler Romanos","due",0L,"updated",now));
+            }
+            SyncState.Subject eng=new SyncState.Subject();eng.title="Inglês";eng.created=1;eng.updated=1;pc.st.subjects.add(eng);
+            SyncState.StudyCard faith=new SyncState.StudyCard();faith.subject="Inglês";faith.front="Faith";faith.back="Fé";faith.due=now;faith.updated=now;pc.st.studyCards.add(faith);
+            SyncState.Task essay=new SyncState.Task();essay.subject="Teologia";essay.title="Resumo da Reforma";essay.due=now+86400000L;essay.updated=now;pc.st.tasks.add(essay);
+            PhoneSync.now(app);
+            try(StudyStore db=new StudyStore(app);android.database.Cursor r=db.getReadableDatabase().rawQuery("SELECT c.back,s.title FROM cards c JOIN subjects s ON s.id=c.subject WHERE c.front='Faith'",null)){assertTrue("o cartão do computador chegou",r.moveToFirst());assertEquals("Fé",r.getString(0));assertEquals("Inglês",r.getString(1));}
+            try(StudyStore db=new StudyStore(app);android.database.Cursor r=db.getReadableDatabase().rawQuery("SELECT COUNT(*) FROM tasks WHERE title='Resumo da Reforma' AND subject=?",new String[]{""+subject})){r.moveToFirst();assertEquals("a tarefa ficou na disciplina com o mesmo nome",1,r.getInt(0));}
+            boolean got=false;for(SyncState.StudyCard x:pc.st.studyCards)if(x.front.equals("O que é a graça?")&&x.subject.equals("Teologia"))got=true;assertTrue("o cartão do telemóvel chegou ao computador",got);
+            // Deleted on the phone → deleted on the computer; deleted on the computer → deleted on the phone.
+            try(StudyStore db=new StudyStore(app)){db.delete("tasks",task);}
+            pc.st.gone.put(faith.key(),System.currentTimeMillis()+1000);pc.st.studyCards.removeIf(x->x.front.equals("Faith"));
+            PhoneSync.now(app);
+            boolean taskThere=false;for(SyncState.Task x:pc.st.tasks)if(x.title.equals("Ler Romanos"))taskThere=true;assertFalse("tarefa apagada no telemóvel saiu do computador",taskThere);
+            try(StudyStore db=new StudyStore(app);android.database.Cursor r=db.getReadableDatabase().rawQuery("SELECT COUNT(*) FROM cards WHERE front='Faith'",null)){r.moveToFirst();assertEquals("cartão apagado no computador saiu do telemóvel",0,r.getInt(0));}
+            assertEquals(0,PhoneSync.now(app).otherHere);
         }finally{server.close();}
     }
 

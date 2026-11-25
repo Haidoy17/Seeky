@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.49", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.50", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("course", "Estudos também no computador", "As disciplinas, os cartões, as perguntas e as tarefas dos Estudos passam a ficar iguais no telemóvel e no Seeky para Windows (Seeky no computador). O que apagar num lado é apagado no outro", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
+        panel.section("Da 5.49");
         panel.action("phone", "Seeky no computador", "Ferramentas → Seeky no computador: ligue o telemóvel ao Seeky para Windows na mesma rede Wi-Fi (código de 6 números). Notas, onde ficou a leitura, capítulos lidos, versículos para decorar, recordes e músicas favoritas ficam iguais nos dois; também envia e recebe ficheiros. Sincroniza sozinho ao abrir o Seeky", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
         panel.section("Da 5.48");
         panel.action("contents", "Comentários bíblicos MyBible", "Ferramentas → Bíblias importadas → Comentários bíblicos: carregue um ficheiro .commentaries. Na leitura, os versículos comentados levam ✎ e o comentário aparece por baixo do capítulo", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_bibles", true)));
