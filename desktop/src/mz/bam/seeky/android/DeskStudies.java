@@ -67,7 +67,7 @@ final class DeskStudies {
         VBox page = DeskUi.page();
         HBox tabs = new HBox(6);
         for (String t : TABS) { ToggleButton b = new ToggleButton(t); b.getStyleClass().add("chip"); b.setSelected(t.equals(tab) && subject == 0); b.setOnAction(e -> { tab = t; subject = 0; d.open("studies"); }); tabs.getChildren().add(b); }
-        page.getChildren().addAll(DeskUi.row(DeskUi.title("Estudos"), DeskUi.grow(), DeskUi.button("Nova disciplina", false, this::newSubject), DeskUi.button("Seeky IA", true, () -> generate(subject))), tabs);
+        page.getChildren().addAll(DeskUi.row(DeskUi.title("Estudos"), DeskUi.grow(), DeskUi.button("Nova disciplina", false, this::newSubject), DeskUi.button("Plano com IA", false, () -> { d.ai.tab = "Plano de estudo"; d.open("ai"); }), DeskUi.button("Seeky IA", true, () -> generate(subject))), tabs);
         if (subject > 0) page.getChildren().add(subjectPage(subject));
         else switch (tab) {
             case "Disciplinas": page.getChildren().add(subjects()); break;

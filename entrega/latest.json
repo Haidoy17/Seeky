@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007700,
-  "versionName": "5.50.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.50.0.apk",
-  "sha256": "22e0f988242f2c606e6c9c45de740e913126350e493af8ebe55c131ae3d1e17a",
-  "bytes": 13798743,
-  "notes": "Estudos no computador: disciplinas, cartões, perguntas e tarefas ficam iguais no telemóvel e no Seeky para Windows."
+  "versionCode": 5007800,
+  "versionName": "5.51.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.51.0.apk",
+  "sha256": "4b7593e9717dd5afcd6e0639637a6d7059aedec00109b1fbbfc0a93ef60f34d1",
+  "bytes": 13815467,
+  "notes": "Seeky IA mais forte: perguntar a vários materiais, resumir um livro inteiro e plano de estudo a partir de um tema."
 }

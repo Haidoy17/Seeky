@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007700,
-  "versionName": "5.50.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.50.0-app.zip",
-  "sha256": "8e81d74ec3ccd85c30970755cda6b3012ec8a95e5cf1f76b82a4ab1bd1cc5134",
-  "bytes": 8877764,
+  "versionCode": 5007800,
+  "versionName": "5.51.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.51.0-app.zip",
+  "sha256": "b807394b5e1a356acf54c7314586c38a6cae17e3b8cf6dc649e5fbfc4dd4302a",
+  "bytes": 8916094,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Estudos completos: disciplinas, cartões com revisão espaçada, perguntas, tarefas, notas e Seeky IA; sincronizam com o telemóvel."
+  "notes": "Seeky IA mais forte: perguntar a vários documentos, resumir um livro inteiro e plano de estudo a partir de um tema."
 }

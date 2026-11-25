@@ -98,7 +98,9 @@ final class DeskReader {
         MenuItem o = new MenuItem("Abrir"); o.setOnAction(e -> open(f));
         MenuItem dir = new MenuItem("Abrir a pasta"); dir.setOnAction(e -> DeskFiles.system(f.getParentFile()));
         MenuItem out = new MenuItem("Tirar da estante"); out.setOnAction(e -> forget(f));
-        ContextMenu menu = new ContextMenu(o, dir, out); n.setOnContextMenuRequested(e -> menu.show(n, e.getScreenX(), e.getScreenY()));
+        MenuItem sum = new MenuItem("Resumir o livro inteiro (Seeky IA)"); sum.setOnAction(e -> { d.ai.tab = "Resumir livro"; d.open("ai"); d.ai.summarise(f); });
+        MenuItem ask = new MenuItem("Perguntar a este livro (Seeky IA)"); ask.setOnAction(e -> { d.ai.tab = "Perguntar"; d.ai.addDocs(Collections.singletonList(f)); });
+        ContextMenu menu = new ContextMenu(o, dir, sum, ask, out); n.setOnContextMenuRequested(e -> menu.show(n, e.getScreenX(), e.getScreenY()));
         n.setCursor(javafx.scene.Cursor.HAND); DeskUi.lift(n);
     }
     /** Estante: covers standing on wooden planks, as many per shelf as fit. */

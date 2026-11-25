@@ -196,6 +196,11 @@ final class DeskSelfTest {
                 int[] made = DeskStudies.save(s, subj, "Pergunta: O que é a graça?\nResposta: Favor imerecido.\n\nPergunta: Quem escreveu Romanos?\nResposta: Paulo.\n\nPERGUNTAS\nQ: Quantos evangelhos há?\nA) 2\nB) 3\nC) 4\nD) 5\nCerta: C\nPorquê: Mateus, Marcos, Lucas e João.\nQ: Sem opções\nCerta: A");
                 StudySchedule.Next good = StudySchedule.next(0, 0, 0, 0, 2), retry = StudySchedule.next(0, 3, 2, 0, 0);
                 check(made[0] == 2 && made[1] == 1 && s.rows("SELECT answer,correct FROM st_questions").get(0)[0].equals("4") && good.interval == 1 && retry.interval == 0, "estudos: cartões e perguntas da IA, revisão espaçada");
+                // Seeky IA mais forte (5.51): vários documentos, plano de estudo guardado nos Estudos.
+                String many = SeekyAiDeep.block(Arrays.asList(new SeekyAiDeep.Doc("Graça", "Introdução.\n\nA graça é favor imerecido de Deus."), new SeekyAiDeep.Doc("Receitas", "Bolo de farinha e ovos.")), "O que é a graça?", 4000);
+                SeekyAiDeep.Plan plan = SeekyAiDeep.parse("TÍTULO: João\nOBJECTIVO: Ler o evangelho.\nDIA 1 | Introdução | Ler João 1\nDIA 2 | Sinais | Ler João 2\nCARTÕES\nPergunta: Quantos sinais?\nResposta: Sete.", 6);
+                DeskAiHub.schema(s); long planned = DeskAiHub.save(s, plan, 1000L, 3, 30);
+                check(many.contains("[D1·T") && !many.contains("[D2·T") && s.count("SELECT COUNT(*) FROM st_tasks WHERE subject=? AND estimate=30", planned) == 2 && s.count("SELECT COUNT(*) FROM st_cards WHERE subject=?", planned) == 1 && s.count("SELECT COUNT(*) FROM notes WHERE subject=? AND title LIKE 'Plano de estudo%'", planned) == 1, "seeky ia: vários documentos e plano de estudo");
                 SyncState pcSide = new SyncState(), phoneSide = new SyncState();
                 SyncState.StudyCard sc = new SyncState.StudyCard(); sc.subject = "Teologia"; sc.front = "O que é a graça?"; sc.back = "Favor"; sc.updated = 10; pcSide.studyCards.add(sc);
                 SyncState.StudyCard newer = new SyncState.StudyCard(); newer.subject = "teologia"; newer.front = "O que é a  graça?"; newer.back = "Favor imerecido"; newer.updated = 20; phoneSide.studyCards.add(newer);

@@ -22,6 +22,8 @@ perdem ao actualizar nem ao desinstalar.
   versículos; procurar passagens (João 3:16, Salmo 23) e palavras; copiar, ouvir, decorar, criar nota.
 - **Estudo bíblico**: planos de leitura, leitura de hoje, sequência de dias, semana, decorar versículos
   com a mesma repetição espaçada do Android.
+- **Seeky IA**: perguntar a vários documentos (até 12, com fontes), resumir um livro inteiro num resumo
+  geral (retoma onde parou) e plano de estudo a partir de um tema (disciplina, sessões, cartões, nota).
 - **Estudos**: Hoje, Disciplinas (cartões, perguntas, materiais, tarefas, notas), Cartões com revisão
   espaçada, Perguntas, Agenda, Progresso e Seeky IA para criar cartões e perguntas; sincroniza com o
   telemóvel.

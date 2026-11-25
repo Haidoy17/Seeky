@@ -1,5 +1,22 @@
 # Registo de alterações
 
+## 5.51.0 — 2026-11-25 (Android e Windows)
+
+- **Seeky IA mais forte**, com o mesmo núcleo nos dois (`SeekyAiDeep`):
+  - **Perguntar a vários documentos** (até 12): o Seeky escolhe no aparelho os trechos que respondem à
+    pergunta (pelas palavras, sem acentos, com a pergunta anterior) e envia só esses; a resposta cita
+    `[D1·T4]` e indica de que documento vem cada ideia. Documentos sem nada relevante são indicados.
+  - **Resumir um livro inteiro**: cada parte é resumida e os resumos são juntos, em uma ou mais etapas,
+    num resumo geral (visão geral, ideias por partes, conceitos e nomes, perguntas de revisão).
+    Retoma onde parou se a quota acabar.
+  - **Plano de estudo a partir de um tema**: nível, semanas, sessões por semana e minutos; cria uma
+    disciplina com as sessões datadas nas tarefas, cartões de revisão e uma nota com o plano.
+- **Windows**: novo ecrã *Seeky IA* (menu, Início, botão *Plano com IA* nos Estudos e *Resumir o livro
+  inteiro* / *Perguntar a este livro* no menu de cada livro). Espera e tenta de novo quando o Gemini
+  pede para abrandar.
+- **Android**: *Estudar com Seeky* passa a abrir um menu com conversa, vários materiais, plano de estudo e
+  resumo de livro; *Resumo por etapas* ganha *Livro inteiro* (até 60 pedidos por execução) e o resumo geral.
+
 ## 5.50.0 — 2026-11-25 (Android e Windows)
 
 - **Estudos no Seeky para Windows**, como no telemóvel:

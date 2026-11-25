@@ -23,8 +23,12 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.50", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.51", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("collection", "Perguntar a vários materiais", "Estudos › Estudar com Seeky: escolha até 12 materiais e pergunte. O Seeky envia os trechos mais relevantes de cada um e a resposta diz de que material vem cada ideia", false, () -> a.startActivity(new android.content.Intent(a, StudyAssistantActivity.class).putExtra("many", true)));
+        panel.action("book", "Resumir um livro inteiro", "No livro: Ferramentas de leitura › Resumo por etapas › Livro inteiro. No fim, os resumos das partes são juntos num resumo geral guardado nos Estudos", false, () -> PlusUi.toast(a, "Abra o livro e escolha Ferramentas de leitura › Resumo por etapas › Livro inteiro."));
+        panel.action("calendar", "Plano de estudo a partir de um tema", "A Seeky IA cria uma disciplina com sessões datadas nas tarefas, cartões de revisão e uma nota com o plano", false, () -> StudyPlanAi.ask(a, sid -> PlusUi.toast(a, "Plano guardado nos Estudos.")));
+        panel.section("Da 5.50");
         panel.action("course", "Estudos também no computador", "As disciplinas, os cartões, as perguntas e as tarefas dos Estudos passam a ficar iguais no telemóvel e no Seeky para Windows (Seeky no computador). O que apagar num lado é apagado no outro", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
         panel.section("Da 5.49");
         panel.action("phone", "Seeky no computador", "Ferramentas → Seeky no computador: ligue o telemóvel ao Seeky para Windows na mesma rede Wi-Fi (código de 6 números). Notas, onde ficou a leitura, capítulos lidos, versículos para decorar, recordes e músicas favoritas ficam iguais nos dois; também envia e recebe ficheiros. Sincroniza sozinho ao abrir o Seeky", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
