@@ -1,8 +1,8 @@
 {
-  "versionCode": 5007900,
-  "versionName": "5.52.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.52.0.apk",
-  "sha256": "0845a6ad6873878bad28142a18222fa15d08bd1d7929cb316c1c7dc4f89c5b0b",
-  "bytes": 13818506,
-  "notes": "Estudos: Curso › Módulos e Disciplinas também no computador; o Seeky ligado leva os cursos."
+  "versionCode": 5008000,
+  "versionName": "5.53.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.53.0.apk",
+  "sha256": "fabd6056bce40595f51762c1517d5219acb1c8efedd7e2fdcc9661000d70d21c",
+  "bytes": 14010546,
+  "notes": "Narrações em MP3 (um ficheiro por capítulo, com título, livro e faixa)."
 }

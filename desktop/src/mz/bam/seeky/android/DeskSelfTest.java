@@ -207,6 +207,17 @@ final class DeskSelfTest {
                 SyncState.Task gone = new SyncState.Task(); gone.subject = "Teologia"; gone.title = "Ler"; gone.due = 0; gone.updated = 5; pcSide.tasks.add(gone); phoneSide.gone.put(gone.key(), 50L);
                 SyncState.Changes sch = SyncState.merge(pcSide, phoneSide);
                 check(sch.studyCards.size() == 1 && sch.studyCards.get(0).back.equals("Favor imerecido") && sch.remove.contains(gone.key()) && SyncState.merge(phoneSide, pcSide).studyCards.isEmpty(), "estudos: juntar com o telemóvel (mais recente, apagadas)");
+                // Áudio (5.53): MP3 com etiquetas; no Windows, a voz do Windows gravada e convertida em MP3.
+                java.io.File wavIn = new java.io.File(home, "teste.wav"), mp3Out = new java.io.File(home, "01 - Capítulo.mp3");
+                { int rate = 22050, frames = rate; java.nio.ByteBuffer head = java.nio.ByteBuffer.wrap(DeskVoices.wavHeader(rate, 1, 16, frames * 2L)); byte[] pcm = new byte[frames * 2]; for (int i = 0; i < frames; i++) { short v = (short) (Math.sin(2 * Math.PI * 440 * i / rate) * 8000); pcm[2 * i] = (byte) v; pcm[2 * i + 1] = (byte) (v >> 8); } try (java.io.FileOutputStream o = new java.io.FileOutputStream(wavIn)) { o.write(head.array()); o.write(pcm); } }
+                double secs = Mp3Writer.fromWav(wavIn, mp3Out, new Mp3Writer.Tags("Capítulo 1", "Livro", "Seeky", 1, 3), () -> false, null);
+                byte[] mp3b = java.nio.file.Files.readAllBytes(mp3Out.toPath()); boolean hashes = true; for (DeskVoices.Voice v : DeskVoices.PIPER) hashes &= v.sha.matches("[0-9a-f]{64}") && v.jsonSha.matches("[0-9a-f]{64}");
+                check(mp3b[0] == 'I' && mp3b[1] == 'D' && mp3b[2] == '3' && Math.abs(secs - 1.0) < 0.01 && mp3b.length > 6000 && mp3b.length < 12000 && hashes && DeskVoices.ENGINE_SHA.matches("[0-9a-f]{64}") && DeskAudio.fileName(3, 12, "Cap: 3/a").equals("03 - Cap 3 a.mp3"), "áudio: MP3 com etiquetas e vozes Piper verificadas");
+                if (DeskSecret.windows()) {
+                    java.io.File spoken = new java.io.File(home, "voz.wav"), spokenMp3 = new java.io.File(home, "voz.mp3");
+                    boolean voiced = false; try { DeskVoices.windowsWav("", 0, "Olá. Este é o Seeky a gravar um capítulo em áudio.", spoken, () -> false); voiced = Mp3Writer.fromWav(spoken, spokenMp3, new Mp3Writer.Tags("Teste", "Seeky", "Seeky", 1, 1), () -> false, null) > 1.0 && spokenMp3.length() > 8000; } catch (Exception e) { System.out.println("voz do Windows: " + e.getMessage()); }
+                    check(voiced, "áudio: voz do Windows gravada em MP3");
+                } else check(DeskVoices.lines("Um\n\n  dois  \ntrês").equals("Um\ndois\ntrês\n"), "áudio: texto preparado para a voz");
                 // Cursos › módulos ou disciplinas (5.52): vindos do telemóvel e o curso escrito à mão da 5.50.
                 SyncState.Changes cc = new SyncState.Changes(); SyncState.Course co = new SyncState.Course(); co.title = "Curso do telemóvel"; co.description = "Três anos"; co.updated = 30; cc.courses.add(co);
                 SyncState.Subject sj = new SyncState.Subject(); sj.title = "Grego"; sj.course = "Curso do telemóvel"; sj.kind = "module"; sj.updated = 30; cc.subjects.add(sj); DeskSync.applyStudy(s, cc);

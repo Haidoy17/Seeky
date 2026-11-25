@@ -99,8 +99,9 @@ final class DeskReader {
         MenuItem dir = new MenuItem("Abrir a pasta"); dir.setOnAction(e -> DeskFiles.system(f.getParentFile()));
         MenuItem out = new MenuItem("Tirar da estante"); out.setOnAction(e -> forget(f));
         MenuItem sum = new MenuItem("Resumir o livro inteiro (Seeky IA)"); sum.setOnAction(e -> { d.ai.tab = "Resumir livro"; d.open("ai"); d.ai.summarise(f); });
+        MenuItem mp3 = new MenuItem("Gravar em MP3…"); mp3.setOnAction(e -> DeskAudio.exportBook(d, f));
         MenuItem ask = new MenuItem("Perguntar a este livro (Seeky IA)"); ask.setOnAction(e -> { d.ai.tab = "Perguntar"; d.ai.addDocs(Collections.singletonList(f)); });
-        ContextMenu menu = new ContextMenu(o, dir, sum, ask, out); n.setOnContextMenuRequested(e -> menu.show(n, e.getScreenX(), e.getScreenY()));
+        ContextMenu menu = new ContextMenu(o, dir, sum, ask, mp3, out); n.setOnContextMenuRequested(e -> menu.show(n, e.getScreenX(), e.getScreenY()));
         n.setCursor(javafx.scene.Cursor.HAND); DeskUi.lift(n);
     }
     /** Estante: covers standing on wooden planks, as many per shelf as fit. */
@@ -295,7 +296,7 @@ final class DeskReader {
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw.run(); } }, next = () -> { if (at[0] < pages - 1) { at[0]++; draw.run(); } };
         Slider zoomBar = new Slider(0.6, 3, zoom[0]); zoomBar.setPrefWidth(120); zoomBar.setTooltip(new Tooltip("Zoom")); zoomBar.valueChangingProperty().addListener((o, a, b) -> { if (!b) { zoom[0] = zoomBar.getValue(); draw.run(); } });
         java.util.function.Supplier<String> place = () -> "página " + (at[0] + 1);
-        HBox top = bar(title, where, prev, next, () -> DeskSpeech.toggle(d, pageText[0]), zoomBar, markPage);
+        HBox top = bar(title, where, prev, next, () -> DeskSpeech.toggle(d, pageText[0]), zoomBar, markPage, DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
         top.getChildren().addAll(aiMenu(title, place, () -> pageText[0], () -> ""), noteButton(title, place));
         VBox page = new VBox(10, top, scroll); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         page.setOnKeyPressed(e -> { switch (e.getCode()) { case RIGHT: case PAGE_DOWN: next.run(); break; case LEFT: case PAGE_UP: prev.run(); break; default: } });
@@ -401,7 +402,7 @@ final class DeskReader {
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw[0].run(); } }, next = () -> { if (at[0] < book.texts.size() - 1) { at[0]++; draw[0].run(); } };
         java.util.function.Supplier<String> place = () -> book.names.get(at[0]);
         HBox top = bar(book.title, where, prev, next, () -> DeskSpeech.toggle(d, book.texts.get(at[0])), toc);
-        top.getChildren().addAll(aiMenu(book.title, place, () -> book.texts.get(at[0]), () -> selected[0]), noteButton(book.title, place));
+        top.getChildren().addAll(aiMenu(book.title, place, () -> book.texts.get(at[0]), () -> selected[0]), noteButton(book.title, place), DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
         VBox page = new VBox(10, top, holder); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         d.show(page);
         if (showMark > 0) afterLoad.add(() -> web.getEngine().executeScript("var e=document.getElementById('m" + showMark + "'); if(e){e.scrollIntoView({block:'center'}); e.style.outline='3px solid " + DeskThemes.hex(DeskThemes.current.accent) + "';}"));

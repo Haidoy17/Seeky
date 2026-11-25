@@ -1,5 +1,23 @@
 # Registo de alterações
 
+## 5.53.0 — 2026-11-25 (Android e Windows)
+
+- **MP3 nos dois** com o mesmo codificador (LAME em Java, `jump3r` 1.0.5, LGPL 2.1): 64 kbit/s mono
+  para voz (cerca de 30 MB por hora), etiquetas ID3 com o capítulo, o livro, o autor e a faixa (n/total).
+- **Android**: *Guardar narração* passa a ter *Tipo de ficheiro*: MP3 (predefinido) ou WAV, para o livro
+  inteiro, um intervalo de capítulos/páginas ou a selecção, um ficheiro por parte ou um só. A conversão
+  é feita no fim de cada parte e retoma como antes.
+- **Windows**:
+  - *Gravar em MP3* no menu de cada livro e na barra do leitor (EPUB, Word, TXT, PDF por grupos de 10
+    páginas): escolher do capítulo X ao Y, a pasta (Música\Seeky\livro por omissão), um MP3 por
+    capítulo; no fim pode juntar a pasta à Música do Seeky.
+  - **Vozes naturais Piper** (gratuitas, sem Internet depois de descarregadas): motor de 22 MB e vozes
+    de 63 MB — Português de Portugal (Tugão), Português do Brasil (Faber), Espanhol, Francês e Inglês
+    (EUA e Reino Unido), todas com licença aberta. Descarregadas só a pedido, de endereços fixos, e
+    usadas só se o SHA-256 for o esperado. Lêem em voz alta (o som sai enquanto é gerado) e gravam MP3.
+  - As vozes do Windows também gravam capítulos (System.Speech para WAV, depois MP3); texto com acentos
+    enviado em UTF-8.
+
 ## 5.52.0 — 2026-11-25 (Android e Windows)
 
 - **Estudos no Windows organizados como no telemóvel: Curso › Módulo ou Disciplina.**

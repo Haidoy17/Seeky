@@ -1,3 +1,13 @@
+## Seeky 5.53.0
+
+Instale **Seeky_5.53.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.53.0.
+
+### Novidades
+- **Narrações em MP3** no telemóvel (Ouvir › Guardar narração › Tipo de ficheiro).
+- **Gravar em MP3** no computador: capítulos de um livro, um MP3 por capítulo.
+- **Vozes naturais Piper** no computador (Definições › Leitura em voz alta e áudio).
+
 ## Seeky 5.52.0
 
 Instale **Seeky_5.52.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
