@@ -85,7 +85,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -137,9 +137,11 @@ public final class DeskMain extends Application {
             flash.index.rebuild(Collections.singletonList(docs), () -> false);
             if (store.count("SELECT COUNT(*) FROM st_subjects") == 0) {
                 long now = System.currentTimeMillis();
-                long teo = store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "Teologia Sistemática", DeskStudies.COLORS[0], now, now);
-                long eng = store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "Inglês", DeskStudies.COLORS[1], now, now);
-                store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", "História da Igreja", DeskStudies.COLORS[2], now, now);
+                long bt = store.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", "Bacharelato em Teologia", "Curso de quatro anos: teologia, Bíblia e história.", now, now);
+                long teo = store.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", "Teologia Sistemática", DeskStudies.COLORS[0], now, now, bt, "subject");
+                store.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", "Módulo 1 · Introdução à Bíblia", DeskStudies.COLORS[3], now, now, bt, "module");
+                long eng = store.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", "Inglês", DeskStudies.COLORS[1], now, now, 0, "subject");
+                store.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", "História da Igreja", DeskStudies.COLORS[2], now, now, bt, "subject");
                 String[][] cards = {{"O que é a graça?", "O favor de Deus que não merecemos."}, {"O que significa justificação?", "Ser declarado justo diante de Deus pela fé."}, {"Quantos livros tem a Bíblia protestante?", "66 livros."}};
                 for (int i = 0; i < cards.length; i++) store.update("INSERT INTO st_cards(subject,front,back,due,interval,reps,updated) VALUES(?,?,?,?,?,?,?)", teo, cards[i][0], cards[i][1], now - (i == 2 ? -3 * 86400000L : 0), i == 2 ? 3 : 0, i == 2 ? 1 : 0, now);
                 store.update("INSERT INTO st_cards(subject,front,back,due,updated) VALUES(?,?,?,?,?)", eng, "Faith", "Fé", now, now);
@@ -160,6 +162,8 @@ public final class DeskMain extends Application {
         if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
+        else if (id.equals("studies-courses")) { studies.tab = "Cursos"; open("studies"); studies.tab = "Hoje"; }
+        else if (id.equals("studies-course")) { List<Object[]> r = studies.rows("SELECT id FROM st_courses ORDER BY id LIMIT 1"); if (!r.isEmpty()) studies.course = ((Number) r.get(0)[0]).longValue(); open("studies"); studies.course = 0; }
         else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }
         else if (id.equals("ai")) { ai.tab = "Perguntar"; open("ai"); }
         else if (id.equals("ai-plan")) { ai.tab = "Plano de estudo"; open("ai"); ai.tab = "Perguntar"; }

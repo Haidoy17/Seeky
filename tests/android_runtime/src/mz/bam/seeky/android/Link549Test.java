@@ -24,13 +24,13 @@ public class Link549Test {
             st.notes.removeIf(x->ch.delete.contains(x.uuid));st.deleted.putAll(ch.tombs);
             for(String[] r:ch.readings)st.readings.add(SyncState.reading(r[0],r[1],Integer.parseInt(r[2])));
             for(SyncState.Card c:ch.cards){st.cards.removeIf(x->x.reference.equals(c.reference));st.cards.add(c);}
-            for(SyncState.Subject x:ch.subjects){st.subjects.removeIf(y->y.key().equals(x.key()));st.subjects.add(x);}
+            for(SyncState.Course x:ch.courses){st.courses.removeIf(y->y.key().equals(x.key()));st.courses.add(x);}for(SyncState.Subject x:ch.subjects){st.subjects.removeIf(y->y.key().equals(x.key()));st.subjects.add(x);}
             for(SyncState.StudyCard x:ch.studyCards){st.studyCards.removeIf(y->y.key().equals(x.key()));st.studyCards.add(x);}
             for(SyncState.Task x:ch.tasks){st.tasks.removeIf(y->y.key().equals(x.key()));st.tasks.add(x);}
-            st.studyCards.removeIf(y->ch.remove.contains(y.key()));st.tasks.removeIf(y->ch.remove.contains(y.key()));st.gone.putAll(ch.goneTombs);
+            st.courses.removeIf(y->ch.remove.contains(y.key()));st.subjects.removeIf(y->ch.remove.contains(y.key()));st.studyCards.removeIf(y->ch.remove.contains(y.key()));st.tasks.removeIf(y->ch.remove.contains(y.key()));st.gone.putAll(ch.goneTombs);
             return ch;
         }
-        public synchronized SyncState state(String device,long since){SyncState c=new SyncState();c.notes.addAll(st.notes);c.deleted.putAll(st.deleted);c.readings.addAll(st.readings);c.cards.addAll(st.cards);c.subjects.addAll(st.subjects);c.studyCards.addAll(st.studyCards);c.tasks.addAll(st.tasks);c.gone.putAll(st.gone);return c;}
+        public synchronized SyncState state(String device,long since){SyncState c=new SyncState();c.notes.addAll(st.notes);c.deleted.putAll(st.deleted);c.readings.addAll(st.readings);c.cards.addAll(st.cards);c.subjects.addAll(st.subjects);c.courses.addAll(st.courses);c.studyCards.addAll(st.studyCards);c.tasks.addAll(st.tasks);c.gone.putAll(st.gone);return c;}
         public void synced(String d,String n,SyncState.Changes ch){}
         public synchronized List<String[]> outbox(){return new ArrayList<>(queue);}
         public File outboxFile(String id){return outbox;}
@@ -80,6 +80,29 @@ public class Link549Test {
         }finally{server.close();}
     }
 
+    @Test public void coursesWithModulesAndSubjectsTravelBothWays()throws Exception{
+        // 5.52: Curso › Módulo ou Disciplina, the same on the phone and on the computer.
+        FakePc pc=new FakePc(app.getCacheDir());SyncServer server=new SyncServer(pc,0,0);server.start();
+        try{
+            PhoneSync.remember(app,SyncClient.pair("127.0.0.1",server.port(),PhoneSync.device(app),"Telemóvel","123456"));
+            long now=System.currentTimeMillis(),course,subject;
+            try(StudyStore db=new StudyStore(app)){course=db.save("courses",0,StudyStore.values("title","Bacharelato","description","Quatro anos","created",now));subject=db.save("subjects",0,StudyStore.values("title","Hermenêutica","color",0xff3f6b4f,"created",now,"course",course,"kind","module"));}
+            SyncState.Course pcCourse=new SyncState.Course();pcCourse.title="Curso do computador";pcCourse.updated=now;pc.st.courses.add(pcCourse);
+            SyncState.Subject greek=new SyncState.Subject();greek.title="Grego";greek.course="Curso do computador";greek.kind="module";greek.updated=now;pc.st.subjects.add(greek);
+            PhoneSync.now(app);
+            try(StudyStore db=new StudyStore(app);android.database.Cursor r=db.getReadableDatabase().rawQuery("SELECT s.kind FROM subjects s JOIN courses c ON c.id=s.course WHERE s.title='Grego' AND c.title='Curso do computador'",null)){assertTrue("o módulo do computador chegou dentro do curso",r.moveToFirst());assertEquals("module",r.getString(0));}
+            SyncState.Subject mine=null;for(SyncState.Subject x:pc.st.subjects)if(x.title.equals("Hermenêutica"))mine=x;assertNotNull("o módulo do telemóvel chegou ao computador",mine);assertEquals("Bacharelato",mine.course);assertEquals("module",mine.kind);
+            boolean described=false;for(SyncState.Course x:pc.st.courses)if(x.title.equals("Bacharelato")&&x.description.equals("Quatro anos"))described=true;assertTrue("o curso com a descrição chegou ao computador",described);
+            Thread.sleep(5);
+            try(StudyStore db=new StudyStore(app)){db.getWritableDatabase().execSQL("UPDATE subjects SET kind='subject' WHERE id=?",new Object[]{subject});}
+            PhoneSync.now(app);
+            for(SyncState.Subject x:pc.st.subjects)if(x.title.equals("Hermenêutica"))mine=x;assertEquals("mudar de módulo para disciplina também chega",  "subject",mine.kind);
+            try(StudyStore db=new StudyStore(app)){db.deleteCourse(course);}
+            PhoneSync.now(app);
+            boolean still=false;for(SyncState.Course x:pc.st.courses)if(x.title.equals("Bacharelato"))still=true;assertFalse("o curso apagado no telemóvel é apagado no computador",still);
+            for(SyncState.Subject x:pc.st.subjects)if(x.title.equals("Hermenêutica"))mine=x;assertEquals("o módulo fica, sem curso","",mine.course);
+        }finally{server.close();}
+    }
     @Test public void studiesTravelBothWays()throws Exception{
         // 5.50: subjects, cards and tasks of Estudos; deletions on either side.
         FakePc pc=new FakePc(app.getCacheDir());SyncServer server=new SyncServer(pc,0,0);server.start();

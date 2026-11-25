@@ -1,5 +1,6 @@
 package mz.bam.seeky.android;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -21,8 +22,9 @@ import org.json.JSONArray;
  */
 final class DeskStudies {
     final DeskMain d;
-    String tab = "Hoje"; long subject; String subjectTab = "Cartões";
-    static final String[] TABS = {"Hoje", "Disciplinas", "Cartões", "Perguntas", "Agenda", "Progresso"};
+    String tab = "Hoje"; long subject, course; String subjectTab = "Cartões";
+    static final long NO_COURSE = -1;
+    static final String[] TABS = {"Hoje", "Cursos", "Cartões", "Perguntas", "Agenda", "Progresso"};
     static final int[] COLORS = {0x3f6b4f, 0x2f5d7a, 0x7a2e43, 0xb07a1f, 0x5b3a8b, 0x2c6975, 0x8a4b2a, 0x4a5a6b};
     static final long DAY = 86400000L;
     DeskStudies(DeskMain d) { this.d = d; }
@@ -37,10 +39,24 @@ final class DeskStudies {
             st.execute("CREATE TABLE IF NOT EXISTS st_quiz(id INTEGER PRIMARY KEY,subject INTEGER NOT NULL DEFAULT 0,total INTEGER NOT NULL,correct INTEGER NOT NULL,created INTEGER NOT NULL)");
             st.execute("CREATE TABLE IF NOT EXISTS sync_gone(key TEXT PRIMARY KEY,at INTEGER NOT NULL)");
             try { st.execute("ALTER TABLE notes ADD COLUMN subject INTEGER NOT NULL DEFAULT 0"); } catch (SQLException exists) {}
+            // 5.52: Curso › Módulo ou Disciplina, as on the phone.
+            st.execute("CREATE TABLE IF NOT EXISTS st_courses(id INTEGER PRIMARY KEY,title TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',created INTEGER NOT NULL,updated INTEGER NOT NULL)");
+            try { st.execute("ALTER TABLE st_subjects ADD COLUMN course_id INTEGER NOT NULL DEFAULT 0"); } catch (SQLException exists) {}
+            try { st.execute("ALTER TABLE st_subjects ADD COLUMN kind TEXT NOT NULL DEFAULT 'subject'"); } catch (SQLException exists) {}
+        } catch (SQLException ignored) {}
+        try { // the old free-text course of 5.50 becomes a real course
+            for (Object[] r : s.rows("SELECT id,course FROM st_subjects WHERE course<>'' AND course_id=0")) {
+                String name = (r[1] + "").trim(); long now = System.currentTimeMillis();
+                List<Object[]> c = s.rows("SELECT id FROM st_courses WHERE title=? COLLATE NOCASE", name);
+                long cid = c.isEmpty() ? s.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", name, "", now, now) : ((Number) c.get(0)[0]).longValue();
+                s.update("UPDATE st_subjects SET course_id=?,course='' WHERE id=?", cid, r[0]);
+            }
         } catch (SQLException ignored) {}
     }
     /** Something deleted here is deleted on the phone too at the next sync. */
     static void gone(DeskStore s, String key) { try { s.update("INSERT OR REPLACE INTO sync_gone(key,at) VALUES(?,?)", key, System.currentTimeMillis()); } catch (SQLException ignored) {} }
+    static String courseTitle(DeskStore s, long id) { try { List<Object[]> r = s.rows("SELECT title FROM st_courses WHERE id=?", id); return r.isEmpty() ? "" : r.get(0)[0] + ""; } catch (SQLException e) { return ""; } }
+    static String kindLabel(Object kind) { return "module".equals(kind + "") ? "Módulo" : "Disciplina"; }
     static String subjectTitle(DeskStore s, long id) { try { List<Object[]> r = s.rows("SELECT title FROM st_subjects WHERE id=?", id); return r.isEmpty() ? "" : r.get(0)[0] + ""; } catch (SQLException e) { return ""; } }
     void deleteRow(String table, long id) {
         try {
@@ -66,11 +82,16 @@ final class DeskStudies {
         schema(d.store);
         VBox page = DeskUi.page();
         HBox tabs = new HBox(6);
-        for (String t : TABS) { ToggleButton b = new ToggleButton(t); b.getStyleClass().add("chip"); b.setSelected(t.equals(tab) && subject == 0); b.setOnAction(e -> { tab = t; subject = 0; d.open("studies"); }); tabs.getChildren().add(b); }
-        page.getChildren().addAll(DeskUi.row(DeskUi.title("Estudos"), DeskUi.grow(), DeskUi.button("Nova disciplina", false, this::newSubject), DeskUi.button("Plano com IA", false, () -> { d.ai.tab = "Plano de estudo"; d.open("ai"); }), DeskUi.button("Seeky IA", true, () -> generate(subject))), tabs);
+        for (String t : TABS) { ToggleButton b = new ToggleButton(t); b.getStyleClass().add("chip"); b.setSelected(t.equals(tab) && subject == 0 && (course == 0 || t.equals("Cursos"))); b.setOnAction(e -> { tab = t; subject = 0; course = 0; d.open("studies"); }); tabs.getChildren().add(b); }
+        MenuButton create = new MenuButton("Criar");
+        MenuItem nc = new MenuItem("Curso…"); nc.setOnAction(e -> courseForm(0));
+        MenuItem ns = new MenuItem("Módulo ou disciplina…"); ns.setOnAction(e -> subjectForm(0, course > 0 ? course : 0));
+        create.getItems().addAll(nc, ns);
+        page.getChildren().addAll(DeskUi.row(DeskUi.title("Estudos"), DeskUi.grow(), create, DeskUi.button("Plano com IA", false, () -> { d.ai.tab = "Plano de estudo"; d.open("ai"); }), DeskUi.button("Seeky IA", true, () -> generate(subject))), tabs);
         if (subject > 0) page.getChildren().add(subjectPage(subject));
+        else if (course != 0) page.getChildren().add(coursePage(course));
         else switch (tab) {
-            case "Disciplinas": page.getChildren().add(subjects()); break;
+            case "Cursos": case "Disciplinas": page.getChildren().add(courses()); break;
             case "Cartões": page.getChildren().add(cardsList(0)); break;
             case "Perguntas": page.getChildren().add(questionsList(0)); break;
             case "Agenda": page.getChildren().add(agenda(0)); break;
@@ -101,33 +122,81 @@ final class DeskStudies {
         if (!soon.isEmpty()) { VBox next = new VBox(6); for (Object[] t : soon) next.getChildren().add(taskRow(t, true)); box.getChildren().add(DeskUi.card(DeskUi.heading("Próximos prazos"), next)); }
         return box;
     }
-    Node subjects() {
-        List<Object[]> all = rows("SELECT id,title,color,course FROM st_subjects ORDER BY course COLLATE NOCASE,title COLLATE NOCASE");
-        if (all.isEmpty()) return DeskUi.card(DeskUi.heading("Ainda não há disciplinas"), DeskUi.text("Crie uma disciplina para cada matéria (por exemplo Teologia, Matemática, Inglês) e junte-lhe materiais, cartões, perguntas e tarefas."), DeskUi.button("Nova disciplina", true, this::newSubject));
+    /** Cursos: each course with its modules and subjects; modules and subjects without a course in "Sem curso". */
+    Node courses() {
+        List<Object[]> all = rows("SELECT id,title,description FROM st_courses ORDER BY title COLLATE NOCASE");
+        long loose = count("SELECT COUNT(*) FROM st_subjects WHERE course_id=0"), now = System.currentTimeMillis();
+        if (all.isEmpty() && loose == 0) return DeskUi.card(DeskUi.heading("Comece por um curso"),
+            DeskUi.text("Um curso junta módulos ou disciplinas (por exemplo: Curso de Teologia › Módulo 1 › Hermenêutica). Em cada módulo ou disciplina ficam os materiais, cartões, perguntas, tarefas e notas."),
+            DeskUi.row(DeskUi.button("Criar curso", true, () -> courseForm(0)), DeskUi.button("Criar módulo ou disciplina", false, () -> subjectForm(0, 0))));
+        FlowPane grid = new FlowPane(14, 14);
+        for (Object[] c : all) {
+            long id = ((Number) c[0]).longValue();
+            long modules = count("SELECT COUNT(*) FROM st_subjects WHERE course_id=? AND kind='module'", id), subs = count("SELECT COUNT(*) FROM st_subjects WHERE course_id=? AND kind<>'module'", id);
+            long due = count("SELECT COUNT(*) FROM st_cards WHERE due<=? AND subject IN (SELECT id FROM st_subjects WHERE course_id=?)", now, id);
+            Region stripe = new Region(); stripe.setMinHeight(6); stripe.getStyleClass().add("course-stripe");
+            String desc = (c[2] + "").trim();
+            VBox card = DeskUi.card(stripe, DeskUi.muted("Curso"), DeskUi.heading(c[1] + ""), desc.isEmpty() ? new Region() : DeskUi.muted(desc.length() > 120 ? desc.substring(0, 120) + "…" : desc),
+                DeskUi.text(modules + (modules == 1 ? " módulo" : " módulos") + " · " + subs + (subs == 1 ? " disciplina" : " disciplinas") + (due > 0 ? " · " + due + " cartões para rever" : "")));
+            card.setPrefWidth(300); card.getStyleClass().add("tile"); card.setOnMouseClicked(e -> { course = id; subject = 0; d.open("studies"); }); DeskUi.lift(card);
+            grid.getChildren().add(card);
+        }
+        if (loose > 0) {
+            VBox card = DeskUi.card(DeskUi.muted("Sem curso"), DeskUi.heading("Módulos e disciplinas soltos"), DeskUi.text(loose + (loose == 1 ? " módulo ou disciplina" : " módulos ou disciplinas")));
+            card.setPrefWidth(300); card.getStyleClass().add("tile"); card.setOnMouseClicked(e -> { course = NO_COURSE; subject = 0; d.open("studies"); }); DeskUi.lift(card);
+            grid.getChildren().add(card);
+        }
+        return grid;
+    }
+    /** One course: its description, then its modules and its subjects. */
+    Node coursePage(long cid) {
+        String title = cid == NO_COURSE ? "Sem curso" : courseTitle(d.store, cid);
+        if (title.isEmpty()) { course = 0; return courses(); }
+        VBox box = new VBox(12);
+        MenuButton more = new MenuButton("Mais");
+        if (cid > 0) {
+            MenuItem edit = new MenuItem("Editar o curso…"); edit.setOnAction(e -> courseForm(cid));
+            MenuItem del = new MenuItem("Eliminar o curso"); del.setOnAction(e -> { if (DeskUi.confirm("Eliminar o curso " + title + "?", "Os módulos e disciplinas ficam, sem curso.")) { deleteCourse(cid); course = 0; d.open("studies"); } });
+            more.getItems().addAll(edit, new SeparatorMenuItem(), del);
+        }
+        HBox head = DeskUi.row(DeskUi.iconButton("back", "Cursos", () -> { course = 0; tab = "Cursos"; d.open("studies"); }), new VBox(0, DeskUi.muted(cid > 0 ? "Curso" : ""), DeskUi.heading(title)), DeskUi.grow(),
+            DeskUi.button("Novo módulo ou disciplina", true, () -> subjectForm(0, cid > 0 ? cid : 0)));
+        if (cid > 0) head.getChildren().add(more);
+        box.getChildren().add(head);
+        if (cid > 0) { List<Object[]> r = rows("SELECT description FROM st_courses WHERE id=?", cid); if (!r.isEmpty() && !(r.get(0)[0] + "").trim().isEmpty()) box.getChildren().add(DeskUi.text(r.get(0)[0] + "")); }
+        long key = cid > 0 ? cid : 0;
+        List<Object[]> modules = rows("SELECT id,title,color,kind FROM st_subjects WHERE course_id=? AND kind='module' ORDER BY title COLLATE NOCASE", key);
+        List<Object[]> subs = rows("SELECT id,title,color,kind FROM st_subjects WHERE course_id=? AND kind<>'module' ORDER BY title COLLATE NOCASE", key);
+        if (modules.isEmpty() && subs.isEmpty()) box.getChildren().add(DeskUi.card(DeskUi.heading("Ainda sem módulos nem disciplinas"), DeskUi.text("Crie o primeiro módulo ou disciplina deste curso."), DeskUi.button("Novo módulo ou disciplina", true, () -> subjectForm(0, key))));
+        if (!modules.isEmpty()) box.getChildren().addAll(DeskUi.heading("Módulos"), subjectCards(modules));
+        if (!subs.isEmpty()) box.getChildren().addAll(DeskUi.heading("Disciplinas"), subjectCards(subs));
+        return box;
+    }
+    FlowPane subjectCards(List<Object[]> list) {
         FlowPane grid = new FlowPane(14, 14); long now = System.currentTimeMillis();
-        for (Object[] s : all) {
+        for (Object[] s : list) {
             long id = ((Number) s[0]).longValue(); int color = ((Number) s[2]).intValue();
             Region stripe = new Region(); stripe.setMinHeight(6); stripe.setStyle("-fx-background-color: " + DeskThemes.hex(color) + "; -fx-background-radius: 6;");
             long due = count("SELECT COUNT(*) FROM st_cards WHERE subject=? AND due<=?", id, now), cards = count("SELECT COUNT(*) FROM st_cards WHERE subject=?", id), tasks = count("SELECT COUNT(*) FROM st_tasks WHERE subject=? AND done=0", id), mats = count("SELECT COUNT(*) FROM st_materials WHERE subject=?", id);
-            VBox card = DeskUi.card(stripe, DeskUi.heading(s[1] + ""), DeskUi.muted((s[3] + "").isEmpty() ? "Disciplina" : s[3] + ""), DeskUi.text(mats + " materiais · " + cards + " cartões" + (due > 0 ? " (" + due + " para rever)" : "") + " · " + tasks + " tarefas"));
+            VBox card = DeskUi.card(stripe, DeskUi.muted(kindLabel(s[3])), DeskUi.heading(s[1] + ""), DeskUi.text(mats + " materiais · " + cards + " cartões" + (due > 0 ? " (" + due + " para rever)" : "") + " · " + tasks + " tarefas"));
             card.setPrefWidth(300); card.getStyleClass().add("tile"); card.setOnMouseClicked(e -> { subject = id; subjectTab = "Cartões"; d.open("studies"); }); DeskUi.lift(card);
             grid.getChildren().add(card);
         }
         return grid;
     }
     Node subjectPage(long id) {
-        List<Object[]> r = rows("SELECT title,color,course FROM st_subjects WHERE id=?", id); if (r.isEmpty()) { subject = 0; return subjects(); }
-        String title = r.get(0)[0] + "";
+        List<Object[]> r = rows("SELECT title,color,course_id,kind FROM st_subjects WHERE id=?", id); if (r.isEmpty()) { subject = 0; return courses(); }
+        String title = r.get(0)[0] + ""; long cid = ((Number) r.get(0)[2]).longValue(); String kind = kindLabel(r.get(0)[3]), parent = cid > 0 ? courseTitle(d.store, cid) : "";
         VBox box = new VBox(12);
         HBox tabs = new HBox(6);
         for (String t : new String[]{"Cartões", "Perguntas", "Materiais", "Tarefas", "Notas"}) { ToggleButton b = new ToggleButton(t); b.getStyleClass().add("chip"); b.setSelected(t.equals(subjectTab)); b.setOnAction(e -> { subjectTab = t; d.open("studies"); }); tabs.getChildren().add(b); }
         MenuButton more = new MenuButton("Mais");
-        MenuItem rename = new MenuItem("Mudar o nome…"); rename.setOnAction(e -> { String n = DeskUi.ask("Nome da disciplina", "Nome", title); if (n != null) { try { d.store.update("UPDATE st_subjects SET title=?,updated=? WHERE id=?", n, System.currentTimeMillis(), id); } catch (SQLException ignored) {} d.open("studies"); } });
+        MenuItem rename = new MenuItem("Editar (nome, tipo e curso)…"); rename.setOnAction(e -> subjectForm(id, cid));
         MenuItem focus = new MenuItem("Estudar com o Foco"); focus.setOnAction(e -> { d.focus.subject = title; d.open("focus"); });
-        MenuItem del = new MenuItem("Eliminar a disciplina"); del.setOnAction(e -> { if (DeskUi.confirm("Eliminar " + title + "?", "Os cartões, perguntas, tarefas e notas ficam, sem disciplina.")) { deleteSubject(id); subject = 0; d.open("studies"); } });
+        MenuItem del = new MenuItem("Eliminar " + (kind.equals("Módulo") ? "o módulo" : "a disciplina")); del.setOnAction(e -> { if (DeskUi.confirm("Eliminar " + title + "?", "Os cartões, perguntas, tarefas e notas ficam, sem " + (kind.equals("Módulo") ? "módulo." : "disciplina."))) { deleteSubject(id); subject = 0; d.open("studies"); } });
         more.getItems().addAll(rename, focus, new SeparatorMenuItem(), del);
         Region dot = new Region(); dot.setMinSize(14, 14); dot.setMaxSize(14, 14); dot.setStyle("-fx-background-color: " + DeskThemes.hex(((Number) r.get(0)[1]).intValue()) + "; -fx-background-radius: 7;");
-        box.getChildren().addAll(DeskUi.row(DeskUi.iconButton("back", "Disciplinas", () -> { subject = 0; tab = "Disciplinas"; d.open("studies"); }), dot, DeskUi.heading(title), DeskUi.grow(), more), tabs);
+        box.getChildren().addAll(DeskUi.row(DeskUi.iconButton("back", parent.isEmpty() ? "Cursos" : parent, () -> { subject = 0; course = cid > 0 ? cid : NO_COURSE; d.open("studies"); }), dot, new VBox(0, DeskUi.muted(parent.isEmpty() ? kind : parent + " › " + kind), DeskUi.heading(title)), DeskUi.grow(), more), tabs);
         switch (subjectTab) {
             case "Perguntas": box.getChildren().add(questionsList(id)); break;
             case "Materiais": box.getChildren().add(materials(id)); break;
@@ -139,13 +208,62 @@ final class DeskStudies {
     }
 
     // ---- disciplinas ----
-    void newSubject() {
-        String t = DeskUi.ask("Nova disciplina", "Nome (por exemplo Teologia Sistemática)", ""); if (t == null) return;
-        try { long n = count("SELECT COUNT(*) FROM st_subjects"); long now = System.currentTimeMillis(); subject = d.store.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", t, COLORS[(int) (n % COLORS.length)], now, now); subjectTab = "Materiais"; } catch (SQLException ignored) {}
-        d.open("studies");
+    void newSubject() { subjectForm(0, course > 0 ? course : 0); }
+    /** Novo curso / editar curso: nome e descrição. */
+    void courseForm(long id) {
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText(id == 0 ? "Novo curso" : "Editar o curso"); DeskUi.style(dlg.getDialogPane());
+        TextField name = new TextField(); name.setPromptText("Nome (por exemplo Bacharelato em Teologia)");
+        TextArea desc = new TextArea(); desc.setPromptText("Descrição (opcional)"); desc.setPrefRowCount(3); desc.setWrapText(true);
+        String old = "";
+        if (id > 0) { List<Object[]> r = rows("SELECT title,description FROM st_courses WHERE id=?", id); if (!r.isEmpty()) { old = r.get(0)[0] + ""; name.setText(old); desc.setText(r.get(0)[1] + ""); } }
+        VBox box = new VBox(8, DeskUi.muted("Nome do curso"), name, DeskUi.muted("Descrição"), desc); box.setPrefWidth(460); dlg.getDialogPane().setContent(box); dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Platform.runLater(name::requestFocus);
+        String before = old;
+        dlg.showAndWait().filter(b -> b == ButtonType.OK).ifPresent(b -> {
+            String t = name.getText().trim(); if (t.isEmpty()) return; long now = System.currentTimeMillis();
+            try {
+                if (id > 0) { d.store.update("UPDATE st_courses SET title=?,description=?,updated=? WHERE id=?", t, desc.getText().trim(), now, id); if (!SyncState.norm(before).equals(SyncState.norm(t))) gone(d.store, "course:" + SyncState.norm(before)); }
+                else { course = d.store.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", t, desc.getText().trim(), now, now); subject = 0; }
+            } catch (SQLException ignored) {}
+            d.open("studies");
+        });
+    }
+    /** Novo / editar módulo ou disciplina: nome, tipo (Módulo ou Disciplina) e curso. */
+    void subjectForm(long id, long presetCourse) {
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText(id == 0 ? "Novo módulo ou disciplina" : "Editar"); DeskUi.style(dlg.getDialogPane());
+        TextField name = new TextField(); name.setPromptText("Nome (por exemplo Hermenêutica)");
+        ComboBox<String> type = new ComboBox<>(); type.getItems().addAll("Disciplina", "Módulo"); type.getSelectionModel().select(0);
+        List<Object[]> all = rows("SELECT id,title FROM st_courses ORDER BY title COLLATE NOCASE");
+        ComboBox<String> parent = new ComboBox<>(); parent.getItems().add("Sem curso"); for (Object[] c : all) parent.getItems().add(c[1] + ""); parent.getItems().add("Novo curso…");
+        parent.getSelectionModel().select(0); long pick = presetCourse; String old = "";
+        if (id > 0) { List<Object[]> r = rows("SELECT title,kind,course_id FROM st_subjects WHERE id=?", id); if (!r.isEmpty()) { old = r.get(0)[0] + ""; name.setText(old); type.getSelectionModel().select("module".equals(r.get(0)[1] + "") ? 1 : 0); pick = ((Number) r.get(0)[2]).longValue(); } }
+        for (int i = 0; i < all.size(); i++) if (((Number) all.get(i)[0]).longValue() == pick) parent.getSelectionModel().select(i + 1);
+        GridPane g = new GridPane(); g.setHgap(12); g.setVgap(10);
+        g.addRow(0, DeskUi.muted("Nome"), name); g.addRow(1, DeskUi.muted("Tipo"), type); g.addRow(2, DeskUi.muted("Curso"), parent); GridPane.setHgrow(name, Priority.ALWAYS);
+        VBox box = new VBox(10, g, DeskUi.muted("Um módulo é uma parte de um curso (Módulo 1, Módulo 2…); uma disciplina é uma matéria (Teologia, Inglês…). Os dois têm materiais, cartões, perguntas, tarefas e notas."));
+        box.setPrefWidth(480); dlg.getDialogPane().setContent(box); dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Platform.runLater(name::requestFocus);
+        String before = old;
+        dlg.showAndWait().filter(b -> b == ButtonType.OK).ifPresent(b -> {
+            String t = name.getText().trim(); if (t.isEmpty()) return;
+            int at = parent.getSelectionModel().getSelectedIndex(); long cid = 0;
+            if (at == parent.getItems().size() - 1) { String c = DeskUi.ask("Novo curso", "Nome do curso", ""); if (c == null || c.trim().isEmpty()) return; try { long now = System.currentTimeMillis(); cid = d.store.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", c.trim(), "", now, now); } catch (SQLException e) { return; } }
+            else if (at > 0) cid = ((Number) all.get(at - 1)[0]).longValue();
+            String kind = type.getSelectionModel().getSelectedIndex() == 1 ? "module" : "subject"; long now = System.currentTimeMillis();
+            try {
+                if (id > 0) { d.store.update("UPDATE st_subjects SET title=?,kind=?,course_id=?,updated=? WHERE id=?", t, kind, cid, now, id); if (!SyncState.norm(before).equals(SyncState.norm(t))) gone(d.store, "subject:" + SyncState.norm(before)); }
+                else { long n = count("SELECT COUNT(*) FROM st_subjects"); subject = d.store.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", t, COLORS[(int) (n % COLORS.length)], now, now, cid, kind); subjectTab = "Materiais"; }
+                course = cid > 0 ? cid : NO_COURSE;
+            } catch (SQLException ignored) {}
+            d.open("studies");
+        });
+    }
+    void deleteCourse(long id) {
+        String title = courseTitle(d.store, id);
+        try { d.store.update("UPDATE st_subjects SET course_id=0,updated=? WHERE course_id=?", System.currentTimeMillis(), id); d.store.update("DELETE FROM st_courses WHERE id=?", id); gone(d.store, "course:" + SyncState.norm(title)); } catch (SQLException ignored) {}
     }
     long chooseSubject(String why) {
-        List<Object[]> all = rows("SELECT id,title FROM st_subjects ORDER BY title COLLATE NOCASE"); if (all.isEmpty()) return 0;
+        List<Object[]> all = rows("SELECT st_subjects.id,CASE WHEN st_courses.title IS NULL THEN st_subjects.title ELSE st_courses.title || ' › ' || st_subjects.title END FROM st_subjects LEFT JOIN st_courses ON st_courses.id=st_subjects.course_id ORDER BY 2 COLLATE NOCASE"); if (all.isEmpty()) return 0;
         ChoiceDialog<String> c = new ChoiceDialog<>(); c.getItems().add("Sem disciplina"); for (Object[] s : all) c.getItems().add(s[1] + ""); c.setSelectedItem(c.getItems().get(0)); c.setHeaderText(why); c.setTitle("Seeky"); DeskUi.style(c.getDialogPane());
         Optional<String> pick = c.showAndWait(); if (!pick.isPresent()) return -1;
         for (Object[] s : all) if ((s[1] + "").equals(pick.get())) return ((Number) s[0]).longValue();

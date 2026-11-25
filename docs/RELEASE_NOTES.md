@@ -1,3 +1,13 @@
+## Seeky 5.52.0
+
+Instale **Seeky_5.52.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.52.0.
+
+### Novidades
+- **Cursos › Módulos e Disciplinas** também no Seeky para Windows, como no telemóvel.
+- O **Seeky ligado** leva os cursos e o tipo (módulo ou disciplina) nos dois sentidos.
+- O **plano de estudo** da Seeky IA pergunta o curso e se cria um módulo ou uma disciplina.
+
 ## Seeky 5.51.0
 
 Instale **Seeky_5.51.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

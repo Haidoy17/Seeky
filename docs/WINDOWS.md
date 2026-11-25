@@ -24,7 +24,7 @@ perdem ao actualizar nem ao desinstalar.
   com a mesma repetição espaçada do Android.
 - **Seeky IA**: perguntar a vários documentos (até 12, com fontes), resumir um livro inteiro num resumo
   geral (retoma onde parou) e plano de estudo a partir de um tema (disciplina, sessões, cartões, nota).
-- **Estudos**: Hoje, Disciplinas (cartões, perguntas, materiais, tarefas, notas), Cartões com revisão
+- **Estudos**: Hoje, Cursos › Módulos e Disciplinas (cartões, perguntas, materiais, tarefas, notas), Cartões com revisão
   espaçada, Perguntas, Agenda, Progresso e Seeky IA para criar cartões e perguntas; sincroniza com o
   telemóvel.
 - **Jogo da Bíblia**: Fácil, Médio, Difícil e Lendário, 60 s por pergunta, recordes.

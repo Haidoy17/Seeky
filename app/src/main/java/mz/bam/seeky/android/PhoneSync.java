@@ -47,6 +47,13 @@ final class PhoneSync implements SyncClient.Local {
             d.execSQL("CREATE TABLE deleted(kind TEXT NOT NULL,uuid TEXT NOT NULL,at INTEGER NOT NULL,PRIMARY KEY(kind,uuid))");
         }
         @Override public void onUpgrade(SQLiteDatabase d, int o, int n) {}
+        @Override public void onOpen(SQLiteDatabase d) { super.onOpen(d); if (!d.isReadOnly()) d.execSQL("CREATE TABLE IF NOT EXISTS stamps(key TEXT PRIMARY KEY,fp TEXT NOT NULL,at INTEGER NOT NULL)"); }
+        /** When a course or subject last changed (phone tables keep only "created"): the time its contents were first seen as they are now. */
+        long stamp(String key, String fp, long base) {
+            try (Cursor r = getReadableDatabase().rawQuery("SELECT fp,at FROM stamps WHERE key=?", new String[]{key})) { if (r.moveToFirst()) { if (r.getString(0).equals(fp)) return Math.max(base, r.getLong(1)); } else { set(key, fp, base); return base; } }
+            long now = System.currentTimeMillis(); set(key, fp, now); return now;
+        }
+        void set(String key, String fp, long at) { ContentValues v = new ContentValues(); v.put("key", key); v.put("fp", fp); v.put("at", at); getWritableDatabase().insertWithOnConflict("stamps", null, v, SQLiteDatabase.CONFLICT_REPLACE); }
         String uuid(long local) {
             try (Cursor r = getReadableDatabase().rawQuery("SELECT uuid FROM ids WHERE kind='note' AND local=?", new String[]{"" + local})) { if (r.moveToFirst()) return r.getString(0); }
             String u = SyncState.uuid(); ContentValues v = new ContentValues(); v.put("kind", "note"); v.put("local", local); v.put("uuid", u); getWritableDatabase().insertWithOnConflict("ids", null, v, SQLiteDatabase.CONFLICT_REPLACE); return u;
@@ -65,6 +72,7 @@ final class PhoneSync implements SyncClient.Local {
             String subject = ""; if (!table.equals("subjects") && r.n("subject") > 0) { StudyStore.Row s = db.get("subjects", r.n("subject")); if (s != null) subject = s.s("title"); }
             switch (table) {
                 case "subjects": key = "subject:" + SyncState.norm(r.s("title")); break;
+                case "courses": key = "course:" + SyncState.norm(r.s("title")); break;
                 case "cards": key = "card:" + SyncState.studyKey(subject, r.s("front")); break;
                 case "questions": key = "question:" + SyncState.studyKey(subject, r.s("prompt")); break;
                 case "tasks": key = "task:" + SyncState.taskKey(subject, r.s("title"), r.n("due")); break;
@@ -106,8 +114,11 @@ final class PhoneSync implements SyncClient.Local {
             try (Cursor r = d.rawQuery("SELECT name,level,score,correct,at FROM records", null)) { while (r.moveToNext()) { SyncState.Record x = new SyncState.Record(); x.name = r.getString(0); x.level = r.getInt(1); x.points = r.getInt(2); x.correct = r.getInt(3); x.at = r.getLong(4); st.records.add(x); } }
         } catch (Exception ignored) {}
         try (StudyStore db = new StudyStore(c)) {
-            SQLiteDatabase d = db.getReadableDatabase(); Map<Long, String> names = new HashMap<>();
-            try (Cursor r = d.rawQuery("SELECT id,title,color,created FROM subjects", null)) { while (r.moveToNext()) { SyncState.Subject x = new SyncState.Subject(); x.title = r.getString(1); x.color = r.getInt(2) & 0xffffff; x.created = r.getLong(3); x.updated = x.created; st.subjects.add(x); names.put(r.getLong(0), x.title); } }
+            SQLiteDatabase d = db.getReadableDatabase(); Map<Long, String> names = new HashMap<>(), courseNames = new HashMap<>();
+            try (Ids ids = new Ids(c)) {
+                try (Cursor r = d.rawQuery("SELECT id,title,description,created FROM courses", null)) { while (r.moveToNext()) { SyncState.Course x = new SyncState.Course(); x.title = r.getString(1); x.description = r.getString(2); x.created = r.getLong(3); x.updated = ids.stamp(x.key(), courseFp(x.title, x.description), x.created); st.courses.add(x); courseNames.put(r.getLong(0), x.title); } }
+                try (Cursor r = d.rawQuery("SELECT id,title,color,created,course,kind FROM subjects", null)) { while (r.moveToNext()) { SyncState.Subject x = new SyncState.Subject(); x.title = r.getString(1); x.color = r.getInt(2) & 0xffffff; x.created = r.getLong(3); x.course = courseNames.getOrDefault(r.getLong(4), ""); x.kind = SyncState.kind(r.getString(5)); x.updated = ids.stamp(x.key(), subjectFp(x), x.created); st.subjects.add(x); names.put(r.getLong(0), x.title); } }
+            }
             try (Cursor r = d.rawQuery("SELECT subject,front,back,due,interval,reps,lapses,updated FROM cards WHERE suspended=0", null)) { while (r.moveToNext()) { SyncState.StudyCard x = new SyncState.StudyCard(); x.subject = names.getOrDefault(r.getLong(0), ""); x.front = r.getString(1); x.back = r.getString(2); x.due = r.getLong(3); x.interval = r.getInt(4); x.reps = r.getInt(5); x.lapses = r.getInt(6); x.updated = r.getLong(7); st.studyCards.add(x); } }
             try (Cursor r = d.rawQuery("SELECT subject,prompt,answer,choices,correct,explanation,updated FROM questions", null)) { while (r.moveToNext()) { SyncState.Question x = new SyncState.Question(); x.subject = names.getOrDefault(r.getLong(0), ""); x.prompt = r.getString(1); x.answer = r.getString(2); x.choices = r.getString(3); x.correct = r.getInt(4); x.explanation = r.getString(5); x.updated = r.getLong(6); st.questions.add(x); } }
             try (Cursor r = d.rawQuery("SELECT subject,title,due,estimate,priority,done,updated FROM tasks", null)) { while (r.moveToNext()) { SyncState.Task x = new SyncState.Task(); x.subject = names.getOrDefault(r.getLong(0), ""); x.title = r.getString(1); x.due = r.getLong(2); x.estimate = r.getInt(3); x.priority = r.getInt(4); x.done = r.getInt(5) == 1; x.updated = r.getLong(6); st.tasks.add(x); } }
@@ -177,12 +188,17 @@ final class PhoneSync implements SyncClient.Local {
         return ch;
     }
 
-    /** Estudos from the computer: subjects by name, cards/questions/tasks (newest wins), deletions. */
+    static String courseFp(String title, String description) { return title + "\u0001" + description; }
+    static String subjectFp(SyncState.Subject x) { return x.title + "\u0001" + (x.color & 0xffffff) + "\u0001" + SyncState.norm(x.course) + "\u0001" + SyncState.kind(x.kind); }
+    /** Estudos from the computer: courses and subjects by name, cards/questions/tasks (newest wins), deletions. */
     void applyStudy(SyncState.Changes ch) throws Exception {
         try (StudyStore db = new StudyStore(c); Ids ids = new Ids(c)) {
-            SQLiteDatabase d = db.getWritableDatabase(); Map<String, Long> subjects = new HashMap<>();
+            SQLiteDatabase d = db.getWritableDatabase(); Map<String, Long> subjects = new HashMap<>(), courses = new HashMap<>();
+            try (Cursor r = d.rawQuery("SELECT id,title FROM courses", null)) { while (r.moveToNext()) courses.put(SyncState.norm(r.getString(1)), r.getLong(0)); }
+            for (SyncState.Course x : ch.courses) { Long id = courses.get(SyncState.norm(x.title)); if (id == null) courses.put(SyncState.norm(x.title), db.save("courses", 0, StudyStore.values("title", x.title, "description", x.description, "created", x.created > 0 ? x.created : System.currentTimeMillis()))); else d.execSQL("UPDATE courses SET title=?,description=? WHERE id=?", new Object[]{x.title, x.description, id}); ids.set(x.key(), courseFp(x.title, x.description), x.updated); }
+            java.util.function.Function<String, Long> courseId = t -> { if (t == null || t.trim().isEmpty()) return 0L; Long id = courses.get(SyncState.norm(t)); if (id != null) return id; long n = db.save("courses", 0, StudyStore.values("title", t, "description", "", "created", System.currentTimeMillis())); courses.put(SyncState.norm(t), n); return n; };
             try (Cursor r = d.rawQuery("SELECT id,title FROM subjects", null)) { while (r.moveToNext()) subjects.put(SyncState.norm(r.getString(1)), r.getLong(0)); }
-            for (SyncState.Subject x : ch.subjects) { if (!subjects.containsKey(SyncState.norm(x.title))) subjects.put(SyncState.norm(x.title), db.save("subjects", 0, StudyStore.values("title", x.title, "color", x.color | 0xff000000, "created", x.created > 0 ? x.created : System.currentTimeMillis()))); else d.execSQL("UPDATE subjects SET title=?,color=? WHERE id=?", new Object[]{x.title, x.color | 0xff000000, subjects.get(SyncState.norm(x.title))}); }
+            for (SyncState.Subject x : ch.subjects) { long cid = courseId.apply(x.course); String kind = SyncState.kind(x.kind); if (!subjects.containsKey(SyncState.norm(x.title))) subjects.put(SyncState.norm(x.title), db.save("subjects", 0, StudyStore.values("title", x.title, "color", x.color | 0xff000000, "created", x.created > 0 ? x.created : System.currentTimeMillis(), "course", cid, "kind", kind))); else d.execSQL("UPDATE subjects SET title=?,color=?,course=?,kind=? WHERE id=?", new Object[]{x.title, x.color | 0xff000000, cid, kind, subjects.get(SyncState.norm(x.title))}); ids.set(x.key(), subjectFp(x), x.updated); }
             java.util.function.Function<String, Long> subjectId = t -> { if (t == null || t.trim().isEmpty()) return 0L; Long id = subjects.get(SyncState.norm(t)); if (id != null) return id; long n = db.save("subjects", 0, StudyStore.values("title", t, "color", 0xff3f6b4f, "created", System.currentTimeMillis())); subjects.put(SyncState.norm(t), n); return n; };
             Map<String, Long> cards = new HashMap<>(), questions = new HashMap<>(), tasks = new HashMap<>();
             try (Cursor r = d.rawQuery("SELECT c.id,COALESCE(s.title,''),c.front FROM cards c LEFT JOIN subjects s ON s.id=c.subject", null)) { while (r.moveToNext()) cards.put("card:" + SyncState.studyKey(r.getString(1), r.getString(2)), r.getLong(0)); }
@@ -192,9 +208,9 @@ final class PhoneSync implements SyncClient.Local {
             for (SyncState.Question x : ch.questions) { Long id = questions.get(x.key()); android.content.ContentValues v = StudyStore.values("answer", x.answer, "choices", x.choices, "correct", x.correct, "explanation", x.explanation, "updated", x.updated); if (id != null) d.update("questions", v, "id=?", new String[]{"" + id}); else { v.put("subject", subjectId.apply(x.subject)); v.put("prompt", x.prompt); db.save("questions", 0, v); } }
             for (SyncState.Task x : ch.tasks) { Long id = tasks.get(x.key()); android.content.ContentValues v = StudyStore.values("estimate", x.estimate, "priority", x.priority, "done", x.done ? 1 : 0, "updated", x.updated); if (id != null) d.update("tasks", v, "id=?", new String[]{"" + id}); else { v.put("subject", subjectId.apply(x.subject)); v.put("title", x.title); v.put("due", x.due); db.save("tasks", 0, v); } }
             for (String k : ch.remove) {
-                Long id = k.startsWith("card:") ? cards.get(k) : k.startsWith("question:") ? questions.get(k) : k.startsWith("task:") ? tasks.get(k) : k.startsWith("subject:") ? subjects.get(k.substring(8)) : null;
+                Long id = k.startsWith("card:") ? cards.get(k) : k.startsWith("question:") ? questions.get(k) : k.startsWith("task:") ? tasks.get(k) : k.startsWith("subject:") ? subjects.get(k.substring(8)) : k.startsWith("course:") ? courses.get(k.substring(7)) : null;
                 if (id == null) continue;
-                try { if (k.startsWith("subject:")) db.deleteSubject(id); else db.delete(k.startsWith("card:") ? "cards" : k.startsWith("question:") ? "questions" : "tasks", id); } catch (Exception ignored) {}
+                try { if (k.startsWith("course:")) db.deleteCourse(id); else if (k.startsWith("subject:")) db.deleteSubject(id); else db.delete(k.startsWith("card:") ? "cards" : k.startsWith("question:") ? "questions" : "tasks", id); } catch (Exception ignored) {}
             }
             for (Map.Entry<String, Long> t : ch.goneTombs.entrySet()) ids.gone(t.getKey(), t.getValue());
         }

@@ -27,12 +27,12 @@ public class Ai551Test {
     @Test public void aStudyPlanBecomesASubjectWithDatedSessionsCardsAndANote()throws Exception{
         SeekyAiDeep.Plan plan=SeekyAiDeep.parse("TÍTULO: Evangelho de João\nOBJECTIVO: Conhecer os sinais.\nDIA 1 | Introdução | Ler João 1\nDIA 2 | Sinais | Ler João 2\nDIA 3 | Revisão | Rever\nCARTÕES\nPergunta: Quantos sinais?\nResposta: Sete.",6);
         long start=System.currentTimeMillis();long sid,again;
-        try(StudyStore db=new StudyStore(w.app)){sid=StudyPlanAi.save(db,plan,start,3,45);
+        try(StudyStore db=new StudyStore(w.app)){long course=db.save("courses",0,StudyStore.values("title","Bacharelato","description","","created",start));sid=StudyPlanAi.save(db,plan,start,3,45,course,"module");assertEquals(course,db.get("subjects",sid).n("course"));assertEquals("module",db.get("subjects",sid).s("kind"));
             assertEquals("Evangelho de João",db.get("subjects",sid).s("title"));
             List<StudyStore.Row> tasks=db.rows("tasks","subject=?",new String[]{""+sid},"due",10);assertEquals(3,tasks.size());assertTrue(tasks.get(0).s("title").startsWith("Sessão 1 · Introdução"));assertEquals(45,tasks.get(0).n("estimate"));assertTrue(tasks.get(1).n("due")>tasks.get(0).n("due"));
             assertEquals(1,db.count("cards","subject=?",new String[]{""+sid}));
             assertEquals(1,db.rows("notes","subject=? AND title LIKE 'Plano de estudo%'",new String[]{""+sid},null,5).size());
-            SeekyAiDeep.Plan second=SeekyAiDeep.parse("TÍTULO: Evangelho de João\nDIA 1 | A | B",6);again=StudyPlanAi.save(db,second,start,3,30);
+            SeekyAiDeep.Plan second=SeekyAiDeep.parse("TÍTULO: Evangelho de João\nDIA 1 | A | B",6);again=StudyPlanAi.save(db,second,start,3,30,0,"subject");assertEquals("subject",db.get("subjects",again).s("kind"));
             assertEquals("Evangelho de João (2)",db.get("subjects",again).s("title"));}
     }
 }

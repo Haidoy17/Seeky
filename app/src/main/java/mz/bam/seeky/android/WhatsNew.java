@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.51", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.52", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("course", "Cursos, módulos e disciplinas nos dois", "Os cursos e o tipo de cada um (Módulo ou Disciplina) passam também para o Seeky para Windows, com o Seeky ligado. O plano de estudo da Seeky IA pergunta o curso e se cria um módulo ou uma disciplina", false, () -> PlusUi.toast(a, "Abra Estudos › Cursos."));
+        panel.section("Da 5.51");
         panel.action("collection", "Perguntar a vários materiais", "Estudos › Estudar com Seeky: escolha até 12 materiais e pergunte. O Seeky envia os trechos mais relevantes de cada um e a resposta diz de que material vem cada ideia", false, () -> a.startActivity(new android.content.Intent(a, StudyAssistantActivity.class).putExtra("many", true)));
         panel.action("book", "Resumir um livro inteiro", "No livro: Ferramentas de leitura › Resumo por etapas › Livro inteiro. No fim, os resumos das partes são juntos num resumo geral guardado nos Estudos", false, () -> PlusUi.toast(a, "Abra o livro e escolha Ferramentas de leitura › Resumo por etapas › Livro inteiro."));
         panel.action("calendar", "Plano de estudo a partir de um tema", "A Seeky IA cria uma disciplina com sessões datadas nas tarefas, cartões de revisão e uma nota com o plano", false, () -> StudyPlanAi.ask(a, sid -> PlusUi.toast(a, "Plano guardado nos Estudos.")));

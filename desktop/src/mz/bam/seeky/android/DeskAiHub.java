@@ -261,18 +261,29 @@ final class DeskAiHub {
         Spinner<Integer> weeks = new Spinner<>(1, 12, 4), per = new Spinner<>(1, 7, 3);
         ComboBox<Integer> minutes = new ComboBox<>(); minutes.getItems().addAll(15, 25, 30, 45, 60, 90); minutes.getSelectionModel().select(Integer.valueOf(30));
         DatePicker start = new DatePicker(LocalDate.now());
+        List<Object[]> courses; try { courses = d.store.rows("SELECT id,title FROM st_courses ORDER BY title COLLATE NOCASE"); } catch (SQLException e) { courses = new ArrayList<>(); }
+        ComboBox<String> course = new ComboBox<>(); course.getItems().add("Sem curso"); for (Object[] c : courses) course.getItems().add(c[1] + ""); course.getItems().add("Novo curso…");
+        long preset = d.studies.course; course.getSelectionModel().select(0); for (int i = 0; i < courses.size(); i++) if (((Number) courses.get(i)[0]).longValue() == preset) course.getSelectionModel().select(i + 1);
+        ComboBox<String> type = new ComboBox<>(); type.getItems().addAll("Disciplina", "Módulo"); type.getSelectionModel().select(0);
+        List<Object[]> known = courses;
         GridPane g = new GridPane(); g.setHgap(12); g.setVgap(10);
         g.addRow(0, DeskUi.muted("Tema"), theme); g.addRow(1, DeskUi.muted("Nível"), level); g.addRow(2, DeskUi.muted("Semanas"), weeks);
         g.addRow(3, DeskUi.muted("Sessões por semana"), per); g.addRow(4, DeskUi.muted("Minutos por sessão"), minutes); g.addRow(5, DeskUi.muted("Começa em"), start);
+        g.addRow(6, DeskUi.muted("Curso"), course); g.addRow(7, DeskUi.muted("Criar como"), type);
         GridPane.setHgrow(theme, Priority.ALWAYS);
         Label total = DeskUi.muted("");
-        Runnable count = () -> total.setText(Math.min(60, weeks.getValue() * per.getValue()) + " sessões na Agenda, uma disciplina nova, cartões de revisão e uma nota com o plano.");
-        weeks.valueProperty().addListener((o, a, b) -> count.run()); per.valueProperty().addListener((o, a, b) -> count.run()); count.run();
-        Button make = DeskUi.button("Criar plano com a IA", true, () -> plan(theme.getText(), level.getSelectionModel().getSelectedIndex(), weeks.getValue(), per.getValue(), minutes.getValue(), start.getValue() == null ? LocalDate.now() : start.getValue()));
+        Runnable count = () -> total.setText(Math.min(60, weeks.getValue() * per.getValue()) + " sessões na Agenda, " + (type.getSelectionModel().getSelectedIndex() == 1 ? "um módulo novo" : "uma disciplina nova") + (course.getSelectionModel().getSelectedIndex() > 0 ? " no curso escolhido" : "") + ", cartões de revisão e uma nota com o plano.");
+        weeks.valueProperty().addListener((o, a, b) -> count.run()); per.valueProperty().addListener((o, a, b) -> count.run()); type.valueProperty().addListener((o, a, b) -> count.run()); course.valueProperty().addListener((o, a, b) -> count.run()); count.run();
+        Button make = DeskUi.button("Criar plano com a IA", true, () -> {
+            int at = course.getSelectionModel().getSelectedIndex(); long cid = 0;
+            if (at == course.getItems().size() - 1) { String c = DeskUi.ask("Novo curso", "Nome do curso", ""); if (c == null || c.trim().isEmpty()) return; try { long now = System.currentTimeMillis(); cid = d.store.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", c.trim(), "", now, now); } catch (SQLException e) { return; } }
+            else if (at > 0) cid = ((Number) known.get(at - 1)[0]).longValue();
+            plan(theme.getText(), level.getSelectionModel().getSelectedIndex(), weeks.getValue(), per.getValue(), minutes.getValue(), start.getValue() == null ? LocalDate.now() : start.getValue(), cid, type.getSelectionModel().getSelectedIndex() == 1 ? "module" : "subject");
+        });
         return new VBox(12, DeskUi.card(DeskUi.heading("Plano de estudo a partir de um tema"),
             DeskUi.muted("A Seeky IA prepara as sessões, do essencial à revisão. Revê o plano antes de o guardar nos Estudos."), g, total, make));
     }
-    void plan(String theme, int level, int weeks, int perWeek, int minutes, LocalDate start) {
+    void plan(String theme, int level, int weeks, int perWeek, int minutes, LocalDate start, long courseId, String kind) {
         String q;
         try { q = SeekyAiDeep.planQuestion(theme, weeks, perWeek, minutes, level, false); } catch (IllegalArgumentException e) { DeskUi.info("Plano de estudo", e.getMessage()); return; }
         if (!ready()) return;
@@ -285,20 +296,20 @@ final class DeskAiHub {
             Alert show = new Alert(Alert.AlertType.CONFIRMATION, "", new ButtonType("Guardar nos Estudos", ButtonBar.ButtonData.OK_DONE), ButtonType.CANCEL);
             show.setTitle("Seeky IA"); show.setHeaderText(p.title + " · " + p.sessions.size() + " sessões · " + p.cards.size() + " cartões"); show.getDialogPane().setContent(t); DeskUi.style(show.getDialogPane());
             show.showAndWait().filter(b -> b.getButtonData() == ButtonBar.ButtonData.OK_DONE).ifPresent(b -> {
-                long sid = save(d.store, p, from, perWeek, minutes);
-                d.status("Plano guardado: " + p.title); d.studies.subject = sid; d.studies.subjectTab = "Tarefas"; d.open("studies");
+                long sid = save(d.store, p, from, perWeek, minutes, courseId, kind);
+                d.status("Plano guardado: " + p.title); d.studies.subject = sid; d.studies.course = courseId > 0 ? courseId : DeskStudies.NO_COURSE; d.studies.subjectTab = "Tarefas"; d.open("studies");
             });
         });
     }
     /** A new subject with the sessions as dated tasks, the cards and the plan as a note. Returns the subject id. */
-    static long save(DeskStore s, SeekyAiDeep.Plan p, long start, int perWeek, int minutes) {
+    static long save(DeskStore s, SeekyAiDeep.Plan p, long start, int perWeek, int minutes, long courseId, String kind) {
         DeskStudies.schema(s);
         long now = System.currentTimeMillis(), sid;
         try {
             String title = p.title; int n = 2;
             while (s.count("SELECT COUNT(*) FROM st_subjects WHERE title=? COLLATE NOCASE", title) > 0) title = p.title + " (" + n++ + ")";
             p.title = title;
-            sid = s.update("INSERT INTO st_subjects(title,color,created,updated) VALUES(?,?,?,?)", title, DeskStudies.COLORS[(int) (s.count("SELECT COUNT(*) FROM st_subjects") % DeskStudies.COLORS.length)], now, now);
+            sid = s.update("INSERT INTO st_subjects(title,color,created,updated,course_id,kind) VALUES(?,?,?,?,?,?)", title, DeskStudies.COLORS[(int) (s.count("SELECT COUNT(*) FROM st_subjects") % DeskStudies.COLORS.length)], now, now, Math.max(0, courseId), SyncState.kind(kind));
             for (SeekyAiDeep.Session x : p.sessions) {
                 String t = SeekyAiDeep.cut("Sessão " + x.day + " · " + x.title + (x.detail.isEmpty() ? "" : " — " + x.detail), 200);
                 s.update("INSERT INTO st_tasks(subject,title,due,estimate,priority,updated) VALUES(?,?,?,?,?,?)", sid, t, SeekyAiDeep.due(start, x.day, perWeek), minutes, 1, now);

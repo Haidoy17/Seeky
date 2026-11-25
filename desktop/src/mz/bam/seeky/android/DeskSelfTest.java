@@ -199,14 +199,21 @@ final class DeskSelfTest {
                 // Seeky IA mais forte (5.51): vários documentos, plano de estudo guardado nos Estudos.
                 String many = SeekyAiDeep.block(Arrays.asList(new SeekyAiDeep.Doc("Graça", "Introdução.\n\nA graça é favor imerecido de Deus."), new SeekyAiDeep.Doc("Receitas", "Bolo de farinha e ovos.")), "O que é a graça?", 4000);
                 SeekyAiDeep.Plan plan = SeekyAiDeep.parse("TÍTULO: João\nOBJECTIVO: Ler o evangelho.\nDIA 1 | Introdução | Ler João 1\nDIA 2 | Sinais | Ler João 2\nCARTÕES\nPergunta: Quantos sinais?\nResposta: Sete.", 6);
-                DeskAiHub.schema(s); long planned = DeskAiHub.save(s, plan, 1000L, 3, 30);
-                check(many.contains("[D1·T") && !many.contains("[D2·T") && s.count("SELECT COUNT(*) FROM st_tasks WHERE subject=? AND estimate=30", planned) == 2 && s.count("SELECT COUNT(*) FROM st_cards WHERE subject=?", planned) == 1 && s.count("SELECT COUNT(*) FROM notes WHERE subject=? AND title LIKE 'Plano de estudo%'", planned) == 1, "seeky ia: vários documentos e plano de estudo");
+                DeskAiHub.schema(s); long course = s.update("INSERT INTO st_courses(title,description,created,updated) VALUES(?,?,?,?)", "Bacharelato", "", 1L, 1L); long planned = DeskAiHub.save(s, plan, 1000L, 3, 30, course, "module");
+                check(many.contains("[D1·T") && !many.contains("[D2·T") && s.count("SELECT COUNT(*) FROM st_tasks WHERE subject=? AND estimate=30", planned) == 2 && s.count("SELECT COUNT(*) FROM st_cards WHERE subject=?", planned) == 1 && s.count("SELECT COUNT(*) FROM notes WHERE subject=? AND title LIKE 'Plano de estudo%'", planned) == 1 && s.count("SELECT COUNT(*) FROM st_subjects WHERE id=? AND course_id=? AND kind='module'", planned, course) == 1, "seeky ia: vários documentos e plano de estudo num curso");
                 SyncState pcSide = new SyncState(), phoneSide = new SyncState();
                 SyncState.StudyCard sc = new SyncState.StudyCard(); sc.subject = "Teologia"; sc.front = "O que é a graça?"; sc.back = "Favor"; sc.updated = 10; pcSide.studyCards.add(sc);
                 SyncState.StudyCard newer = new SyncState.StudyCard(); newer.subject = "teologia"; newer.front = "O que é a  graça?"; newer.back = "Favor imerecido"; newer.updated = 20; phoneSide.studyCards.add(newer);
                 SyncState.Task gone = new SyncState.Task(); gone.subject = "Teologia"; gone.title = "Ler"; gone.due = 0; gone.updated = 5; pcSide.tasks.add(gone); phoneSide.gone.put(gone.key(), 50L);
                 SyncState.Changes sch = SyncState.merge(pcSide, phoneSide);
                 check(sch.studyCards.size() == 1 && sch.studyCards.get(0).back.equals("Favor imerecido") && sch.remove.contains(gone.key()) && SyncState.merge(phoneSide, pcSide).studyCards.isEmpty(), "estudos: juntar com o telemóvel (mais recente, apagadas)");
+                // Cursos › módulos ou disciplinas (5.52): vindos do telemóvel e o curso escrito à mão da 5.50.
+                SyncState.Changes cc = new SyncState.Changes(); SyncState.Course co = new SyncState.Course(); co.title = "Curso do telemóvel"; co.description = "Três anos"; co.updated = 30; cc.courses.add(co);
+                SyncState.Subject sj = new SyncState.Subject(); sj.title = "Grego"; sj.course = "Curso do telemóvel"; sj.kind = "module"; sj.updated = 30; cc.subjects.add(sj); DeskSync.applyStudy(s, cc);
+                s.update("INSERT INTO st_subjects(title,color,created,updated,course) VALUES(?,?,?,?,?)", "Antiga", 0, 1L, 1L, "Curso antigo"); DeskStudies.schema(s);
+                SyncState back = DeskSync.export(s, 0); boolean travels = false; for (SyncState.Subject x : back.subjects) if (x.title.equals("Grego") && x.course.equals("Curso do telemóvel") && x.kind.equals("module")) travels = true;
+                check(s.count("SELECT COUNT(*) FROM st_subjects JOIN st_courses ON st_courses.id=st_subjects.course_id WHERE st_subjects.title='Grego' AND st_courses.title='Curso do telemóvel' AND kind='module'") == 1
+                    && s.count("SELECT COUNT(*) FROM st_subjects JOIN st_courses ON st_courses.id=st_subjects.course_id WHERE st_subjects.title='Antiga' AND st_courses.title='Curso antigo'") == 1 && travels, "estudos: cursos com módulos e disciplinas");
                 // Seeky ligado: emparelhar com o código, juntar notas/leitura/estudo, apagar, ficheiros nos dois sentidos.
                 check(syncTest(s, home), "Seeky ligado (emparelhar, sincronizar, ficheiros)");
                 List<BibleGame.Question> q = new BibleGame(BibleGame.EASY, new Random(1), DeskStudy.verses(s)).round(); check(q.size() == BibleGame.ROUND, "jogo da Bíblia (" + q.size() + " perguntas)");
