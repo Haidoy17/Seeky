@@ -63,13 +63,17 @@ final class DeskEdge {
     synchronized void open() throws IOException {
         if (edge != null && edge.isAlive() && System.currentTimeMillis() - lastPoll < 60000) return;
         File exe = exe(); if (exe == null) throw new IOException("O Microsoft Edge não está instalado neste computador.");
-        if (edge != null) edge.destroyForcibly();
+        if (edge != null) kill(edge);
         ProcessBuilder pb = new ProcessBuilder(exe.getAbsolutePath(), "--app=" + base(), "--user-data-dir=" + DeskStore.folder("edge-voz").getAbsolutePath(),
             "--no-first-run", "--no-default-browser-check", "--disable-sync", "--autoplay-policy=no-user-gesture-required", "--window-position=-32000,-32000", "--window-size=320,200", "--disable-features=Translate,msEdgeTranslate");
         pb.redirectErrorStream(true); pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
         edge = pb.start(); lastPoll = System.currentTimeMillis();
+        if (!hooked) { hooked = true; Runtime.getRuntime().addShutdownHook(new Thread(() -> { Process e = edge; if (e != null) kill(e); })); }
     }
-    void close() { Process p = edge; if (p != null) p.destroyForcibly(); edge = null; try { server.close(); } catch (IOException ignored) {} }
+    boolean hooked;
+    /** Edge starts helper processes (renderer, GPU, audio): close them all, not only the first one. */
+    static void kill(Process p) { try { p.descendants().forEach(ProcessHandle::destroyForcibly); } catch (Exception ignored) {} p.destroyForcibly(); }
+    void close() { Process p = edge; if (p != null) kill(p); edge = null; try { server.close(); } catch (IOException ignored) {} }
 
     /** All the voices Edge offers (it opens Edge the first time). */
     List<Voice> voices(long waitMillis) throws Exception {
