@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008000,
-  "versionName": "5.53.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.53.0.apk",
-  "sha256": "fabd6056bce40595f51762c1517d5219acb1c8efedd7e2fdcc9661000d70d21c",
-  "bytes": 14010546,
-  "notes": "Narrações em MP3 (um ficheiro por capítulo, com título, livro e faixa)."
+  "versionCode": 5008100,
+  "versionName": "5.54.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.54.0.apk",
+  "sha256": "e59ca7d3e0886fd912583ef47a487e34ce31a7cd82d0a7b52cb62c4152023b0e",
+  "bytes": 14010714,
+  "notes": "No computador: vozes naturais do Microsoft Edge para ler em voz alta."
 }

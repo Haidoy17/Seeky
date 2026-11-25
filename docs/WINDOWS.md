@@ -22,7 +22,8 @@ perdem ao actualizar nem ao desinstalar.
   versículos; procurar passagens (João 3:16, Salmo 23) e palavras; copiar, ouvir, decorar, criar nota.
 - **Estudo bíblico**: planos de leitura, leitura de hoje, sequência de dias, semana, decorar versículos
   com a mesma repetição espaçada do Android.
-- **Áudio**: vozes naturais Piper (descarregadas a pedido, verificadas por SHA-256) ou vozes do Windows;
+- **Áudio**: vozes naturais do Microsoft Edge (leitura em voz alta pelo próprio Edge; gravação em MP3 pelo
+  Azure Speech com a chave do utilizador), vozes naturais Piper (descarregadas a pedido, verificadas por SHA-256) ou vozes do Windows;
   *Gravar em MP3* (um ficheiro por capítulo, com etiquetas). Componentes: Piper 2023.11.14-2 (MIT) e
   vozes Piper com licença CC0 ou CC BY 4.0, descarregados no computador do utilizador; jump3r 1.0.5 (LGPL 2.1).
 - **Seeky IA**: perguntar a vários documentos (até 12, com fontes), resumir um livro inteiro num resumo
