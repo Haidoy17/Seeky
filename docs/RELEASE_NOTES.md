@@ -1,3 +1,13 @@
+## Seeky 5.51.0
+
+Instale **Seeky_5.51.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.51.0.
+
+### Novidades
+- **Perguntar a vários documentos** de uma vez, com a indicação de onde vem cada ideia.
+- **Resumir um livro inteiro** num resumo geral, por etapas, retomando onde parou.
+- **Plano de estudo a partir de um tema**: disciplina, sessões na agenda, cartões e nota.
+
 ## Seeky 5.50.0
 
 Instale **Seeky_5.50.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

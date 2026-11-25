@@ -33,20 +33,20 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
-    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync; DeskStudies studies;
+    DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync; DeskStudies studies; DeskAiHub ai;
 
 
     @Override public void start(Stage stage) throws Exception {
         instance = this; this.stage = stage;
         store = new DeskStore();
-        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this); sync = new DeskSync(this, store); DeskSync.schema(store); studies = new DeskStudies(this);
+        bible = new DeskBible(this); study = new DeskStudy(this); notes = new DeskNotes(this); reader = new DeskReader(this); files = new DeskFiles(this); media = new DeskMedia(this); focus = new DeskFocus(this); music = new DeskLibrary(this, DeskLibrary.AUDIO); videos = new DeskLibrary(this, DeskLibrary.VIDEO); flash = new DeskFlash(this); sync = new DeskSync(this, store); DeskSync.schema(store); studies = new DeskStudies(this); ai = new DeskAiHub(this);
         root = new BorderPane();
         root.getStyleClass().add("root-pane"); theme(store.get("theme", DeskThemes.DEFAULT));
         nav.getStyleClass().add("nav"); nav.setPadding(new Insets(18, 12, 18, 12)); nav.setPrefWidth(232);
         Label brand = new Label("Seeky"); brand.getStyleClass().add("brand");
         VBox head = new VBox(0, brand); head.setPadding(new Insets(0, 10, 16, 10));
         nav.getChildren().add(head);
-        item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("studies", "Estudos", "course"); item("game", "Jogo da Bíblia", "game");
+        item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("studies", "Estudos", "course"); item("ai", "Seeky IA", "sparkle"); item("game", "Jogo da Bíblia", "game");
         item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video"); item("phone", "Telemóvel", "phone");
         Region gap = new Region(); VBox.setVgrow(gap, Priority.ALWAYS); nav.getChildren().add(gap);
         item("settings", "Definições", "settings");
@@ -85,7 +85,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-subject", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -111,6 +111,7 @@ public final class DeskMain extends Application {
                 store.update("INSERT INTO focus(day,subject,minutes,ended) VALUES(?,?,?,?)", BibleStudyCore.day(System.currentTimeMillis()), "Estudo bíblico", 50, System.currentTimeMillis());
                 store.update("INSERT INTO focus(day,subject,minutes,ended) VALUES(?,?,?,?)", BibleStudyCore.day(System.currentTimeMillis() - 86400000L), "Leitura", 25, System.currentTimeMillis() - 86400000L);
             }
+            ai.docs.add(demoBook);
             if (store.count("SELECT COUNT(*) FROM tracks") == 0) {
                 java.io.File m = DeskStore.folder("exemplo/musica"); List<java.io.File> songs = new ArrayList<>();
                 String[][] demoSongs = {{"Grande é o Senhor", "Coro Seeky", "Louvores", "2019", "Gospel"}, {"Rocha eterna", "Coro Seeky", "Louvores", "2019", "Gospel"}, {"Aleluia", "Banda da Fé", "Ao vivo em Maputo", "2021", "Gospel"}, {"Graça", "Ana Mabunda", "Caminho", "2023", "Pop"}, {"Luz do mundo", "Ana Mabunda", "Caminho", "2023", "Pop"}, {"Salmo 23", "Banda da Fé", "Ao vivo em Maputo", "2021", "Gospel"}};
@@ -160,6 +161,8 @@ public final class DeskMain extends Application {
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
         else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }
+        else if (id.equals("ai")) { ai.tab = "Perguntar"; open("ai"); }
+        else if (id.equals("ai-plan")) { ai.tab = "Plano de estudo"; open("ai"); ai.tab = "Perguntar"; }
         else if (id.equals("music-albums")) { music.tab = "Álbuns"; open("music"); music.tab = "Início"; }
         else if (id.equals("notes-edit")) notes.edit(0, "Estudo: o amor de Deus", "# O amor de Deus\nLer **João 3:16** e Romanos 5:8.\n\n- Deus amou o mundo\n- Deu o seu Filho\n\n[ ] Orar pela família\n[x] Ler 1 João 4\n\n> Porque Deus amou o mundo de tal maneira…");
         else open(id);
@@ -190,6 +193,7 @@ public final class DeskMain extends Application {
             case "videos": view = videos.view(); break;
             case "phone": view = sync.view(); break;
             case "studies": view = studies.view(); break;
+            case "ai": view = ai.view(); break;
             case "focus": view = focus.view(); break;
             case "marks": view = DeskMarks.view(this); id = "reader"; break;
             case "settings": view = DeskSettings.view(this); break;
@@ -219,6 +223,7 @@ public final class DeskMain extends Application {
             {"study", "Estudo bíblico", "Plano de leitura, sequência e versículos para decorar", "study"},
             {"game", "Jogo da Bíblia", "Quatro níveis, 60 s por pergunta, recordes", "game"},
             {"course", "Estudos", "Disciplinas, cartões, perguntas, tarefas e Seeky IA", "studies"},
+            {"sparkle", "Seeky IA", "Perguntar a vários livros, resumir um livro inteiro, plano de estudo", "ai"},
             {"note", "Bloco de notas", "Texto rico, tarefas, passagens, Word, PDF e Seeky IA", "notes"},
             {"reader", "Livros", "PDF, EPUB, Word, TXT e outros formatos", "reader"},
             {"folder", "Ficheiros", "Explorar discos, procurar e organizar", "files"},

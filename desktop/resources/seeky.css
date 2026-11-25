@@ -152,3 +152,15 @@
 .root-pane .check-box:selected .mark, .dialog-pane .check-box:selected .mark { -fx-background-color: -seeky-on-accent; }
 .dialog-pane .date-picker .arrow-button { -fx-background-color: -seeky-raised; }
 .study-answer { -fx-font-size: 18px; }
+/* 5.51 · Seeky IA */
+.doc-chip { -fx-background-color: -seeky-raised; -fx-background-radius: 16; -fx-padding: 4 6 4 12; -fx-border-color: -seeky-line; -fx-border-radius: 16; }
+.root-pane .button.flat { -fx-background-color: transparent; -fx-padding: 2 6; -fx-text-fill: -seeky-muted; }
+.root-pane .button.flat:hover { -fx-text-fill: -seeky-ink; }
+.accent-label { -fx-text-fill: -seeky-accent !important; -fx-font-weight: bold; -fx-font-size: 12.5px; }
+.card.bubble-me { -fx-background-color: -seeky-raised; }
+.root-pane .menu-button.primary { -fx-background-color: -seeky-accent; -fx-background-radius: 12; -fx-padding: 4 12; }
+.root-pane .menu-button.primary > .label { -fx-text-fill: -seeky-on-accent; -fx-font-weight: bold; }
+.root-pane .menu-button.primary > .arrow-button > .arrow { -fx-background-color: -seeky-on-accent; }
+.root-pane .hyperlink { -fx-text-fill: -seeky-accent; -fx-border-color: transparent; }
+.root-pane .date-picker > .arrow-button { -fx-background-color: -seeky-raised; -fx-background-radius: 0 12 12 0; }
+.root-pane .date-picker > .arrow-button > .arrow { -fx-background-color: -seeky-ink; }

@@ -1,0 +1,117 @@
+PASS long Unicode material splits and reconstructs without dropped text or broken emoji
+PASS blank questions are rejected before networking
+PASS question size is bounded
+PASS material larger than one selected slice is rejected
+PASS only the last three complete exchanges enter the request
+PASS Gemini receives selected context and bounded conversation history
+PASS payload contains no credential or executable tools
+PASS assistant history uses Gemini model role
+PASS Gemini parser displays answer and excludes thought parts
+PASS Gemini token limit is reported as a partial answer
+PASS blocked response is not turned into a successful answer
+PASS oversized model text is rejected before display
+PASS Google credential is sent only as the Google HTTPS header
+PASS redirects are disabled, connections close, and keys never enter URLs
+PASS quota error is explicit, sanitized and does not switch providers
+PASS provider redirect is not followed with a credential
+PASS network response has a hard byte limit
+PASS cancellation is observed while reading and stops the response
+PASS cancelled connection is released
+PASS deeply nested server JSON is rejected before recursive parsing
+PASS new dotted Google auth key format accepted without altering key
+PASS connection check actually generates bounded text with the production contract and no document
+PASS invalid key reason is actionable without echoing server secrets
+PASS application restriction failure distinguished from local storage
+PASS connection check rejects an invalid key without pretending it was verified
+PASS connection test never retries or switches providers
+PASS HTTP 400 retains actionable Google detail while redacting exact credential
+PASS known Google auth key patterns are hidden even outside current credential
+PASS HTTP 200 with no generated text cannot pass connection verification
+PASS pending question and exact context survive reopening
+PASS successful exchange is committed once without duplicate pending text
+PASS uncommitted temporary write cannot replace valid history
+PASS conversation path traversal is rejected
+PASS deleting conversation removes only its own snapshot
+PASS 34 Seeky AI context, protocol, transport and persistence checks
+PASS default model is gemini-3.5-flash-lite
+PASS model names are cleaned and unsafe names refused
+PASS text models ranked lite, flash, then pro; speech, embedding and live left out: [gemini-3.5-flash-lite, gemini-3.5-flash-lite-preview-09, gemini-3.5-flash, gemini-2.5-flash, gemini-3.5-pro]
+PASS without a list: default, flash, then the newest Gemini 4 Hydrogen: [gemini-3.5-flash-lite, gemini-3.5-flash, gemini-4-hydrogen]
+PASS the request uses the chosen model, not a fixed one
+PASS the key's own list rules out models it does not have: [gemini-4.0-flash-lite, gemini-3.5-flash]
+PASS the user's choice is tried first
+PASS after a 404 the next model answers: [https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent, https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent]
+PASS the switch is explained without Google's raw text: O modelo gemini-3.5-flash-lite foi descontinuado ou não está disponível para esta chave. O Seeky mudou para o gemini-3.5-flash.
+PASS the model that worked is used first next time
+PASS the notice is shown once
+PASS HTTP 400 for an unsupported model also moves on
+PASS no model left: plain message: Gemini: nenhum modelo disponível para esta chave (tentados: gemini-3.5-flash-lite, gemini-3.5-flash, gemini-4-hydrogen). Abra Ligação da IA e toque em Testar e guardar para actualizar a lista de modelos.
+PASS only the known models are tried, without endless retries
+PASS an invalid key stops at once with its own message
+PASS only models with generateContent are offered: [gemini-3.5-flash-lite, gemini-3.5-flash]
+PASS model list is a GET with the key in a header, not in the address
+PASS choice, working model and list are saved: gemini-3.5-flash||gemini-3.5-flash-lite,gemini-3.5-flash
+PASS a chosen model the key no longer has falls back to automatic
+PASS Hydrogen has a readable name and is known as a thinking model
+PASS Hydrogen asks for LOW thinking with room for the answer
+PASS other models' requests are unchanged and the original payload is not modified
+PASS Hydrogen without free quota: the next model answers and the reason is explained: O Gemini 4 Hydrogen · mais recente não tem quota gratuita nesta chave (a Google pode exigir um plano pago). O Seeky usou o gemini-3.5-flash-lite.
+PASS the choice goes back to automatic after a key without quota for it
+PASS a normal rate limit stops without switching models
+PASS a refused thinking setting is retried once on the same model without it
+PASS 26 Gemini model choice and fallback checks
+PASS pictures and recordings used by a note are found
+PASS the file says what it is and where it came from
+PASS both notes come back
+PASS title, text, folder, pin, colour, spacing, dates and book survive
+PASS the picture travels with the note; a missing file is simply left out
+PASS the same note is recognised so it is not imported twice
+PASS a picture with the same name but other content gets a new name in the note
+PASS other JSON files are refused (Este ficheiro não é uma cópia de notas do Seeky.)
+PASS text that is not a Seeky file is refused (Este ficheiro não é uma cópia de notas do Seeky.)
+PASS an empty file is refused (Ficheiro vazio.)
+PASS file names that leave the notes folder, hidden names and broken data are ignored
+PASS dates in the future and impossible spacing are corrected
+PASS empty notes are skipped
+PASS the file is named after the date
+NotesTransferTest 14 checks
+PASS the passages that answer are found in each document
+PASS each excerpt is labelled with its document; an unrelated document sends nothing
+PASS the header says honestly which document had nothing relevant
+PASS the excerpts stay within the budget
+PASS a general question sends an even sample of every document and says so
+PASS words are folded without accents and cut to a stem
+PASS a follow-up question keeps the words of the previous one
+PASS only cited documents that exist are counted
+PASS a question without documents is refused
+PASS the excerpts travel as quoted evidence and the answer comes back
+PASS answers over several documents may be longer
+PASS a material block over the limit is refused
+PASS each excerpt is asked for a summary
+PASS each excerpt is asked for a summary
+PASS each excerpt is asked for a summary
+PASS each excerpt is asked for a summary
+PASS the partial summaries are joined, in order, into a general summary
+PASS the whole book is read in 4 excerpts and joined with one more request
+PASS progress says what is happening
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS every join fits one request
+PASS a long book is joined in steps and the cost estimate matches (10 requests)
+PASS cost of trivial lists
+PASS the plan request asks for dated sessions and cards
+PASS a plan without a theme is refused
+PASS more than 12 weeks is refused
+PASS title and goal are read
+PASS sessions are read, including other spellings; impossible days are dropped
+PASS the cards after CARTÕES are read
+PASS three sessions a week are spread over the week
+PASS the plan becomes a readable note
+SeekyAiDeepTest: 39 checks
