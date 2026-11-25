@@ -85,7 +85,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings", "settings-voices"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -162,6 +162,7 @@ public final class DeskMain extends Application {
         if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
+        else if (id.equals("settings-voices")) { open("settings"); javafx.application.Platform.runLater(() -> { javafx.scene.Node n = scene.lookup(".page-scroll"); if (n instanceof javafx.scene.control.ScrollPane) ((javafx.scene.control.ScrollPane) n).setVvalue(0.82); }); }
         else if (id.equals("studies-courses")) { studies.tab = "Cursos"; open("studies"); studies.tab = "Hoje"; }
         else if (id.equals("studies-course")) { List<Object[]> r = studies.rows("SELECT id FROM st_courses ORDER BY id LIMIT 1"); if (!r.isEmpty()) studies.course = ((Number) r.get(0)[0]).longValue(); open("studies"); studies.course = 0; }
         else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }

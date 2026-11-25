@@ -1,10 +1,10 @@
 {
-  "versionCode": 5007900,
-  "versionName": "5.52.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.52.0-app.zip",
-  "sha256": "1a7fd366c399de2b822fc88d5062deaf033797532ccaea3c229219773d11885c",
-  "bytes": 8924312,
+  "versionCode": 5008000,
+  "versionName": "5.53.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.53.0-app.zip",
+  "sha256": "c0d452d800c0ec709c95ee6ed224b8bfbeae498a315a007de663036424e213b5",
+  "bytes": 9296795,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Estudos: Curso › Módulos e Disciplinas, como no telemóvel; o Seeky ligado leva os cursos; o plano da IA escolhe o curso e o tipo."
+  "notes": "Áudio: gravar capítulos em MP3 e vozes naturais Piper (Português de Portugal e do Brasil, Espanhol, Francês, Inglês)."
 }

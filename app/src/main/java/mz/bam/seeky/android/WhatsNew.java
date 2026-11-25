@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.52", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.53", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "Narrações em MP3", "No livro: Ouvir › Guardar narração. Escolha MP3 (cerca de 10 vezes mais pequeno do que WAV), um ficheiro por capítulo, com título, livro e número da faixa", false, () -> PlusUi.toast(a, "Abra um livro e escolha Ouvir › Guardar narração."));
+        panel.section("Da 5.52");
         panel.action("course", "Cursos, módulos e disciplinas nos dois", "Os cursos e o tipo de cada um (Módulo ou Disciplina) passam também para o Seeky para Windows, com o Seeky ligado. O plano de estudo da Seeky IA pergunta o curso e se cria um módulo ou uma disciplina", false, () -> PlusUi.toast(a, "Abra Estudos › Cursos."));
         panel.section("Da 5.51");
         panel.action("collection", "Perguntar a vários materiais", "Estudos › Estudar com Seeky: escolha até 12 materiais e pergunte. O Seeky envia os trechos mais relevantes de cada um e a resposta diz de que material vem cada ideia", false, () -> a.startActivity(new android.content.Intent(a, StudyAssistantActivity.class).putExtra("many", true)));

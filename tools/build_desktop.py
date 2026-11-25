@@ -31,7 +31,7 @@ DEPS = [
 # Java 21 + JavaFX para Windows x64 (Azul Zulu, GPLv2 com Classpath Exception), incluído no instalador.
 RUNTIME = ('zulu21.54.109-ca-fx-jre21.0.13.0.3-win_x64.zip', 'https://cdn.azul.com/zulu/bin/zulu21.54.109-ca-fx-jre21.0.13.0.3-win_x64.zip', 'e3176d6fc15ee94bb1afebcaf3b6ef4c03bb4829ef10fc0807683b3526d780ba')
 # Bibliotecas do Android que o núcleo também usa (Java puro, já no repositório).
-SHARED_LIBS = ['commons-compress-1.26.2.jar', 'commons-io-2.16.1.jar', 'commons-codec-1.17.0.jar', 'commons-lang3-3.17.0.jar', 'xz-1.9.jar']
+SHARED_LIBS = ['jump3r-1.0.5.jar', 'commons-compress-1.26.2.jar', 'commons-io-2.16.1.jar', 'commons-codec-1.17.0.jar', 'commons-lang3-3.17.0.jar', 'xz-1.9.jar']
 # Classes sem imports Android que ainda dependem de ecrãs Android, ou do PDF do Android.
 EXCLUDE = {'WebSpeechHighlight', 'WebMarks', 'StudyReading', 'PdfGlyphs', 'PdfIndexText', 'PdfTextSource'}
 

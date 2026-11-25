@@ -1,0 +1,168 @@
+package mz.bam.seeky.android;
+
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * 5.53 · Áudio no computador: escolher a voz (natural Piper ou do Windows), descarregar vozes Piper e gravar
+ * capítulos de um livro em MP3 (um ficheiro por capítulo, com título, livro e número da faixa).
+ */
+final class DeskAudio {
+    private DeskAudio() {}
+
+    // ================================================================ Definições
+    static Node card(DeskMain d) {
+        VBox box = new VBox(10);
+        ComboBox<String> voice = new ComboBox<>(); voice.setPrefWidth(360);
+        List<String[]> choices = new ArrayList<>(); // {engine, id}
+        Runnable fill = () -> {
+            voice.getItems().clear(); choices.clear();
+            for (DeskVoices.Voice v : DeskVoices.PIPER) if (v.ready() && DeskVoices.engineReady()) { voice.getItems().add("Natural · " + v.label); choices.add(new String[]{"piper", v.id}); }
+            voice.getItems().add("Windows · voz predefinida"); choices.add(new String[]{"windows", ""});
+        };
+        fill.run();
+        Runnable select = () -> {
+            String engine = d.store.get("voice_engine", "windows"), id = engine.equals("piper") ? d.store.get("piper_voice", "") : d.store.get("voice", "");
+            int at = -1; for (int i = 0; i < choices.size(); i++) if (choices.get(i)[0].equals(engine) && choices.get(i)[1].equals(id)) at = i;
+            if (at < 0) for (int i = 0; i < choices.size(); i++) if (choices.get(i)[0].equals("windows") && choices.get(i)[1].isEmpty()) at = i;
+            voice.getSelectionModel().select(Math.max(0, at));
+        };
+        select.run();
+        d.run(null, DeskSpeech::voices, list -> { for (String n : list) { voice.getItems().add("Windows · " + n); choices.add(new String[]{"windows", n}); } select.run(); });
+        voice.setOnAction(e -> { int i = voice.getSelectionModel().getSelectedIndex(); if (i < 0 || i >= choices.size()) return; String[] c = choices.get(i); d.store.put("voice_engine", c[0]); if (c[0].equals("piper")) d.store.put("piper_voice", c[1]); else d.store.put("voice", c[1]); });
+        Slider rate = new Slider(-5, 5, Integer.parseInt(d.store.get("voice_rate", "0"))); rate.setMajorTickUnit(1); rate.setSnapToTicks(true); rate.setPrefWidth(200);
+        rate.valueProperty().addListener((o, a, b) -> d.store.put("voice_rate", String.valueOf(b.intValue())));
+        box.getChildren().addAll(DeskUi.heading("Leitura em voz alta e áudio"),
+            DeskUi.muted("A voz escolhida lê os livros, a Bíblia e as notas, e grava capítulos em MP3 (menu de cada livro › Gravar em MP3)."),
+            DeskUi.row(voice, DeskUi.muted("Velocidade"), rate, DeskUi.button("Experimentar", false, () -> DeskSpeech.say(d, sample(d)))));
+        // Vozes naturais Piper
+        VBox natural = new VBox(8);
+        natural.getChildren().add(DeskUi.heading("Vozes naturais (Piper)"));
+        natural.getChildren().add(DeskUi.muted("Vozes gratuitas, mais naturais do que as do Windows, que funcionam sem Internet depois de descarregadas. O motor tem 22 MB e cada voz cerca de 63 MB; o Seeky confirma cada ficheiro (SHA-256) antes de o usar."));
+        if (!DeskVoices.engineReady()) natural.getChildren().add(DeskUi.button("Descarregar o motor Piper (22 MB)", true, () -> fetch(d, "Motor Piper", (c, p) -> DeskVoices.installEngine(c, p))));
+        for (DeskVoices.Voice v : DeskVoices.PIPER) {
+            Label state = DeskUi.muted(v.ready() ? "Instalada" : "63 MB");
+            Node action = v.ready()
+                ? DeskUi.button("Remover", false, () -> { if (DeskUi.confirm("Remover " + v.label + "?", "Pode voltar a descarregá-la depois.")) { DeskVoices.removeVoice(v); if (v.id.equals(d.store.get("piper_voice", ""))) d.store.put("voice_engine", "windows"); d.open("settings"); } })
+                : DeskUi.button("Descarregar", false, () -> {
+                    if (!DeskVoices.engineReady()) { DeskUi.info("Falta o motor", "Descarregue primeiro o motor Piper."); return; }
+                    fetch(d, v.label, (c, p) -> DeskVoices.installVoice(v, c, p), () -> { d.store.put("voice_engine", "piper"); d.store.put("piper_voice", v.id); });
+                });
+            VBox words = new VBox(1, DeskUi.text(v.label), DeskUi.muted("Licença " + v.licence)); HBox.setHgrow(words, Priority.ALWAYS);
+            HBox row = new HBox(10, words, state, action); row.setAlignment(Pos.CENTER_LEFT);
+            natural.getChildren().add(row);
+        }
+        box.getChildren().addAll(new Separator(), natural);
+        box.getStyleClass().add("card"); box.setPadding(new javafx.geometry.Insets(16));
+        return box;
+    }
+    static String sample(DeskMain d) {
+        DeskVoices.Voice v = DeskVoices.chosen(d.store);
+        if (v != null && v.language.startsWith("en")) return "Hello! This is Seeky reading aloud with a natural voice.";
+        if (v != null && v.language.startsWith("es")) return "¡Hola! Este es Seeky leyendo en voz alta.";
+        if (v != null && v.language.startsWith("fr")) return "Bonjour ! C'est Seeky qui lit à voix haute.";
+        return "Olá! Esta é a voz do Seeky a ler em voz alta.";
+    }
+    interface Fetch { void run(java.util.function.BooleanSupplier cancel, DeskVoices.Progress p) throws Exception; }
+    static void fetch(DeskMain d, String what, Fetch job) { fetch(d, what, job, null); }
+    /** A download with a progress bar and a Cancel button; the settings page is redrawn at the end. */
+    static void fetch(DeskMain d, String what, Fetch job, Runnable after) {
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("A descarregar · " + what); DeskUi.style(dlg.getDialogPane());
+        ProgressBar bar = new ProgressBar(0); bar.setPrefWidth(420); Label line = DeskUi.muted("A ligar…");
+        dlg.getDialogPane().setContent(new VBox(10, line, bar)); dlg.getDialogPane().getButtonTypes().add(new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE));
+        AtomicBoolean cancel = new AtomicBoolean(); dlg.setOnHidden(e -> cancel.set(true));
+        d.run(null, () -> { try { job.run(cancel::get, (done, total, name) -> Platform.runLater(() -> { bar.setProgress(total > 0 ? (double) done / total : -1); line.setText(name + " · " + (done >> 20) + (total > 0 ? " de " + (total >> 20) : "") + " MB"); })); return true; } finally { Platform.runLater(dlg::close); } },
+            ok -> { if (after != null) after.run(); d.status(what + " pronto."); d.open("settings"); });
+        dlg.show();
+    }
+
+    // ================================================================ Gravar em MP3
+    static final class Part { final String name, text; Part(String name, String text) { this.name = name; this.text = text; } }
+    /** The chapters of a book (EPUB, Word, TXT and converted formats) or groups of 10 pages of a PDF. */
+    static List<Part> parts(File f) throws Exception {
+        List<Part> out = new ArrayList<>();
+        if (f.getName().toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+            try (org.apache.pdfbox.pdmodel.PDDocument doc = org.apache.pdfbox.pdmodel.PDDocument.load(f, org.apache.pdfbox.io.MemoryUsageSetting.setupTempFileOnly())) {
+                org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); int pages = doc.getNumberOfPages();
+                for (int from = 1; from <= pages; from += 10) { int to = Math.min(pages, from + 9); s.setStartPage(from); s.setEndPage(to); out.add(new Part(from == to ? "Página " + from : "Páginas " + from + "–" + to, s.getText(doc))); }
+            }
+        } else { DeskReader.Book b = DeskReader.chapters(f); for (int i = 0; i < b.texts.size(); i++) out.add(new Part(b.names.get(i), b.texts.get(i))); }
+        return out;
+    }
+    static String safe(String name) { String s = name.replaceAll("[\\\\/:*?\"<>|\\p{Cc}]+", " ").replaceAll("\\s+", " ").trim(); if (s.length() > 80) s = s.substring(0, 80).trim(); return s.isEmpty() ? "Parte" : s; }
+    static String fileName(int number, int total, String chapter) { int width = Math.max(2, String.valueOf(total).length()); return String.format(Locale.ROOT, "%0" + width + "d", number) + " - " + safe(chapter) + ".mp3"; }
+
+    static String titleOf(DeskMain d, File book) { try { List<Object[]> r = d.store.rows("SELECT title FROM books WHERE path=?", book.getPath()); if (!r.isEmpty() && !(r.get(0)[0] + "").trim().isEmpty()) return r.get(0)[0] + ""; } catch (java.sql.SQLException ignored) {} return book.getName().replaceFirst("\\.[^.]+$", ""); }
+    static void exportBook(DeskMain d, File book) {
+        d.run("A abrir o livro…", () -> parts(book), list -> choose(d, book, list));
+    }
+    static void choose(DeskMain d, File book, List<Part> list) {
+        if (list.isEmpty()) { DeskUi.info("Sem texto", "Este livro não tem texto que o Seeky consiga ler."); return; }
+        String title = titleOf(d, book);
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("Gravar em MP3 · " + title); DeskUi.style(dlg.getDialogPane());
+        Spinner<Integer> from = new Spinner<>(1, list.size(), 1), to = new Spinner<>(1, list.size(), list.size()); from.setEditable(true); to.setEditable(true);
+        ComboBox<String> first = new ComboBox<>(), last = new ComboBox<>();
+        for (int i = 0; i < list.size(); i++) { String n = (i + 1) + ". " + list.get(i).name; first.getItems().add(n); last.getItems().add(n); }
+        first.getSelectionModel().select(0); last.getSelectionModel().select(list.size() - 1); first.setPrefWidth(320); last.setPrefWidth(320);
+        DeskVoices.Voice natural = DeskVoices.chosen(d.store);
+        String voiceName = natural != null ? natural.label + " (natural)" : d.store.get("voice", "").isEmpty() ? "voz predefinida do Windows" : d.store.get("voice", "") + " (Windows)";
+        File music = new File(System.getProperty("user.home"), "Music");
+        File[] folder = {new File(new File(music.isDirectory() ? music : new File(System.getProperty("user.home")), "Seeky"), safe(title))};
+        Label where = DeskUi.text(folder[0].getPath());
+        Button pick = DeskUi.button("Escolher pasta…", false, () -> { DirectoryChooser c = new DirectoryChooser(); c.setTitle("Pasta para os MP3"); File base = folder[0].getParentFile(); if (base != null && base.isDirectory()) c.setInitialDirectory(base); File f = c.showDialog(d.stage); if (f != null) { folder[0] = new File(f, safe(title)); where.setText(folder[0].getPath()); } });
+        CheckBox addToMusic = new CheckBox("Juntar à Música do Seeky no fim"); addToMusic.setSelected(true);
+        GridPane g = new GridPane(); g.setHgap(12); g.setVgap(10);
+        g.addRow(0, DeskUi.muted("Do capítulo"), first); g.addRow(1, DeskUi.muted("Até ao capítulo"), last); g.addRow(2, DeskUi.muted("Voz"), DeskUi.text(voiceName)); g.addRow(3, DeskUi.muted("Pasta"), new VBox(4, where, pick));
+        VBox box = new VBox(10, g, addToMusic, DeskUi.muted("Um MP3 por capítulo (64 kbit/s, cerca de 30 MB por hora de leitura), com o título do capítulo, o livro e o número da faixa. A voz e a velocidade mudam-se em Definições."));
+        box.setPrefWidth(560); dlg.getDialogPane().setContent(box);
+        ButtonType go = new ButtonType("Gravar", ButtonBar.ButtonData.OK_DONE); dlg.getDialogPane().getButtonTypes().addAll(go, ButtonType.CANCEL);
+        dlg.showAndWait().filter(b -> b == go).ifPresent(b -> {
+            int a = first.getSelectionModel().getSelectedIndex(), z = last.getSelectionModel().getSelectedIndex();
+            if (z < a) { int t = a; a = z; z = t; }
+            record(d, book, title, list, a, z, folder[0], addToMusic.isSelected());
+        });
+    }
+    static void record(DeskMain d, File book, String title, List<Part> list, int a, int z, File folder, boolean addToMusic) {
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("A gravar · " + title); DeskUi.style(dlg.getDialogPane());
+        ProgressBar bar = new ProgressBar(0); bar.setPrefWidth(460); Label line = DeskUi.muted("A preparar…");
+        dlg.getDialogPane().setContent(new VBox(10, line, bar)); dlg.getDialogPane().getButtonTypes().add(new ButtonType("Parar", ButtonBar.ButtonData.CANCEL_CLOSE));
+        AtomicBoolean cancel = new AtomicBoolean(); dlg.setOnHidden(e -> cancel.set(true));
+        DeskVoices.Voice natural = DeskVoices.chosen(d.store); String winVoice = d.store.get("voice", ""); int rate = Integer.parseInt(d.store.get("voice_rate", "0"));
+        d.run(null, () -> {
+            try {
+                if (!folder.isDirectory() && !folder.mkdirs()) throw new java.io.IOException("Não foi possível criar a pasta " + folder);
+                File tmp = DeskStore.folder("tmp-audio"); int count = z - a + 1, made = 0; double seconds = 0;
+                for (int i = a; i <= z; i++) {
+                    if (cancel.get()) break;
+                    Part p = list.get(i); String text = p.text == null ? "" : p.text.trim(); int n = i - a;
+                    if (text.length() < 2) continue;
+                    final int step = n; Platform.runLater(() -> { line.setText("Capítulo " + (step + 1) + " de " + count + " · " + p.name + " · a gerar a voz"); bar.setProgress((double) step / count); });
+                    File wav = new File(tmp, "cap-" + UUID.randomUUID() + ".wav");
+                    try {
+                        if (natural != null) DeskVoices.piperWav(natural, rate, text, wav, cancel::get); else DeskVoices.windowsWav(winVoice, rate, text, wav, cancel::get);
+                        Platform.runLater(() -> line.setText("Capítulo " + (step + 1) + " de " + count + " · " + p.name + " · a converter para MP3"));
+                        File out = new File(folder, fileName(i + 1, list.size(), p.name));
+                        seconds += Mp3Writer.fromWav(wav, out, new Mp3Writer.Tags(p.name, title, "Seeky", i + 1, list.size()), cancel::get,
+                            (done, total) -> Platform.runLater(() -> bar.setProgress((step + 0.5 + 0.5 * done / Math.max(1, total)) / count)));
+                        made++;
+                    } finally { wav.delete(); }
+                }
+                return new double[]{made, seconds};
+            } finally { Platform.runLater(dlg::close); }
+        }, r -> {
+            int made = (int) r[0]; long minutes = Math.round(r[1] / 60);
+            if (made > 0 && addToMusic) { List<String> folders = d.music.folders(); if (!folders.contains(folder.getPath())) { folders.add(folder.getPath()); d.music.folders(folders); } d.music.rescan(false); }
+            Alert done = new Alert(Alert.AlertType.INFORMATION, made + (made == 1 ? " capítulo gravado" : " capítulos gravados") + " em MP3 (" + minutes + " min) em\n" + folder.getPath() + (cancel.get() ? "\n\nA gravação foi parada; os capítulos já gravados ficam." : ""), new ButtonType("Abrir a pasta"), ButtonType.CLOSE);
+            done.setHeaderText(made > 0 ? "Áudio gravado" : "Nada gravado"); done.setTitle("Seeky"); DeskUi.style(done.getDialogPane());
+            done.showAndWait().filter(b -> b.getText().equals("Abrir a pasta")).ifPresent(b -> DeskFiles.system(folder));
+        });
+        dlg.show();
+    }
+}

@@ -1,0 +1,5 @@
+Verifies
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+versionCode 5008000 · versionName 5.53.0
+SHA-256 do APK: fabd6056bce40595f51762c1517d5219acb1c8efedd7e2fdcc9661000d70d21c
+Testes: núcleo OK; IA/MP3 (host) OK incl. Mp3WriterTest 10 verificações (confirmado com ffprobe: 3,06 s, 64 kbit/s, etiquetas); Robolectric completo 495 testes OK (inclui ChapterExportTest.wholeBookCanBeSavedAsTaggedMp3PerChapter).

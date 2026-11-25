@@ -1,0 +1,34 @@
+PASS versão 5.53.0
+PASS referências bíblicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+PASS importar Bíblia CSV (versículo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS Bíblia MyBible com títulos e comentários
+PASS etiquetas das músicas (ID3 e M4A)
+PASS biblioteca de música (pastas, álbuns, mais ouvidas)
+PASS livros: importar pasta e capas (EPUB, PDF)
+PASS Flash: índice e pesquisa (4)
+PASS notas do telemóvel (.seekynotes)
+PASS marcações nos livros
+PASS estudos: cartões e perguntas da IA, revisão espaçada
+PASS seeky ia: vários documentos e plano de estudo num curso
+PASS estudos: juntar com o telemóvel (mais recente, apagadas)
+PASS áudio: MP3 com etiquetas e vozes Piper verificadas
+PASS áudio: texto preparado para a voz
+PASS estudos: cursos com módulos e disciplinas
+  ligado: recusa=true código=true 1.ª=true 2.ª=true calma=true envio=true receber=true esquecido=true
+PASS Seeky ligado (emparelhar, sincronizar, ficheiros)
+PASS jogo da Bíblia (10 perguntas)
+PASS temas do telemóvel
+PASS foco (Pomodoro)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS 29 verificações do Seeky Desktop

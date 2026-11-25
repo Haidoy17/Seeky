@@ -1,0 +1,6 @@
+Windows Server 2025 (GitHub Actions, execução 45596284742), Seeky actualizado de 5.45.0 para 5.53.0:
+PASS versão 5.53.0
+PASS áudio: MP3 com etiquetas e vozes Piper verificadas
+PASS áudio: voz do Windows gravada em MP3
+PASS 29 verificações do Seeky Desktop
+Capturas: 26
