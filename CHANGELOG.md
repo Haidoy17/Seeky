@@ -1,5 +1,17 @@
 # Registo de alterações
 
+## 5.54.0 — 2026-11-25 (Android e Windows)
+
+- **Windows: todas as vozes naturais do Microsoft Edge** para ler em voz alta (livros, Bíblia, notas):
+  o Seeky abre o próprio Edge escondido numa página local que usa a Web Speech API do navegador e lista
+  todas as vozes "Online (Natural)" que o Edge oferece (portuguesas primeiro). Gratuito, sem chave;
+  precisa de Internet. Ligação só em 127.0.0.1, com código aleatório no endereço e verificação do Host.
+- **Gravar em MP3 com as vozes do Edge**: pela via oficial da Microsoft, o **Azure Speech** (as mesmas
+  vozes neurais, p. ex. pt-PT-RaquelNeural), com a chave do utilizador (plano gratuito de 500 000
+  caracteres por mês), guardada protegida pelo Windows. Sem chave, o Seeky explica e permite gravar com
+  Piper ou com as vozes do Windows.
+- Android: só o número da versão (e a novidade no ecrã Novidades); as vozes continuam as do Google.
+
 ## 5.53.0 — 2026-11-25 (Android e Windows)
 
 - **MP3 nos dois** com o mesmo codificador (LAME em Java, `jump3r` 1.0.5, LGPL 2.1): 64 kbit/s mono

@@ -92,7 +92,7 @@ public final class DeskMain extends Application {
     java.io.File demoBook;
     /** Leaves for good: stops sound, timers and the Flash, closes the data. */
     void quit() {
-        try { sync.stop(); focus.stop(); DeskSpeech.stop(); media.stop(); flash.hide(); DeskTray.remove(); store.close(); worker.shutdownNow(); } catch (Exception ignored) {}
+        try { sync.stop(); focus.stop(); DeskSpeech.stop(); if (DeskEdge.instance != null) DeskEdge.instance.close(); media.stop(); flash.hide(); DeskTray.remove(); store.close(); worker.shutdownNow(); } catch (Exception ignored) {}
         Platform.exit(); System.exit(0);
     }
     /** Shows the main window (from the Flash, the tray icon or a second start). */
@@ -162,7 +162,7 @@ public final class DeskMain extends Application {
         if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
-        else if (id.equals("settings-voices")) { open("settings"); javafx.application.Platform.runLater(() -> { javafx.scene.Node n = scene.lookup(".page-scroll"); if (n instanceof javafx.scene.control.ScrollPane) ((javafx.scene.control.ScrollPane) n).setVvalue(0.82); }); }
+        else if (id.equals("settings-voices")) { open("settings"); javafx.application.Platform.runLater(() -> { javafx.scene.Node n = scene.lookup(".page-scroll"); if (n instanceof javafx.scene.control.ScrollPane) ((javafx.scene.control.ScrollPane) n).setVvalue(0.74); }); }
         else if (id.equals("studies-courses")) { studies.tab = "Cursos"; open("studies"); studies.tab = "Hoje"; }
         else if (id.equals("studies-course")) { List<Object[]> r = studies.rows("SELECT id FROM st_courses ORDER BY id LIMIT 1"); if (!r.isEmpty()) studies.course = ((Number) r.get(0)[0]).longValue(); open("studies"); studies.course = 0; }
         else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }

@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.53", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.54", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "Vozes naturais do Edge no computador", "No Seeky para Windows: todas as vozes naturais do Microsoft Edge para ler em voz alta (Definições › Leitura em voz alta e áudio). No telemóvel continuam as vozes Google", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.53");
         panel.action("speaker", "Narrações em MP3", "No livro: Ouvir › Guardar narração. Escolha MP3 (cerca de 10 vezes mais pequeno do que WAV), um ficheiro por capítulo, com título, livro e número da faixa", false, () -> PlusUi.toast(a, "Abra um livro e escolha Ouvir › Guardar narração."));
         panel.section("Da 5.52");
         panel.action("course", "Cursos, módulos e disciplinas nos dois", "Os cursos e o tipo de cada um (Módulo ou Disciplina) passam também para o Seeky para Windows, com o Seeky ligado. O plano de estudo da Seeky IA pergunta o curso e se cria um módulo ou uma disciplina", false, () -> PlusUi.toast(a, "Abra Estudos › Cursos."));

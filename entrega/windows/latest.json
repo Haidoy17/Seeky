@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008000,
-  "versionName": "5.53.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.53.0-app.zip",
-  "sha256": "c0d452d800c0ec709c95ee6ed224b8bfbeae498a315a007de663036424e213b5",
-  "bytes": 9296795,
+  "versionCode": 5008100,
+  "versionName": "5.54.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.54.0-app.zip",
+  "sha256": "55dd9bc63a9ee746efc6adc7e32f4bd37cb95b44ee7df8af84e49ad48bd90c80",
+  "bytes": 9316685,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Áudio: gravar capítulos em MP3 e vozes naturais Piper (Português de Portugal e do Brasil, Espanhol, Francês, Inglês)."
+  "notes": "Vozes naturais do Microsoft Edge para ler em voz alta; gravar em MP3 com essas vozes através do Azure Speech."
 }

@@ -1,0 +1,261 @@
+JUnit version 4.13.2
+............System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.shadows.ShadowCloseGuard$CloseGuardReflector$$Reflector60.open(Unknown Source)
+	at org.robolectric.shadows.ShadowCloseGuard.open(ShadowCloseGuard.java:38)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.os.ParcelFileDescriptor.$$robo$$android_os_ParcelFileDescriptor$__constructor__(ParcelFileDescriptor.java:206)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:193)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:189)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.newParcelFileDescriptor(ShadowParcelFileDescriptor.java:116)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.open(ShadowParcelFileDescriptor.java:121)
+	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java)
+	at mz.bam.seeky.android.SeekyShellService.onTransact(SeekyShellService.java:52)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.util.ReflectionHelpers.lambda$callInstanceMethod$6(ReflectionHelpers.java:341)
+	at org.robolectric.util.ReflectionHelpers.traverseClassHierarchy(ReflectionHelpers.java:543)
+	at org.robolectric.util.ReflectionHelpers.callInstanceMethod(ReflectionHelpers.java:335)
+	at org.robolectric.shadows.ShadowBinderBridge.onTransact(ShadowBinderBridge.java:21)
+	at org.robolectric.shadows.ShadowBinder.transact(ShadowBinder.java:31)
+	at android.os.Binder.transact(Binder.java)
+	at mz.bam.seeky.android.ShizukuFiles.call(ShizukuFiles.java:76)
+	at mz.bam.seeky.android.ShizukuFiles.open(ShizukuFiles.java:94)
+	at mz.bam.seeky.android.ShizukuFiles.copyOut(ShizukuFiles.java:103)
+	at mz.bam.seeky.android.ShizukuFiles.copyFolderOut(ShizukuFiles.java:112)
+	at mz.bam.seeky.android.AppData544Test.theServiceWorksOnlyInsideTheAppsFolders(AppData544Test.java:42)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.shadows.ShadowCloseGuard$CloseGuardReflector$$Reflector60.open(Unknown Source)
+	at org.robolectric.shadows.ShadowCloseGuard.open(ShadowCloseGuard.java:38)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.os.ParcelFileDescriptor.$$robo$$android_os_ParcelFileDescriptor$__constructor__(ParcelFileDescriptor.java:206)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:193)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:189)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.newParcelFileDescriptor(ShadowParcelFileDescriptor.java:116)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.open(ShadowParcelFileDescriptor.java:121)
+	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java)
+	at mz.bam.seeky.android.SeekyShellService.onTransact(SeekyShellService.java:52)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.util.ReflectionHelpers.lambda$callInstanceMethod$6(ReflectionHelpers.java:341)
+	at org.robolectric.util.ReflectionHelpers.traverseClassHierarchy(ReflectionHelpers.java:543)
+	at org.robolectric.util.ReflectionHelpers.callInstanceMethod(ReflectionHelpers.java:335)
+	at org.robolectric.shadows.ShadowBinderBridge.onTransact(ShadowBinderBridge.java:21)
+	at org.robolectric.shadows.ShadowBinder.transact(ShadowBinder.java:31)
+	at android.os.Binder.transact(Binder.java)
+	at mz.bam.seeky.android.ShizukuFiles.call(ShizukuFiles.java:76)
+	at mz.bam.seeky.android.ShizukuFiles.open(ShizukuFiles.java:94)
+	at mz.bam.seeky.android.ShizukuFiles.copyIn(ShizukuFiles.java:118)
+	at mz.bam.seeky.android.AppData544Test.theServiceWorksOnlyInsideTheAppsFolders(AppData544Test.java:36)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.shadows.ShadowCloseGuard$CloseGuardReflector$$Reflector60.open(Unknown Source)
+	at org.robolectric.shadows.ShadowCloseGuard.open(ShadowCloseGuard.java:38)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.os.ParcelFileDescriptor.$$robo$$android_os_ParcelFileDescriptor$__constructor__(ParcelFileDescriptor.java:206)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:193)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:189)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.newParcelFileDescriptor(ShadowParcelFileDescriptor.java:116)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.open(ShadowParcelFileDescriptor.java:121)
+	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java)
+	at mz.bam.seeky.android.SeekyShellService.onTransact(SeekyShellService.java:52)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.util.ReflectionHelpers.lambda$callInstanceMethod$6(ReflectionHelpers.java:341)
+	at org.robolectric.util.ReflectionHelpers.traverseClassHierarchy(ReflectionHelpers.java:543)
+	at org.robolectric.util.ReflectionHelpers.callInstanceMethod(ReflectionHelpers.java:335)
+	at org.robolectric.shadows.ShadowBinderBridge.onTransact(ShadowBinderBridge.java:21)
+	at org.robolectric.shadows.ShadowBinder.transact(ShadowBinder.java:31)
+	at android.os.Binder.transact(Binder.java)
+	at mz.bam.seeky.android.ShizukuFiles.call(ShizukuFiles.java:76)
+	at mz.bam.seeky.android.ShizukuFiles.open(ShizukuFiles.java:94)
+	at mz.bam.seeky.android.ShizukuFiles.copyOut(ShizukuFiles.java:103)
+	at mz.bam.seeky.android.AppData544Test.theServiceWorksOnlyInsideTheAppsFolders(AppData544Test.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+.................No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+.No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+No package ID 7f found for ID 0x7f02000b.
+.................................................System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'AbstractCursor.close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.shadows.ShadowCloseGuard$CloseGuardReflector$$Reflector60.open(Unknown Source)
+	at org.robolectric.shadows.ShadowCloseGuard.open(ShadowCloseGuard.java:38)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.database.AbstractCursor.$$robo$$android_database_AbstractCursor$__constructor__(AbstractCursor.java:227)
+	at android.database.AbstractCursor.<init>(AbstractCursor.java:225)
+	at android.database.MatrixCursor.<init>(MatrixCursor.java:45)
+	at android.database.MatrixCursor.<init>(MatrixCursor.java:63)
+	at mz.bam.seeky.android.ScanProvider.query(ScanProvider.java:71)
+	at mz.bam.seeky.android.Features5240Test.bibleProviderServesOnlyCleanDownloads(Features5240Test.java:249)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+System.logW: A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+java.lang.Throwable: Explicit termination method 'close' not called
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$openWithCallSite(CloseGuard.java:288)
+	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java)
+	at dalvik.system.CloseGuard.$$robo$$dalvik_system_CloseGuard$open(CloseGuard.java:257)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.robolectric.shadows.ShadowCloseGuard$CloseGuardReflector$$Reflector60.open(Unknown Source)
+	at org.robolectric.shadows.ShadowCloseGuard.open(ShadowCloseGuard.java:38)
+	at dalvik.system.CloseGuard.open(CloseGuard.java)
+	at android.os.ParcelFileDescriptor.$$robo$$android_os_ParcelFileDescriptor$__constructor__(ParcelFileDescriptor.java:206)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:193)
+	at android.os.ParcelFileDescriptor.<init>(ParcelFileDescriptor.java:189)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.newParcelFileDescriptor(ShadowParcelFileDescriptor.java:116)
+	at org.robolectric.shadows.ShadowParcelFileDescriptor.open(ShadowParcelFileDescriptor.java:121)
+	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java)
+	at mz.bam.seeky.android.ScanProvider.openFile(ScanProvider.java:47)
+	at mz.bam.seeky.android.Features5240Test.bibleProviderServesOnlyCleanDownloads(Features5240Test.java:246)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+.....................................................................................................................................................................................................................................Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 1 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 2 WAV
+.Batch result: Pausado · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Pausado · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Narração guardada · 2 WAV
+.Batch result: Narração guardada · 2 WAV
+.Batch result: Narração guardada · 1 WAV
+.Batch result: Falha na narração: A voz não conseguiu gerar áudio. · 0 ficheiros concluídos mantidos · Pode retomar desta posição.
+Batch result: Narração guardada · 1 WAV
+..........................................................................................................................................................................
+Time: 138.452
+
+OK (495 tests)
+
+exit=0

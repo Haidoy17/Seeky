@@ -8,14 +8,19 @@ final class DeskSpeech {
     private DeskSpeech() {}
     static volatile Process speaking;
     static final Process[] piper = new Process[1];
-    static volatile boolean piperBusy;
-    static boolean busy() { Process p = speaking; return p != null && p.isAlive() || piperBusy; }
-    static void stop() { Process p = speaking; if (p != null) p.destroyForcibly(); speaking = null; Process q = piper[0]; if (q != null) q.destroyForcibly(); piper[0] = null; piperBusy = false; }
+    static volatile boolean piperBusy, edgeBusy;
+    static boolean busy() { Process p = speaking; return p != null && p.isAlive() || piperBusy || edgeBusy; }
+    static void stop() { if (edgeBusy && DeskEdge.instance != null) DeskEdge.instance.stop(); edgeBusy = false; Process p = speaking; if (p != null) p.destroyForcibly(); speaking = null; Process q = piper[0]; if (q != null) q.destroyForcibly(); piper[0] = null; piperBusy = false; }
     static void toggle(DeskMain d, String text) { if (busy()) { stop(); d.status("Leitura parada."); } else say(d, text); }
     static void say(DeskMain d, String text) {
         stop();
         if (!DeskSecret.windows()) { d.status("A leitura em voz alta usa as vozes do Windows."); return; }
         String voice = d.store.get("voice", ""); int rate = Integer.parseInt(d.store.get("voice_rate", "0"));
+        if ("edge".equals(d.store.get("voice_engine", "")) && DeskEdge.available()) {
+            String name = d.store.get("edge_voice", "");
+            try { edgeBusy = true; DeskEdge.get().speak(text.length() > 200000 ? text.substring(0, 200000) : text, name, DeskEdge.rate(rate), () -> edgeBusy = false); d.status("A ler com a voz natural do Edge… (toque outra vez para parar)"); return; }
+            catch (Exception e) { edgeBusy = false; d.status("O Edge não abriu; a usar a voz do Windows."); }
+        }
         DeskVoices.Voice natural = DeskVoices.chosen(d.store);
         if (natural != null) {
             try { piperBusy = true; DeskVoices.speak(natural, rate, text.length() > 200000 ? text.substring(0, 200000) : text, piper, () -> piperBusy = false); d.status("A ler com " + natural.label + "… (toque outra vez para parar)"); return; }

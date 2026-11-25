@@ -213,6 +213,22 @@ final class DeskSelfTest {
                 double secs = Mp3Writer.fromWav(wavIn, mp3Out, new Mp3Writer.Tags("Capítulo 1", "Livro", "Seeky", 1, 3), () -> false, null);
                 byte[] mp3b = java.nio.file.Files.readAllBytes(mp3Out.toPath()); boolean hashes = true; for (DeskVoices.Voice v : DeskVoices.PIPER) hashes &= v.sha.matches("[0-9a-f]{64}") && v.jsonSha.matches("[0-9a-f]{64}");
                 check(mp3b[0] == 'I' && mp3b[1] == 'D' && mp3b[2] == '3' && Math.abs(secs - 1.0) < 0.01 && mp3b.length > 6000 && mp3b.length < 12000 && hashes && DeskVoices.ENGINE_SHA.matches("[0-9a-f]{64}") && DeskAudio.fileName(3, 12, "Cap: 3/a").equals("03 - Cap 3 a.mp3"), "áudio: MP3 com etiquetas e vozes Piper verificadas");
+                // Vozes naturais do Edge (5.54): a ponte local com a página do Edge, simulada aqui; e o Azure para gravar.
+                boolean bridge = false;
+                { DeskEdge e = new DeskEdge(); try {
+                    String page = http("GET", e.base(), null, "127.0.0.1:" + e.port()), wrongHost = http("GET", e.base(), null, "evil.example:" + e.port()), wrongToken = http("GET", "http://127.0.0.1:" + e.port() + "/s/x/", null, "127.0.0.1:" + e.port());
+                    http("POST", e.base() + "voices", "[{\"name\":\"Microsoft Raquel Online (Natural) - Portuguese (Portugal)\",\"lang\":\"pt-PT\"},{\"name\":\"Microsoft David - English (United States)\",\"lang\":\"en-US\"},{\"name\":\"Microsoft Francisca Online (Natural) - Portuguese (Brazil)\",\"lang\":\"pt-BR\"}]", "127.0.0.1:" + e.port());
+                    boolean[] ended = {false}; int id = e.queue("Olá mundo.", "Microsoft Raquel Online (Natural) - Portuguese (Portugal)", 1.0, () -> ended[0] = true);
+                    String cmd = http("GET", e.base() + "next", null, "127.0.0.1:" + e.port());
+                    http("POST", e.base() + "event", "{\"type\":\"end\",\"id\":" + id + "}", "127.0.0.1:" + e.port());
+                    List<DeskEdge.Voice> nat = DeskEdge.sorted(e.voices, true);
+                    System.out.println("  edge-ponte: página=" + page.contains("speechSynthesis") + " host=" + wrongHost + " código=" + wrongToken + " fala=" + cmd.contains("Olá mundo.") + " fim=" + ended[0] + " vozes=" + DeskEdge.sorted(e.voices, true).size() + (DeskEdge.sorted(e.voices, true).isEmpty() ? "" : " " + DeskEdge.sorted(e.voices, true).get(0).azure() + " / " + DeskEdge.sorted(e.voices, true).get(0).label()));
+                    bridge = page.contains("speechSynthesis") && wrongHost.equals("404") && wrongToken.equals("404") && cmd.contains("\"op\":\"speak\"") && cmd.contains("Olá mundo.") && ended[0]
+                        && nat.size() == 2 && nat.get(0).azure().equals("pt-PT-RaquelNeural") && nat.get(1).azure().equals("pt-BR-FranciscaNeural") && nat.get(0).label().startsWith("Raquel · Português");
+                } finally { e.close(); } }
+                String longText = String.join(" ", Collections.nCopies(800, "Frase curta.")); List<String> pieces = DeskAzure.pieces(longText);
+                check(bridge && pieces.size() == 5 && String.join(" ", pieces).equals(longText) && pieces.stream().allMatch(x -> x.length() <= DeskAzure.PIECE) && DeskAzure.ssml("A & <b>", "pt-PT-RaquelNeural", "pt-PT", 2).contains("A &amp; &lt;b&gt;") && DeskAzure.ssml("x", "pt-PT-RaquelNeural", "pt-PT", 2).contains("rate='+16%'"), "áudio: vozes naturais do Edge (ponte local) e Azure para gravar");
+                if (DeskSecret.windows() && DeskEdge.available()) { try { List<DeskEdge.Voice> real = DeskEdge.sorted(DeskEdge.get().voices(45000), true); System.out.println("  edge: " + real.size() + " vozes naturais" + (real.isEmpty() ? "" : " (por ex. " + real.get(0).name + ")")); } catch (Exception ex) { System.out.println("  edge: " + ex.getMessage()); } finally { if (DeskEdge.instance != null) { DeskEdge.instance.close(); DeskEdge.instance = null; } } }
                 if (DeskSecret.windows()) {
                     java.io.File spoken = new java.io.File(home, "voz.wav"), spokenMp3 = new java.io.File(home, "voz.mp3");
                     boolean voiced = false; try { DeskVoices.windowsWav("", 0, "Olá. Este é o Seeky a gravar um capítulo em áudio.", spoken, () -> false); voiced = Mp3Writer.fromWav(spoken, spokenMp3, new Mp3Writer.Tags("Teste", "Seeky", "Seeky", 1, 1), () -> false, null) > 1.0 && spokenMp3.length() > 8000; } catch (Exception e) { System.out.println("voz do Windows: " + e.getMessage()); }
@@ -238,5 +254,15 @@ final class DeskSelfTest {
         } catch (Throwable e) { e.printStackTrace(System.out); check(false, "erro: " + e); }
         System.out.println((ok ? "PASS " : "FAIL ") + checks + " verificações do Seeky Desktop");
         return ok;
+    }
+    /** A plain HTTP request with a chosen Host header (to test the Edge bridge); returns the body, or the status code when it is not 200. */
+    static String http(String method, String url, String body, String host) throws Exception {
+        java.net.URL u = new java.net.URL(url);
+        try (java.net.Socket s = new java.net.Socket(u.getHost(), u.getPort())) {
+            s.setSoTimeout(30000); byte[] b = body == null ? new byte[0] : body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            java.io.OutputStream o = s.getOutputStream(); o.write((method + " " + u.getPath() + " HTTP/1.1\r\nHost: " + host + "\r\nContent-Length: " + b.length + "\r\nConnection: close\r\n\r\n").getBytes(java.nio.charset.StandardCharsets.US_ASCII)); o.write(b); o.flush();
+            String all = new String(s.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            String status = all.substring(9, 12); return status.equals("200") ? all.substring(all.indexOf("\r\n\r\n") + 4) : status;
+        }
     }
 }

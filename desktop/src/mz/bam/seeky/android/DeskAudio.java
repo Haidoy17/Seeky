@@ -29,19 +29,26 @@ final class DeskAudio {
         };
         fill.run();
         Runnable select = () -> {
-            String engine = d.store.get("voice_engine", "windows"), id = engine.equals("piper") ? d.store.get("piper_voice", "") : d.store.get("voice", "");
+            String engine = d.store.get("voice_engine", "windows"), id = engine.equals("piper") ? d.store.get("piper_voice", "") : engine.equals("edge") ? d.store.get("edge_voice", "") : d.store.get("voice", "");
             int at = -1; for (int i = 0; i < choices.size(); i++) if (choices.get(i)[0].equals(engine) && choices.get(i)[1].equals(id)) at = i;
             if (at < 0) for (int i = 0; i < choices.size(); i++) if (choices.get(i)[0].equals("windows") && choices.get(i)[1].isEmpty()) at = i;
             voice.getSelectionModel().select(Math.max(0, at));
         };
         select.run();
         d.run(null, DeskSpeech::voices, list -> { for (String n : list) { voice.getItems().add("Windows · " + n); choices.add(new String[]{"windows", n}); } select.run(); });
-        voice.setOnAction(e -> { int i = voice.getSelectionModel().getSelectedIndex(); if (i < 0 || i >= choices.size()) return; String[] c = choices.get(i); d.store.put("voice_engine", c[0]); if (c[0].equals("piper")) d.store.put("piper_voice", c[1]); else d.store.put("voice", c[1]); });
+        Label edgeState = DeskUi.muted(DeskEdge.available() ? "A procurar as vozes naturais do Edge…" : "O Microsoft Edge não foi encontrado neste computador.");
+        if (DeskEdge.available()) d.run(null, () -> DeskEdge.sorted(DeskEdge.get().voices(20000), true), list -> {
+            int at = 0; for (DeskEdge.Voice v : list) { voice.getItems().add(at, "Edge · " + v.label()); choices.add(at, new String[]{"edge", v.name, v.lang}); at++; }
+            edgeState.setText(list.isEmpty() ? "O Edge não devolveu vozes naturais (precisam de Internet). Tente de novo mais tarde." : list.size() + " vozes naturais do Edge disponíveis (precisam de Internet para ler).");
+            select.run();
+        });
+        voice.setOnAction(e -> { int i = voice.getSelectionModel().getSelectedIndex(); if (i < 0 || i >= choices.size()) return; String[] c = choices.get(i); d.store.put("voice_engine", c[0]); if (c[0].equals("piper")) d.store.put("piper_voice", c[1]); else if (c[0].equals("edge")) { d.store.put("edge_voice", c[1]); d.store.put("edge_lang", c[2]); } else d.store.put("voice", c[1]); });
         Slider rate = new Slider(-5, 5, Integer.parseInt(d.store.get("voice_rate", "0"))); rate.setMajorTickUnit(1); rate.setSnapToTicks(true); rate.setPrefWidth(200);
         rate.valueProperty().addListener((o, a, b) -> d.store.put("voice_rate", String.valueOf(b.intValue())));
         box.getChildren().addAll(DeskUi.heading("Leitura em voz alta e áudio"),
-            DeskUi.muted("A voz escolhida lê os livros, a Bíblia e as notas, e grava capítulos em MP3 (menu de cada livro › Gravar em MP3)."),
-            DeskUi.row(voice, DeskUi.muted("Velocidade"), rate, DeskUi.button("Experimentar", false, () -> DeskSpeech.say(d, sample(d)))));
+            DeskUi.muted("A voz escolhida lê os livros, a Bíblia e as notas, e grava capítulos em MP3 (menu de cada livro › Gravar em MP3). As vozes naturais do Edge são as mesmas da leitura em voz alta do Microsoft Edge."),
+            DeskUi.row(voice, DeskUi.muted("Velocidade"), rate, DeskUi.button("Experimentar", false, () -> DeskSpeech.say(d, sample(d)))), edgeState);
+        box.getChildren().addAll(new Separator(), azure(d));
         // Vozes naturais Piper
         VBox natural = new VBox(8);
         natural.getChildren().add(DeskUi.heading("Vozes naturais (Piper)"));
@@ -63,7 +70,24 @@ final class DeskAudio {
         box.getStyleClass().add("card"); box.setPadding(new javafx.geometry.Insets(16));
         return box;
     }
+    /** Gravar com as vozes do Edge: o Azure Speech (chave gratuita do utilizador). */
+    static Node azure(DeskMain d) {
+        ComboBox<String> region = new ComboBox<>(); region.getItems().addAll(DeskAzure.REGIONS); region.getSelectionModel().select(d.store.get("azure_region", "westeurope"));
+        PasswordField key = new PasswordField(); key.setPromptText(d.store.get("azure_key", "").isEmpty() ? "Chave do recurso Speech (Azure)" : "Chave guardada · deixe vazio para manter"); key.setPrefWidth(320);
+        Label state = DeskUi.muted(DeskAzure.configured(d.store) ? "Ligado ao Azure Speech (" + d.store.get("azure_region", "") + "). As vozes do Edge também gravam MP3." : "Sem chave: as vozes do Edge só lêem em voz alta; para gravar MP3 use o Piper ou o Windows, ou ligue o Azure Speech.");
+        Button save = DeskUi.button("Testar e guardar", true, () -> {
+            String entered = key.getText().trim(), reg = region.getValue(); state.setText("A testar…");
+            d.run(null, () -> { String k = entered.isEmpty() ? DeskAzure.key(d.store) : entered; if (k.length() < 16 || !k.matches("[A-Za-z0-9]+")) throw new Exception("Introduza a chave do recurso Speech do Azure."); byte[] mp3 = DeskAzure.synth(reg, k, DeskAzure.ssml("Olá.", "pt-PT-RaquelNeural", "pt-PT", 0), () -> false); if (mp3.length < 500) throw new Exception("O Azure não devolveu áudio."); if (!entered.isEmpty()) d.store.put("azure_key", DeskSecret.protect(k)); d.store.put("azure_region", reg); return true; },
+                ok -> { state.setText("Ligado ao Azure Speech (" + reg + "). As vozes do Edge também gravam MP3."); key.clear(); });
+        });
+        Button forget = DeskUi.button("Esquecer a chave", false, () -> { d.store.put("azure_key", ""); d.open("settings"); });
+        VBox box = new VBox(8, DeskUi.heading("Gravar com as vozes do Edge (Azure Speech)"),
+            DeskUi.muted("O Edge só toca as vozes; para as gravar em MP3 a Microsoft oferece as mesmas vozes no Azure Speech. Crie um recurso Speech gratuito (500 000 caracteres por mês) em portal.azure.com e cole aqui a chave. A chave fica protegida pelo Windows e só é enviada à Microsoft com o texto a gravar."),
+            DeskUi.row(region, key, save, forget), state);
+        return box;
+    }
     static String sample(DeskMain d) {
+        if ("edge".equals(d.store.get("voice_engine", ""))) { String l = d.store.get("edge_lang", "pt"); if (l.startsWith("en")) return "Hello! This is Seeky reading aloud with a natural Edge voice."; if (l.startsWith("es")) return "¡Hola! Este es Seeky leyendo con una voz natural."; if (l.startsWith("fr")) return "Bonjour ! C'est Seeky qui lit avec une voix naturelle."; }
         DeskVoices.Voice v = DeskVoices.chosen(d.store);
         if (v != null && v.language.startsWith("en")) return "Hello! This is Seeky reading aloud with a natural voice.";
         if (v != null && v.language.startsWith("es")) return "¡Hola! Este es Seeky leyendo en voz alta.";
@@ -112,7 +136,16 @@ final class DeskAudio {
         for (int i = 0; i < list.size(); i++) { String n = (i + 1) + ". " + list.get(i).name; first.getItems().add(n); last.getItems().add(n); }
         first.getSelectionModel().select(0); last.getSelectionModel().select(list.size() - 1); first.setPrefWidth(320); last.setPrefWidth(320);
         DeskVoices.Voice natural = DeskVoices.chosen(d.store);
-        String voiceName = natural != null ? natural.label + " (natural)" : d.store.get("voice", "").isEmpty() ? "voz predefinida do Windows" : d.store.get("voice", "") + " (Windows)";
+        boolean edge = "edge".equals(d.store.get("voice_engine", "")) && !d.store.get("edge_voice", "").isEmpty();
+        if (edge && !DeskAzure.configured(d.store)) {
+            Alert need = new Alert(Alert.AlertType.CONFIRMATION, "As vozes naturais do Edge só lêem em voz alta. Para as gravar em MP3, ligue o Azure Speech em Definições (chave gratuita), ou grave agora com uma voz Piper ou do Windows.", new ButtonType("Abrir Definições"), new ButtonType("Gravar com outra voz"), ButtonType.CANCEL);
+            need.setHeaderText("Gravar com a voz do Edge"); need.setTitle("Seeky"); DeskUi.style(need.getDialogPane());
+            Optional<ButtonType> pick = need.showAndWait(); if (!pick.isPresent() || pick.get() == ButtonType.CANCEL) return;
+            if (pick.get().getText().equals("Abrir Definições")) { d.open("settings"); return; }
+            edge = false;
+        }
+        boolean useEdge = edge;
+        String voiceName = useEdge ? new DeskEdge.Voice(d.store.get("edge_voice", ""), d.store.get("edge_lang", "pt-PT")).label() + " (Edge, via Azure)" : natural != null ? natural.label + " (natural)" : d.store.get("voice", "").isEmpty() ? "voz predefinida do Windows" : d.store.get("voice", "") + " (Windows)";
         File music = new File(System.getProperty("user.home"), "Music");
         File[] folder = {new File(new File(music.isDirectory() ? music : new File(System.getProperty("user.home")), "Seeky"), safe(title))};
         Label where = DeskUi.text(folder[0].getPath());
@@ -126,15 +159,16 @@ final class DeskAudio {
         dlg.showAndWait().filter(b -> b == go).ifPresent(b -> {
             int a = first.getSelectionModel().getSelectedIndex(), z = last.getSelectionModel().getSelectedIndex();
             if (z < a) { int t = a; a = z; z = t; }
-            record(d, book, title, list, a, z, folder[0], addToMusic.isSelected());
+            record(d, book, title, list, a, z, folder[0], addToMusic.isSelected(), useEdge);
         });
     }
-    static void record(DeskMain d, File book, String title, List<Part> list, int a, int z, File folder, boolean addToMusic) {
+    static void record(DeskMain d, File book, String title, List<Part> list, int a, int z, File folder, boolean addToMusic, boolean useEdge) {
         Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("A gravar · " + title); DeskUi.style(dlg.getDialogPane());
         ProgressBar bar = new ProgressBar(0); bar.setPrefWidth(460); Label line = DeskUi.muted("A preparar…");
         dlg.getDialogPane().setContent(new VBox(10, line, bar)); dlg.getDialogPane().getButtonTypes().add(new ButtonType("Parar", ButtonBar.ButtonData.CANCEL_CLOSE));
         AtomicBoolean cancel = new AtomicBoolean(); dlg.setOnHidden(e -> cancel.set(true));
-        DeskVoices.Voice natural = DeskVoices.chosen(d.store); String winVoice = d.store.get("voice", ""); int rate = Integer.parseInt(d.store.get("voice_rate", "0"));
+        DeskVoices.Voice natural = useEdge ? null : DeskVoices.chosen(d.store); String winVoice = d.store.get("voice", ""); int rate = Integer.parseInt(d.store.get("voice_rate", "0"));
+        DeskEdge.Voice edgeVoice = useEdge ? new DeskEdge.Voice(d.store.get("edge_voice", ""), d.store.get("edge_lang", "pt-PT")) : null; String region = d.store.get("azure_region", "");
         d.run(null, () -> {
             try {
                 if (!folder.isDirectory() && !folder.mkdirs()) throw new java.io.IOException("Não foi possível criar a pasta " + folder);
@@ -144,6 +178,12 @@ final class DeskAudio {
                     Part p = list.get(i); String text = p.text == null ? "" : p.text.trim(); int n = i - a;
                     if (text.length() < 2) continue;
                     final int step = n; Platform.runLater(() -> { line.setText("Capítulo " + (step + 1) + " de " + count + " · " + p.name + " · a gerar a voz"); bar.setProgress((double) step / count); });
+                    if (edgeVoice != null) {
+                        File out = new File(folder, fileName(i + 1, list.size(), p.name)); String key = DeskAzure.key(d.store);
+                        seconds += DeskAzure.mp3(region, key, edgeVoice.azure(), edgeVoice.lang, rate, text, out, new Mp3Writer.Tags(p.name, title, "Seeky", i + 1, list.size()), cancel::get,
+                            (done, total) -> Platform.runLater(() -> { line.setText("Capítulo " + (step + 1) + " de " + count + " · " + p.name + " · parte " + done + " de " + total); bar.setProgress((step + (double) done / total) / count); }));
+                        made++; continue;
+                    }
                     File wav = new File(tmp, "cap-" + UUID.randomUUID() + ".wav");
                     try {
                         if (natural != null) DeskVoices.piperWav(natural, rate, text, wav, cancel::get); else DeskVoices.windowsWav(winVoice, rate, text, wav, cancel::get);
