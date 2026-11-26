@@ -35,6 +35,16 @@ final class DeskSync implements SyncServer.Host {
         catch (Exception e) { lastError = "A porta " + SyncWire.TCP_PORT + " está ocupada: feche outro Seeky aberto e tente outra vez."; }
     }
     void stop() { if (server != null) server.close(); server = null; }
+    java.security.KeyPair identity;
+    /** 5.55: this computer's own key pair; the private half is kept protected by Windows (DPAPI). */
+    @Override public synchronized java.security.KeyPair identity() throws Exception {
+        if (identity != null) return identity;
+        String pub = s.get("sync_key_pub", ""), priv = s.get("sync_key_priv", "");
+        if (!pub.isEmpty() && !priv.isEmpty()) try { identity = new java.security.KeyPair(SyncWire.publicKey(SyncWire.unb64(pub)), SyncWire.privateKey(SyncWire.unb64(DeskSecret.reveal(priv)))); return identity; } catch (Exception ignored) {}
+        java.security.KeyPair k = SyncWire.ephemeral();
+        s.put("sync_key_priv", DeskSecret.protect(SyncWire.b64(k.getPrivate().getEncoded()))); s.put("sync_key_pub", SyncWire.b64(k.getPublic().getEncoded()));
+        identity = k; return k;
+    }
     @Override public String id() { String id = s.get("sync_id", ""); if (id.isEmpty()) { id = SyncState.uuid(); s.put("sync_id", id); } return id; }
     @Override public String name() { String n = System.getenv("COMPUTERNAME"); if (n == null || n.isEmpty()) try { n = InetAddress.getLocalHost().getHostName(); } catch (Exception e) { n = "Computador"; } return n; }
     /** A new 6-digit code, valid for 10 minutes (shown big on the "Telemóvel" page). */

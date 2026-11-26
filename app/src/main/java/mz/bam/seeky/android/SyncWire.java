@@ -36,6 +36,27 @@ final class SyncWire {
     static byte[] concat(byte[] a, byte[] b) { byte[] o = new byte[a.length + b.length]; System.arraycopy(a, 0, o, 0, a.length); System.arraycopy(b, 0, o, a.length, b.length); return o; }
     static boolean same(byte[] a, byte[] b) { return MessageDigest.isEqual(a, b); }
 
+    // ---------------------------------------------------------------- 5.55: emparelhar sem dar o código a adivinhar
+    // Troca de chaves efémeras ECDH (P-256): a chave da ligação nunca depende do código. O código só confirma que
+    // os dois lados são quem dizem, bit a bit (como o Bluetooth "passkey entry"): em cada volta cada lado compromete-se
+    // antes de revelar, por isso um impostor tem uma só hipótese em cerca de um milhão e nada para testar fora da ligação.
+    static final int CODE_BITS = 20;
+    static java.security.KeyPair ephemeral() throws Exception { java.security.KeyPairGenerator g = java.security.KeyPairGenerator.getInstance("EC"); g.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"), RANDOM); return g.generateKeyPair(); }
+    static java.security.PublicKey publicKey(byte[] x509) throws Exception { if (x509 == null || x509.length < 60 || x509.length > 200) throw new SecurityException("Chave inválida."); return java.security.KeyFactory.getInstance("EC").generatePublic(new java.security.spec.X509EncodedKeySpec(x509)); }
+    static java.security.PrivateKey privateKey(byte[] pkcs8) throws Exception { return java.security.KeyFactory.getInstance("EC").generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(pkcs8)); }
+    static byte[] agree(java.security.PrivateKey mine, java.security.PublicKey theirs) throws Exception { javax.crypto.KeyAgreement k = javax.crypto.KeyAgreement.getInstance("ECDH"); k.init(mine); k.doPhase(theirs, true); return k.generateSecret(); }
+    static byte[] hmac(byte[] key, byte[]... parts) throws Exception { javax.crypto.Mac m = javax.crypto.Mac.getInstance("HmacSHA256"); m.init(new SecretKeySpec(key, "HmacSHA256")); for (byte[] p : parts) m.update(p); return m.doFinal(); }
+    static byte[] sha(byte[]... parts) throws Exception { MessageDigest d = MessageDigest.getInstance("SHA-256"); for (byte[] p : parts) { d.update(intBytes(p.length)); d.update(p); } return d.digest(); }
+    static byte[] intBytes(int n) { return new byte[]{(byte) (n >>> 24), (byte) (n >>> 16), (byte) (n >>> 8), (byte) n}; }
+    static byte[] ascii(String s) { return s.getBytes(StandardCharsets.UTF_8); }
+    /** HKDF-SHA256 (extract and one expand block): a 256-bit key. */
+    static byte[] hkdf(byte[] salt, byte[] secret, String info) throws Exception { byte[] prk = hmac(salt, secret); return hmac(prk, ascii(info), new byte[]{1}); }
+    /** The 6-digit code as 20 bits. */
+    static int codeValue(String code) { String d = code == null ? "" : code.replaceAll("\\D", ""); if (d.length() != 6) throw new IllegalArgumentException("Código de 6 números."); return Integer.parseInt(d); }
+    static int bit(int code, int i) { return (code >>> i) & 1; }
+    /** Commitment to one bit of the code, bound to the whole conversation (both keys, the device, the side). */
+    static byte[] commit(byte[] nonce, String side, int round, int bit, byte[] transcript) throws Exception { return hmac(nonce, ascii("seeky-bit-2|" + side + "|" + round + "|" + bit), transcript); }
+
     static byte[] seal(byte[] key, byte[] plain) throws Exception {
         byte[] iv = random(12); Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
         c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(128, iv));
