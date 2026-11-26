@@ -34,10 +34,10 @@ final class PhoneSync implements SyncClient.Local {
     static String deviceName() { String m = (Build.MANUFACTURER == null ? "" : Build.MANUFACTURER) + " " + (Build.MODEL == null ? "" : Build.MODEL); m = m.trim(); return m.isEmpty() ? "Telemóvel" : Character.toUpperCase(m.charAt(0)) + m.substring(1); }
     static SyncClient.Computer computer(Context c) {
         SharedPreferences p = prefs(c); String token = p.getString("token", ""); if (token.isEmpty()) return null;
-        SyncClient.Computer pc = new SyncClient.Computer(); pc.id = p.getString("pc_id", ""); pc.name = p.getString("pc_name", "Computador"); pc.host = p.getString("pc_host", ""); pc.port = p.getInt("pc_port", SyncWire.TCP_PORT); pc.token = SyncWire.unb64(token); return pc;
+        SyncClient.Computer pc = new SyncClient.Computer(); pc.id = p.getString("pc_id", ""); pc.name = p.getString("pc_name", "Computador"); pc.host = p.getString("pc_host", ""); pc.port = p.getInt("pc_port", SyncWire.TCP_PORT); pc.token = SyncWire.unb64(token); String key = p.getString("pc_key", ""); if (key.isEmpty()) return null; /* paired before 5.55: pair again with the new, safer method */ pc.key = SyncWire.unb64(key); return pc;
     }
-    static void remember(Context c, SyncClient.Computer pc) { prefs(c).edit().putString("pc_id", pc.id).putString("pc_name", pc.name).putString("pc_host", pc.host).putInt("pc_port", pc.port).putString("token", SyncWire.b64(pc.token)).apply(); }
-    static void forget(Context c) { prefs(c).edit().remove("pc_id").remove("pc_name").remove("pc_host").remove("pc_port").remove("token").remove("last").apply(); }
+    static void remember(Context c, SyncClient.Computer pc) { prefs(c).edit().putString("pc_id", pc.id).putString("pc_name", pc.name).putString("pc_host", pc.host).putInt("pc_port", pc.port).putString("token", SyncWire.b64(pc.token)).putString("pc_key", pc.key == null ? "" : SyncWire.b64(pc.key)).apply(); }
+    static void forget(Context c) { prefs(c).edit().remove("pc_id").remove("pc_name").remove("pc_host").remove("pc_port").remove("token").remove("pc_key").remove("last").apply(); }
 
     // ================================================================ notas: identidades e apagadas
     static final class Ids extends SQLiteOpenHelper {

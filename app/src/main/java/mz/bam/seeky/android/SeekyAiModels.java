@@ -43,13 +43,13 @@ final class SeekyAiModels {
         for (String bad : new String[]{"tts", "image", "embedding", "aqa", "live", "audio", "robotics", "computer-use", "veo", "imagen"}) if (n.contains(bad)) return false;
         return true;
     }
-    /** Cheapest, fastest first: flash-lite, then flash, then the rest; newer versions before older; stable before preview. */
+    /** 5.55: newest Gemini first; within a version flash-lite (largest free quota), then flash, then the rest; stable before preview. */
     static List<String> rank(Collection<String> names) {
         List<String> out = new ArrayList<>();
         for (String n : names) { String c = clean(n); if (usable(c) && !out.contains(c)) out.add(c); }
         out.sort((a, b) -> {
-            int ta = tier(a), tb = tier(b); if (ta != tb) return Integer.compare(ta, tb);
             int va = Double.compare(version(b), version(a)); if (va != 0) return va;
+            int ta = tier(a), tb = tier(b); if (ta != tb) return Integer.compare(ta, tb);
             int pa = (a.contains("preview") || a.contains("exp") ? 1 : 0) - (b.contains("preview") || b.contains("exp") ? 1 : 0); if (pa != 0) return pa;
             return a.compareTo(b);
         });
@@ -63,10 +63,10 @@ final class SeekyAiModels {
         LinkedHashSet<String> want = new LinkedHashSet<>();
         String c = clean(chosen), w = clean(working);
         if (!c.isEmpty()) want.add(c);
-        if (!w.isEmpty()) want.add(w);
         List<String> known = rank(available == null ? Collections.emptyList() : available);
+        want.addAll(known);          // what the API says this key has, newest first (5.55)
+        if (!w.isEmpty()) want.add(w);
         want.add(DEFAULT);
-        want.addAll(known);          // what the API says this key has, best first
         for (String f : FALLBACKS) want.add(f);
         List<String> out = new ArrayList<>();
         for (String m : want) {
@@ -74,8 +74,16 @@ final class SeekyAiModels {
             out.add(m); if (out.size() == ATTEMPTS) break;
         }
         if (out.isEmpty()) out.add(DEFAULT);
-        return out;
+        // A model at a usage peak (429/5xx) waits at the end for two minutes.
+        long now = System.currentTimeMillis(); List<String> free = new ArrayList<>(), later = new ArrayList<>();
+        for (String m : out) { Long until = BUSY.get(m); if (until != null && until > now) later.add(m); else free.add(m); }
+        if (free.isEmpty()) return out; // all busy: the usual order
+        free.addAll(later); return free;
     }
+    static final Map<String, Long> BUSY = new java.util.concurrent.ConcurrentHashMap<>();
+    /** The model answered "too many requests" or "overloaded": others go first for a while. */
+    static void busy(String model) { BUSY.put(clean(model), System.currentTimeMillis() + 120_000L); }
+    static synchronized void busySwitch(String gone, String now) { notice = "O modelo " + gone + " está com muito uso neste momento; respondeu o " + now + "."; }
     static List<String> order() { return order(chosen, working, available); }
 
     /** The model in the requests when nothing failed yet. */

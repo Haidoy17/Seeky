@@ -1,6 +1,7 @@
 package mz.bam.seeky.android;
 
 import javafx.application.Platform;
+import javafx.scene.control.*;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -26,8 +27,21 @@ final class DeskUpdates {
             JSONObject m = new JSONObject(new String(get(MANIFEST + "?t=" + System.currentTimeMillis() / 60000, 65536), StandardCharsets.UTF_8));
             long code = m.getLong("versionCode"); String name = m.getString("versionName"), url = m.getString("app"), sha = m.getString("sha256").toLowerCase();
             if (code <= DeskVersion.CODE) { if (manual) Platform.runLater(() -> DeskUi.info("O Seeky está actualizado", "Versão " + DeskMain.VERSION + ".")); return; }
-            Platform.runLater(() -> { if (DeskUi.confirm("Nova versão: Seeky " + name, m.optString("notes", "") + "\n\nOs seus dados mantêm-se. Actualizar agora?")) d.run("A descarregar o Seeky " + name + "…", () -> install(name, url, sha), dir -> DeskUi.info("Actualização instalada", "Feche e volte a abrir o Seeky para usar a versão " + name + ".")); });
+            Platform.runLater(() -> { if (DeskUi.confirm("Nova versão: Seeky " + name, m.optString("notes", "") + "\n\nOs seus dados mantêm-se. Actualizar agora?")) d.run("A descarregar o Seeky " + name + "…", () -> install(name, url, sha), dir -> ready(d, name)); });
         } catch (Exception e) { if (manual) Platform.runLater(() -> DeskUi.info("Não foi possível procurar actualizações", "Verifique a Internet. (" + e.getMessage() + ")")); }
+    }
+    /** 5.55: "Actualização pronta" in the Seeky style, with Reiniciar agora (the new version opens by itself). */
+    static void ready(DeskMain d, String name) {
+        Alert a = new Alert(Alert.AlertType.NONE, "A versão " + name + " já está no computador. Os seus dados ficam como estão.", new ButtonType("Reiniciar agora", ButtonBar.ButtonData.OK_DONE), new ButtonType("Mais tarde", ButtonBar.ButtonData.CANCEL_CLOSE));
+        a.setTitle("Seeky"); a.setHeaderText("Actualização pronta · Seeky " + name); DeskUi.style(a.getDialogPane());
+        a.showAndWait().filter(b -> b.getButtonData() == ButtonBar.ButtonData.OK_DONE).ifPresent(b -> restart(d));
+    }
+    /** Opens Seeky again a moment after this one closes (so the single-instance check lets it start). */
+    static void restart(DeskMain d) {
+        String local = System.getenv("LOCALAPPDATA"); File exe = local == null ? null : new File(local, "Programs\\Seeky\\Seeky.exe");
+        if (exe == null || !exe.isFile()) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
+        try { ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", "Start-Sleep -Seconds 2; Start-Process -FilePath $env:SEEKY_EXE"); pb.environment().put("SEEKY_EXE", exe.getAbsolutePath()); pb.start(); } catch (IOException e) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
+        d.quit();
     }
     static byte[] get(String url, int max) throws IOException {
         URL u = new URL(url); if (!"https".equals(u.getProtocol()) || !HOST.equals(u.getHost())) throw new IOException("Ligação de actualização recusada.");

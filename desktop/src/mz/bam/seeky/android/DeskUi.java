@@ -29,6 +29,11 @@ final class DeskUi {
         ICONS.put("speaker", "M4 9 H8 L13 5 V19 L8 15 H4 Z M16 9 Q18 12 16 15 M18.5 6.5 Q22.5 12 18.5 17.5");
         ICONS.put("sparkle", "M10 3 Q11 11 18 12.5 Q11 14 10 22 Q9 14 2 12.5 Q9 11 10 3 Z M19 2 V7 M16.5 4.5 H21.5");
         ICONS.put("back", "M15 5 L8 12 L15 19");
+        ICONS.put("shuffle", "M3 7 H7 C11 7 13 17 17 17 H21 M18 14 L21 17 L18 20 M3 17 H7 C8.5 17 9.6 15.6 10.6 13.8 M13.4 10.2 C14.4 8.4 15.5 7 17 7 H21 M18 4 L21 7 L18 10");
+        ICONS.put("repeat", "M4 11 V9 C4 7.3 5.3 6 7 6 H19 M16 3 L19 6 L16 9 M20 13 V15 C20 16.7 18.7 18 17 18 H5 M8 21 L5 18 L8 15");
+        ICONS.put("repeat1", "M4 11 V9 C4 7.3 5.3 6 7 6 H19 M16 3 L19 6 L16 9 M20 13 V15 C20 16.7 18.7 18 17 18 H5 M8 21 L5 18 L8 15 M11 10.5 L12.5 9.5 V14.5");
+        ICONS.put("rewind", "M11 6 L4 12 L11 18 Z M20 6 L13 12 L20 18 Z");
+        ICONS.put("forward", "M13 6 L20 12 L13 18 Z M4 6 L11 12 L4 18 Z");
         ICONS.put("trash", "M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 20 H17 L18 7");
         ICONS.put("export", "M12 3 V15 M7 8 L12 3 L17 8 M5 14 V20 H19 V14");
         ICONS.put("timer", "M12 21 A8 8 0 1 0 12 5 A8 8 0 1 0 12 21 Z M12 9 V13 L14.5 15 M9.5 2.5 H14.5 M18.5 5.5 L20 7");
@@ -114,5 +119,23 @@ final class DeskUi {
     static void info(String title, String message) { Alert a = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK); a.setHeaderText(title); a.setTitle("Seeky"); style(a.getDialogPane()); a.showAndWait(); }
     static boolean confirm(String title, String message) { Alert a = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK, ButtonType.CANCEL); a.setHeaderText(title); a.setTitle("Seeky"); style(a.getDialogPane()); return a.showAndWait().filter(b -> b == ButtonType.OK).isPresent(); }
     static String ask(String title, String prompt, String value) { TextInputDialog d = new TextInputDialog(value == null ? "" : value); d.setHeaderText(title); d.setContentText(prompt); d.setTitle("Seeky"); style(d.getDialogPane()); return d.showAndWait().map(String::trim).filter(s -> !s.isEmpty()).orElse(null); }
-    static void style(DialogPane p) { if (DeskMain.instance != null) { p.getStylesheets().setAll(DeskMain.instance.scene.getStylesheets()); p.getStyleClass().addAll(DeskMain.instance.root.getStyleClass()); p.setStyle(DeskMain.instance.root.getStyle()); } }
+    /**
+     * 5.55: every Seeky dialog in the Seeky style — no white Windows title bar, rounded corners in the theme's colours,
+     * no "i" icon, dragged by its top; it opens over the Seeky window.
+     */
+    static void style(DialogPane p) {
+        if (DeskMain.instance != null) { p.getStylesheets().setAll(DeskMain.instance.scene.getStylesheets()); p.getStyleClass().addAll(DeskMain.instance.root.getStyleClass()); p.setStyle(DeskMain.instance.root.getStyle()); }
+        if (!p.getStyleClass().contains("seeky-dialog")) p.getStyleClass().add("seeky-dialog");
+        p.setGraphic(null);
+        javafx.scene.Scene scene = p.getScene(); if (scene == null) return;
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        if (scene.getWindow() instanceof javafx.stage.Stage) {
+            javafx.stage.Stage st = (javafx.stage.Stage) scene.getWindow();
+            try { st.initStyle(javafx.stage.StageStyle.TRANSPARENT); } catch (IllegalStateException ignored) {}
+            try { if (st.getOwner() == null && DeskMain.instance != null && DeskMain.instance.stage != null && DeskMain.instance.stage.isShowing()) st.initOwner(DeskMain.instance.stage); } catch (IllegalStateException ignored) {}
+            double[] at = new double[2];
+            p.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> { at[0] = e.getScreenX() - st.getX(); at[1] = e.getScreenY() - st.getY(); });
+            p.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_DRAGGED, e -> { if (at[1] < 64) { st.setX(e.getScreenX() - at[0]); st.setY(e.getScreenY() - at[1]); } });
+        }
+    }
 }

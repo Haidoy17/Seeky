@@ -19,6 +19,8 @@ final class SyncServer implements Closeable {
         /** The code on the screen now, or null when "Ligar telemóvel" is not open. */
         String code(); void codeUsed(); void codeFailed();
         byte[] token(String device); void paired(String device, String deviceName, byte[] token);
+        /** The computer's own EC key pair (P-256), made once and kept; the phone remembers its public half. */
+        java.security.KeyPair identity() throws Exception;
         SyncState.Changes apply(String device, SyncState phone) throws Exception;
         SyncState state(String device, long since) throws Exception;
         void synced(String device, String deviceName, SyncState.Changes changes);
@@ -58,28 +60,49 @@ final class SyncServer implements Closeable {
         try (SyncWire.Channel ch = new SyncWire.Channel(s.getInputStream(), s.getOutputStream(), s)) {
             JSONObject open = new JSONObject(ch.plain()); String op = open.optString("op"), device = open.optString("device", "");
             if (!device.matches("[a-f0-9-]{8,64}")) { ch.plain(error("Telemóvel desconhecido.")); return; }
-            if (op.equals("pair")) pair(ch, open, device);
-            else if (op.equals("session")) session(ch, device, open.optString("name", "Telemóvel"));
+            if (op.equals("pair2")) pair(ch, open, device);
+            else if (op.equals("session2")) session(ch, open, device, open.optString("name", "Telemóvel"));
+            else if (op.equals("pair") || op.equals("session")) ch.plain(error("Actualize o Seeky no telemóvel para a versão 5.55 ou mais recente e volte a ligá-lo."));
         } catch (Exception ignored) {}
     }
     static String error(String m) { return "{\"error\":" + JSONObject.quote(m) + "}"; }
     synchronized boolean tooMany() { return failures >= 5; }
+    /** 5.55: ECDH for the key, the code confirmed bit by bit (the phone commits first in each round). */
     void pair(SyncWire.Channel ch, JSONObject open, String device) throws Exception {
         String code = host.code();
         if (code == null) { ch.plain(error("No computador, abra Ligar telemóvel para ver o código.")); return; }
         if (tooMany()) { ch.plain(error("Demasiadas tentativas. No computador, mostre um código novo.")); return; }
-        ch.key = SyncWire.codeKey(code, SyncWire.unb64(open.getString("salt")));
-        try { if (!"seeky".equals(new JSONObject(ch.text()).optString("hello"))) throw new SecurityException(); }
-        catch (SecurityException | org.json.JSONException e) { synchronized (this) { failures++; } host.codeFailed(); ch.plain(error("Código errado.")); return; }
+        int value = SyncWire.codeValue(code);
+        byte[] theirPub = SyncWire.unb64(open.getString("epk")); java.security.PublicKey theirs = SyncWire.publicKey(theirPub);
+        java.security.KeyPair eph = SyncWire.ephemeral(), id = host.identity(); byte[] ephPub = eph.getPublic().getEncoded(), idPub = id.getPublic().getEncoded();
+        ch.plain(new JSONObject().put("epk", SyncWire.b64(ephPub)).put("spk", SyncWire.b64(idPub)).toString());
+        byte[] transcript = SyncWire.sha(SyncWire.ascii("seeky-pair-2"), SyncWire.ascii(device), theirPub, ephPub, idPub);
+        for (int i = 0; i < SyncWire.CODE_BITS; i++) {
+            byte[] commitment = SyncWire.unb64(new JSONObject(ch.plain()).getString("c"));
+            byte[] ns = SyncWire.random(16); int b = SyncWire.bit(value, i);
+            ch.plain(new JSONObject().put("c", SyncWire.b64(SyncWire.commit(ns, "pc", i, b, transcript))).toString());
+            byte[] nc = SyncWire.unb64(new JSONObject(ch.plain()).getString("n"));
+            if (!SyncWire.same(SyncWire.commit(nc, "phone", i, b, transcript), commitment)) { synchronized (this) { failures++; } host.codeFailed(); ch.plain(error("Código errado.")); return; }
+            ch.plain(new JSONObject().put("n", SyncWire.b64(ns)).toString());
+        }
         synchronized (this) { failures = 0; }
+        ch.key = SyncWire.hkdf(transcript, SyncWire.concat(SyncWire.agree(eph.getPrivate(), theirs), SyncWire.agree(id.getPrivate(), theirs)), "seeky-pair-key-2");
         byte[] token = SyncWire.random(32);
         host.paired(device, open.optString("name", "Telemóvel"), token); host.codeUsed();
         ch.send(new JSONObject().put("token", SyncWire.b64(token)).put("id", host.id()).put("name", host.name()).toString());
     }
-    void session(SyncWire.Channel ch, String device, String deviceName) throws Exception {
+    /** 5.55: fresh ECDH keys every session, bound to this computer's key, the pairing secret and both nonces. */
+    void session(SyncWire.Channel ch, JSONObject open, String device, String deviceName) throws Exception {
         byte[] token = host.token(device);
         if (token == null) { ch.plain(error("Este telemóvel já não está ligado a este computador. Ligue-o outra vez.")); return; }
-        ch.plain("{\"ok\":true}"); ch.key = SyncWire.tokenKey(token);
+        byte[] theirPub = SyncWire.unb64(open.getString("epk")), nc = SyncWire.unb64(open.getString("n")); if (nc.length != 16) return;
+        java.security.PublicKey theirs = SyncWire.publicKey(theirPub); java.security.KeyPair eph = SyncWire.ephemeral(), id = host.identity();
+        byte[] ephPub = eph.getPublic().getEncoded(), ns = SyncWire.random(16);
+        ch.plain(new JSONObject().put("epk", SyncWire.b64(ephPub)).put("n", SyncWire.b64(ns)).toString());
+        byte[] transcript = SyncWire.sha(SyncWire.ascii("seeky-session-2"), SyncWire.ascii(device), theirPub, ephPub, id.getPublic().getEncoded(), nc, ns);
+        ch.key = SyncWire.hkdf(transcript, SyncWire.concat(SyncWire.concat(SyncWire.agree(eph.getPrivate(), theirs), SyncWire.agree(id.getPrivate(), theirs)), token), "seeky-session-key-2");
+        if (!"seeky".equals(new JSONObject(ch.text()).optString("hello"))) return;
+        ch.send("{\"ok\":true}");
         for (;;) {
             JSONObject r = new JSONObject(ch.text()); String req = r.optString("req");
             switch (req) {

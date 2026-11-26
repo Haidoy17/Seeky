@@ -1,0 +1,9 @@
+PASS a normal request is answered
+PASS the key goes only from the server to Google
+PASS tools are dropped and the answer size is capped
+PASS a model that is not offered looks not found (the app tries the next)
+PASS a request without the app id is refused
+PASS a request that is too large is refused
+PASS the daily limit per device is enforced
+PASS the service says it is up
+SeekyIaWorkerTest: 8 checks

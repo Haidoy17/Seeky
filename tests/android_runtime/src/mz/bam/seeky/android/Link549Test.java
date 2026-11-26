@@ -16,7 +16,7 @@ public class Link549Test {
         FakePc(File dir){outbox=new File(dir,"para o telemóvel.txt");inbox=new File(dir,"recebidos");inbox.mkdirs();}
         public String id(){return "pc-teste";}public String name(){return "PC de teste";}
         public synchronized String code(){return code;}public synchronized void codeUsed(){code=null;}public void codeFailed(){}
-        public synchronized byte[] token(String d){return tokens.get(d);}public synchronized void paired(String d,String n,byte[] t){tokens.put(d,t);}
+        public synchronized byte[] token(String d){return tokens.get(d);}public synchronized void paired(String d,String n,byte[] t){tokens.put(d,t);}java.security.KeyPair key;public synchronized java.security.KeyPair identity()throws Exception{if(key==null)key=SyncWire.ephemeral();return key;}
         public synchronized SyncState.Changes apply(String device,SyncState phone){
             SyncState.Changes ch=SyncState.merge(st,phone);
             for(Map.Entry<String,String> e:ch.relink.entrySet())for(SyncState.Note n:st.notes)if(n.uuid.equals(e.getKey()))n.uuid=e.getValue();
@@ -80,6 +80,25 @@ public class Link549Test {
         }finally{server.close();}
     }
 
+    @Test public void pairingCannotBeTestedOfflineAndAnotherComputerIsRefused()throws Exception{
+        // 5.55: the code is confirmed bit by bit after an ECDH exchange; the phone keeps the computer's key.
+        FakePc pc=new FakePc(app.getCacheDir());SyncServer server=new SyncServer(pc,0,0);server.start();
+        try{
+            try{SyncClient.pair("127.0.0.1",server.port(),PhoneSync.device(app),"Telemóvel","654321");fail("wrong code accepted");}catch(java.io.IOException e){assertTrue(e.getMessage(),e.getMessage().contains("Código errado"));}
+            SyncClient.Computer c=SyncClient.pair("127.0.0.1",server.port(),PhoneSync.device(app),"Telemóvel","123456");
+            assertNotNull(c.key);assertArrayEquals(pc.identity().getPublic().getEncoded(),c.key);assertEquals(32,c.token.length);
+            try(SyncWire.Channel ch=SyncClient.session(c,PhoneSync.device(app),"Telemóvel")){ch.send("{\"req\":\"bye\"}");}
+            // An impostor that even knows the pairing secret but not the computer's private key is refused.
+            FakePc rogue=new FakePc(app.getCacheDir());rogue.tokens.put(PhoneSync.device(app),c.token);SyncServer fake=new SyncServer(rogue,0,0);fake.start();
+            try{SyncClient.Computer there=new SyncClient.Computer();there.host="127.0.0.1";there.port=fake.port();there.token=c.token;there.key=c.key;
+                try{SyncClient.session(there,PhoneSync.device(app),"Telemóvel").close();fail("impostor accepted");}catch(java.io.IOException e){assertTrue(e.getMessage(),e.getMessage().contains("não é o mesmo"));}}
+            finally{fake.close();}
+            // The old way of pairing is refused with a clear message.
+            try(SyncWire.Channel ch=SyncClient.connect("127.0.0.1",server.port())){ch.plain("{\"op\":\"pair\",\"device\":\""+PhoneSync.device(app)+"\",\"salt\":\"AAAA\"}");assertTrue(ch.plain().contains("Actualize o Seeky"));}
+            // A phone paired before 5.55 (no computer key kept) is asked to pair again.
+            PhoneSync.remember(app,c);assertNotNull(PhoneSync.computer(app));PhoneSync.prefs(app).edit().remove("pc_key").apply();assertNull(PhoneSync.computer(app));
+        }finally{server.close();}
+    }
     @Test public void coursesWithModulesAndSubjectsTravelBothWays()throws Exception{
         // 5.52: Curso › Módulo ou Disciplina, the same on the phone and on the computer.
         FakePc pc=new FakePc(app.getCacheDir());SyncServer server=new SyncServer(pc,0,0);server.start();

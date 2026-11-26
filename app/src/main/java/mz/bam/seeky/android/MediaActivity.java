@@ -427,12 +427,12 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         center.setGravity(Gravity.CENTER);
         boolean tracks = MediaQueue.size() > 1;
         if (tracks) center.addView(iconButton("skipprev", "Faixa anterior", 26, () -> command(MediaPlaybackService.TRACK_PREV)), new LinearLayout.LayoutParams(dp(56), dp(56)));
-        center.addView(iconButton("replay10", "Recuar 10 segundos", 30, () -> { if (service != null) service.skip(-10000); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        center.addView(iconButton(MediaSkip.backIcon(this), AppLanguage.text(this, "Recuar") + " " + MediaSkip.seconds(this) + " " + AppLanguage.text(this, "segundos"), 30, () -> { if (service != null) service.skip(-MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
         buildPlay(72);
         LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(dp(72), dp(72));
         pp.setMargins(dp(18), 0, dp(18), 0);
         center.addView(play, pp);
-        center.addView(iconButton("forward10", "Avançar 10 segundos", 30, () -> { if (service != null) service.skip(10000); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        center.addView(iconButton(MediaSkip.forwardIcon(this), AppLanguage.text(this, "Avançar") + " " + MediaSkip.seconds(this) + " " + AppLanguage.text(this, "segundos"), 30, () -> { if (service != null) service.skip(MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
         if (tracks) center.addView(iconButton("skipnext", "Faixa seguinte", 26, () -> command(MediaPlaybackService.TRACK_NEXT)), new LinearLayout.LayoutParams(dp(56), dp(56)));
         ui.addView(center, new LinearLayout.LayoutParams(-1, 0, 1));
 
@@ -608,8 +608,8 @@ public final class MediaActivity extends Activity implements TextureView.Surface
     void menu() {
         UiPanel p = new UiPanel(this, "Mais opções", clean(titleView.getText().toString()), isVideo ? "video" : "audio");
         p.section("Reprodução");
-        if (!isVideo) p.quick(new String[]{"replay10", "forward10", "timer"}, new String[]{"−10 s", "+10 s", "Temporizador"}, new Runnable[]{
-                () -> { if (service != null) service.skip(-10000); }, () -> { if (service != null) service.skip(10000); }, () -> NarrationIndex.sleep(this)});
+        if (!isVideo) p.quick(new String[]{MediaSkip.backIcon(this), MediaSkip.forwardIcon(this), "timer"}, new String[]{MediaSkip.back(this), MediaSkip.forward(this), "Temporizador"}, new Runnable[]{
+                () -> { if (service != null) service.skip(-MediaSkip.ms(this)); }, () -> { if (service != null) service.skip(MediaSkip.ms(this)); }, () -> NarrationIndex.sleep(this)});
         else {
             p.action("screenrotate", AppLanguage.text(this, "Rodar ecrã:") + " " + AppLanguage.text(this, ORIENTATIONS[orientation]), "Automático, horizontal ou vertical", false, this::cycleOrientation);
             p.action("rotate", "Rodar imagem 90°", "Para vídeos gravados de lado", false, this::rotateImage);

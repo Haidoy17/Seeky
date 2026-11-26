@@ -1,0 +1,20 @@
+// Testes do serviço Seeky IA (Cloudflare Worker) com o Google e o KV simulados. Correr: node tests/server/seeky-ia.test.mjs
+import worker from '../../server/seeky-ia/worker.js';
+let checks = 0; const ok = (v, n) => { if (!v) throw new Error('FALHOU: ' + n); checks++; console.log('PASS ' + n); };
+const kv = new Map(); const env = { GEMINI_KEY: 'chave-secreta', PER_INSTALL: '3', PER_IP: '5', PER_DAY: '100', MODELS: 'gemini-3.5-flash-lite,gemini-3.5-flash', LIMITS: { get: async k => kv.get(k) ?? null, put: async (k, v) => { kv.set(k, v); } } };
+let sent = null; globalThis.fetch = async (url, init) => { sent = { url, init }; return new Response('{"candidates":[{"content":{"parts":[{"text":"Olá"}]}}]}', { status: 200 }); };
+const install = '0123456789abcdef0123456789abcdef';
+const req = (model, body, headers = {}) => new Request(`https://seeky-ia.exemplo.workers.dev/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'X-Seeky-Install': install, 'CF-Connecting-IP': '1.2.3.4', ...headers }, body: JSON.stringify(body) });
+const body = { contents: [{ role: 'user', parts: [{ text: 'Olá' }] }], systemInstruction: { parts: [{ text: 'És o Seeky' }] }, generationConfig: { temperature: 0.35, maxOutputTokens: 999999 }, tools: [{ codeExecution: {} }] };
+let r = await worker.fetch(req('gemini-3.5-flash-lite', body), env);
+ok(r.status === 200 && (await r.text()).includes('Olá'), 'a normal request is answered');
+ok(sent.init.headers['x-goog-api-key'] === 'chave-secreta' && sent.url.endsWith('/gemini-3.5-flash-lite:generateContent'), 'the key goes only from the server to Google');
+const forwarded = JSON.parse(sent.init.body);
+ok(!forwarded.tools && forwarded.generationConfig.maxOutputTokens === 4096, 'tools are dropped and the answer size is capped');
+r = await worker.fetch(req('gemini-9-ultra', body), env); ok(r.status === 404, 'a model that is not offered looks not found (the app tries the next)');
+r = await worker.fetch(req('gemini-3.5-flash', body, { 'X-Seeky-Install': 'x' }), env); ok(r.status === 403, 'a request without the app id is refused');
+r = await worker.fetch(new Request('https://x.workers.dev/v1beta/models/gemini-3.5-flash:generateContent', { method: 'POST', headers: { 'X-Seeky-Install': install }, body: 'x'.repeat(300000) }), env); ok(r.status === 413, 'a request that is too large is refused');
+await worker.fetch(req('gemini-3.5-flash', body), env); await worker.fetch(req('gemini-3.5-flash', body), env);
+r = await worker.fetch(req('gemini-3.5-flash', body), env); ok(r.status === 429 && (await r.text()).includes('limite diário deste aparelho'), 'the daily limit per device is enforced');
+r = await worker.fetch(new Request('https://x.workers.dev/', { method: 'GET' }), env); ok(r.status === 200, 'the service says it is up');
+console.log('SeekyIaWorkerTest: ' + checks + ' checks');

@@ -1,0 +1,5 @@
+Verifies
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+versionCode 5008200 · versionName 5.55.0
+SHA-256 do APK: d830770e50b7b1169a6100fe9b2e4f8620b355f42f3175742bafb5f656a0d1d6
+Testes: núcleo OK; IA (host) OK (modelos 34 verificações, incl. picos de uso e serviço sem chave); serviço Seeky IA 8 verificações (node); Robolectric completo 496 testes OK (inclui Link549Test com o emparelhamento novo).

@@ -1,3 +1,18 @@
+## Seeky 5.55.0
+
+Instale **Seeky_5.55.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.55.0.
+
+### Importante
+- **Volte a ligar o telemóvel ao computador** (Seeky ligado): o emparelhamento ficou mais seguro.
+
+### Novidades
+- Leitura em voz alta que não puxa a página enquanto desliza (PDF, Word, EPUB).
+- Música: saltar 10/15/30 s; no Windows também aleatório, repetir e editar a letra.
+- Avisos do Windows com o estilo do Seeky e *Reiniciar agora* depois de actualizar.
+- Seeky IA: modelos mais recentes primeiro, troca automática em picos de uso, preparada para funcionar
+  sem chave com o serviço Seeky IA.
+
 ## Seeky 5.54.0
 
 Instale **Seeky_5.54.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

@@ -9,12 +9,16 @@ final class DeskAi {
     private DeskAi() {}
     static boolean loaded;
     static void load(DeskStore s) {
-        if (loaded) return; loaded = true;
+        if (loaded) return; loaded = true; SeekyAiService.load(serviceStore(s));
         String known = s.get("gemini_models", "");
         SeekyAiModels.restore(s.get("gemini_model", ""), s.get("gemini_working", ""), known.isEmpty() ? Collections.emptyList() : Arrays.asList(known.split(",")));
         SeekyAiModels.store = (chosen, working, available) -> { s.put("gemini_model", chosen); s.put("gemini_working", working); s.put("gemini_models", String.join(",", available)); };
     }
-    static String key(DeskStore s) throws Exception { return DeskSecret.reveal(s.get("gemini_key", "")); }
+    /** The person's own key, or (5.55) the Seeky IA service when there is none. */
+    static String key(DeskStore s) throws Exception { String own = DeskSecret.reveal(s.get("gemini_key", "")); return own.isEmpty() && SeekyAiService.available() ? SeekyAiService.KEY : own; }
+    /** Seeky IA can answer: own key saved, or the Seeky IA service is on. */
+    static boolean ready(DeskStore s) { load(s); return !s.get("gemini_key", "").isEmpty() || SeekyAiService.available(); }
+    static SeekyAiService.Store serviceStore(DeskStore s) { return new SeekyAiService.Store() { public String get(String k, String f) { return s.get(k, f); } public void put(String k, String v) { s.put(k, v); } }; }
 
     /** Ligação da IA: key, model and test. */
     static void settings(DeskMain d) {
@@ -25,7 +29,7 @@ final class DeskAi {
         List<String> names = new ArrayList<>(SeekyAiModels.available.isEmpty() ? Arrays.asList(SeekyAiModels.FALLBACKS) : SeekyAiModels.available);
         for (String m : names) model.getItems().add(SeekyAiModels.label(m));
         model.getSelectionModel().select(SeekyAiModels.chosen.isEmpty() ? 0 : Math.max(0, names.indexOf(SeekyAiModels.chosen) + 1));
-        Label status = DeskUi.muted("Automático usa " + SeekyAiModels.current() + ". A chave fica protegida pelo Windows e só é enviada à Google.");
+        Label status = DeskUi.muted("Automático usa " + SeekyAiModels.current() + ". A chave fica protegida pelo Windows e só é enviada à Google." + (SeekyAiService.available() ? "\n\nSem chave, o Seeky IA já funciona pelo serviço do Seeky. " + SeekyAiService.about() : ""));
         VBox box = new VBox(10, DeskUi.text("Use uma chave do Google AI Studio (quota gratuita). O Seeky envia à Google só o texto que pedir."), key, DeskUi.muted("Modelo"), model, status);
         box.setPrefWidth(460); dialog.getDialogPane().setContent(box);
         ButtonType test = new ButtonType("Testar e guardar", ButtonBar.ButtonData.OK_DONE); dialog.getDialogPane().getButtonTypes().addAll(test, ButtonType.CANCEL);
@@ -34,7 +38,7 @@ final class DeskAi {
             e.consume(); ok.setDisable(true); status.setText("A testar uma resposta do Gemini…");
             String entered = key.getText().trim(); int pick = model.getSelectionModel().getSelectedIndex(); String wanted = pick <= 0 ? "" : names.get(pick - 1);
             d.run(null, () -> {
-                String secret = entered.isEmpty() ? key(d.store) : entered;
+                String secret = entered.isEmpty() ? key(d.store) : entered; if (secret.isEmpty()) throw new Exception("Introduza uma chave do Google AI Studio.");
                 if (!SeekyAiClient.validKey(secret)) throw new Exception("Introduza uma chave válida do Google AI Studio.");
                 SeekyAiModels.choose(wanted); SeekyAiClient.testConnection(secret, new SeekyAiClient.Call());
                 if (!entered.isEmpty()) d.store.put("gemini_key", DeskSecret.protect(secret));
@@ -48,7 +52,7 @@ final class DeskAi {
     /** The ✨ menu of a note. */
     static void menu(DeskMain d, TextArea body, TextField title) {
         load(d.store);
-        if (d.store.get("gemini_key", "").isEmpty()) { if (DeskUi.confirm("Ligar a Seeky IA", "Para usar a IA nas notas, guarde primeiro a sua chave do Google Gemini.")) settings(d); return; }
+        if (!ready(d.store)) { if (DeskUi.confirm("Ligar a Seeky IA", "Para usar a IA nas notas, guarde primeiro a sua chave do Google Gemini.")) settings(d); return; }
         ContextMenu m = new ContextMenu();
         for (NotepadAiText.Action a : NotepadAiText.ACTIONS) { MenuItem i = new MenuItem(a.label); i.setOnAction(e -> run(d, a, a.key.equals("pedir") ? DeskUi.ask("Pedir ao Seeky", "Por exemplo: transforma em esboço de sermão", "") : "", body, title)); m.getItems().add(i); }
         m.show(body, javafx.geometry.Side.TOP, 20, 20);

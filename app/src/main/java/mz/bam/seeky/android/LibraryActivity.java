@@ -527,6 +527,7 @@ public final class LibraryActivity extends Activity {
             menu();
         });
         if (!video()) {
+            panel.action("forward" + MediaSkip.seconds(this), AppLanguage.text(this, "Saltar") + ": " + MediaSkip.seconds(this) + " s", "Recuar e avançar no leitor e na notificação · toque para 10, 15 ou 30 s", false, () -> { MediaSkip.next(this); menu(); });
             panel.action("tune", "Equalizador e efeitos", "10 bandas, graves, agudos, virtualização, volume", false, () -> EqualizerActivity.open(this));
             panel.action("type", Lyrics.online(this) ? "Letras da internet: activo" : "Letras da internet: desligado", "LRCLIB e Lyrics.ovh · envia só título, artista, álbum e duração", false, () -> { Lyrics.setOnline(this, !Lyrics.online(this)); menu(); });
             String mode = TranscribeWork.mode(this);

@@ -255,7 +255,7 @@ final class DeskReader {
     }
     void ask(String label, String prompt, String source, String title) {
         DeskAi.load(d.store);
-        if (d.store.get("gemini_key", "").isEmpty()) { if (DeskUi.confirm("Ligar a Seeky IA", "Para usar a IA nos livros, guarde primeiro a sua chave do Google Gemini.")) DeskAi.settings(d); return; }
+        if (!DeskAi.ready(d.store)) { if (DeskUi.confirm("Ligar a Seeky IA", "Para usar a IA nos livros, guarde primeiro a sua chave do Google Gemini.")) DeskAi.settings(d); return; }
         String text = source == null ? "" : source.trim(); if (text.isEmpty()) { DeskUi.info("Sem texto", "Esta página não tem texto que o Seeky consiga ler."); return; }
         final String sent = NotepadAiText.cut(text);
         d.run("O Seeky está a ler…", () -> new SeekyAiClient().ask(SeekyAiCore.GEMINI, DeskAi.key(d.store), sent, title, Collections.emptyList(), prompt, false, new SeekyAiClient.Call()).text, answer -> {

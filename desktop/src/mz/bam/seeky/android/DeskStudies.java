@@ -486,7 +486,7 @@ final class DeskStudies {
     void ask(long sid, String source, String text) {
         if (text == null || text.trim().length() < 40) { DeskUi.info("Texto curto", "Escreva ou cole um texto com pelo menos algumas frases."); return; }
         DeskAi.load(d.store);
-        if (d.store.get("gemini_key", "").isEmpty()) { if (DeskUi.confirm("Ligar a Seeky IA", "Para criar cartões com a IA, guarde primeiro a sua chave do Google Gemini.")) DeskAi.settings(d); return; }
+        if (!DeskAi.ready(d.store)) { if (DeskUi.confirm("Ligar a Seeky IA", "Para criar cartões com a IA, guarde primeiro a sua chave do Google Gemini.")) DeskAi.settings(d); return; }
         String prompt = "Cria oito cartões de revisão e cinco perguntas de escolha múltipla sobre este texto, em português. Para cada cartão usa exactamente este formato:\nPergunta: ...\nResposta: ...\n"
             + "Depois escreve a linha PERGUNTAS e, para cada pergunta, este formato:\nQ: ...\nA) ...\nB) ...\nC) ...\nD) ...\nCerta: (letra)\nPorquê: (uma frase)\nNão escrevas mais nada.";
         String sent = NotepadAiText.cut(text.trim());

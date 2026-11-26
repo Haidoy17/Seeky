@@ -1,0 +1,14 @@
+name = "seeky-ia"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+# Contagens diárias (crie com: npx wrangler kv namespace create LIMITS e copie o id para aqui)
+kv_namespaces = [{ binding = "LIMITS", id = "COLOQUE_AQUI_O_ID_DO_KV" }]
+
+[vars]
+# Modelos oferecidos, do mais recente ao mais antigo (a aplicação tenta os seguintes quando um está ocupado).
+MODELS = "gemini-3.5-flash-lite,gemini-3.5-flash"
+PER_INSTALL = "40"   # pedidos por aparelho por dia
+PER_IP = "120"       # pedidos por endereço de rede por dia
+PER_DAY = "1000"     # pedidos no total por dia (protege a sua quota)
+# A chave do Gemini NÃO vai aqui: npx wrangler secret put GEMINI_KEY

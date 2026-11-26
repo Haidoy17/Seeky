@@ -11,6 +11,7 @@ final class Icons extends View {
     final float stroke;
     Icons(Context c,String name,int color){super(c);this.name=name;this.color=color;stroke=AppPalette.of(c).modern?1.55f:1.8f;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
     void setSymbol(String name,int color){if(!this.name.equals(name)||this.color!=color){this.name=name;this.color=color;invalidate();}}
+    void number(Canvas canvas,String n){Paint.Style was=p.getStyle();float w=p.getStrokeWidth();p.setStyle(Paint.Style.FILL);p.setStrokeWidth(0);p.setTextAlign(Paint.Align.CENTER);p.setTextSize(7.2f);p.setFakeBoldText(true);canvas.drawText(n,12,15.4f,p);p.setFakeBoldText(false);p.setStyle(was);p.setStrokeWidth(w);}
     void line(Canvas c,float... points){for(int i=0;i+3<points.length;i+=2)c.drawLine(points[i],points[i+1],points[i+2],points[i+3],p);}
     @Override protected void onDraw(Canvas canvas){
         super.onDraw(canvas);canvas.save();float s=Math.min(getWidth(),getHeight())/24f;canvas.translate((getWidth()-24*s)/2,(getHeight()-24*s)/2);canvas.scale(s,s);p.setColor(color);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(stroke);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
@@ -35,6 +36,8 @@ final class Icons extends View {
             case "info":canvas.drawCircle(12,12,9,p);line(canvas,12,11,12,17);p.setStyle(Paint.Style.FILL);canvas.drawCircle(12,7.6f,1.2f,p);break;
             case "playfill":p.setStyle(Paint.Style.FILL);{android.graphics.Path t=new android.graphics.Path();t.moveTo(8.5f,4.5f);t.lineTo(19.5f,12);t.lineTo(8.5f,19.5f);t.close();canvas.drawPath(t,p);}break;
             case "pausefill":p.setStyle(Paint.Style.FILL);canvas.drawRoundRect(6.5f,4.5f,10.5f,19.5f,1.5f,1.5f,p);canvas.drawRoundRect(13.5f,4.5f,17.5f,19.5f,1.5f,1.5f,p);break;
+            case "replay15":case "replay30":canvas.drawArc(3,3,21,21,200,250,false,p);line(canvas,3.6f,4.5f,3.6f,9.2f,8.3f,9.2f);number(canvas,name.substring(6));break;
+            case "forward15":case "forward30":canvas.drawArc(3,3,21,21,-90,250,false,p);line(canvas,20.4f,4.5f,20.4f,9.2f,15.7f,9.2f);number(canvas,name.substring(7));break;
             case "replay10":canvas.drawArc(3,3,21,21,200,250,false,p);line(canvas,3.6f,4.5f,3.6f,9.2f,8.3f,9.2f);p.setStrokeWidth(1.4f);line(canvas,9.5f,10,9.5f,15.5f);canvas.drawOval(11.6f,10,15,15.5f,p);break;
             case "forward10":canvas.drawArc(3,3,21,21,-90,250,false,p);line(canvas,20.4f,4.5f,20.4f,9.2f,15.7f,9.2f);p.setStrokeWidth(1.4f);line(canvas,9.5f,10,9.5f,15.5f);canvas.drawOval(11.6f,10,15,15.5f,p);break;
             case "repeat":line(canvas,4,11,4,9,6,7,19,7);line(canvas,16,4,19,7,16,10);line(canvas,20,13,20,15,18,17,5,17);line(canvas,8,14,5,17,8,20);break;

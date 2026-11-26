@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008100,
-  "versionName": "5.54.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.54.0-app.zip",
-  "sha256": "8fff6c59c84148790536bafd5c2b32090c895cb4123a85aea4baaea24027b7dc",
-  "bytes": 9316987,
+  "versionCode": 5008200,
+  "versionName": "5.55.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.55.0-app.zip",
+  "sha256": "e31b8267945cc4000de41aa9c6c383f6832daafbf1820c6914a90dad0f29c776",
+  "bytes": 9333652,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Vozes naturais do Microsoft Edge para ler em voz alta; gravar em MP3 com essas vozes através do Azure Speech."
+  "notes": "Avisos com o estilo do Seeky e Reiniciar agora; música com aleatório, repetir, saltar 10/15/30 s e editar letra; Seeky ligado mais seguro (volte a ligar o telemóvel)."
 }

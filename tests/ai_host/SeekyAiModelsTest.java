@@ -6,7 +6,7 @@ public final class SeekyAiModelsTest {
  static int checks;static void ok(boolean value,String name){if(!value)throw new AssertionError(name);checks++;System.out.println("PASS "+name);}
  static final String KEY="test-only-personal-api-key-not-shipped";
  static final class Connection extends HttpURLConnection {
-  int code=200;byte[] reply;final ByteArrayOutputStream sent=new ByteArrayOutputStream();Connection(URL url,int code,String reply){super(url);this.code=code;this.reply=reply.getBytes(StandardCharsets.UTF_8);}
+  int code=200;byte[] reply;List<String> heads;final ByteArrayOutputStream sent=new ByteArrayOutputStream();public void setRequestProperty(String k,String v){super.setRequestProperty(k,v);if(heads!=null)heads.add(k+"="+v);}Connection(URL url,int code,String reply){super(url);this.code=code;this.reply=reply.getBytes(StandardCharsets.UTF_8);}
   public void disconnect(){}public boolean usingProxy(){return false;}public void connect(){}public int getResponseCode(){return code;}public OutputStream getOutputStream(){return sent;}
   public InputStream getInputStream(){return new ByteArrayInputStream(reply);}public InputStream getErrorStream(){return new ByteArrayInputStream(reply);}
  }
@@ -17,7 +17,7 @@ public final class SeekyAiModelsTest {
   ok(SeekyAiModels.DEFAULT.equals("gemini-3.5-flash-lite"),"default model is gemini-3.5-flash-lite");
   ok(SeekyAiModels.clean("models/gemini-3.5-flash").equals("gemini-3.5-flash")&&SeekyAiModels.clean("../x?key=1").isEmpty(),"model names are cleaned and unsafe names refused");
   List<String> ranked=SeekyAiModels.rank(Arrays.asList("models/gemini-2.5-flash","models/gemini-3.5-pro","models/gemini-3.5-flash","models/gemini-2.5-flash-preview-tts","models/text-embedding-004","models/gemini-3.5-flash-lite-preview-09","models/gemini-3.5-flash-lite","models/gemini-2.0-flash-live"));
-  ok(ranked.equals(Arrays.asList("gemini-3.5-flash-lite","gemini-3.5-flash-lite-preview-09","gemini-3.5-flash","gemini-2.5-flash","gemini-3.5-pro")),"text models ranked lite, flash, then pro; speech, embedding and live left out: "+ranked);
+  ok(ranked.equals(Arrays.asList("gemini-3.5-flash-lite","gemini-3.5-flash-lite-preview-09","gemini-3.5-flash","gemini-3.5-pro","gemini-2.5-flash")),"newest version first, then lite, flash, pro; speech, embedding and live left out: "+ranked);
   reset();
   ok(SeekyAiModels.order().equals(Arrays.asList("gemini-3.5-flash-lite","gemini-3.5-flash","gemini-4-hydrogen")),"without a list: default, flash, then the newest Gemini 4 Hydrogen: "+SeekyAiModels.order());
   ok(SeekyAiClient.endpoint(SeekyAiCore.GEMINI).equals("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent"),"the request uses the chosen model, not a fixed one");
@@ -42,6 +42,29 @@ public final class SeekyAiModelsTest {
   SeekyAiClient.Network none=new SeekyAiClient.Network(url->{urls.add(url.toString());return new Connection(url,404,GONE);});
   try{none.post(SeekyAiCore.GEMINI,KEY,new JSONObject(),new SeekyAiClient.Call());throw new AssertionError("should fail");}catch(SeekyAiClient.HttpFailure e){ok(e.status==404&&e.getMessage().contains("nenhum modelo disponível")&&e.getMessage().contains("Testar e guardar")&&!e.getMessage().contains("v1beta"),"no model left: plain message: "+e.getMessage());}
   ok(urls.size()==3,"only the known models are tried, without endless retries");
+  // 5.55: a usage peak (429 / 503) moves on to the next model at once, and that model waits at the end for a while.
+  reset();SeekyAiModels.BUSY.clear();urls.clear();
+  SeekyAiClient.Network peak=new SeekyAiClient.Network(url->{urls.add(url.toString());return url.toString().contains("gemini-3.5-flash-lite")?new Connection(url,503,"{\"error\":{\"code\":503,\"status\":\"UNAVAILABLE\",\"message\":\"The model is overloaded.\"}}"):new Connection(url,200,OK);});
+  String peakRaw=peak.post(SeekyAiCore.GEMINI,KEY,new JSONObject(),new SeekyAiClient.Call());
+  ok(peakRaw.contains("OK")&&urls.size()==2&&urls.get(1).contains("gemini-3.5-flash:"),"an overloaded model passes to the next one: "+urls);
+  String busyNotice=SeekyAiModels.takeNotice();ok(busyNotice.contains("muito uso")&&busyNotice.contains("gemini-3.5-flash"),"the user is told the first model was busy: "+busyNotice);
+  SeekyAiModels.working="";ok(SeekyAiModels.order().get(SeekyAiModels.order().size()-1).equals("gemini-3.5-flash-lite"),"the busy model waits at the end for a while: "+SeekyAiModels.order());
+  reset();SeekyAiModels.BUSY.clear();urls.clear();
+  SeekyAiClient.Network all=new SeekyAiClient.Network(url->{urls.add(url.toString());return new Connection(url,429,"{\"error\":{\"code\":429,\"status\":\"RESOURCE_EXHAUSTED\",\"message\":\"Too many requests\"}}");});
+  try{all.post(SeekyAiCore.GEMINI,KEY,new JSONObject(),new SeekyAiClient.Call());throw new AssertionError("should fail");}catch(SeekyAiClient.HttpFailure e){ok(e.status==429&&e.getMessage().contains("muito uso")&&urls.size()==3,"every model busy: one clear message after trying each once: "+e.getMessage());}
+  SeekyAiModels.BUSY.clear();
+  // 5.55: newest models of the key first.
+  reset();SeekyAiModels.list(Arrays.asList("models/gemini-3.5-flash-lite","models/gemini-4.0-flash","models/gemini-4.0-flash-lite"));
+  ok(SeekyAiModels.order().get(0).equals("gemini-4.0-flash-lite")&&SeekyAiModels.order().get(1).equals("gemini-4.0-flash"),"automatic uses the newest Gemini of the key first: "+SeekyAiModels.order());
+  // 5.55: Seeky IA without a key — through the Seeky service, never with a key inside the app.
+  reset();urls.clear();List<String> heads=new ArrayList<>();
+  ok(SeekyAiService.parse("{\"enabled\":true,\"service\":\"https://seeky-ia.exemplo.workers.dev\"}").equals("https://seeky-ia.exemplo.workers.dev")&&SeekyAiService.parse("{\"enabled\":true,\"service\":\"https://evil.example.com\"}").isEmpty()&&SeekyAiService.parse("{\"enabled\":false,\"service\":\"https://a.workers.dev\"}").isEmpty()&&SeekyAiService.parse("{\"enabled\":true,\"service\":\"http://a.workers.dev\"}").isEmpty(),"only an https *.workers.dev address that is switched on is accepted");
+  SeekyAiService.url="";SeekyAiService.install="";ok(!SeekyAiClient.validKey(SeekyAiService.KEY),"without the service the placeholder is not a key");
+  SeekyAiService.url="https://seeky-ia.exemplo.workers.dev";SeekyAiService.install="0123456789abcdef0123456789abcdef";
+  SeekyAiClient.Network svc=new SeekyAiClient.Network(url->{urls.add(url.toString());Connection c=new Connection(url,200,OK);c.heads=heads;return c;});
+  svc.post(SeekyAiCore.GEMINI,SeekyAiService.KEY,new JSONObject(),new SeekyAiClient.Call());
+  ok(SeekyAiClient.validKey(SeekyAiService.KEY)&&urls.get(0).startsWith("https://seeky-ia.exemplo.workers.dev/v1beta/models/")&&heads.contains("X-Seeky-Install=0123456789abcdef0123456789abcdef")&&!heads.toString().contains("x-goog-api-key"),"the service gets the install id and no key: "+urls+" "+heads);
+  SeekyAiService.url="";SeekyAiService.install="";
   // A wrong key is not a model problem: one attempt only.
   reset();urls.clear();String bad=new JSONObject().put("error",new JSONObject().put("status","INVALID_ARGUMENT").put("message","API key not valid").put("details",new JSONArray().put(new JSONObject().put("reason","API_KEY_INVALID")))).toString();
   SeekyAiClient.Network badKey=new SeekyAiClient.Network(url->{urls.add(url.toString());return new Connection(url,400,bad);});
@@ -73,10 +96,10 @@ public final class SeekyAiModelsTest {
   String told=SeekyAiModels.takeNotice();
   ok(urls.get(0).contains("/gemini-4-hydrogen:generateContent")&&urls.get(1).contains("/gemini-3.5-flash-lite:")&&told.contains("Gemini 4 Hydrogen")&&told.contains("quota gratuita"),"Hydrogen without free quota: the next model answers and the reason is explained: "+told);
   ok(SeekyAiModels.chosen.isEmpty(),"the choice goes back to automatic after a key without quota for it");
-  // An ordinary quota limit (not zero) is not a model problem: no switch.
+  // 5.55: an ordinary rate limit (a usage peak) tries the other models once each, then stops with 429.
   reset();SeekyAiModels.choose("gemini-4-hydrogen");urls.clear();
   SeekyAiClient.Network busy=new SeekyAiClient.Network(url->{urls.add(url.toString());return new Connection(url,429,quota.replace("limit: 0","limit: 20"));});
-  try{busy.post(SeekyAiCore.GEMINI,KEY,plain,new SeekyAiClient.Call());throw new AssertionError();}catch(SeekyAiClient.HttpFailure e){ok(urls.size()==1&&e.status==429,"a normal rate limit stops without switching models");}
+  try{busy.post(SeekyAiCore.GEMINI,KEY,plain,new SeekyAiClient.Call());throw new AssertionError();}catch(SeekyAiClient.HttpFailure e){ok(urls.size()==SeekyAiModels.order().size()&&urls.size()>1&&e.status==429,"a usage peak tries each other model once, then stops: "+urls.size());SeekyAiModels.BUSY.clear();}
   // The thinking setting refused (HTTP 400): asked again once, without it.
   reset();SeekyAiModels.choose("gemini-4-hydrogen");urls.clear();final List<Connection> conns=new ArrayList<>();
   String refuse=new JSONObject().put("error",new JSONObject().put("code",400).put("status","INVALID_ARGUMENT").put("message","Invalid value at 'generation_config.thinking_config.thinking_level'")).toString();

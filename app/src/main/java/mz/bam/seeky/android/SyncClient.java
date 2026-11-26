@@ -11,7 +11,7 @@ import org.json.JSONObject;
 final class SyncClient {
     private SyncClient() {}
     interface Local { SyncState state(long since) throws Exception; SyncState.Changes apply(SyncState computer) throws Exception; }
-    static final class Computer { String id = "", name = "", host = ""; int port = SyncWire.TCP_PORT; byte[] token; }
+    static final class Computer { String id = "", name = "", host = ""; int port = SyncWire.TCP_PORT; byte[] token, key; }
     static final class Result { int notesHere, otherHere, notesThere, otherThere; }
 
     /** Asks the local network who has Seeky open on a computer (a second or two). */
@@ -41,23 +41,53 @@ final class SyncClient {
     }
     static void failIfError(String plain) throws IOException { JSONObject o; try { o = new JSONObject(plain); } catch (Exception e) { return; } if (o.has("error")) throw new IOException(o.optString("error")); }
 
-    /** Pairs with the 6-digit code shown on the computer; the computer gets a name and a secret. */
+    /**
+     * Pairs with the 6-digit code shown on the computer (5.55). An ephemeral ECDH exchange gives the key; the code is
+     * checked bit by bit with commitments, so nobody can test codes away from the connection. The phone keeps the
+     * computer's own public key and refuses any other computer afterwards.
+     */
     static Computer pair(String host, int port, String device, String deviceName, String code) throws Exception {
-        String clean = code == null ? "" : code.replaceAll("\\D", ""); if (clean.length() != 6) throw new IOException("Escreva os 6 números que aparecem no computador.");
+        int value; try { value = SyncWire.codeValue(code); } catch (IllegalArgumentException e) { throw new IOException("Escreva os 6 números que aparecem no computador."); }
         try (SyncWire.Channel ch = connect(host, port)) {
-            byte[] salt = SyncWire.random(16);
-            ch.plain(new JSONObject().put("op", "pair").put("device", device).put("name", deviceName).put("salt", SyncWire.b64(salt)).toString());
-            ch.key = SyncWire.codeKey(clean, salt); ch.send("{\"hello\":\"seeky\"}");
-            byte[] reply = SyncWire.frame(ch.in); JSONObject o;
-            try { o = new JSONObject(new String(SyncWire.open(ch.key, reply), StandardCharsets.UTF_8)); }
-            catch (Exception e) { failIfError(new String(reply, StandardCharsets.UTF_8)); throw new IOException("Código errado."); }
-            Computer c = new Computer(); c.host = host; c.port = port; c.id = o.optString("id"); c.name = o.optString("name", "Computador"); c.token = SyncWire.unb64(o.getString("token"));
+            java.security.KeyPair mine = SyncWire.ephemeral(); byte[] myPub = mine.getPublic().getEncoded();
+            ch.plain(new JSONObject().put("op", "pair2").put("device", device).put("name", deviceName).put("epk", SyncWire.b64(myPub)).toString());
+            JSONObject hi = new JSONObject(ch.plain()); if (hi.has("error")) throw new IOException(hi.optString("error"));
+            byte[] theirEph = SyncWire.unb64(hi.getString("epk")), theirStatic = SyncWire.unb64(hi.getString("spk"));
+            byte[] transcript = SyncWire.sha(SyncWire.ascii("seeky-pair-2"), SyncWire.ascii(device), myPub, theirEph, theirStatic);
+            for (int i = 0; i < SyncWire.CODE_BITS; i++) {
+                byte[] nc = SyncWire.random(16); int b = SyncWire.bit(value, i);
+                ch.plain(new JSONObject().put("c", SyncWire.b64(SyncWire.commit(nc, "phone", i, b, transcript))).toString());
+                JSONObject cb = new JSONObject(ch.plain()); if (cb.has("error")) throw new IOException(cb.optString("error"));
+                ch.plain(new JSONObject().put("n", SyncWire.b64(nc)).toString());
+                JSONObject nb = new JSONObject(ch.plain()); if (nb.has("error")) throw new IOException(nb.optString("error"));
+                if (!SyncWire.same(SyncWire.commit(SyncWire.unb64(nb.getString("n")), "pc", i, b, transcript), SyncWire.unb64(cb.getString("c")))) throw new IOException("Código errado.");
+            }
+            java.security.PublicKey eph = SyncWire.publicKey(theirEph), stat = SyncWire.publicKey(theirStatic);
+            ch.key = SyncWire.hkdf(transcript, SyncWire.concat(SyncWire.agree(mine.getPrivate(), eph), SyncWire.agree(mine.getPrivate(), stat)), "seeky-pair-key-2");
+            JSONObject o = new JSONObject(ch.text());
+            Computer c = new Computer(); c.host = host; c.port = port; c.id = o.optString("id"); c.name = o.optString("name", "Computador"); c.token = SyncWire.unb64(o.getString("token")); c.key = theirStatic;
+            if (c.token.length < 32) throw new IOException("Resposta inválida do computador.");
             return c;
-        } catch (IOException e) { throw e; } catch (Exception e) { String m = e.getMessage(); throw new IOException(m == null ? "Não foi possível ligar ao computador." : m); }
+        } catch (IOException e) { throw e; } catch (SecurityException e) { throw new IOException("Código errado ou computador desconhecido."); } catch (Exception e) { String m = e.getMessage(); throw new IOException(m == null ? "Não foi possível ligar ao computador." : m); }
     }
+    /** A session (5.55): fresh ECDH keys each time, bound to the computer's pinned key and to the pairing secret. */
     static SyncWire.Channel session(Computer c, String device, String deviceName) throws Exception {
+        if (c.key == null || c.key.length == 0) throw new IOException("Por segurança, volte a ligar o telemóvel ao computador (código novo no computador).");
         SyncWire.Channel ch = connect(c.host, c.port);
-        try { ch.plain(new JSONObject().put("op", "session").put("device", device).put("name", deviceName).toString()); failIfError(ch.plain()); ch.key = SyncWire.tokenKey(c.token); return ch; }
+        try {
+            java.security.KeyPair mine = SyncWire.ephemeral(); byte[] myPub = mine.getPublic().getEncoded(), nc = SyncWire.random(16);
+            ch.plain(new JSONObject().put("op", "session2").put("device", device).put("name", deviceName).put("epk", SyncWire.b64(myPub)).put("n", SyncWire.b64(nc)).toString());
+            JSONObject hi = new JSONObject(ch.plain()); if (hi.has("error")) throw new IOException(hi.optString("error"));
+            byte[] theirEph = SyncWire.unb64(hi.getString("epk")), ns = SyncWire.unb64(hi.getString("n"));
+            byte[] transcript = SyncWire.sha(SyncWire.ascii("seeky-session-2"), SyncWire.ascii(device), myPub, theirEph, c.key, nc, ns);
+            byte[] secret = SyncWire.concat(SyncWire.concat(SyncWire.agree(mine.getPrivate(), SyncWire.publicKey(theirEph)), SyncWire.agree(mine.getPrivate(), SyncWire.publicKey(c.key))), c.token);
+            ch.key = SyncWire.hkdf(transcript, secret, "seeky-session-key-2");
+            // Only the computer that was paired (its private key and the pairing secret) can answer this.
+            JSONObject ok; try { ch.send("{\"hello\":\"seeky\"}"); ok = new JSONObject(ch.text()); } catch (Exception e) { throw new SecurityException("other computer"); }
+            if (!ok.optBoolean("ok")) throw new SecurityException("other computer");
+            return ch;
+        }
+        catch (SecurityException e) { ch.close(); throw new IOException("O computador não é o mesmo que foi ligado. Volte a ligar o telemóvel."); }
         catch (Exception e) { ch.close(); throw e; }
     }
     /** Both sides end up with the same notes, study and music; returns what changed on each side. */
