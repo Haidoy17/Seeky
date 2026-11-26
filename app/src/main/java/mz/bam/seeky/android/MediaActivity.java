@@ -427,12 +427,12 @@ public final class MediaActivity extends Activity implements TextureView.Surface
         center.setGravity(Gravity.CENTER);
         boolean tracks = MediaQueue.size() > 1;
         if (tracks) center.addView(iconButton("skipprev", "Faixa anterior", 26, () -> command(MediaPlaybackService.TRACK_PREV)), new LinearLayout.LayoutParams(dp(56), dp(56)));
-        center.addView(iconButton(MediaSkip.backIcon(this), AppLanguage.text(this, "Recuar") + " " + MediaSkip.seconds(this) + " s", 30, () -> { if (service != null) service.skip(-MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        center.addView(iconButton(MediaSkip.backIcon(this), AppLanguage.text(this, "Recuar") + " " + MediaSkip.seconds(this) + " " + AppLanguage.text(this, "segundos"), 30, () -> { if (service != null) service.skip(-MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
         buildPlay(72);
         LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(dp(72), dp(72));
         pp.setMargins(dp(18), 0, dp(18), 0);
         center.addView(play, pp);
-        center.addView(iconButton(MediaSkip.forwardIcon(this), AppLanguage.text(this, "Avançar") + " " + MediaSkip.seconds(this) + " s", 30, () -> { if (service != null) service.skip(MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
+        center.addView(iconButton(MediaSkip.forwardIcon(this), AppLanguage.text(this, "Avançar") + " " + MediaSkip.seconds(this) + " " + AppLanguage.text(this, "segundos"), 30, () -> { if (service != null) service.skip(MediaSkip.ms(this)); }), new LinearLayout.LayoutParams(dp(64), dp(64)));
         if (tracks) center.addView(iconButton("skipnext", "Faixa seguinte", 26, () -> command(MediaPlaybackService.TRACK_NEXT)), new LinearLayout.LayoutParams(dp(56), dp(56)));
         ui.addView(center, new LinearLayout.LayoutParams(-1, 0, 1));
 

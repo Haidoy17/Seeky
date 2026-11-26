@@ -57,7 +57,11 @@ final class DeskSettings {
         page.getChildren().add(DeskUi.card(DeskUi.heading("Tema"), DeskUi.muted("Os mesmos temas do Seeky no telemóvel."), themes(d)));
         page.getChildren().add(flashCard(d));
         DeskAi.load(d.store);
-        page.getChildren().add(DeskUi.card(DeskUi.heading("Seeky IA (Google Gemini)"), DeskUi.muted(d.store.get("gemini_key", "").isEmpty() ? "Sem chave guardada." : "Chave guardada e protegida pelo Windows · modelo " + (SeekyAiModels.chosen.isEmpty() ? "automático (" + SeekyAiModels.current() + ")" : SeekyAiModels.label(SeekyAiModels.chosen))), DeskUi.button("Ligação da IA", true, () -> { DeskAi.settings(d); d.open("settings"); })));
+        page.getChildren().add(DeskUi.card(DeskUi.heading("Seeky IA (Google Gemini)"), DeskUi.muted(d.store.get("gemini_key", "").isEmpty() ? (SeekyAiService.available() ? "Sem chave própria: a usar o serviço Seeky IA (limite diário por computador)." : "Sem chave guardada.") : "Chave guardada e protegida pelo Windows · modelo " + (SeekyAiModels.chosen.isEmpty() ? "automático (" + SeekyAiModels.current() + ")" : SeekyAiModels.label(SeekyAiModels.chosen))), DeskUi.button("Ligação da IA", true, () -> { DeskAi.settings(d); d.open("settings"); })));
+        ComboBox<String> skip = new ComboBox<>(); skip.getItems().addAll("10 segundos", "15 segundos", "30 segundos");
+        String cur = d.store.get("media_skip", "15"); skip.getSelectionModel().select(cur.equals("10") ? 0 : cur.equals("30") ? 2 : 1);
+        skip.setOnAction(e -> d.store.put("media_skip", new String[]{"10", "15", "30"}[Math.max(0, skip.getSelectionModel().getSelectedIndex())]));
+        page.getChildren().add(DeskUi.card(DeskUi.heading("Leitor de música e vídeo"), DeskUi.muted("Os botões de recuar e avançar saltam este tempo. Aleatório e Repetir (tudo ou esta faixa) estão na barra do leitor."), DeskUi.row(DeskUi.muted("Saltar"), skip)));
         page.getChildren().add(DeskAudio.card(d));
         page.getChildren().add(DeskUi.card(DeskUi.heading("Actualizações"), DeskUi.muted("Versão " + DeskMain.VERSION), DeskUi.button("Procurar actualizações agora", true, () -> d.worker.execute(() -> DeskUpdates.check(d, true)))));
         page.getChildren().add(DeskUi.card(DeskUi.heading("Os seus dados"), DeskUi.muted("Bíblias, notas, livros e estudo ficam guardados neste computador."), DeskUi.button("Abrir a pasta", false, () -> DeskFiles.system(DeskStore.home()))));

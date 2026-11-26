@@ -29,6 +29,25 @@ final class DeskMedia {
     final ListView<String> list = new ListView<>(); final ListView<String> lyricsView = new ListView<>();
     final List<long[]> lyricTimes = new ArrayList<>(); final Button play = DeskUi.iconButton("play", "Tocar / pausa", this::toggle);
     boolean seeking, counted, lyricsOpen;
+    // 5.55: aleatório, repetir (desligado / tudo / esta faixa) e saltos de 10, 15 ou 30 s escolhidos nas Definições.
+    boolean shuffle; int repeat; final List<Integer> history = new ArrayList<>(); final Random random = new Random();
+    int skipSeconds() { try { int s = Integer.parseInt(d.store.get("media_skip", "15")); return s == 10 || s == 30 ? s : 15; } catch (NumberFormatException e) { return 15; } }
+    void jump(int sign) { if (player == null) return; Duration t = player.getCurrentTime().add(Duration.seconds(sign * skipSeconds())); Duration total = player.getTotalDuration(); if (t.lessThan(Duration.ZERO)) t = Duration.ZERO; if (total != null && !total.isUnknown() && t.greaterThan(total)) t = total.subtract(Duration.millis(200)); player.seek(t); }
+    /** The next track: in order, or at random (not the same one), wrapping round when "repetir tudo" is on. */
+    int nextIndex() {
+        if (queue.isEmpty()) return -1;
+        if (shuffle && queue.size() > 1) { int n; do n = random.nextInt(queue.size()); while (n == index); return n; }
+        if (index + 1 < queue.size()) return index + 1;
+        return repeat == 1 ? 0 : -1;
+    }
+    void next() { int n = nextIndex(); if (n >= 0) { if (index >= 0) history.add(index); start(n); } }
+    /** Previous: back to the start of this track after 3 s; otherwise the track played before (or the one above). */
+    void previous() {
+        if (player != null && player.getCurrentTime().toSeconds() > 3) { player.seek(Duration.ZERO); return; }
+        if (!history.isEmpty()) { start(history.remove(history.size() - 1)); return; }
+        if (index > 0) start(index - 1); else if (repeat == 1 && !queue.isEmpty()) start(queue.size() - 1); else if (player != null) player.seek(Duration.ZERO);
+    }
+    void ended() { count(); if (repeat == 2 && player != null) { player.seek(Duration.ZERO); player.play(); return; } int n = nextIndex(); if (n >= 0) { if (index >= 0) history.add(index); start(n); } else { play.setGraphic(DeskUi.icon("play", 20)); } }
     DeskMedia(DeskMain d) {
         this.d = d; video.setPreserveRatio(true); video.setFitHeight(340);
         seek.valueChangingProperty().addListener((o, a, b) -> { seeking = b; if (!b && player != null) player.seek(player.getTotalDuration().multiply(seek.getValue())); });
@@ -36,6 +55,7 @@ final class DeskMedia {
         volume.valueProperty().addListener((o, a, b) -> { if (player != null) player.setVolume(b.doubleValue()); d.store.put("volume", String.format(Locale.ROOT, "%.2f", b.doubleValue())); });
         try { volume.setValue(Double.parseDouble(d.store.get("volume", "0.8"))); } catch (Exception ignored) {}
         list.setOnMouseClicked(e -> { if (e.getClickCount() == 2 && list.getSelectionModel().getSelectedIndex() >= 0) start(list.getSelectionModel().getSelectedIndex()); });
+        shuffle = "1".equals(d.store.get("media_shuffle", "0")); try { repeat = Math.max(0, Math.min(2, Integer.parseInt(d.store.get("media_repeat", "0")))); } catch (NumberFormatException e) { repeat = 0; }
         lyricsView.setPlaceholder(DeskUi.muted("Sem letra. Toque em Procurar letra."));
         now.setWrapText(false); now.setMinWidth(60);
     }
@@ -51,11 +71,16 @@ final class DeskMedia {
         VBox words = new VBox(1, now, who); words.setMinWidth(120); words.setPrefWidth(260); words.setMaxWidth(320);
         Button lyrics = DeskUi.iconButton("lyrics", "Letra", () -> { lyricsOpen = !lyricsOpen; d.open(d.current); });
         Button queueB = DeskUi.iconButton("queue", "Fila", this::showQueue);
-        HBox controls = DeskUi.row(DeskUi.iconButton("prev", "Anterior", () -> start(index - 1)), play, DeskUi.iconButton("next", "Seguinte", () -> start(index + 1)));
+        int s = skipSeconds();
+        Button mix = DeskUi.iconButton("shuffle", shuffle ? "Aleatório: ligado" : "Aleatório: desligado", () -> { shuffle = !shuffle; d.store.put("media_shuffle", shuffle ? "1" : "0"); d.status(shuffle ? "Aleatório ligado" : "Aleatório desligado"); d.open(d.current); });
+        Button again = DeskUi.iconButton(repeat == 2 ? "repeat1" : "repeat", repeat == 0 ? "Repetir: desligado" : repeat == 1 ? "Repetir: tudo" : "Repetir: esta faixa", () -> { repeat = (repeat + 1) % 3; d.store.put("media_repeat", "" + repeat); d.status(repeat == 0 ? "Repetir desligado" : repeat == 1 ? "Repetir tudo" : "Repetir esta faixa"); d.open(d.current); });
+        if (shuffle) mix.getStyleClass().add("on"); if (repeat > 0) again.getStyleClass().add("on");
+        Button back = DeskUi.iconButton("rewind", "Recuar " + s + " s", () -> jump(-1)), fwd = DeskUi.iconButton("forward", "Avançar " + s + " s", () -> jump(1));
+        HBox controls = DeskUi.row(mix, DeskUi.iconButton("prev", "Anterior", this::previous), back, play, fwd, DeskUi.iconButton("next", "Seguinte", this::next), again);
         HBox row = new HBox(14, words, controls, new VBox(2, seek, time), DeskUi.icon("speaker", 18), volume, queueB, lyrics); row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         HBox.setHgrow(row.getChildren().get(2), Priority.ALWAYS);
         VBox bar = new VBox(10, row); bar.getStyleClass().add("now-playing"); bar.setPadding(new javafx.geometry.Insets(10, 16, 10, 16));
-        if (lyricsOpen) { lyricsView.setPrefHeight(220); bar.getChildren().add(0, new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics)), lyricsView)); }
+        if (lyricsOpen) { lyricsView.setPrefHeight(220); bar.getChildren().add(0, new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics), DeskUi.button("Editar letra", false, this::editLyrics)), lyricsView)); }
         return bar;
     }
     /** The video, above the list in Vídeos. */
@@ -65,7 +90,7 @@ final class DeskMedia {
         list.setPrefSize(460, 380); dlg.getDialogPane().setContent(list); dlg.getDialogPane().getButtonTypes().add(ButtonType.CLOSE); dlg.show();
     }
 
-    void play(List<DeskLibrary.Track> tracks, int at) { queue.clear(); queue.addAll(tracks); refreshList(); start(at); }
+    void play(List<DeskLibrary.Track> tracks, int at) { queue.clear(); queue.addAll(tracks); history.clear(); refreshList(); start(at); }
     void playNext(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(Math.min(queue.size(), index + 1), t); refreshList(); d.status("A seguir: " + t.title); }
     void enqueue(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(t); refreshList(); d.status("Na fila: " + t.title); }
     /** Files opened from Ficheiros. */
@@ -84,7 +109,7 @@ final class DeskMedia {
             Media m = new Media(f.toURI().toString()); player = new MediaPlayer(m); player.setVolume(volume.getValue()); counted = false;
             video.setMediaPlayer(player);
             player.currentTimeProperty().addListener((o, a, tm) -> tick(tm));
-            player.setOnEndOfMedia(() -> { count(); start(index + 1); });
+            player.setOnEndOfMedia(this::ended);
             player.setOnError(() -> d.status("Não foi possível tocar " + f.getName() + ": " + player.getError().getMessage()));
             player.play(); play.setGraphic(DeskUi.icon("pause", 20));
             refreshList(); loadLyrics(f);
@@ -108,7 +133,7 @@ final class DeskMedia {
     void loadLyrics(File f) {
         lyricTimes.clear(); lyricsView.getItems().clear();
         File beside = new File(f.getParentFile(), f.getName().replaceFirst("\\.[^.]+$", "") + ".lrc"), mine = saved(f);
-        File src = beside.isFile() ? beside : mine.isFile() ? mine : null; if (src == null) return;
+        File src = mine.isFile() ? mine : beside.isFile() ? beside : null; if (src == null) return; // the user's own correction wins
         try { show(new String(Files.readAllBytes(src.toPath()), StandardCharsets.UTF_8)); } catch (IOException ignored) {}
     }
     /** "[01:02.30] text" lines (synced) or plain text. */
@@ -120,6 +145,23 @@ final class DeskMedia {
             else if (!l.trim().isEmpty() && !l.trim().matches("^\\[[a-z]+:.*\\]$")) { if (!synced) lines.add(l.trim()); }
         }
         lyricsView.setItems(FXCollections.observableArrayList(lines));
+    }
+    /** 5.55: correct a wrong lyric by hand (plain text, or "[mm:ss.cc] verso" lines to keep it in time). */
+    void editLyrics() {
+        if (index < 0 || index >= queue.size()) return; File f = new File(queue.get(index).path), mine = saved(f), beside = new File(f.getParentFile(), f.getName().replaceFirst("\\.[^.]+$", "") + ".lrc");
+        String current = ""; try { File src = mine.isFile() ? mine : beside.isFile() ? beside : null; if (src != null) current = new String(Files.readAllBytes(src.toPath()), StandardCharsets.UTF_8); } catch (IOException ignored) {}
+        Dialog<ButtonType> dlg = new Dialog<>(); dlg.setTitle("Seeky"); dlg.setHeaderText("Editar letra · " + queue.get(index).title); DeskUi.style(dlg.getDialogPane());
+        TextArea text = new TextArea(current); text.setWrapText(true); text.setPrefSize(560, 420); text.setPromptText("Escreva ou cole a letra. Para acompanhar a música use linhas como [01:02.30] verso.");
+        Button stamp = DeskUi.button("Marcar o tempo actual na linha", false, () -> { if (player == null) return; Duration t = player.getCurrentTime(); long ms = (long) t.toMillis(); String tag = String.format(Locale.ROOT, "[%02d:%02d.%02d] ", ms / 60000, (ms / 1000) % 60, (ms / 10) % 100); int caret = text.getCaretPosition(); int start = text.getText().lastIndexOf('\n', Math.max(0, caret - 1)) + 1; String line = text.getText().substring(start).replaceFirst("(?s)\n.*", ""); if (line.matches("^\\[\\d+:\\d+(?:[.:]\\d+)?\\].*")) { text.replaceText(start, start + line.indexOf(']') + 1 + (line.length() > line.indexOf(']') + 1 && line.charAt(line.indexOf(']') + 1) == ' ' ? 1 : 0), tag); } else text.insertText(start, tag); int nl = text.getText().indexOf('\n', start); text.positionCaret(nl < 0 ? text.getLength() : nl + 1); });
+        dlg.getDialogPane().setContent(new VBox(8, text, DeskUi.row(stamp, DeskUi.muted("Toque enquanto a música toca para pôr o tempo no início da linha.")))); 
+        ButtonType save = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE), remove = new ButtonType("Apagar letra", ButtonBar.ButtonData.LEFT);
+        dlg.getDialogPane().getButtonTypes().addAll(save, remove, ButtonType.CANCEL);
+        dlg.showAndWait().ifPresent(b -> {
+            try {
+                if (b == save) { Files.write(mine.toPath(), text.getText().getBytes(StandardCharsets.UTF_8)); show(text.getText()); d.status("Letra guardada."); }
+                else if (b == remove) { Files.write(mine.toPath(), new byte[0]); show(""); d.status("Letra apagada desta música."); }
+            } catch (IOException e) { DeskUi.info("Não foi possível guardar a letra", e.getMessage()); }
+        });
     }
     void findLyrics() {
         if (index < 0 || index >= queue.size()) return; DeskLibrary.Track tr = queue.get(index); File f = new File(tr.path); String title = LyricsText.clean((tr.artist.isEmpty() ? "" : tr.artist + " ") + tr.title); long ms = player == null || player.getTotalDuration().isUnknown() ? 0 : (long) player.getTotalDuration().toMillis();

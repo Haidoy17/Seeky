@@ -81,11 +81,12 @@ public final class DeskMain extends Application {
         Platform.setImplicitExit(false);
         scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> flash.open(""));
         if (!flashOnly) stage.show();
+        worker.execute(() -> { try { DeskAi.load(store); SeekyAiService.refresh(DeskAi.serviceStore(store)); } catch (Exception ignored) {} });
         if (getParameters().getNamed().get("screenshots") == null) { DeskTray.listen(this); flash.show(); if (sync.enabled()) sync.start(); if (flashOnly) DeskTray.show(this); }
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-albums", "videos", "flash", "phone", "settings", "settings-voices"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-player", "music-albums", "videos", "flash", "phone", "settings", "settings-voices", "dialog"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -159,7 +160,9 @@ public final class DeskMain extends Application {
         dir.mkdirs();
         if (left.isEmpty()) { Platform.exit(); System.exit(0); return; }
         String id = left.remove(0);
-        if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
+        javafx.scene.control.Alert[] shown = {null};
+        if (id.equals("dialog")) { javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.NONE, "A versão 5.55.0 já está no computador. Os seus dados ficam como estão.", new javafx.scene.control.ButtonType("Reiniciar agora", javafx.scene.control.ButtonBar.ButtonData.OK_DONE), new javafx.scene.control.ButtonType("Mais tarde", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE)); a.setTitle("Seeky"); a.setHeaderText("Actualização pronta · Seeky 5.55.0"); DeskUi.style(a.getDialogPane()); a.show(); shown[0] = a; }
+        else if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
         else if (id.equals("settings-voices")) { open("settings"); javafx.application.Platform.runLater(() -> { javafx.scene.Node n = scene.lookup(".page-scroll"); if (n instanceof javafx.scene.control.ScrollPane) ((javafx.scene.control.ScrollPane) n).setVvalue(0.74); }); }
@@ -168,12 +171,13 @@ public final class DeskMain extends Application {
         else if (id.equals("studies-subject")) { List<Object[]> r = studies.rows("SELECT id FROM st_subjects ORDER BY id LIMIT 1"); if (!r.isEmpty()) { studies.subject = ((Number) r.get(0)[0]).longValue(); studies.subjectTab = "Cartões"; } open("studies"); studies.subject = 0; }
         else if (id.equals("ai")) { ai.tab = "Perguntar"; open("ai"); }
         else if (id.equals("ai-plan")) { ai.tab = "Plano de estudo"; open("ai"); ai.tab = "Perguntar"; }
+        else if (id.equals("music-player")) { List<DeskLibrary.Track> t = DeskLibrary.tracks(store, DeskLibrary.AUDIO, "", new ArrayList<>(), "title", 20); media.queue.clear(); media.queue.addAll(t); media.index = t.isEmpty() ? -1 : 0; if (!t.isEmpty()) { media.now.setText(t.get(0).title); media.who.setText(t.get(0).artist + " · " + t.get(0).album); } media.shuffle = true; media.repeat = 1; media.lyricsOpen = true; media.show("[00:05.00] Grande é o Senhor\n[00:09.50] e mui digno de louvor\n[00:14.00] na cidade do nosso Deus"); open("music"); }
         else if (id.equals("music-albums")) { music.tab = "Álbuns"; open("music"); music.tab = "Início"; }
         else if (id.equals("notes-edit")) notes.edit(0, "Estudo: o amor de Deus", "# O amor de Deus\nLer **João 3:16** e Romanos 5:8.\n\n- Deus amou o mundo\n- Deu o seu Filho\n\n[ ] Orar pela família\n[x] Ler 1 João 4\n\n> Porque Deus amou o mundo de tal maneira…");
         else open(id);
         javafx.animation.PauseTransition wait = new javafx.animation.PauseTransition(javafx.util.Duration.millis(1500));
         wait.setOnFinished(e -> {
-            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage((id.equals("flash") ? flash.panelScene : scene).snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); if (id.equals("flash")) flash.panel.hide(); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
+            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage((id.equals("flash") ? flash.panelScene : shown[0] != null ? shown[0].getDialogPane().getScene() : scene).snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); if (id.equals("flash")) flash.panel.hide(); if (shown[0] != null) shown[0].close(); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
             if (id.equals("notes")) left.add(0, "notes-edit");
             screenshots(dir, left);
         });

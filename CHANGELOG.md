@@ -1,5 +1,25 @@
 # Registo de alterações
 
+## 5.55.0 — 2026-11-26 (Android e Windows)
+
+- **Segurança (revisão com os mecanismos de segurança do Claude)**: o emparelhamento do *Seeky ligado*
+  usava o código de 6 números como chave AES; quem captasse um emparelhamento na rede podia testar o
+  milhão de códigos fora da ligação e ler ou alterar a sincronização. Agora: troca ECDH P-256 efémera,
+  código confirmado bit a bit com compromissos (como o Bluetooth), chave própria do computador guardada
+  no telemóvel e chaves novas em cada sessão. **É preciso voltar a ligar o telemóvel ao computador.**
+- **Leitura em voz alta sem travar** (Android, PDF/Word/EPUB): ao tocar ou deslizar, o Seeky deixa de
+  puxar a página para a frase lida durante 10 s e mostra *Voltar à leitura*; o realce é actualizado no
+  máximo 4 vezes por segundo e só a página lida é redesenhada.
+- **Leitor de música**: Android — saltar 10, 15 ou 30 s (Música › Mais), também na notificação;
+  Windows — aleatório, repetir (tudo/esta faixa), recuar e avançar 10/15/30 s (Definições), anterior volta
+  ao início da faixa, e *Editar letra* (corrigir, marcar o tempo de cada linha, apagar).
+- **Windows: avisos com o estilo do Seeky** (sem a barra branca do Windows, cantos arredondados, cores
+  do tema); *Actualização pronta* com **Reiniciar agora**.
+- **Seeky IA**: modelos Gemini mais recentes primeiro; num pico de uso (429/5xx) passa logo ao modelo
+  seguinte e deixa o ocupado para o fim durante 2 minutos. **Seeky IA sem chave**: serviço próprio
+  (`server/seeky-ia`, Cloudflare Worker) com a chave como segredo e limites diários; as aplicações usam-no
+  sozinhas quando `entrega/seeky-ia.json` estiver ligado. A chave nunca vai dentro da aplicação.
+
 ## 5.54.0 — 2026-11-25 (Android e Windows)
 
 - **Windows: todas as vozes naturais do Microsoft Edge** para ler em voz alta (livros, Bíblia, notas):

@@ -165,3 +165,15 @@
 .root-pane .date-picker > .arrow-button { -fx-background-color: -seeky-raised; -fx-background-radius: 0 12 12 0; }
 .root-pane .date-picker > .arrow-button > .arrow { -fx-background-color: -seeky-ink; }
 .course-stripe { -fx-background-color: -seeky-accent; -fx-background-radius: 6; }
+/* 5.55 · botões ligados no leitor (aleatório, repetir) */
+.root-pane .button.on .icon { -fx-stroke: -seeky-accent; }
+.root-pane .button.on { -fx-background-color: -seeky-raised; }
+/* 5.55 · diálogos com o estilo do Seeky (sem a barra branca do Windows) */
+.dialog-pane.seeky-dialog { -fx-background-color: -seeky-surface; -fx-background-radius: 16; -fx-border-color: -seeky-line; -fx-border-radius: 16; -fx-border-width: 1; -fx-padding: 4 6 8 6; }
+.dialog-pane.seeky-dialog > .header-panel { -fx-background-color: transparent; -fx-padding: 18 22 6 22; -fx-cursor: move; }
+.dialog-pane.seeky-dialog > .header-panel .label { -fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: -seeky-ink; }
+.dialog-pane.seeky-dialog > .content.label { -fx-padding: 6 22 10 22; -fx-text-fill: -seeky-ink; -fx-font-size: 14px; }
+.dialog-pane.seeky-dialog > .content { -fx-padding: 6 22 10 22; }
+.dialog-pane.seeky-dialog > .button-bar > .container { -fx-padding: 6 18 10 18; }
+.dialog-pane.seeky-dialog .button { -fx-background-color: -seeky-raised; -fx-text-fill: -seeky-ink; -fx-background-radius: 12; -fx-padding: 8 16; }
+.dialog-pane.seeky-dialog .button:default { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; -fx-font-weight: bold; }

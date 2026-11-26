@@ -44,7 +44,7 @@ final class DeskAiHub {
         HBox tabs = new HBox(6);
         for (String t : TABS) { ToggleButton b = new ToggleButton(t); b.getStyleClass().add("chip"); b.setSelected(t.equals(tab)); b.setOnAction(e -> { tab = t; d.open("ai"); }); tabs.getChildren().add(b); }
         page.getChildren().addAll(DeskUi.row(DeskUi.title("Seeky IA"), DeskUi.grow(), DeskUi.button("Ligação da IA", false, () -> DeskAi.settings(d))), tabs);
-        if (d.store.get("gemini_key", "").isEmpty())
+        if (!DeskAi.ready(d.store))
             page.getChildren().add(DeskUi.card(DeskUi.heading("Ligue primeiro a Seeky IA"), DeskUi.text("A Seeky IA usa a sua chave gratuita do Google Gemini. Só é enviado à Google o texto necessário para cada pedido."), DeskUi.button("Ligar a IA", true, () -> DeskAi.settings(d))));
         switch (tab) {
             case "Resumir livro": page.getChildren().add(summaryView()); break;
@@ -55,7 +55,7 @@ final class DeskAiHub {
     }
     boolean ready() {
         DeskAi.load(d.store);
-        if (!d.store.get("gemini_key", "").isEmpty()) return true;
+        if (DeskAi.ready(d.store)) return true;
         if (DeskUi.confirm("Ligar a Seeky IA", "Guarde primeiro a sua chave do Google Gemini.")) DeskAi.settings(d);
         return false;
     }

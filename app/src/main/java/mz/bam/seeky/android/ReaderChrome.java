@@ -262,21 +262,17 @@ final class ReaderChrome implements SpeechEvents.Listener {
     void settings(){UiPanel panel=new UiPanel(a,"Definições de leitura",null,"settings");toggle(panel,"Acompanhar leitura por voz",prefs.getBoolean("speech_follow",true),value->prefs.edit().putBoolean("speech_follow",value).apply());toggle(panel,"Manter ecrã ligado",prefs.getBoolean("reader_keep_awake",false),value->{prefs.edit().putBoolean("reader_keep_awake",value).apply();keepAwake();});panel.action("speaker","Voz e idioma",null,false,speech::show);panel.action("palette","Visualizar",null,false,this::visualSettings);panel.action("type","Texto",null,false,this::textSettings);panel.action("expand",a.fullScreen?"Reduzir para pré-visualização":"Expandir para ecrã inteiro",null,false,a::toggleFullScreen);panel.action("arrow","Abrir noutra aplicação",null,false,a::external);panel.show();}
     void keepAwake(){if(prefs.getBoolean("reader_keep_awake",false))a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);else a.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);}
     void organize(){UiPanel panel=new UiPanel(a,"Organizar",null,"edit");panel.action("settings","Ferramentas de leitura",null,false,a.extras::show);if(a.kind.equals("epub"))panel.action("type","Ajustar leitura",null,false,this::textSettings);panel.action("bookmark","Adicionar marcador",null,false,()->a.tools.bookmark());panel.action("note","Anotações do documento",null,false,()->a.tools.documentAnnotations());panel.action("edit","Ferramentas da cópia de estudo",null,false,()->a.tools.menu());panel.action("folder","Exportar anotações",null,false,()->a.tools.exportAnnotations());panel.show();}
-    static final long FOLLOW_PAUSE=10000,REDRAW=250;
-    long touchedAt,lastDraw;boolean drawQueued;
+    static final long FOLLOW_PAUSE=10000;
+    long touchedAt;
     /** The reader moved the page: stop following the voice for a while and offer "Voltar à leitura". */
     void userTouched(){SpeechEvents.State s=SpeechEvents.state;if(!s.active||s.paused||!a.uri.toString().equals(s.uri))return;boolean was=followPaused();touchedAt=android.os.SystemClock.uptimeMillis();if(!was&&speechBar instanceof SpeechTransport)((SpeechTransport)speechBar).following(false);a.main.removeCallbacks(resumeCheck);a.main.postDelayed(resumeCheck,FOLLOW_PAUSE+100);}
     boolean followPaused(){return android.os.SystemClock.uptimeMillis()-touchedAt<FOLLOW_PAUSE;}
     final Runnable resumeCheck=()->{if(!followPaused()&&speechBar instanceof SpeechTransport)((SpeechTransport)speechBar).following(true);};
     /** "Voltar à leitura": follow the voice again at once. */
-    void resumeFollow(){touchedAt=0;lastSpeechPart=-1;if(speechBar instanceof SpeechTransport)((SpeechTransport)speechBar).following(true);lastDraw=0;changed();}
-    final Runnable queuedDraw=()->{drawQueued=false;changed();};
+    void resumeFollow(){touchedAt=0;lastSpeechPart=-1;if(speechBar instanceof SpeechTransport)((SpeechTransport)speechBar).following(true);changed();}
     public void changed(){
         if(a.dead||speechBar==null)return;
-        // At most four page updates a second: the voice announces each word, the page does not need to repaint for each one.
-        long now=android.os.SystemClock.uptimeMillis();SpeechEvents.State st=SpeechEvents.state;
-        if(st.active&&!st.paused&&now-lastDraw<REDRAW){if(!drawQueued){drawQueued=true;a.main.postDelayed(queuedDraw,REDRAW-(now-lastDraw));}return;}
-        lastDraw=now;SpeechEvents.State state=SpeechEvents.state;boolean matches=state.active&&a.uri.toString().equals(state.uri);speechBar.setVisibility(matches?View.VISIBLE:View.GONE);
+SpeechEvents.State state=SpeechEvents.state;boolean matches=state.active&&a.uri.toString().equals(state.uri);speechBar.setVisibility(matches?View.VISIBLE:View.GONE);
         if(!matches){if(a.original!=null&&a.original.active)a.original.speechHighlight.update(state,false);if(a.pageList!=null)for(int i=0;i<a.pageList.getChildCount();i++){View view=a.pageList.getChildAt(i);if(view instanceof ReaderPageView)((ReaderPageView)view).speech(state,false);}lastSpeechPart=-1;if(a.bookText!=null&&spokenSpan!=null&&a.bookText.getText() instanceof Spannable)((Spannable)a.bookText.getText()).removeSpan(spokenSpan);spokenSpan=null;return;}((SpeechTransport)speechBar).changed();
         boolean userSelecting=pdfSelecting()||a.original!=null&&a.original.active&&a.original.view instanceof OriginalWebView&&((OriginalWebView)a.original.view).selecting||a.bookScroll!=null&&a.bookScroll.getParent()==a.body&&a.bookText!=null&&a.bookText.getSelectionStart()>=0&&a.bookText.getSelectionStart()!=a.bookText.getSelectionEnd();
         boolean follow=!userSelecting&&!followPaused()&&prefs.getBoolean("speech_follow",true)&&(!state.paused||state.message.startsWith("Salto aproximado"))&&a.resumed;

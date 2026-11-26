@@ -23,8 +23,13 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.54", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.55", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "Leitura em voz alta sem travar", "Em PDF, Word e EPUB pode deslizar a página enquanto ouve: o Seeky deixa de a puxar para a frase lida e mostra Voltar à leitura", false, () -> PlusUi.toast(a, "Abra um livro e toque em Ouvir."));
+        panel.action("forward30", "Saltar 10, 15 ou 30 segundos", "Na Música › Mais: escolha quanto recuam e avançam os botões do leitor e da notificação", false, () -> PlusUi.toast(a, "Música › Mais › Saltar."));
+        panel.action("sparkle", "Seeky IA mais fácil", "Usa primeiro os modelos Gemini mais recentes e, num pico de uso, passa sozinho a outro. Quando o serviço Seeky IA estiver ligado, funciona sem chave", false, () -> PlusUi.toast(a, "Estudos › Estudar com Seeky."));
+        panel.action("shield", "Seeky ligado mais seguro", "O emparelhamento com o computador foi refeito: volte a ligar o telemóvel ao Seeky para Windows com o código novo", false, () -> a.startActivity(new android.content.Intent(a, ToolsActivity.class).putExtra("open_link", true)));
+        panel.section("Da 5.54");
         panel.action("speaker", "Vozes naturais do Edge no computador", "No Seeky para Windows: todas as vozes naturais do Microsoft Edge para ler em voz alta (Definições › Leitura em voz alta e áudio). No telemóvel continuam as vozes Google", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
         panel.section("Da 5.53");
         panel.action("speaker", "Narrações em MP3", "No livro: Ouvir › Guardar narração. Escolha MP3 (cerca de 10 vezes mais pequeno do que WAV), um ficheiro por capítulo, com título, livro e número da faixa", false, () -> PlusUi.toast(a, "Abra um livro e escolha Ouvir › Guardar narração."));
