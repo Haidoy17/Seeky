@@ -1,0 +1,9 @@
+Windows Server 2025 (GitHub Actions, execução 45858780411), Seeky actualizado de 5.45.0 para 5.55.0:
+PASS versão 5.55.0
+  ligado: recusa=true código=true 1.ª=true 2.ª=true calma=true envio=true receber=true esquecido=true
+PASS Seeky ligado (emparelhar, sincronizar, ficheiros) — com o emparelhamento novo (ECDH + código bit a bit)
+  edge: 321 vozes naturais
+PASS 30 verificações do Seeky Desktop
+Edge fechado depois do autoteste
+Serviço Seeky IA (node, Google simulado): 8 verificações
+Capturas: 28
