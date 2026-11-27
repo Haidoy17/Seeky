@@ -1,5 +1,14 @@
 # Registo de alterações
 
+## 5.55.1 — 2026-11-27 (Windows; Android só o número)
+
+- **Leitura em voz alta mais fluida no Windows**, sem a paragem no fim de cada frase:
+  - vozes naturais do Edge: o texto vai em partes grandes (parágrafos inteiros, até ~1800 letras,
+    cortadas no fim de uma frase), todas postas em fila de uma vez — o Edge já tem a parte seguinte
+    enquanto lê (antes: pedaços de ~280 letras, um de cada vez, à espera do anterior);
+  - vozes Piper: reserva de 4 s de som, que começa a tocar com cerca de 1 s guardado, e pausa entre
+    frases mais curta (0,2 s).
+
 ## 5.55.0 — 2026-11-26 (Android e Windows)
 
 - **Segurança (revisão com os mecanismos de segurança do Claude)**: o emparelhamento do *Seeky ligado*

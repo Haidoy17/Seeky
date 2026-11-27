@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008200,
-  "versionName": "5.55.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.55.0.apk",
-  "sha256": "d830770e50b7b1169a6100fe9b2e4f8620b355f42f3175742bafb5f656a0d1d6",
-  "bytes": 14017560,
-  "notes": "Leitura em voz alta sem travar, saltos de 10/15/30 s, Seeky IA com modelos recentes e Seeky ligado mais seguro (volte a ligar o telemóvel ao computador)."
+  "versionCode": 5008210,
+  "versionName": "5.55.1",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.55.1.apk",
+  "sha256": "dd15735d2ae14dd54bfaaec71ad61506f3294c3d41c69a433df1b5500e3dcb47",
+  "bytes": 14017546,
+  "notes": "Correcção: leitura em voz alta mais fluida no computador (o telemóvel fica igual à 5.55.0)."
 }

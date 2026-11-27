@@ -1,0 +1,2 @@
+utterances 12 max 939 min 939 total 11268 of 11291
+end event {"type":"end","id":7}
