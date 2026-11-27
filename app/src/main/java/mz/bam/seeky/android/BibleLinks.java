@@ -105,10 +105,10 @@ final class BibleLinks {
     }
 
     static void query(Activity a){
-        EditText input=PlusUi.input(a,"Ex.: Isaías 3.1-7, 12 ou Jo 3:16","",160);
+        EditText input=PlusUi.input(a,"Ex.: Jo 3:16 ou um trecho: graça sobre graça","",300);
         UiDialog dialog=new UiDialog.Builder(a).setTitle("Consultar passagem bíblica").setView(input).setPositiveButton("Abrir",null).setNeutralButton("Guardadas",(d,w)->saved(a)).setNegativeButton("Voltar à leitura",null).create();
         dialog.show();
-        dialog.getButton(-1).setOnClickListener(v->{BibleReferences.Reference ref=BibleReferences.lookup(input.getText().toString());if(ref==null){input.setError(AppLanguage.text(a,"Indique o livro, o capítulo e, se quiser, os versículos."));return;}dialog.dismiss();open(a,ref);});
+        dialog.getButton(-1).setOnClickListener(v->{BibleReferences.Reference ref=BibleReferences.lookup(input.getText().toString());if(ref==null&&BibleFinder.looksLikeWords(input.getText().toString())){dialog.dismiss();BibleFind.find(a,input.getText().toString(),false,null);return;}if(ref==null){input.setError(AppLanguage.text(a,"Indique o livro, o capítulo e, se quiser, os versículos, ou escreva um trecho do versículo."));return;}dialog.dismiss();open(a,ref);});
     }
     static void open(Activity a,BibleReferences.Reference ref){if(ref!=null)new Passage(a,ref,-1).load();}
     /** A whole chapter with "Marcar como lido"; {@code done} runs after marking. */
@@ -156,6 +156,10 @@ final class BibleLinks {
         TextToSpeech voice;
         /** Runs after "Marcar como lido" (the study plan refreshes its day). */
         Runnable onRead;
+        /** 5.60: runs when the window closes (the Flash's passage screen then closes too). */
+        Runnable onClosed;
+        /** Where the marked verse starts in the whole chapter (-1: none), to bring it into view. */
+        int firstMark=-1;
 
         Passage(Activity a,BibleReferences.Reference ref,long source){
             this.a=a;this.ref=ref;colors=AppPalette.of(a);
@@ -195,7 +199,7 @@ final class BibleLinks {
         void show(List<StudyStore.Row> found,long picked,Map<Long,List<StudyStore.Row>> passages,int last){
             if(found.isEmpty()){if(dialog!=null)dialog.dismiss();missing();return;}
             sources=found;source=picked;lastChapter=last;version=name(picked);
-            SpannableStringBuilder out=new SpannableStringBuilder();StringBuilder copy=new StringBuilder(),speak=new StringBuilder(),mem=new StringBuilder();int count=0;
+            firstMark=-1;SpannableStringBuilder out=new SpannableStringBuilder();StringBuilder copy=new StringBuilder(),speak=new StringBuilder(),mem=new StringBuilder();int count=0;
             copy.append(whole?ref.book+" "+chapter:ref.title).append(compare?"":" ("+version+")").append('\n');
             for(Map.Entry<Long,List<StudyStore.Row>> e:passages.entrySet()){
                 List<StudyStore.Row> rows=e.getValue();
@@ -210,7 +214,7 @@ final class BibleLinks {
                     out.append(String.valueOf(v));out.setSpan(new StyleSpan(Typeface.BOLD),start,out.length(),0);out.setSpan(new ForegroundColorSpan(colors.accent),start,out.length(),0);out.setSpan(new RelativeSizeSpan(.78f),start,out.length(),0);
                     out.append(' ').append(value);
                     if(e.getKey()==picked&&!compare){boolean noted=false;for(BibleComments.Comment m:comments)if(m.anchor(c)==v&&c>=m.chapter&&c<=m.chapterTo)noted=true;if(noted){int mark=out.length();out.append(" ✎");out.setSpan(new ForegroundColorSpan(colors.accent),mark,out.length(),0);}}
-                    if(whole&&ref.explicit&&ref.contains(c,v))out.setSpan(new BackgroundColorSpan((colors.accent&0xffffff)|0x2e000000),start,out.length(),0);
+                    if(whole&&ref.explicit&&ref.contains(c,v)){out.setSpan(new BackgroundColorSpan((colors.accent&0xffffff)|0x2e000000),start,out.length(),0);if(firstMark<0&&e.getKey()==picked)firstMark=start;}
                     out.append('\n');
                     copy.append(chapters&&!whole?c+":"+v:""+v).append(' ').append(value).append('\n');
                     if(e.getKey()==picked){speak.append(value).append('\n');count++;if(!ref.explicit||ref.contains(c,v))mem.append(mem.length()>0?" ":"").append(value);}
@@ -229,6 +233,13 @@ final class BibleLinks {
             ((View)compareChip.getParent()).setVisibility(sources.size()>1?View.VISIBLE:View.GONE);
             fillNavigation();
             if(dialog.isShowing())dialog.refit();else dialog.show();
+            if(whole&&firstMark>=0)body.postDelayed(this::reveal,120);
+        }
+        /** 5.60: the whole chapter opens at the verse that was looked for. */
+        void reveal(){
+            Layout l=body.getLayout();if(l==null||firstMark<0||firstMark>body.length())return;int y=l.getLineTop(l.getLineForOffset(firstMark));
+            View v=body;int top=0;while(v.getParent() instanceof View&&!(v.getParent() instanceof ScrollView)){top+=v.getTop();v=(View)v.getParent();}
+            if(v.getParent() instanceof ScrollView){top+=v.getTop();((ScrollView)v.getParent()).smoothScrollTo(0,Math.max(0,top+y-dp(60)));}
         }
         void heading(SpannableStringBuilder out,String text,float size){int at=out.length();out.append(text).append('\n');out.setSpan(new StyleSpan(Typeface.BOLD),at,out.length(),0);out.setSpan(new RelativeSizeSpan(size),at,out.length(),0);out.setSpan(new ForegroundColorSpan(colors.ink),at,out.length(),0);}
         void build(){
@@ -257,7 +268,7 @@ final class BibleLinks {
             commentBox=new LinearLayout(a);commentBox.setOrientation(LinearLayout.VERTICAL);root.addView(commentBox,new LinearLayout.LayoutParams(-1,-2));
             navigation=new LinearLayout(a);navigation.setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams np=new LinearLayout.LayoutParams(-1,-2);np.topMargin=dp(10);root.addView(navigation,np);
-            dialog=new UiDialog.Builder(a).setTitle(ref.title).setView(root).setPositiveButton("Voltar à leitura",null).setOnDismissListener(d->quiet()).create();
+            dialog=new UiDialog.Builder(a).setTitle(ref.title).setView(root).setPositiveButton("Voltar à leitura",null).setOnDismissListener(d->{quiet();if(onClosed!=null)onClosed.run();}).create();
         }
         TextView chip(LinearLayout row,String icon,String label,boolean selected,Runnable action){
             LinearLayout c=new LinearLayout(a);c.setGravity(Gravity.CENTER_VERTICAL);c.setPadding(dp(icon==null?14:11),0,dp(14),0);

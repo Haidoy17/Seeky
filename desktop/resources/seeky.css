@@ -222,3 +222,6 @@
 .root-pane .search-results .list-cell { -fx-background-color: transparent; -fx-padding: 4 6; -fx-background-radius: 8; }
 .root-pane .search-results .list-cell:selected, .root-pane .search-results .list-cell:hover { -fx-background-color: -seeky-raised; }
 .root-pane .search-match { -fx-fill: -seeky-accent; -fx-font-weight: bold; }
+/* 5.60: the verse found (Flash, Seeky IA, passage window) is marked when the Bible opens */
+.root-pane .verse-target { -fx-fill: -seeky-accent; -fx-font-weight: bold; -fx-underline: true; }
+.root-pane .verse-target-number { -fx-fill: -seeky-accent; }

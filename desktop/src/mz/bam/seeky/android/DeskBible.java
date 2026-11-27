@@ -20,6 +20,8 @@ import java.util.zip.ZipFile;
 final class DeskBible {
     final DeskMain d;
     String book = "Génesis"; int chapter = 1;
+    /** 5.60: the passage that opened the Bible (from the Flash, Seeky IA or a passage window): marked and shown first. */
+    String targetBook = ""; int targetChapter, targetFrom, targetTo;
     DeskBible(DeskMain d) { this.d = d; book = d.store.get("bible_book", "Génesis"); try { chapter = Integer.parseInt(d.store.get("bible_chapter", "1")); } catch (Exception e) { chapter = 1; } }
 
     Node view() {
@@ -61,14 +63,16 @@ final class DeskBible {
             DeskUi.iconButton("speaker", "Ouvir o capítulo", () -> DeskSpeech.toggle(d, plainChapter(bible))), DeskUi.button("Marcar como lido", false, () -> { d.study.markRead(book, chapter); d.status(book + " " + chapter + " marcado como lido hoje."); }));
         page.getChildren().addAll(nav, text);
         chapterView(bible, text);
-        return DeskUi.scroll(page);
+        ScrollPane scroll = DeskUi.scroll(page); reveal(scroll);
+        if (firstTarget != null) d.status("A passagem está marcada no capítulo.");
+        return scroll;
     }
     List<String> booksOf(long bible) { List<String> out = new ArrayList<>(); try { Set<String> have = new HashSet<>(); for (Object[] r : d.store.rows("SELECT DISTINCT book FROM verses WHERE bible=?", bible)) have.add(r[0] + ""); for (String b : BibleReferences.books(true)) if (have.remove(b)) out.add(b); out.addAll(new TreeSet<>(have)); } catch (SQLException ignored) {} return out; }
     int chaptersOf(long bible, String b) { try { return (int) d.store.count("SELECT MAX(chapter) FROM verses WHERE bible=? AND book=?", bible, b); } catch (SQLException e) { return 1; } }
     String plainChapter(long bible) { StringBuilder s = new StringBuilder(book + ", capítulo " + chapter + ". "); try { for (Object[] v : d.store.chapter(bible, book, chapter)) s.append(v[1]).append(' '); } catch (SQLException ignored) {} return s.toString(); }
     /** The chapter with its section titles and, beside it, the comments of the chosen commentary. */
     void chapterView(long bible, VBox box) {
-        box.getChildren().clear();
+        box.getChildren().clear(); firstTarget = null;
         Label h = DeskUi.title(book + " " + chapter); box.getChildren().add(h);
         TextFlow flow = new TextFlow(); flow.getStyleClass().add("scripture"); flow.setLineSpacing(6);
         boolean showTitles = !"0".equals(d.store.get("show_titles", "1")), showComments = !"0".equals(d.store.get("show_comments", "1"));
@@ -88,6 +92,8 @@ final class DeskBible {
                 }
                 Text n = new Text((first ? "" : " ") + num + " "); n.getStyleClass().add("verse-number");
                 Text t = new Text(body); t.getStyleClass().add("verse-text");
+                boolean target = book.equals(targetBook) && chapter == targetChapter && targetFrom > 0 && num >= targetFrom && num <= Math.max(targetFrom, targetTo);
+                if (target) { t.getStyleClass().add("verse-target"); n.getStyleClass().add("verse-target-number"); if (firstTarget == null) firstTarget = n; }
                 t.setOnMouseClicked(e -> verseMenu(num, body).show(t, e.getScreenX(), e.getScreenY()));
                 flow.getChildren().addAll(n, t);
                 List<Object[]> mine = new ArrayList<>(); for (Object[] cm : comments) if (covers(cm, chapter, num)) mine.add(cm);
@@ -105,6 +111,16 @@ final class DeskBible {
         side.getChildren().setAll(DeskUi.heading("Comentário"), DeskUi.muted(name), DeskUi.text(comments.size() + (comments.size() == 1 ? " nota neste capítulo. Toque em ✎ junto a um versículo." : " notas neste capítulo. Toque em ✎ junto a um versículo.")));
         Object[] firstComment = comments.get(0); showComments(side, ((Number) firstComment[0]).intValue(), Collections.singletonList(firstComment));
         HBox both = new HBox(14, card, side); box.getChildren().add(both);
+    }
+    Text firstTarget;
+    /** Scrolls the page so the marked verse is in view (after the page is laid out). */
+    void reveal(ScrollPane scroll) {
+        javafx.application.Platform.runLater(() -> javafx.application.Platform.runLater(() -> {
+            Text t = firstTarget; if (t == null || scroll.getContent() == null) return;
+            javafx.geometry.Bounds b = scroll.getContent().sceneToLocal(t.localToScene(t.getBoundsInLocal()));
+            double content = scroll.getContent().getBoundsInLocal().getHeight(), view = scroll.getViewportBounds().getHeight();
+            if (content > view) scroll.setVvalue(Math.max(0, Math.min(1, (b.getMinY() - view / 3) / (content - view))));
+        }));
     }
     void showComments(VBox side, int verse, List<Object[]> list) {
         String name = side.getChildren().size() > 1 && side.getChildren().get(1) instanceof Label ? ((Label) side.getChildren().get(1)).getText() : "";
@@ -140,6 +156,12 @@ final class DeskBible {
             return;
         }
         String needle = q.trim();
+        // 5.60: a remembered phrase (other translations, any order) finds its verse first.
+        if (BibleFinder.looksLikeWords(needle)) d.run(null, () -> DeskFindPassage.local(d, needle, 3), hits -> {
+            if (hits.isEmpty()) return; VBox top = new VBox(8, DeskUi.heading(BibleFinder.confident(hits) ? "Passagem encontrada" : "Passagens parecidas"));
+            for (BibleFinder.Hit h : hits) { BibleReferences.Reference r = h.reference(); if (r != null) top.getChildren().add(DeskFindPassage.card(d, r, Math.round(h.score * 100) + "% das palavras")); }
+            out.getChildren().add(0, top);
+        });
         d.run("A procurar…", () -> d.store.rows("SELECT book,chapter,verse,text FROM verses WHERE bible=? AND text LIKE ? LIMIT 200", bible, "%" + needle.replace("%", "") + "%"), rows -> {
             out.getChildren().add(DeskUi.muted(rows.size() + (rows.size() == 200 ? "+ " : " ") + "versículos com \"" + needle + "\""));
             for (Object[] r : rows) { Label l = DeskUi.text(r[0] + " " + r[1] + ":" + r[2] + " — " + r[3]); l.getStyleClass().add("result"); l.setOnMouseClicked(e -> { book = r[0] + ""; chapter = ((Number) r[1]).intValue(); d.store.put("bible_book", book); d.store.put("bible_chapter", chapter + ""); d.open("bible"); }); out.getChildren().add(l); }

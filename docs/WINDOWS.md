@@ -59,6 +59,7 @@ perdem ao actualizar nem ao desinstalar.
   duplo clique ou Enter toca; *Tocar*, *Tocar a seguir* e *Adicionar à fila* para as seleccionadas.
 - **Passagens bíblicas** (João 3:16…) nas notas, nos livros e nos PDF: um clique mostra o texto numa
   janela, com *Copiar* e *Abrir na Bíblia*.
+- **Encontrar a passagem** por um trecho no Flash, na Bíblia e na Seeky IA (abre a Bíblia com o versículo marcado).
 - **Procurar no livro** aberto (Ctrl+F) e respostas da Seeky IA formatadas (sem marcas soltas).
 - **Livros**: o livro fica aberto ao mudar de ecrã (*Voltar à leitura*); nos PDF, arrastar sobre o texto
   para marcar com cores, nota, copiar, ouvir ou explicar.

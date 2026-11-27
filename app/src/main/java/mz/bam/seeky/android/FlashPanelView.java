@@ -15,7 +15,7 @@ import java.util.*;
 final class FlashPanelView extends LinearLayout {
     interface Actions {void close();void open();void stop();void mode(boolean flash);void folders();void category(String category);default void sizesChanged(){}}
     final AppPalette palette;final EditText input;final TextView status,flash,complete,folders;
-    final View clear,sizeButton;final LinearLayout sizeTools;boolean compactLayout;final LinearLayout results,footer;final ScrollView scroll;final HorizontalScrollView categories;
+    final View clear,sizeButton;final LinearLayout sizeTools;boolean compactLayout;final LinearLayout results,footer,passages;final ScrollView scroll;final HorizontalScrollView categories;
     final Map<String,TextView> chips=new LinkedHashMap<>();final Actions actions;
     int dp(float n){return PlusUi.dp(getContext(),n);}
     GradientDrawable shape(int color,int radius,boolean border){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));if(border)d.setStroke(dp(1),palette.line);return d;}
@@ -35,7 +35,7 @@ final class FlashPanelView extends LinearLayout {
         input.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int n,int f){}public void onTextChanged(CharSequence s,int a,int b,int n){clear.setVisibility(s.length()==0?GONE:VISIBLE);}public void afterTextChanged(Editable e){}});
         categories=new HorizontalScrollView(c);categories.setHorizontalScrollBarEnabled(false);categories.setOverScrollMode(OVER_SCROLL_NEVER);LinearLayout options=new LinearLayout(c);options.setGravity(Gravity.CENTER_VERTICAL);
         for(String category:new String[]{"Tudo","PDF","Documentos","Imagens","Vídeos","Áudio"}){TextView chip=choice(category,()->actions.category(category));chip.setPadding(dp(13),0,dp(13),0);chip.setMinWidth(dp(48));chips.put(category,chip);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-2,dp(40));p.rightMargin=dp(8);options.addView(chip,p);}categories.addView(options);addView(categories,block(44,4));
-        status=label("Recentes",12,palette.muted);status.setGravity(Gravity.CENTER_VERTICAL);status.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);addView(status,block(24,4));
+        status=label("Recentes",12,palette.muted);status.setGravity(Gravity.CENTER_VERTICAL);status.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);addView(status,block(24,4));passages=new LinearLayout(c);passages.setOrientation(VERTICAL);addView(passages,new LinearLayout.LayoutParams(-1,-2));
         scroll=new ScrollView(c);scroll.setFillViewport(false);scroll.setClipToPadding(false);scroll.setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);results=new LinearLayout(c);results.setOrientation(VERTICAL);scroll.addView(results);addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         LinearLayout tools=new LinearLayout(c);tools.setGravity(Gravity.CENTER_VERTICAL);LinearLayout modes=new LinearLayout(c);modes.setPadding(dp(3),dp(3),dp(3),dp(3));modes.setBackground(shape(palette.tint,14,false));
         flash=choice("Flash",()->actions.mode(true));complete=choice("Completa",()->actions.mode(false));modes.addView(flash,new LinearLayout.LayoutParams(0,-1,1));modes.addView(complete,new LinearLayout.LayoutParams(0,-1,1));LinearLayout.LayoutParams mp=new LinearLayout.LayoutParams(0,dp(46),1);mp.rightMargin=dp(8);tools.addView(modes,mp);

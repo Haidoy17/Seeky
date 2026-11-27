@@ -97,11 +97,12 @@ public final class DeskMain extends Application {
         scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> flash.open(""));
         if (!flashOnly) stage.show();
         worker.execute(() -> { try { DeskAi.load(store); SeekyAiService.refresh(DeskAi.serviceStore(store)); } catch (Exception ignored) {} });
+        worker.execute(() -> { try { DeskFindPassage.finder(this); } catch (Exception ignored) {} }); // 5.60: ready for the Flash
         if (getParameters().getNamed().get("screenshots") == null) { DeskTray.listen(this); flash.show(); if (sync.enabled()) sync.start(); if (flashOnly) DeskTray.show(this); }
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "book-pdf", "book-search", "passage", "reader-resume", "marks", "ai-answer", "focus", "files", "music", "music-player", "music-albums", "videos", "flash", "phone", "settings", "settings-voices", "dialog"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "book-pdf", "book-search", "passage", "reader-resume", "marks", "ai-answer", "focus", "files", "music", "music-player", "music-albums", "videos", "flash", "flash-passage", "ai-find", "bible-target", "phone", "settings", "settings-voices", "dialog"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -184,6 +185,9 @@ public final class DeskMain extends Application {
         else if (id.equals("reader-resume")) { reader.inBook = false; open("reader"); }
         else if (id.equals("passage")) { javafx.scene.control.Alert a = DeskPassage.dialog(this, BibleReferences.lookup("Génesis 1:1-3")); a.show(); shown[0] = a; }
         else if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
+        else if (id.equals("flash-passage")) { flash.open(""); flash.input.setText("Deus disse que houvesse luz e houve luz"); }
+        else if (id.equals("ai-find")) ai.findPassage("Deus disse que houvesse luz e houve luz");
+        else if (id.equals("bible-target")) DeskFindPassage.openInBible(this, BibleReferences.lookup("Génesis 1:3"));
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
         else if (id.equals("settings-voices")) { open("settings"); javafx.application.Platform.runLater(() -> { javafx.scene.Node n = scene.lookup(".page-scroll"); if (n instanceof javafx.scene.control.ScrollPane) ((javafx.scene.control.ScrollPane) n).setVvalue(0.74); }); }
@@ -199,7 +203,7 @@ public final class DeskMain extends Application {
         else open(id);
         javafx.animation.PauseTransition wait = new javafx.animation.PauseTransition(javafx.util.Duration.millis(1500));
         wait.setOnFinished(e -> {
-            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage((id.equals("flash") ? flash.panelScene : shown[0] != null ? shown[0].getDialogPane().getScene() : scene).snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); if (id.equals("flash")) flash.panel.hide(); if (shown[0] != null) shown[0].close(); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
+            try { javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage((id.startsWith("flash") ? flash.panelScene : shown[0] != null ? shown[0].getDialogPane().getScene() : scene).snapshot(null), null), "png", new java.io.File(dir, "desktop-" + id + ".png")); if (id.startsWith("flash")) flash.panel.hide(); if (shown[0] != null) shown[0].close(); } catch (Exception x) { System.out.println("screenshot " + id + ": " + x); }
             if (id.equals("notes")) left.add(0, "notes-edit");
             screenshots(dir, left);
         });
