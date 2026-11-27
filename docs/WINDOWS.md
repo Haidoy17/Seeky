@@ -59,6 +59,8 @@ perdem ao actualizar nem ao desinstalar.
   duplo clique ou Enter toca; *Tocar*, *Tocar a seguir* e *Adicionar à fila* para as seleccionadas.
 - **Passagens bíblicas** (João 3:16…) nas notas, nos livros e nos PDF: um clique mostra o texto numa
   janela, com *Copiar* e *Abrir na Bíblia*.
+- **Livros**: o livro fica aberto ao mudar de ecrã (*Voltar à leitura*); nos PDF, arrastar sobre o texto
+  para marcar com cores, nota, copiar, ouvir ou explicar.
 - **Sair do Seeky** nas Definições fecha tudo (janela, Flash e ícone junto ao relógio).
 - **Leitura em voz alta** com as vozes do Windows, do Edge ou Piper; *Ouvir* lê a página (ou o capítulo)
   inteira e passa sozinho à seguinte até ao fim do livro (pode desligar-se em Definições).

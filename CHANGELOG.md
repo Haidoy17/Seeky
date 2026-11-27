@@ -1,5 +1,26 @@
 # Registo de alterações
 
+## 5.58.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: passagens lidas como no telemóvel.** O texto passa pela mesma preparação do Android
+  (`SpeechText.forVoice`): "Salmos 13:40" é lido "Salmos capítulo 13, versículo 40" (antes a voz dizia
+  "13 horas e 40 minutos"); também na gravação em MP3.
+- **Windows: leitura sem paragens entre páginas e com o parágrafo realçado.** Enquanto uma página é lida, a
+  seguinte já está preparada e (com o Edge ou as vozes do Windows) entregue à voz, por isso virar a página
+  não faz pausa. O Edge recebe partes maiores (até ~2400 letras) e diz que parágrafo está a ler; nos livros
+  EPUB/Word/TXT esse parágrafo fica realçado e a página acompanha-o; ao deslizar, o acompanhamento pára
+  10 s e aparece *Voltar à leitura* (como no telemóvel). As vozes do Windows passam a ser uma só leitura
+  contínua, parágrafo a parágrafo.
+- **Windows: o livro fica aberto.** Ao ir para outro ecrã e voltar a Livros, o livro aparece onde estava;
+  *Voltar à leitura* no menu lateral e na estante (com *Fechar o livro*); o PDF anterior é fechado ao abrir
+  outro (antes ficava aberto em memória).
+- **Windows: marcações nos PDF.** Arraste sobre o texto da página (duplo clique: uma palavra) e escolha a
+  cor, *Nota*, *Copiar*, *Ouvir* ou *Explicar*; as marcações aparecem pintadas por cima da página e abrem com
+  um clique; *Marcar página* continua para a página inteira; Esc limpa e Ctrl+C copia a selecção.
+- **Windows: estante mais leve.** Cada prateleira (e cada capa na grelha e na lista) é desenhada uma vez e
+  guardada como imagem enquanto desliza; saiu a sombra interior que cobria a estante inteira.
+- Android: só o número da versão e as Novidades.
+
 ## 5.57.0 — 2026-11-27 (Android e Windows)
 
 - **Windows: notas numa só página.** A página de marcas (`**`, `#`, `- `…) e a pré-visualização ao lado

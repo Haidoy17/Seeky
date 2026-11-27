@@ -1,0 +1,59 @@
+# CI no Windows real: run 45973314731 (sucesso). Os acentos aparecem como � no registo do GitHub.
+PASS vers�o 5.57.0
+PASS refer�ncias b�blicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+PASS importar B�blia CSV (vers�culo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS B�blia MyBible com t�tulos e coment�rios
+PASS etiquetas das m�sicas (ID3 e M4A)
+PASS biblioteca de m�sica (pastas, �lbuns, mais ouvidas)
+PASS livros: importar pasta e capas (EPUB, PDF)
+PASS Flash: �ndice e pesquisa (4)
+PASS notas do telem�vel (.seekynotes)
+PASS marca��es nos livros
+PASS estudos: cart�es e perguntas da IA, revis�o espa�ada
+PASS seeky ia: v�rios documentos e plano de estudo num curso
+PASS estudos: juntar com o telem�vel (mais recente, apagadas)
+PASS �udio: MP3 com etiquetas e vozes Piper verificadas
+PASS �udio: vozes naturais do Edge (ponte local) e Azure para gravar
+PASS �udio: voz do Windows gravada em MP3
+PASS estudos: cursos com m�dulos e disciplinas
+PASS Seeky ligado (emparelhar, sincronizar, ficheiros)
+PASS jogo da B�blia (10 perguntas)
+PASS temas do telem�vel
+PASS foco (Pomodoro)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS passagens no PDF com o s�tio na p�gina: 2
+PASS passagens para o editor de notas
+PASS parar a leitura n�o passa � p�gina seguinte
+PASS 33 verifica��es do Seeky Desktop
+PASS nota 1 volta igual do editor
+PASS passagens marcadas no editor: 2
+PASS nota 2 volta igual do editor
+PASS texto escrito no editor guardado
+PASS negrito pela barra
+PASS tarefa pela barra
+PASS t�tulo pela barra
+PASS editor de notas
+PASS vers�o 5.45.0
+PASS refer�ncias b�blicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+PASS importar B�blia CSV (vers�culo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS jogo da B�blia (10 perguntas)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS 13 verifica��es do Seeky Desktop
+À espera do antigo: 1 Seeky novo
+Reiniciar: o Seeky novo abriu depois de o antigo fechar (pid 4132)

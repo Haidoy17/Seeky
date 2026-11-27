@@ -39,7 +39,9 @@ final class DeskEdge {
 
     // ---------------------------------------------------------------- the local bridge
     final String token; final ServerSocket server; final BlockingQueue<String> commands = new LinkedBlockingQueue<>();
-    final Map<Integer, Runnable> finished = new ConcurrentHashMap<>(); final CountDownLatch listed = new CountDownLatch(1);
+    final Map<Integer, Runnable> finished = new ConcurrentHashMap<>();
+    /** 5.58: told which paragraph (from 0) of the text is being read. */
+    final Map<Integer, java.util.function.IntConsumer> paragraphs = new ConcurrentHashMap<>(); final CountDownLatch listed = new CountDownLatch(1);
     volatile List<Voice> voices = new ArrayList<>(); volatile Process edge; volatile long lastPoll; volatile String lastError = "";
     int ids;
     DeskEdge() throws IOException {
@@ -82,12 +84,19 @@ final class DeskEdge {
     }
     synchronized int speak(String text, String voice, double rate, Runnable done) throws IOException { open(); return queue(text, voice, rate, done); }
     /** Hands the text to the page (which reads it in short pieces) and remembers who to tell when it ends. */
-    synchronized int queue(String text, String voice, double rate, Runnable done) {
-        int id = ++ids; if (done != null) finished.put(id, done);
-        commands.clear(); commands.offer(new JSONObject().put("op", "speak").put("id", id).put("text", text).put("voice", voice).put("rate", rate).toString());
+    synchronized int queue(String text, String voice, double rate, Runnable done) { return queue(text, voice, rate, done, null, false); }
+    /**
+     * Hands text to the page. {@code add}: after what is already being read, without stopping it (5.58: the next
+     * page is given to Edge before this one ends, so turning the page makes no pause).
+     */
+    synchronized int queue(String text, String voice, double rate, Runnable done, java.util.function.IntConsumer paragraph, boolean add) {
+        int id = ++ids; if (done != null) finished.put(id, done); if (paragraph != null) paragraphs.put(id, paragraph);
+        if (!add) commands.clear();
+        commands.offer(new JSONObject().put("op", add ? "add" : "speak").put("id", id).put("text", text).put("voice", voice).put("rate", rate).toString());
         return id;
     }
-    void stop() { commands.clear(); commands.offer(new JSONObject().put("op", "stop").toString()); for (Runnable r : finished.values()) r.run(); finished.clear(); }
+    synchronized int append(String text, String voice, double rate, Runnable done, java.util.function.IntConsumer paragraph) throws IOException { open(); return queue(text, voice, rate, done, paragraph, true); }
+    void stop() { commands.clear(); commands.offer(new JSONObject().put("op", "stop").toString()); paragraphs.clear(); for (Runnable r : finished.values()) r.run(); finished.clear(); }
 
     // ---------------------------------------------------------------- tiny HTTP server (127.0.0.1 only)
     void serve() {
@@ -122,7 +131,8 @@ final class DeskEdge {
                 case "POST event": {
                     JSONObject e = new JSONObject(text); String type = e.optString("type");
                     if (type.equals("error")) lastError = e.optString("detail");
-                    if (type.equals("end") || type.equals("error")) { Runnable r = finished.remove(e.optInt("id")); if (r != null) r.run(); }
+                    if (type.equals("para")) { java.util.function.IntConsumer c = paragraphs.get(e.optInt("id")); if (c != null) c.accept(e.optInt("para")); }
+                    if (type.equals("end") || type.equals("error")) { paragraphs.remove(e.optInt("id")); Runnable r = finished.remove(e.optInt("id")); if (r != null) r.run(); }
                     reply(out, 200, "application/json", "{}"); break;
                 }
                 default: reply(out, 404, "text/plain", "Não encontrado");
@@ -144,15 +154,25 @@ final class DeskEdge {
     /** The local page: lists Edge's voices and speaks what Seeky sends, in short pieces so long chapters do not stall. */
     static String page() {
         return "<!doctype html><html><head><meta charset='utf-8'><title>Seeky · voz</title></head><body style='font-family:sans-serif'>Seeky · voz do Edge<script>\n"
-            + "const T=location.pathname;let job=0,queue=[],voice=null,rate=1;\n"
+            + "const T=location.pathname;let active=new Set(),voice=null,rate=1;\n"
             + "function post(p,o){return fetch(T+p,{method:'POST',body:JSON.stringify(o)}).catch(()=>{});}\n"
             + "function list(){const v=speechSynthesis.getVoices().map(x=>({name:x.name,lang:x.lang}));if(v.length)post('voices',v);}\n"
             + "speechSynthesis.onvoiceschanged=list;setTimeout(list,400);setTimeout(list,2500);\n"
-            // 5.56: big pieces (whole paragraphs, up to ~1800 letters, cut at the end of a sentence), all queued at once,
-            // so Edge already has the next one while it reads: no pause at the end of each sentence.
-            + "function pieces(t){const out=[];let cur='';const flush=()=>{if(cur.trim())out.push(cur.trim());cur='';};for(const para of t.split(/\\n+/)){let p=para.trim();if(!p)continue;if(cur&&cur.length+p.length+1>1800)flush();while(p.length>1800){let cut=-1;for(const m of ['. ','! ','? ','; ',': ',', ',' ']){const i=p.lastIndexOf(m,1800);if(i>600){cut=i+1;break;}}if(cut<0)cut=1800;if(cur)flush();out.push(p.slice(0,cut).trim());p=p.slice(cut).trim();}cur=cur?cur+'\\n'+p:p;}flush();return out;}\n"
-            + "function speakAll(id,parts){parts.forEach((part,i)=>{const u=new SpeechSynthesisUtterance(part);if(voice){u.voice=voice;u.lang=voice.lang;}u.rate=rate;if(i===parts.length-1)u.onend=()=>{if(id===job)post('event',{type:'end',id});};u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'||id!==job)return;post('event',{type:'error',id,detail:e.error});};speechSynthesis.speak(u);});if(!parts.length)post('event',{type:'end',id});}\n"
-            + "function handle(c){if(c.op==='voices')list();else if(c.op==='stop'){job++;speechSynthesis.cancel();}else if(c.op==='speak'){speechSynthesis.cancel();job=c.id;voice=speechSynthesis.getVoices().find(v=>v.name===c.voice)||null;rate=Math.max(.5,Math.min(2,c.rate||1));speakAll(c.id,pieces(c.text||''));}}\n"
+            // 5.56: big pieces (whole paragraphs, cut at the end of a sentence), all queued at once, so Edge already has
+            // the next one while it reads. 5.58: up to ~2400 letters; each piece remembers where its paragraphs start, so
+            // the page can tell Seeky which paragraph is being read (to light it up and follow it, as on the phone).
+            + "function pieces(t){const out=[];let cur='',marks=[],para=-1;const flush=()=>{if(cur.trim())out.push({text:cur,marks:marks});cur='';marks=[];};"
+            + "for(const raw of t.split(/\\n+/)){let p=raw.trim();if(!p)continue;para++;if(cur&&cur.length+p.length+1>2400)flush();"
+            + "while(p.length>2400){let cut=-1;for(const m of ['. ','! ','? ','; ',': ',', ',' ']){const i=p.lastIndexOf(m,2400);if(i>600){cut=i+1;break;}}if(cut<0)cut=2400;if(cur)flush();out.push({text:p.slice(0,cut).trim(),marks:[[0,para]]});p=p.slice(cut).trim();}"
+            + "if(cur)cur+='\\n';marks.push([cur.length,para]);cur+=p;}flush();return out;}\n"
+            + "function paraAt(marks,ci){let p=marks.length?marks[0][1]:0;for(const m of marks){if(m[0]<=ci)p=m[1];else break;}return p;}\n"
+            + "function speakAll(id,parts){let last=-1;const tell=n=>{if(n!==last&&active.has(id)){last=n;post('event',{type:'para',id,para:n});}};"
+            + "parts.forEach((part,i)=>{const u=new SpeechSynthesisUtterance(part.text);if(voice){u.voice=voice;u.lang=voice.lang;}u.rate=rate;"
+            + "u.onstart=()=>tell(paraAt(part.marks,0));u.onboundary=e=>tell(paraAt(part.marks,e.charIndex||0));"
+            + "if(i===parts.length-1)u.onend=()=>{if(active.has(id)){active.delete(id);post('event',{type:'end',id});}};"
+            + "u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'||!active.has(id))return;active.delete(id);post('event',{type:'error',id,detail:e.error});};speechSynthesis.speak(u);});"
+            + "if(!parts.length){active.delete(id);post('event',{type:'end',id});}}\n"
+            + "function handle(c){if(c.op==='voices')list();else if(c.op==='stop'){active.clear();speechSynthesis.cancel();}else if(c.op==='speak'||c.op==='add'){if(c.op==='speak'){speechSynthesis.cancel();active.clear();}active.add(c.id);voice=speechSynthesis.getVoices().find(v=>v.name===c.voice)||null;rate=Math.max(.5,Math.min(2,c.rate||1));speakAll(c.id,pieces(c.text||''));}}\n"
             + "async function loop(){for(;;){try{const r=await fetch(T+'next',{cache:'no-store'});handle(await r.json());}catch(e){await new Promise(z=>setTimeout(z,1500));}}}loop();\n"
             + "</script></body></html>";
     }

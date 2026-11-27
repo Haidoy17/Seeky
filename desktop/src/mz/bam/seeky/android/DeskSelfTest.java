@@ -149,6 +149,12 @@ final class DeskSelfTest {
             String script = DeskNotes.editorScript(); int[] at = {0}; DeskNotesBridge bridge = new DeskNotesBridge(m -> {}); web.setUserData(bridge);
             e.getLoadWorker().stateProperty().addListener((o, a, st) -> {
                 if (st != javafx.concurrent.Worker.State.SUCCEEDED) return;
+                if (at[0] >= NOTES.length) { // 5.58: a book page lights up the paragraph being read aloud
+                    Object lit = e.executeScript("seekyRead(1); var p=document.querySelectorAll('p.para'); p.length + ':' + (p[1].className.indexOf('reading')>=0) + ':' + (p[0].className.indexOf('reading')>=0)");
+                    boolean ok7 = "3:true:false".equals(String.valueOf(lit)); all[0] &= ok7;
+                    System.out.println((ok7 ? "PASS" : "FAIL") + " livro: parágrafo lido realçado (" + lit + ")");
+                    done.countDown(); return;
+                }
                 ((netscape.javascript.JSObject) e.executeScript("window")).setMember("seeky", bridge); e.executeScript(script);
                 String back = String.valueOf(e.executeScript("markup()")), want = NOTES[at[0]];
                 boolean same = back.equals(want); all[0] &= same;
@@ -171,7 +177,11 @@ final class DeskSelfTest {
                     String head = String.valueOf(e.executeScript("markup()")); boolean ok6 = head.endsWith("\n## Título novo"); all[0] &= ok6;
                     System.out.println((ok6 ? "PASS" : "FAIL") + " título pela barra" + (ok6 ? "" : ": " + head));
                 }
-                if (++at[0] < NOTES.length) e.loadContent(DeskNotesHtml.editor(NOTES[at[0]], DeskNotes.media())); else done.countDown();
+                if (++at[0] < NOTES.length) e.loadContent(DeskNotesHtml.editor(NOTES[at[0]], DeskNotes.media()));
+                else { // 5.58: then a book page
+                    DeskReader.Book b = new DeskReader.Book(); b.title = "Livro"; b.names.add("Capítulo 1"); b.texts.add("Primeiro parágrafo.\n\nSegundo parágrafo com Salmos 23:1.\nTerceiro.");
+                    try { e.loadContent(DeskReader.chapterHtml(b, 0, Collections.emptyList())); } catch (RuntimeException ex) { System.out.println("FAIL livro: " + ex); all[0] = false; done.countDown(); }
+                }
             });
             e.loadContent(DeskNotesHtml.editor(NOTES[0], DeskNotes.media()));
         });
@@ -301,6 +311,23 @@ final class DeskSelfTest {
                   boolean inside = !pg.hits.isEmpty(); for (DeskPdfPassages.Hit hit : pg.hits) for (double[] b : hit.boxes) inside &= b[0] >= 0 && b[2] <= w && b[1] >= 0 && b[3] <= h && b[2] > b[0] && b[3] > b[1];
                   check(pg.hits.size() == 2 && pg.hits.get(0).ref.title.equals("João 3:16") && pg.hits.get(1).ref.title.equals("Romanos 8:28") && inside && pg.text.contains("João 3:16"), "passagens no PDF com o sítio na página: " + pg.hits.size());
               } }
+            // 5.58: passagens ditas como no telemóvel (não como horas) e um parágrafo por linha (para o realce do que se lê).
+            { String said = DeskSpeech.prepare("Leia Salmos 13:40 hoje.\n\n  Depois João 3:16.", "pt-PT"); String[] lines = said.trim().split("\n");
+              check(lines.length == 2 && said.contains("capítulo 13") && said.contains("versículo 40") && !said.contains("13:40") && said.contains("capítulo 3"), "passagens lidas como no telemóvel: " + lines[0]); }
+            // 5.58: seleccionar e marcar texto num PDF (letra mais próxima, encontrar a marcação depois).
+            { File pp = new File(home, "marcar.pdf"); try (OutputStream o = new FileOutputStream(pp)) { DeskPdf.note("Marcar", "# Marcar\nA graça de Deus é suficiente para todos os dias.", home, o); }
+              try (org.apache.pdfbox.pdmodel.PDDocument pd = org.apache.pdfbox.pdmodel.PDDocument.load(pp)) {
+                  DeskPdfPassages.Page pg = DeskPdfPassages.find(pd, 0); int[] at = DeskPdfPassages.locate(pg, "graça de   Deus"); boolean ok2 = at != null && pg.text.substring(at[0], at[1]).replaceAll("\\s+", " ").equals("graça de Deus");
+                  double[] c = at == null ? null : pg.chars.get(at[0]); int near = c == null ? -1 : DeskPdfPassages.nearest(pg, (c[0] + c[2]) / 2, (c[1] + c[3]) / 2);
+                  check(ok2 && near == at[0] && DeskPdfPassages.boxes(pg, at[0], at[1]).size() == 1, "marcar texto num PDF");
+              } }
+            // 5.58: a página seguinte vai para o Edge sem parar a actual, e o Edge diz o parágrafo que está a ler.
+            { DeskEdge e = new DeskEdge(); try {
+                  int[] para = {-1}; int id = e.queue("Página dois.", "x", 1.0, () -> {}, n -> para[0] = n, true);
+                  String cmd = http("GET", e.base() + "next", null, "127.0.0.1:" + e.port());
+                  http("POST", e.base() + "event", "{\"type\":\"para\",\"id\":" + id + ",\"para\":3}", "127.0.0.1:" + e.port());
+                  check(cmd.contains("\"op\":\"add\"") && para[0] == 3 && e.page().contains("onboundary"), "Edge: página seguinte em fila e parágrafo lido");
+              } finally { e.close(); } }
             check(DeskNotesBridge.refsOf("Ver Salmo 23:1 e Mt 5:3").startsWith("4\t15\tSalmos 23:1") || DeskNotesBridge.refsOf("Ver Salmo 23:1 e Mt 5:3").contains("23:1"), "passagens para o editor de notas");
             // 5.56: parar a leitura (ou começar outra) muda a geração, por isso a página seguinte só vem quando a leitura acaba sozinha.
             { int g = DeskSpeech.generation; DeskSpeech.stop(); int g2 = DeskSpeech.generation; DeskSpeech.stop(); check(g2 == g + 1 && DeskSpeech.generation == g + 2 && !DeskSpeech.busy(), "parar a leitura não passa à página seguinte"); }

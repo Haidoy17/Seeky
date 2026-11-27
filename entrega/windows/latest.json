@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008400,
-  "versionName": "5.57.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.57.0-app.zip",
-  "sha256": "8d38c86468fa626755e75a3d6c97d30e0f91e70f2fdaa6a7b8cfa3344f24e62b",
-  "bytes": 9364566,
+  "versionCode": 5008500,
+  "versionName": "5.58.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.58.0-app.zip",
+  "sha256": "ab9b74d6a84b50172e48373be664aa9e50ca8d5448b9b838cbecfeec9bf99ae3",
+  "bytes": 9379243,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Notas numa só página; passagens bíblicas numa janela nas notas, livros e PDF; barra de rolagem visível; Sair do Seeky; Reiniciar agora corrigido."
+  "notes": "Passagens lidas como no telemóvel; leitura sem pausas entre páginas e com o parágrafo realçado; o livro fica aberto (Voltar à leitura); marcações nos PDF; estante mais leve."
 }
