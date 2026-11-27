@@ -151,12 +151,13 @@ final class DeskAiHub {
     Node bubble(String[] m) {
         boolean me = m[0].equals("user");
         Label who = new Label(me ? "Você" : "Seeky"); who.getStyleClass().add(me ? "muted" : "accent-label");
-        Label body = DeskUi.text(m[1]);
+        String shown = me ? m[1] : DeskRich.tidy(m[1]); // 5.59: the answer formatted, without raw marks
+        Node body = me ? DeskUi.text(m[1]) : DeskRich.node(d, shown);
         VBox b = new VBox(6, who, body); b.getStyleClass().addAll("card", me ? "bubble-me" : "bubble"); b.setPadding(new javafx.geometry.Insets(12, 14, 12, 14));
         if (!me) {
             if (m.length > 2 && !m[2].isEmpty()) b.getChildren().add(DeskUi.muted(m[2]));
-            b.getChildren().add(DeskUi.row(DeskUi.button("Copiar", false, () -> { ClipboardContent c = new ClipboardContent(); c.putString(m[1]); Clipboard.getSystemClipboard().setContent(c); d.status("Resposta copiada."); }),
-                DeskUi.button("Guardar como nota", false, () -> saveNote("Seeky IA · " + firstQuestion(), m[1] + (m.length > 2 && !m[2].isEmpty() ? "\n\n" + m[2] : ""), "Seeky IA"))));
+            b.getChildren().add(DeskUi.row(DeskUi.button("Copiar", false, () -> { ClipboardContent c = new ClipboardContent(); c.putString(DeskRich.plain(shown)); Clipboard.getSystemClipboard().setContent(c); d.status("Resposta copiada."); }),
+                DeskUi.button("Guardar como nota", false, () -> saveNote("Seeky IA · " + firstQuestion(), shown + (m.length > 2 && !m[2].isEmpty() ? "\n\n" + m[2] : ""), "Seeky IA"))));
         }
         return b;
     }
@@ -205,9 +206,9 @@ final class DeskAiHub {
             }
         } catch (SQLException ignored) {}
         if (!summaryText.isEmpty()) {
-            TextArea t = new TextArea(summaryText); t.setWrapText(true); t.setEditable(false); t.setPrefRowCount(22);
+            ScrollPane t = new ScrollPane(DeskRich.node(d, DeskRich.tidy(summaryText))); t.setFitToWidth(true); t.setPrefViewportHeight(440); t.getStyleClass().add("page-scroll");
             box.getChildren().add(DeskUi.card(DeskUi.heading("Resumo geral · " + summaryTitle), DeskUi.muted("Guardado no Bloco de notas, na pasta Resumos."), t,
-                DeskUi.row(DeskUi.button("Copiar", false, () -> { ClipboardContent c = new ClipboardContent(); c.putString(summaryText); Clipboard.getSystemClipboard().setContent(c); d.status("Resumo copiado."); }),
+                DeskUi.row(DeskUi.button("Copiar", false, () -> { ClipboardContent c = new ClipboardContent(); c.putString(DeskRich.plain(DeskRich.tidy(summaryText))); Clipboard.getSystemClipboard().setContent(c); d.status("Resumo copiado."); }),
                     summaryBook == null ? new Region() : DeskUi.button("Abrir o livro", false, () -> d.reader.open(summaryBook)))));
         }
         return box;
@@ -237,7 +238,7 @@ final class DeskAiHub {
             return new String[]{title, summary};
         } finally { Platform.runLater(dlg::close); } }, r -> {
             dlg.close(); summaryTitle = r[0]; summaryText = r[1]; summaryBook = f; tab = "Resumir livro";
-            saveNote("Resumo geral · " + r[0], r[1] + "\n\nFonte: " + f.getName() + " (livro inteiro, resumido pela Seeky IA)", "Resumos");
+            saveNote("Resumo geral · " + r[0], DeskRich.tidy(r[1]) + "\n\nFonte: " + f.getName() + " (livro inteiro, resumido pela Seeky IA)", "Resumos");
             d.open("ai");
         });
         dlg.show();
@@ -292,10 +293,8 @@ final class DeskAiHub {
             SeekyAiDeep.Plan p = SeekyAiDeep.parse(answer, max);
             if (p.sessions.isEmpty()) { DeskUi.info("A IA não devolveu um plano", "Tente outra vez, talvez com um tema mais concreto."); return; }
             if (p.title.isEmpty()) p.title = SeekyAiDeep.cut(theme, 80);
-            TextArea t = new TextArea(p.note(from, perWeek)); t.setWrapText(true); t.setEditable(false); t.setPrefSize(600, 380);
-            Alert show = new Alert(Alert.AlertType.CONFIRMATION, "", new ButtonType("Guardar nos Estudos", ButtonBar.ButtonData.OK_DONE), ButtonType.CANCEL);
-            show.setTitle("Seeky IA"); show.setHeaderText(p.title + " · " + p.sessions.size() + " sessões · " + p.cards.size() + " cartões"); show.getDialogPane().setContent(t); DeskUi.style(show.getDialogPane());
-            show.showAndWait().filter(b -> b.getButtonData() == ButtonBar.ButtonData.OK_DONE).ifPresent(b -> {
+            ButtonType keep = new ButtonType("Guardar nos Estudos", ButtonBar.ButtonData.OK_DONE);
+            DeskRich.show(d, p.title + " · " + p.sessions.size() + " sessões · " + p.cards.size() + " cartões", DeskRich.tidy(p.note(from, perWeek)), keep, new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE)).filter(b -> b == keep).ifPresent(b -> {
                 long sid = save(d.store, p, from, perWeek, minutes, courseId, kind);
                 d.status("Plano guardado: " + p.title); d.studies.subject = sid; d.studies.course = courseId > 0 ? courseId : DeskStudies.NO_COURSE; d.studies.subjectTab = "Tarefas"; d.open("studies");
             });

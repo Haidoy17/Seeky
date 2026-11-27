@@ -1,0 +1,11 @@
+PASS nota 1 volta igual do editor
+PASS passagens marcadas no editor: 2
+PASS nota 2 volta igual do editor
+PASS texto escrito no editor guardado
+PASS negrito pela barra
+PASS tarefa pela barra
+PASS título pela barra
+PASS livro: parágrafo lido realçado (3:true:false)
+PASS livro: procurar no livro (2:1:hit current)
+PASS respostas da IA sem marcas soltas
+PASS editor de notas

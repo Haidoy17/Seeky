@@ -197,3 +197,28 @@
 .root-pane .pdf-select { -fx-background-color: -seeky-accent; -fx-opacity: 0.3; -fx-background-radius: 2; }
 .root-pane .resume-card { -fx-background-color: -seeky-raised; }
 .root-pane .nav-item.resume { -fx-background-color: derive(-seeky-accent, -55%); -fx-text-fill: -seeky-ink; }
+/* 5.59: Seeky IA's answers formatted (no raw ## or *) */
+.root-pane .rich-text { -fx-fill: -seeky-ink; -fx-font-size: 15px; }
+.root-pane .rich-h1 .rich-text { -fx-font-size: 22px; -fx-font-weight: bold; }
+.root-pane .rich-h2 .rich-text { -fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: -seeky-accent; }
+.root-pane .rich-h3 .rich-text, .root-pane .rich-h4 .rich-text { -fx-font-size: 16px; -fx-font-weight: bold; }
+.root-pane .rich-mark { -fx-text-fill: -seeky-accent; -fx-font-size: 15px; -fx-font-weight: bold; }
+.root-pane .rich-done .rich-text { -fx-fill: -seeky-muted; -fx-strikethrough: true; }
+.root-pane .rich-quote { -fx-border-color: transparent transparent transparent -seeky-accent; -fx-border-width: 0 0 0 4; -fx-padding: 4 0 4 14; }
+.root-pane .rich-quote-text .rich-text { -fx-fill: -seeky-muted; -fx-font-style: italic; }
+.root-pane .rich-general { -fx-fill: -seeky-muted; -fx-font-size: 12px; -fx-font-style: italic; }
+.root-pane .rich-highlight { -fx-fill: -seeky-accent; -fx-font-weight: bold; }
+.root-pane .rich-passage { -fx-text-fill: -seeky-accent; -fx-font-size: 15px; -fx-underline: false; -fx-border-color: transparent transparent -seeky-accent transparent; -fx-border-width: 0 0 1 0; -fx-border-style: dotted; }
+.root-pane .rich-passage:hover { -fx-underline: true; }
+.root-pane .rich-table { -fx-hgap: 0; -fx-vgap: 0; }
+.root-pane .rich-head, .root-pane .rich-cell { -fx-border-color: -seeky-line; -fx-border-width: 0.5; -fx-padding: 6 10; }
+.root-pane .rich-head { -fx-background-color: -seeky-raised; }
+.root-pane .rich-th .rich-text { -fx-font-weight: bold; }
+/* 5.59: Procurar no livro */
+.root-pane .pdf-hit { -fx-background-color: #f6d365; -fx-opacity: 0.45; -fx-background-radius: 3; }
+.root-pane .pdf-hit-current { -fx-background-color: -seeky-accent; -fx-opacity: 0.55; -fx-background-radius: 3; -fx-border-color: -seeky-accent; -fx-border-width: 2; -fx-border-radius: 3; }
+.root-pane .book-search { -fx-background-color: -seeky-surface; }
+.root-pane .search-results { -fx-background-color: transparent; -fx-border-color: transparent; }
+.root-pane .search-results .list-cell { -fx-background-color: transparent; -fx-padding: 4 6; -fx-background-radius: 8; }
+.root-pane .search-results .list-cell:selected, .root-pane .search-results .list-cell:hover { -fx-background-color: -seeky-raised; }
+.root-pane .search-match { -fx-fill: -seeky-accent; -fx-font-weight: bold; }

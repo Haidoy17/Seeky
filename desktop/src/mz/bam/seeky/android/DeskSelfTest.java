@@ -153,6 +153,13 @@ final class DeskSelfTest {
                     Object lit = e.executeScript("seekyRead(1); var p=document.querySelectorAll('p.para'); p.length + ':' + (p[1].className.indexOf('reading')>=0) + ':' + (p[0].className.indexOf('reading')>=0)");
                     boolean ok7 = "3:true:false".equals(String.valueOf(lit)); all[0] &= ok7;
                     System.out.println((ok7 ? "PASS" : "FAIL") + " livro: parágrafo lido realçado (" + lit + ")");
+                    // 5.59: Procurar no livro: sem acentos nem maiúsculas, o escolhido fica destacado.
+                    Object hits = e.executeScript("var n=seekyFind('PARAGRAFO',1); n + ':' + document.querySelectorAll('span.hit.current').length + ':' + document.querySelectorAll('span.hit')[1].className");
+                    boolean ok8 = "2:1:hit current".equals(String.valueOf(hits)) && DeskBookSearch.find("O Coração e o coracao", "coração").size() == 2 && DeskBookSearch.find("muitas   vezes\nexiste", "vezes existe").size() == 1; all[0] &= ok8;
+                    System.out.println((ok8 ? "PASS" : "FAIL") + " livro: procurar no livro (" + hits + ")");
+                    String tidy = DeskRich.tidy("## Título\n\n* Ponto [T1] com **negrito** (Conhecimento Geral).\n- Outro [D2·T4]");
+                    boolean ok9 = tidy.equals("## Título\n\n- Ponto com **negrito** (conhecimento geral).\n- Outro"); all[0] &= ok9;
+                    System.out.println((ok9 ? "PASS" : "FAIL") + " respostas da IA sem marcas soltas" + (ok9 ? "" : ": " + tidy));
                     done.countDown(); return;
                 }
                 ((netscape.javascript.JSObject) e.executeScript("window")).setMember("seeky", bridge); e.executeScript(script);

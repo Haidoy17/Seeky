@@ -1,3 +1,11 @@
+## Seeky 5.59.0
+
+Instale **Seeky_5.59.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.59.0.
+
+- Windows: procurar dentro do livro aberto (Ctrl+F), com os resultados e as palavras realçadas.
+- Windows: respostas da Seeky IA formatadas, sem `##`, asteriscos nem `[T1]`.
+
 ## Seeky 5.58.0
 
 Instale **Seeky_5.58.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

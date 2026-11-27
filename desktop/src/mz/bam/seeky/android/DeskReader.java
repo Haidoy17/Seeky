@@ -259,6 +259,8 @@ final class DeskReader {
     Reading reading;
     /** Set by the PDF page: selects these words with the mouse (screenshots and checks). */
     java.util.function.Predicate<String> demoSelect = w -> false;
+    /** Set by the book shown: searches it (screenshots and checks). */
+    java.util.function.Consumer<String> demoSearch = q -> {};
     /**
      * 5.58 · Reading a book aloud, page after page, as on the phone: while a page is read, the next one is already
      * prepared and (with Edge or the Windows voices) handed to the voice, so turning the page makes no pause; the
@@ -344,13 +346,9 @@ final class DeskReader {
         final String sent = NotepadAiText.cut(text);
         d.run("O Seeky está a ler…", () -> new SeekyAiClient().ask(SeekyAiCore.GEMINI, DeskAi.key(d.store), sent, title, Collections.emptyList(), prompt, false, new SeekyAiClient.Call()).text, answer -> {
             String switched = SeekyAiModels.takeNotice(); if (!switched.isEmpty()) d.status(switched);
-            String clean = NotepadAiText.clean(answer);
-            Alert show = new Alert(Alert.AlertType.NONE, clean, new ButtonType("Guardar como nota", ButtonBar.ButtonData.OK_DONE), new ButtonType("Copiar", ButtonBar.ButtonData.OTHER), ButtonType.CLOSE);
-            show.setHeaderText(label + " · " + title); show.setTitle("Seeky IA"); show.getDialogPane().setPrefWidth(660); DeskUi.style(show.getDialogPane());
-            show.showAndWait().ifPresent(b -> {
-                if (b.getButtonData() == ButtonBar.ButtonData.OK_DONE) d.notes.newWith(label + " — " + title, "> " + title + "\n\n" + clean);
-                else if (b.getButtonData() == ButtonBar.ButtonData.OTHER) { javafx.scene.input.ClipboardContent c = new javafx.scene.input.ClipboardContent(); c.putString(clean); javafx.scene.input.Clipboard.getSystemClipboard().setContent(c); d.status("Copiado."); }
-            });
+            String clean = DeskRich.tidy(answer); ButtonType save = new ButtonType("Guardar como nota", ButtonBar.ButtonData.OK_DONE);
+            DeskRich.show(d, label + " · " + title, clean, save, new ButtonType("Fechar", ButtonBar.ButtonData.CANCEL_CLOSE))
+                .filter(b -> b == save).ifPresent(b -> d.notes.newWith(label + " — " + title, "> " + title + "\n\n" + clean));
         });
     }
 
@@ -363,25 +361,41 @@ final class DeskReader {
         Label where = DeskUi.muted("");
         // 5.57: passages on the page (as on the phone) are boxes over the picture; a click shows the passage.
         // 5.58: the marks (coloured text) and the selection are layers too; drag over the text to select it.
-        Pane overlay = new Pane(), marksLayer = new Pane(), selLayer = new Pane(); overlay.setPickOnBounds(false); marksLayer.setPickOnBounds(false); selLayer.setPickOnBounds(false); selLayer.setMouseTransparent(true);
-        StackPane sheet = new StackPane(view, marksLayer, selLayer, overlay); sheet.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        Pane overlay = new Pane(), marksLayer = new Pane(), selLayer = new Pane(), hitLayer = new Pane(); overlay.setPickOnBounds(false); marksLayer.setPickOnBounds(false); selLayer.setPickOnBounds(false); selLayer.setMouseTransparent(true); hitLayer.setMouseTransparent(true);
+        StackPane sheet = new StackPane(view, marksLayer, hitLayer, selLayer, overlay); sheet.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         for (Node n : sheet.getChildren()) StackPane.setAlignment(n, javafx.geometry.Pos.TOP_LEFT);
         StackPane holder = new StackPane(sheet); ScrollPane scroll = new ScrollPane(holder); scroll.setFitToWidth(true); DeskUi.smooth(scroll);
         HBox selBar = new HBox(6); selBar.getStyleClass().add("selection-bar"); selBar.setPadding(new javafx.geometry.Insets(6, 10, 6, 10)); selBar.setVisible(false); selBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         Pane barLayer = new Pane(selBar); barLayer.setPickOnBounds(false);
         StackPane area = new StackPane(scroll, barLayer); VBox.setVgrow(area, Priority.ALWAYS);
         String[] pageText = {""}; DeskPdfPassages.Page[] shown = {null};
-        Button markPage = DeskUi.button("Marcar página", false, () -> {});
+        // 5.59: Procurar no livro: the words found on the page are lit up and the page scrolls to the one chosen.
+        String[] searchQuery = {""}; int[] searchFocus = {-1}; double[] wantY = {-1};
+        Runnable scrollToHit = () -> javafx.application.Platform.runLater(() -> {
+            double content = holder.getHeight(), viewH = scroll.getViewportBounds().getHeight();
+            scroll.setVvalue(wantY[0] < 0 || content <= viewH ? 0 : Math.max(0, Math.min(1, (wantY[0] - viewH / 3) / (content - viewH))));
+        });
+        java.util.function.Consumer<DeskPdfPassages.Page> paintHits = pg -> {
+            hitLayer.getChildren().clear(); wantY[0] = -1; if (pg == null || searchQuery[0].isEmpty()) return; double sc = 96 * zoom[0] / 72;
+            List<int[]> hits = DeskBookSearch.find(pg.text, searchQuery[0]);
+            for (int k = 0; k < hits.size(); k++) for (double[] b : DeskPdfPassages.boxes(pg, hits.get(k)[0], hits.get(k)[1])) {
+                Region r = new Region(); r.getStyleClass().add(k == searchFocus[0] ? "pdf-hit-current" : "pdf-hit");
+                r.relocate(b[0] * sc - 2, b[1] * sc - 2); r.setPrefSize((b[2] - b[0]) * sc + 4, (b[3] - b[1]) * sc + 4); r.resize(r.getPrefWidth(), r.getPrefHeight()); hitLayer.getChildren().add(r);
+                if (k == Math.max(0, Math.min(searchFocus[0], hits.size() - 1)) && wantY[0] < 0) wantY[0] = b[1] * sc;
+            }
+            scrollToHit.run();
+        };
+        Button markPage = DeskUi.button("Marcar página", false, () -> {}); markPage.setMinWidth(Region.USE_PREF_SIZE);
         Runnable draw = () -> {
             where.setText((at[0] + 1) + " / " + pages); remember(f, title, "pdf", at[0], pages);
-            int p = at[0]; shown[0] = null; marksLayer.getChildren().clear(); selLayer.getChildren().clear(); selBar.setVisible(false);
-            d.run(null, () -> { synchronized (doc) { return render.renderImageWithDPI(p, (float) (96 * zoom[0])); } }, img -> { if (p == at[0]) { view.setImage(SwingFXUtils.toFXImage(img, null)); scroll.setVvalue(0); } });
+            int p = at[0]; shown[0] = null; marksLayer.getChildren().clear(); selLayer.getChildren().clear(); hitLayer.getChildren().clear(); wantY[0] = -1; selBar.setVisible(false);
+            d.run(null, () -> { synchronized (doc) { return render.renderImageWithDPI(p, (float) (96 * zoom[0])); } }, img -> { if (p == at[0]) { view.setImage(SwingFXUtils.toFXImage(img, null)); if (wantY[0] >= 0) scrollToHit.run(); else scroll.setVvalue(0); } });
             overlay.getChildren().clear(); double scale = 96 * zoom[0] / 72;
             d.worker.execute(() -> {
                 try {
                     DeskPdfPassages.Page found; synchronized (doc) { found = DeskPdfPassages.find(doc, p); }
                     if (p != at[0]) return; pageText[0] = found.text;
-                    javafx.application.Platform.runLater(() -> { if (p == at[0]) { shown[0] = found; showPassages(overlay, found, scale); paintPdfMarks(marksLayer, f, p, found, scale, markPage); } });
+                    javafx.application.Platform.runLater(() -> { if (p == at[0]) { shown[0] = found; showPassages(overlay, found, scale); paintPdfMarks(marksLayer, f, p, found, scale, markPage); paintHits.accept(found); } });
                 } catch (Exception ignored) {}
             });
         };
@@ -394,7 +408,7 @@ final class DeskReader {
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw.run(); } }, next = () -> { if (at[0] < pages - 1) { at[0]++; draw.run(); } };
         Slider zoomBar = new Slider(0.6, 3, zoom[0]); zoomBar.setPrefWidth(120); zoomBar.setTooltip(new Tooltip("Zoom")); zoomBar.valueChangingProperty().addListener((o, a, b) -> { if (!b) { zoom[0] = zoomBar.getValue(); draw.run(); } });
         java.util.function.Supplier<String> place = () -> "página " + (at[0] + 1);
-        java.util.function.IntFunction<String> textOf = p -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setStartPage(p + 1); s.setEndPage(p + 1); synchronized (doc) { return s.getText(doc); } } catch (Exception e) { return ""; } };
+        java.util.function.IntFunction<String> textOf = p -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setSortByPosition(true); s.setStartPage(p + 1); s.setEndPage(p + 1); synchronized (doc) { return s.getText(doc); } } catch (Exception e) { return ""; } };
         // Selecting with the mouse: drag over the words (double click: one word); then colour, note, copy, listen, explain.
         int[] sel = {-1, -1};
         Runnable clearSel = () -> { sel[0] = sel[1] = -1; selLayer.getChildren().clear(); selBar.setVisible(false); };
@@ -443,9 +457,20 @@ final class DeskReader {
         Button selExplain = DeskUi.button("Explicar", true, () -> { String t = selectedText.get(); selBar.setVisible(false); ask("Explicar a selecção", prompt("explicar", ""), t, title + " · página " + (at[0] + 1)); }); selExplain.setGraphic(DeskUi.icon("sparkle", 16));
         selBar.getChildren().addAll(DeskMarks.dots(c -> markSel.accept(c, "")), new Separator(javafx.geometry.Orientation.VERTICAL), selNote, selCopy, selListen, selExplain);
         HBox top = bar(title, where, prev, next, () -> listen(at, pages, "página", textOf, p -> { at[0] = p; draw.run(); }), zoomBar, markPage, DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
+        DeskBookSearch search = new DeskBookSearch(d, new DeskBookSearch.Source() {
+            public int count() { return pages; }
+            public String text(int i) { return textOf.apply(i); }
+            public String place(int i) { return "Página " + (i + 1); }
+        }, (part, q, occ) -> { searchQuery[0] = q; searchFocus[0] = occ; if (part != at[0]) { at[0] = part; draw.run(); } else paintHits.accept(shown[0]); },
+           () -> { searchQuery[0] = ""; searchFocus[0] = -1; hitLayer.getChildren().clear(); });
+        Button find = DeskUi.iconButton("search", "Procurar no livro (Ctrl+F)", () -> { if (search.open()) search.close(); else search.show(); });
+        top.getChildren().add(top.getChildren().size() - 1 >= 0 ? Math.max(0, top.getChildren().size() - 1) : 0, find);
         top.getChildren().addAll(aiMenu(title, place, () -> pageText[0], selectedText), noteButton(title, place));
-        VBox page = new VBox(10, top, area); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
+        HBox.setHgrow(area, Priority.ALWAYS); HBox body = new HBox(12, area, search.panel); VBox.setVgrow(body, Priority.ALWAYS);
+        VBox page = new VBox(10, top, body); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         page.setOnKeyPressed(e -> { switch (e.getCode()) { case RIGHT: case PAGE_DOWN: next.run(); break; case LEFT: case PAGE_UP: prev.run(); break; case ESCAPE: clearSel.run(); break; case C: if (e.isShortcutDown() && sel[0] >= 0) selCopy.fire(); break; default: } });
+        page.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> { if (e.isShortcutDown() && e.getCode() == javafx.scene.input.KeyCode.F) { search.show(); e.consume(); } });
+        demoSearch = q -> { search.show(); search.field.setText(q); search.search(q); };
         d.show(page); keep(page, title, f, doc, where); page.requestFocus(); draw.run();
     }
     /** A whole-page mark ("Marcar página"), not words marked on the page. */
@@ -527,7 +552,15 @@ final class DeskReader {
          .append("<button id='seekyback' onclick='seekyBack()'>Voltar à leitura</button><script>var seekyUser=0,seekyNow=-1;")
          .append("['wheel','keydown','mousedown'].forEach(function(k){window.addEventListener(k,function(e){if(e.target&&e.target.id==='seekyback')return;seekyUser=Date.now();if(seekyNow>=0)document.getElementById('seekyback').style.display='block';},true);});")
          .append("function seekyRead(n){seekyNow=n;var ps=document.querySelectorAll('p.para');for(var i=0;i<ps.length;i++)ps[i].classList.toggle('reading',i===n);var b=document.getElementById('seekyback');if(n<0){b.style.display='none';return;}if(Date.now()-seekyUser>10000&&ps[n]){ps[n].scrollIntoView({block:'center',behavior:'smooth'});b.style.display='none';}}")
-         .append("function seekyBack(){seekyUser=0;document.getElementById('seekyback').style.display='none';if(seekyNow>=0)seekyRead(seekyNow);}</script>");
+         .append("function seekyBack(){seekyUser=0;document.getElementById('seekyback').style.display='none';if(seekyNow>=0)seekyRead(seekyNow);}")
+         // 5.59: Procurar no livro: the words found are lit up; the chosen one is brought to the middle.
+         .append("function seekyFold(s){var o='';for(var i=0;i<s.length;i++){var c=s.charAt(i);var n=c.normalize?c.normalize('NFD'):c;o+=(n.length?n.charAt(0):c).toLowerCase();}return o;}")
+         .append("function seekyFindClear(){var hs=document.querySelectorAll('span.hit');for(var i=0;i<hs.length;i++){var h=hs[i];h.parentNode.replaceChild(document.createTextNode(h.textContent),h);}document.body.normalize();}")
+         .append("function seekyFind(q,n){seekyFindClear();q=seekyFold(String(q).trim().replace(/\\s+/g,' '));if(!q)return 0;var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false),nodes=[],t;")
+         .append("while((t=w.nextNode())){var p=t.parentNode;while(p&&!(p.classList&&p.classList.contains('para')))p=p.parentNode;if(p)nodes.push(t);}")
+         .append("nodes.forEach(function(node){var s=seekyFold(node.nodeValue.replace(/\\s/g,' ')),i=0,f=[];while((i=s.indexOf(q,i))>=0){f.push(i);i+=q.length;}for(var k=f.length-1;k>=0;k--){node.splitText(f[k]+q.length);var mid=node.splitText(f[k]),sp=document.createElement('span');sp.className='hit';mid.parentNode.insertBefore(sp,mid);sp.appendChild(mid);}});")
+         .append("var hs=document.querySelectorAll('span.hit');if(!hs.length)return 0;var c=hs[Math.max(0,Math.min(n,hs.length-1))];c.className='hit current';seekyUser=Date.now();c.scrollIntoView({block:'center'});return hs.length;}</script>")
+         .append("<style>span.hit{background:#f6d36599;border-radius:3px}span.hit.current{background:").append(accent).append(";color:").append(DeskThemes.hex(th.onAccent)).append(";box-shadow:0 0 0 2px ").append(accent).append("}</style>");
         return h.append(DeskPassage.SCRIPT).append("</body></html>").toString();
     }
     void text(File f, Book book, int start, long showMark) {
@@ -596,7 +629,21 @@ final class DeskReader {
         web.getEngine().getLoadWorker().stateProperty().addListener((o, a, st) -> { if (st == Worker.State.SUCCEEDED && readingAt[0] == at[0] && readingAt[1] >= 0 && DeskSpeech.busy()) try { web.getEngine().executeScript("window.seekyRead&&seekyRead(" + readingAt[1] + ")"); } catch (Exception ignored) {} });
         HBox top = bar(book.title, where, prev, next, () -> listen(at, book.texts.size(), book.texts.size() == 1 ? "página" : "parte", i -> book.texts.get(i), i -> { at[0] = i; draw[0].run(); }, follow), toc);
         top.getChildren().addAll(aiMenu(book.title, place, () -> book.texts.get(at[0]), () -> selected[0]), noteButton(book.title, place), DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
-        VBox page = new VBox(10, top, holder); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
+        // 5.59: Procurar no livro, across all the chapters; the chapter opens with the words lit up.
+        Object[] pendingFind = {null};
+        java.util.function.Consumer<Object[]> applyFind = pf -> { try { Object n = ((netscape.javascript.JSObject) web.getEngine().executeScript("window")).call("seekyFind", pf[0], pf[1]); } catch (Exception ignored) {} };
+        web.getEngine().getLoadWorker().stateProperty().addListener((o, a, st) -> { if (st == Worker.State.SUCCEEDED && pendingFind[0] != null) applyFind.accept((Object[]) pendingFind[0]); });
+        DeskBookSearch search = new DeskBookSearch(d, new DeskBookSearch.Source() {
+            public int count() { return book.texts.size(); }
+            public String text(int i) { return book.texts.get(i); }
+            public String place(int i) { return book.names.get(i); }
+        }, (part, q, occ) -> { Object[] pf = {q, occ}; pendingFind[0] = pf; if (part != at[0]) { at[0] = part; draw[0].run(); } else applyFind.accept(pf); },
+           () -> { pendingFind[0] = null; try { web.getEngine().executeScript("window.seekyFindClear&&seekyFindClear()"); } catch (Exception ignored) {} });
+        top.getChildren().add(Math.max(0, top.getChildren().size() - 3), DeskUi.iconButton("search", "Procurar no livro (Ctrl+F)", () -> { if (search.open()) search.close(); else search.show(); }));
+        HBox.setHgrow(holder, Priority.ALWAYS); HBox body = new HBox(12, holder, search.panel); VBox.setVgrow(body, Priority.ALWAYS);
+        VBox page = new VBox(10, top, body); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
+        page.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> { if (e.isShortcutDown() && e.getCode() == javafx.scene.input.KeyCode.F) { search.show(); e.consume(); } });
+        demoSearch = q -> { search.show(); search.field.setText(q); search.search(q); };
         d.show(page); keep(page, book.title, f, null, where);
         if (showMark > 0) afterLoad.add(() -> web.getEngine().executeScript("var e=document.getElementById('m" + showMark + "'); if(e){e.scrollIntoView({block:'center'}); e.style.outline='3px solid " + DeskThemes.hex(DeskThemes.current.accent) + "';}"));
         draw[0].run();
