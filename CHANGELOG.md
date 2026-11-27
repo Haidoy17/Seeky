@@ -1,5 +1,21 @@
 # Registo de alterações
 
+## 5.56.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: ouvir o livro seguido.** *Ouvir* lê a página inteira do PDF (ou o capítulo do EPUB/Word/TXT)
+  e, quando acaba, mostra a página seguinte e continua a ler, até ao fim do livro. Páginas sem texto
+  (imagens) são saltadas. Parar: tocar outra vez em *Ouvir*. Desligar: Definições › Leitura em voz alta e
+  áudio. No telemóvel isto já acontecia (Acompanhar leitura por voz).
+- **Windows: leitor de música.**
+  - um clique **selecciona** a música (Ctrl ou Shift para várias, com realce bem visível) e já não começa a
+    tocar; **duplo clique** ou **Enter** toca; barra *Tocar · Tocar a seguir · Adicionar à fila · Limpar
+    selecção* para as seleccionadas; o menu do botão direito também age sobre a selecção;
+  - mais leve: cada linha da lista é construída uma vez e só muda o texto ao deslizar (antes criava botões,
+    dicas e menus de novo para cada linha); aleatório, repetir e letra já não reconstroem o ecrã todo; o
+    relógio da música é redesenhado 4 vezes por segundo em vez de em cada fotograma; a pesquisa espera
+    uma pausa na escrita.
+- Android: só o número da versão e as Novidades (para ficar igual ao Windows).
+
 ## 5.55.1 — 2026-11-27 (Windows; Android só o número)
 
 - **Leitura em voz alta mais fluida no Windows**, sem a paragem no fim de cada frase:

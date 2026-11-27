@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008210,
-  "versionName": "5.55.1",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.55.1.apk",
-  "sha256": "dd15735d2ae14dd54bfaaec71ad61506f3294c3d41c69a433df1b5500e3dcb47",
-  "bytes": 14017546,
-  "notes": "Correcção: leitura em voz alta mais fluida no computador (o telemóvel fica igual à 5.55.0)."
+  "versionCode": 5008300,
+  "versionName": "5.56.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.56.0.apk",
+  "sha256": "a3049123e99a3898189752a82a6e4784e1bc6afd347ca1d962f844e9610fb621",
+  "bytes": 14018279,
+  "notes": "Windows: Ouvir lê a página inteira e passa sozinho à seguinte; na Música um clique selecciona e o duplo clique toca, lista e leitor mais leves."
 }
