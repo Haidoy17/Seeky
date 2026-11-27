@@ -50,12 +50,14 @@ final class DeskAi {
     }
 
     /** The ✨ menu of a note. */
-    static void menu(DeskMain d, TextArea body, TextField title) {
+    static void menu(DeskMain d, TextArea body, TextField title) { menu(d, body, title, body); }
+    /** 5.57: the note editor keeps the marks in a TextArea that is not shown; the menu opens by the button. */
+    static void menu(DeskMain d, TextArea body, TextField title, javafx.scene.Node anchor) {
         load(d.store);
         if (!ready(d.store)) { if (DeskUi.confirm("Ligar a Seeky IA", "Para usar a IA nas notas, guarde primeiro a sua chave do Google Gemini.")) settings(d); return; }
         ContextMenu m = new ContextMenu();
         for (NotepadAiText.Action a : NotepadAiText.ACTIONS) { MenuItem i = new MenuItem(a.label); i.setOnAction(e -> run(d, a, a.key.equals("pedir") ? DeskUi.ask("Pedir ao Seeky", "Por exemplo: transforma em esboço de sermão", "") : "", body, title)); m.getItems().add(i); }
-        m.show(body, javafx.geometry.Side.TOP, 20, 20);
+        m.show(anchor, javafx.geometry.Side.BOTTOM, 0, 4);
     }
     static void run(DeskMain d, NotepadAiText.Action a, String extra, TextArea body, TextField title) {
         if (a.key.equals("pedir") && extra == null) return;

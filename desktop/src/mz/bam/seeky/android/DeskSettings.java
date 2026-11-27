@@ -53,7 +53,9 @@ final class DeskSettings {
     }
     static javafx.scene.paint.Color color(int c) { return javafx.scene.paint.Color.rgb((c >> 16) & 255, (c >> 8) & 255, c & 255); }
     static Node view(DeskMain d) {
-        VBox page = DeskUi.page(DeskUi.title("Definições"));
+        // 5.57: Sair fecha o Seeky por completo (janela, botão Flash, ícone junto ao relógio e leitura em voz alta).
+        Button exit = DeskUi.button("Sair do Seeky", false, () -> exit(d)); exit.setGraphic(DeskUi.icon("power", 18));
+        VBox page = DeskUi.page(DeskUi.row(DeskUi.title("Definições"), DeskUi.grow(), exit));
         page.getChildren().add(DeskUi.card(DeskUi.heading("Tema"), DeskUi.muted("Os mesmos temas do Seeky no telemóvel."), themes(d)));
         page.getChildren().add(flashCard(d));
         DeskAi.load(d.store);
@@ -65,6 +67,8 @@ final class DeskSettings {
         page.getChildren().add(DeskAudio.card(d));
         page.getChildren().add(DeskUi.card(DeskUi.heading("Actualizações"), DeskUi.muted("Versão " + DeskMain.VERSION), DeskUi.button("Procurar actualizações agora", true, () -> d.worker.execute(() -> DeskUpdates.check(d, true)))));
         page.getChildren().add(DeskUi.card(DeskUi.heading("Os seus dados"), DeskUi.muted("Bíblias, notas, livros e estudo ficam guardados neste computador."), DeskUi.button("Abrir a pasta", false, () -> DeskFiles.system(DeskStore.home()))));
+        page.getChildren().add(DeskUi.card(DeskUi.heading("Sair do Seeky"), DeskUi.muted("Fecha o Seeky por completo: a janela, o botão Flash, o ícone junto ao relógio e a leitura em voz alta. Fechar a janela no X apenas a esconde quando o Flash está ligado."), DeskUi.button("Sair do Seeky", true, () -> exit(d))));
         return DeskUi.scroll(page);
     }
+    static void exit(DeskMain d) { if (DeskUi.confirm("Sair do Seeky?", "O Seeky fecha por completo, incluindo o botão Flash. Volta a abri-lo pelo ícone no ambiente de trabalho ou no menu Iniciar.")) d.quit(); }
 }

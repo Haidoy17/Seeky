@@ -65,6 +65,10 @@ jobs:
           $left = @(Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -like '*edge-voz*' })
           if ($left.Count -gt 0) { throw "Ficaram $($left.Count) processos do Edge abertos depois do autoteste" }
           Write-Host "Edge fechado depois do autoteste"
+          # 5.57: o editor de notas de uma só página devolve as mesmas marcas (telemóvel, Word, PDF).
+          $notes = & "$env:LOCALAPPDATA\Programs\Seeky\runtime\bin\java.exe" '-Dfile.encoding=UTF-8' '--add-modules' 'javafx.controls,javafx.web,javafx.media,javafx.swing' '-cp' "$apps\$($manifest.versionName)\*" 'mz.bam.seeky.android.DeskLauncher' '--note-test'
+          $notes | Write-Host
+          if ($LASTEXITCODE -ne 0) { throw "Editor de notas falhou" }
       - name: Autoteste pelo Seeky.exe
         shell: pwsh
         run: |
@@ -74,18 +78,42 @@ jobs:
           $p = Start-Process "$dir\Seeky.exe" -ArgumentList '--self-test' -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Seeky.exe --self-test terminou com $($p.ExitCode)" }
           Write-Host "Seeky.exe --self-test: OK"
+      - name: Reiniciar depois de actualizar
+        shell: pwsh
+        run: |
+          # 5.57: o Seeky novo é aberto já com --after=<antigo> e só abre quando o antigo fechou.
+          $exe = "$env:LOCALAPPDATA\Programs\Seeky\Seeky.exe"
+          Start-Process $exe
+          $deadline = (Get-Date).AddSeconds(60)
+          do { Start-Sleep -Seconds 2; $old = Get-Process javaw -ErrorAction SilentlyContinue | Select-Object -First 1 } while (-not $old -and (Get-Date) -lt $deadline)
+          if (-not $old) { throw "O Seeky não abriu" }
+          Start-Sleep -Seconds 15
+          Start-Process $exe -ArgumentList "--after=$($old.Id)"
+          Start-Sleep -Seconds 6
+          $waiting = @(Get-Process javaw -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $old.Id })
+          Write-Host "À espera do antigo: $($waiting.Count) Seeky novo"
+          Stop-Process -Id $old.Id -Force
+          $deadline = (Get-Date).AddSeconds(60); $new = @()
+          do { Start-Sleep -Seconds 3; $new = @(Get-Process javaw -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $old.Id }) } while ($new.Count -eq 0 -and (Get-Date) -lt $deadline)
+          if ($new.Count -eq 0) { throw "Depois de fechar o antigo, o Seeky novo não ficou aberto" }
+          Start-Sleep -Seconds 10
+          $new = @(Get-Process javaw -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $old.Id })
+          if ($new.Count -eq 0) { throw "O Seeky novo fechou-se sozinho" }
+          Write-Host "Reiniciar: o Seeky novo abriu depois de o antigo fechar (pid $($new[0].Id))"
+          $new | Stop-Process -Force
+          Start-Sleep -Seconds 3
       - name: Abrir as janelas no Windows e tirar capturas
         shell: pwsh
         run: |
           $out = "$env:RUNNER_TEMP\capturas"
           $p = Start-Process "$env:LOCALAPPDATA\Programs\Seeky\Seeky.exe" -ArgumentList "--screenshots=$out" -PassThru
           $deadline = (Get-Date).AddMinutes(4)
-          while ((Get-Date) -lt $deadline -and (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count -lt 28) { Start-Sleep -Seconds 3 }
+          while ((Get-Date) -lt $deadline -and (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count -lt 30) { Start-Sleep -Seconds 3 }
           Start-Sleep -Seconds 3
           Get-Process javaw -ErrorAction SilentlyContinue | Stop-Process -Force
           $n = (Get-ChildItem $out -Filter *.png -ErrorAction SilentlyContinue).Count
           Write-Host "Capturas: $n"
-          if ($n -lt 28) { throw "O Seeky não abriu todas as janelas no Windows ($n capturas)" }
+          if ($n -lt 30) { throw "O Seeky não abriu todas as janelas no Windows ($n capturas)" }
       - uses: actions/upload-artifact@v4
         if: always()
         with:

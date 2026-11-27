@@ -304,7 +304,10 @@ final class DeskReader {
         int[] at = {Math.min(Math.max(0, start), Math.max(0, pages - 1))}; double[] zoom = {1.4};
         ImageView view = new ImageView(); view.setPreserveRatio(true);
         Label where = DeskUi.muted("");
-        StackPane holder = new StackPane(view); ScrollPane scroll = new ScrollPane(holder); scroll.setFitToWidth(true); scroll.setPannable(true); VBox.setVgrow(scroll, Priority.ALWAYS); DeskUi.smooth(scroll);
+        // 5.57: passages on the page (as on the phone) are boxes over the picture; a click shows the passage.
+        Pane overlay = new Pane(); overlay.setPickOnBounds(false);
+        StackPane sheet = new StackPane(view, overlay); StackPane.setAlignment(view, javafx.geometry.Pos.TOP_LEFT); StackPane.setAlignment(overlay, javafx.geometry.Pos.TOP_LEFT); sheet.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        StackPane holder = new StackPane(sheet); ScrollPane scroll = new ScrollPane(holder); scroll.setFitToWidth(true); scroll.setPannable(true); VBox.setVgrow(scroll, Priority.ALWAYS); DeskUi.smooth(scroll);
         String[] pageText = {""};
         Button markPage = DeskUi.button("Marcar página", false, () -> {});
         Runnable draw = () -> {
@@ -312,7 +315,14 @@ final class DeskReader {
             boolean marked = !DeskMarks.list(d.store, f.getPath(), at[0]).isEmpty(); markPage.setText(marked ? "Página marcada" : "Marcar página");
             int p = at[0];
             d.run(null, () -> { synchronized (doc) { return render.renderImageWithDPI(p, (float) (96 * zoom[0])); } }, img -> { if (p == at[0]) { view.setImage(SwingFXUtils.toFXImage(img, null)); scroll.setVvalue(0); } });
-            d.worker.execute(() -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setStartPage(p + 1); s.setEndPage(p + 1); String t; synchronized (doc) { t = s.getText(doc); } if (p == at[0]) pageText[0] = t; } catch (Exception ignored) {} });
+            overlay.getChildren().clear(); double scale = 96 * zoom[0] / 72;
+            d.worker.execute(() -> {
+                try {
+                    DeskPdfPassages.Page found; synchronized (doc) { found = DeskPdfPassages.find(doc, p); }
+                    if (p != at[0]) return; pageText[0] = found.text;
+                    javafx.application.Platform.runLater(() -> { if (p == at[0]) showPassages(overlay, found, scale); });
+                } catch (Exception ignored) {}
+            });
         };
         markPage.setOnAction(e -> {
             List<DeskMarks.Mark> existing = DeskMarks.list(d.store, f.getPath(), at[0]);
@@ -329,6 +339,17 @@ final class DeskReader {
         VBox page = new VBox(10, top, scroll); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         page.setOnKeyPressed(e -> { switch (e.getCode()) { case RIGHT: case PAGE_DOWN: next.run(); break; case LEFT: case PAGE_UP: prev.run(); break; default: } });
         d.show(page); page.requestFocus(); draw.run();
+    }
+    /** The passages of a PDF page as boxes over its picture (underlined in the theme's colour). */
+    void showPassages(Pane overlay, DeskPdfPassages.Page page, double scale) {
+        overlay.getChildren().clear();
+        for (DeskPdfPassages.Hit hit : page.hits) for (double[] b : hit.boxes) {
+            Region r = new Region(); r.getStyleClass().add("pdf-passage"); r.setCursor(javafx.scene.Cursor.HAND);
+            double pad = 2; r.relocate(b[0] * scale - pad, b[1] * scale - pad); r.setPrefSize((b[2] - b[0]) * scale + 2 * pad, (b[3] - b[1]) * scale + 2 * pad); r.resize(r.getPrefWidth(), r.getPrefHeight());
+            Tooltip.install(r, new Tooltip(hit.ref.title + " — clique para ler"));
+            r.setOnMouseClicked(e -> { if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) DeskPassage.show(d, hit.ref); });
+            overlay.getChildren().add(r);
+        }
     }
     void pageMark(File f, String title, int page, String snippet, Runnable done) {
         Dialog<ButtonType> dialog = new Dialog<>(); dialog.setTitle("Seeky"); dialog.setHeaderText("Marcar a página " + (page + 1)); DeskUi.style(dialog.getDialogPane());
@@ -367,9 +388,9 @@ final class DeskReader {
         DeskThemes.Theme th = DeskThemes.current;
         StringBuilder h = new StringBuilder("<html><head><meta charset='utf-8'><style>body{font-family:Georgia,'Segoe UI',serif;font-size:19px;line-height:1.65;max-width:760px;margin:24px auto;padding:0 24px;")
             .append("background:").append(DeskThemes.hex(th.bg)).append(";color:").append(DeskThemes.hex(th.ink)).append("}h2{font-family:'Segoe UI',sans-serif}a.passage{color:").append(DeskThemes.hex(th.accent))
-            .append(";text-decoration:none;border-bottom:1px dotted}::selection{background:").append(DeskThemes.hex(th.accent)).append(";color:").append(DeskThemes.hex(th.onAccent)).append("}</style></head><body><h2>").append(DeskNotesHtml.esc(book.names.get(at))).append("</h2>");
+            .append(";text-decoration:none;border-bottom:1px dotted;cursor:pointer}").append(DeskPassage.scrollbarCss()).append("::selection{background:").append(DeskThemes.hex(th.accent)).append(";color:").append(DeskThemes.hex(th.onAccent)).append("}</style></head><body><h2>").append(DeskNotesHtml.esc(book.names.get(at))).append("</h2>");
         for (String para : book.texts.get(at).split("\\n\\s*\\n|\\n")) if (!para.trim().isEmpty()) h.append("<p>").append(DeskMarks.paint(DeskNotesHtml.linkPassages(DeskNotesHtml.esc(para.trim())), marks)).append("</p>");
-        return h.append("</body></html>").toString();
+        return h.append(DeskPassage.SCRIPT).append("</body></html>").toString();
     }
     void text(File f, Book book, int start, long showMark) {
         int[] at = {Math.min(Math.max(0, start), book.texts.size() - 1)};
@@ -424,8 +445,8 @@ final class DeskReader {
             selBar.relocate(x, Math.max(8, y));
         });
         web.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> selBar.setVisible(false));
-        web.getEngine().setOnAlert(e -> { String m = e.getData(); if (m != null && m.startsWith("seekymark:")) { try { DeskMarks.menu(d, Long.parseLong(m.substring(10)), redraw); } catch (NumberFormatException ignored) {} } });
-        web.getEngine().locationProperty().addListener((o, a, url) -> { if (url != null && url.startsWith("seeky:")) { BibleReferences.Reference r = BibleReferences.lookup(url.substring(6).replace("%20", " ")); if (r != null) d.notes.passage(r); redraw.run(); } });
+        web.getEngine().setOnAlert(e -> { String m = e.getData(); if (DeskPassage.alert(d, m)) return; if (m != null && m.startsWith("seekymark:")) { try { DeskMarks.menu(d, Long.parseLong(m.substring(10)), redraw); } catch (NumberFormatException ignored) {} } });
+
         toc.setOnAction(e -> { int i = toc.getSelectionModel().getSelectedIndex(); if (i >= 0 && i != at[0]) { at[0] = i; draw[0].run(); } });
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw[0].run(); } }, next = () -> { if (at[0] < book.texts.size() - 1) { at[0]++; draw[0].run(); } };
         java.util.function.Supplier<String> place = () -> book.names.get(at[0]);

@@ -36,12 +36,32 @@ final class DeskUpdates {
         a.setTitle("Seeky"); a.setHeaderText("Actualização pronta · Seeky " + name); DeskUi.style(a.getDialogPane());
         a.showAndWait().filter(b -> b.getButtonData() == ButtonBar.ButtonData.OK_DONE).ifPresent(b -> restart(d));
     }
-    /** Opens Seeky again a moment after this one closes (so the single-instance check lets it start). */
-    static void restart(DeskMain d) {
+    /** The Seeky.exe this window was started from (the launcher passes it), or the usual install place. */
+    static File launcher() {
+        String given = System.getProperty("seeky.launcher", ""); if (!given.isEmpty() && new File(given).isFile()) return new File(given);
         String local = System.getenv("LOCALAPPDATA"); File exe = local == null ? null : new File(local, "Programs\\Seeky\\Seeky.exe");
-        if (exe == null || !exe.isFile()) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
-        try { ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", "Start-Sleep -Seconds 2; Start-Process -FilePath $env:SEEKY_EXE"); pb.environment().put("SEEKY_EXE", exe.getAbsolutePath()); pb.start(); } catch (IOException e) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
+        return exe != null && exe.isFile() ? exe : null;
+    }
+    /**
+     * Opens Seeky again after this one has closed. 5.57: the new Seeky is started at once with "--after=<this process>"
+     * and waits until this one has really gone before opening (before, a fixed 2-second wait sometimes let the new one
+     * find the old one still running, hand itself over to it and close: nothing opened).
+     */
+    static void restart(DeskMain d) {
+        File exe = launcher();
+        if (exe == null) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
+        try {
+            ProcessBuilder pb = new ProcessBuilder(exe.getAbsolutePath(), "--after=" + ProcessHandle.current().pid());
+            pb.directory(exe.getParentFile()); pb.redirectOutput(ProcessBuilder.Redirect.DISCARD); pb.redirectError(ProcessBuilder.Redirect.DISCARD); pb.redirectInput(ProcessBuilder.Redirect.from(new File("NUL")));
+            pb.start();
+        } catch (IOException e) { d.status("Feche e volte a abrir o Seeky para usar a nova versão."); return; }
         d.quit();
+    }
+    /** "--after=<pid>": waits (at most 60 s) for that Seeky to close. */
+    static void waitFor(String[] args) {
+        for (String a : args) if (a.startsWith("--after=")) {
+            try { long pid = Long.parseLong(a.substring(8)); ProcessHandle.of(pid).ifPresent(h -> { try { h.onExit().get(60, java.util.concurrent.TimeUnit.SECONDS); } catch (Exception ignored) {} }); } catch (NumberFormatException ignored) {}
+        }
     }
     static byte[] get(String url, int max) throws IOException {
         URL u = new URL(url); if (!"https".equals(u.getProtocol()) || !HOST.equals(u.getHost())) throw new IOException("Ligação de actualização recusada.");

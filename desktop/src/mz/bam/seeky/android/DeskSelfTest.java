@@ -136,6 +136,49 @@ final class DeskSelfTest {
             return refused && codeGone && first && second && quiet && upload && download && locked;
         } finally { server.close(); System.setProperty("user.home", realHome); }
     }
+    /** 5.57 · Notes written in the one-page editor come back as the same marks (the phone, Word and PDF read them). */
+    static final String[] NOTES = {
+        "# Estudo\nTexto com **negrito**, *itálico*, __sublinhado__, ~~riscado~~ e ==destaque==.\n{cor:azul}Frase azul{/cor} e normal.\n\n- um\n- dois\n  - dentro\n1. primeiro\n2. segundo\n[ ] fazer\n[x] feito\n> Citação\n[c] Centrado\n[d] À direita\n  Recuado\n---\n| A | B |\n|---|---|\n| 1 | 2 |\nLer João 3:16 e Romanos 5:8.",
+        "## Sermão\n\n### Pontos\n1. **Fé**: confiar\n2. *Esperança*\n\n#### Fim\nSem marcas."
+    };
+    /** Runs the editor page in a hidden window and compares what it gives back. */
+    static boolean notes() {
+        java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1); boolean[] all = {true};
+        javafx.application.Platform.startup(() -> {
+            javafx.scene.web.WebView web = new javafx.scene.web.WebView(); javafx.scene.web.WebEngine e = web.getEngine();
+            String script = DeskNotes.editorScript(); int[] at = {0}; DeskNotesBridge bridge = new DeskNotesBridge(m -> {}); web.setUserData(bridge);
+            e.getLoadWorker().stateProperty().addListener((o, a, st) -> {
+                if (st != javafx.concurrent.Worker.State.SUCCEEDED) return;
+                ((netscape.javascript.JSObject) e.executeScript("window")).setMember("seeky", bridge); e.executeScript(script);
+                String back = String.valueOf(e.executeScript("markup()")), want = NOTES[at[0]];
+                boolean same = back.equals(want); all[0] &= same;
+                System.out.println((same ? "PASS" : "FAIL") + " nota " + (at[0] + 1) + " volta igual do editor" + (same ? "" : "\n--- esperado\n" + want + "\n--- recebido\n" + back));
+                Object passages = e.executeScript("decorate(); document.querySelectorAll('span.passage').length");
+                if (at[0] == 0) { boolean ok2 = passages instanceof Number && ((Number) passages).intValue() == 2; all[0] &= ok2; System.out.println((ok2 ? "PASS" : "FAIL") + " passagens marcadas no editor: " + passages); }
+                // Typing: a new bullet and a ticked task survive.
+                if (at[0] == 1) {
+                    e.executeScript("var p=document.createElement('p');p.textContent='Nova linha com Salmo 23:1';document.getElementById('doc').appendChild(p);decorate();");
+                    String typed = String.valueOf(e.executeScript("markup()")); boolean ok3 = typed.endsWith("Sem marcas.\nNova linha com Salmo 23:1"); all[0] &= ok3;
+                    System.out.println((ok3 ? "PASS" : "FAIL") + " texto escrito no editor guardado" + (ok3 ? "" : ": " + typed));
+                    // The toolbar: bold, then a task list, on the selected line.
+                    e.executeScript("var d=document.getElementById('doc'),p=d.lastChild,r=document.createRange();r.selectNodeContents(p);var s=window.getSelection();s.removeAllRanges();s.addRange(r);cmd('bold','');");
+                    String bold = String.valueOf(e.executeScript("markup()")); boolean ok4 = bold.endsWith("\n**Nova linha com Salmo 23:1**"); all[0] &= ok4;
+                    System.out.println((ok4 ? "PASS" : "FAIL") + " negrito pela barra" + (ok4 ? "" : ": " + bold));
+                    e.executeScript("cmd('list','task');");
+                    String task = String.valueOf(e.executeScript("markup()")); boolean ok5 = task.endsWith("\n[ ] **Nova linha com Salmo 23:1**"); all[0] &= ok5;
+                    System.out.println((ok5 ? "PASS" : "FAIL") + " tarefa pela barra" + (ok5 ? "" : ": " + task));
+                    e.executeScript("var d=document.getElementById('doc'),p=document.createElement('p');p.textContent='Título novo';d.appendChild(p);var r=document.createRange();r.selectNodeContents(p);r.collapse(true);var s=window.getSelection();s.removeAllRanges();s.addRange(r);cmd('block','h2');");
+                    String head = String.valueOf(e.executeScript("markup()")); boolean ok6 = head.endsWith("\n## Título novo"); all[0] &= ok6;
+                    System.out.println((ok6 ? "PASS" : "FAIL") + " título pela barra" + (ok6 ? "" : ": " + head));
+                }
+                if (++at[0] < NOTES.length) e.loadContent(DeskNotesHtml.editor(NOTES[at[0]], DeskNotes.media())); else done.countDown();
+            });
+            e.loadContent(DeskNotesHtml.editor(NOTES[0], DeskNotes.media()));
+        });
+        try { if (!done.await(60, java.util.concurrent.TimeUnit.SECONDS)) { System.out.println("FAIL editor de notas não respondeu"); all[0] = false; } } catch (InterruptedException ex) { all[0] = false; }
+        System.out.println((all[0] ? "PASS" : "FAIL") + " editor de notas");
+        return all[0];
+    }
     static boolean run() {
         try {
             File home = Files.createTempDirectory("seeky-selftest").toFile(); System.setProperty("seeky.home", home.getPath());
@@ -251,6 +294,14 @@ final class DeskSelfTest {
             File txt = new File(home, "livro.txt"); Files.write(txt.toPath(), "Capítulo um.\n\nTexto do livro.".getBytes(StandardCharsets.UTF_8)); check(DeskReader.chapters(txt).texts.size() == 1, "ler livro TXT");
             Class.forName("org.apache.pdfbox.pdmodel.PDDocument"); check(true, "PDFBox presente");
             Class.forName("javafx.scene.media.MediaPlayer"); check(true, "JavaFX Media presente");
+            // 5.57: passagens num PDF reconhecidas com o sítio na página (como no telemóvel).
+            { File pp = new File(home, "passagens.pdf"); try (OutputStream o = new FileOutputStream(pp)) { DeskPdf.note("Estudo", "# Estudo\nLeia João 3:16 com atenção e depois Romanos 8:28.", home, o); }
+              try (org.apache.pdfbox.pdmodel.PDDocument pd = org.apache.pdfbox.pdmodel.PDDocument.load(pp)) {
+                  DeskPdfPassages.Page pg = DeskPdfPassages.find(pd, 0); float w = pd.getPage(0).getMediaBox().getWidth(), h = pd.getPage(0).getMediaBox().getHeight();
+                  boolean inside = !pg.hits.isEmpty(); for (DeskPdfPassages.Hit hit : pg.hits) for (double[] b : hit.boxes) inside &= b[0] >= 0 && b[2] <= w && b[1] >= 0 && b[3] <= h && b[2] > b[0] && b[3] > b[1];
+                  check(pg.hits.size() == 2 && pg.hits.get(0).ref.title.equals("João 3:16") && pg.hits.get(1).ref.title.equals("Romanos 8:28") && inside && pg.text.contains("João 3:16"), "passagens no PDF com o sítio na página: " + pg.hits.size());
+              } }
+            check(DeskNotesBridge.refsOf("Ver Salmo 23:1 e Mt 5:3").startsWith("4\t15\tSalmos 23:1") || DeskNotesBridge.refsOf("Ver Salmo 23:1 e Mt 5:3").contains("23:1"), "passagens para o editor de notas");
             // 5.56: parar a leitura (ou começar outra) muda a geração, por isso a página seguinte só vem quando a leitura acaba sozinha.
             { int g = DeskSpeech.generation; DeskSpeech.stop(); int g2 = DeskSpeech.generation; DeskSpeech.stop(); check(g2 == g + 1 && DeskSpeech.generation == g + 2 && !DeskSpeech.busy(), "parar a leitura não passa à página seguinte"); }
         } catch (Throwable e) { e.printStackTrace(System.out); check(false, "erro: " + e); }

@@ -109,25 +109,27 @@ final class DeskNotes {
     }
     void newWith(String title, String body) { d.open("notes"); edit(0, title, body); }
 
-    /** The editor: text with Seeky's marks on the left, the formatted note on the right. */
+    /** The page script of the editor (resources/notes-editor.js). */
+    static String editorScript() {
+        try (InputStream in = DeskNotes.class.getResourceAsStream("/notes-editor.js")) { return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8); }
+        catch (Exception e) { return ""; }
+    }
+    /**
+     * 5.57 · The editor is one page: what you write is formatted as you write it and is the final note (no
+     * separate text with marks, no preview). The note is still kept as Seeky's marks, so it is the same on the
+     * phone, in Word and in PDF. Passages (João 3:16…) are marked as you write; a click shows them over the page.
+     */
     void edit(long id, String title0, String body0) {
         long[] note = {id};
         TextField title = new TextField(title0); title.setPromptText("Título"); title.getStyleClass().add("note-title");
-        TextArea body = new TextArea(body0); body.setWrapText(true); body.getStyleClass().add("note-body"); body.setPromptText("Escreva aqui… Passagens como João 3:16 são reconhecidas.");
-        WebView preview = new WebView(); preview.setContextMenuEnabled(false);
+        TextArea source = new TextArea(body0); // the note's marks: saved, exported and given to Seeky IA (not shown)
+        boolean[] fromPage = {false};
+        WebView page = new WebView(); page.setContextMenuEnabled(false); VBox.setVgrow(page, Priority.ALWAYS);
+        javafx.scene.web.WebEngine engine = page.getEngine();
         Label info = DeskUi.muted(""); String[] saved = {""};
         FlowPane passages = new FlowPane(6, 6);
-        PauseTransition later = new PauseTransition(Duration.millis(500));
-        Runnable refresh = () -> {
-            boolean dark = d.root.getStyleClass().contains("dark");
-            preview.getEngine().loadContent(DeskNotesHtml.html(title.getText(), body.getText(), media(), dark, 0));
-            int[] t = NotepadText.tasks(body.getText());
-            info.setText(NotepadText.words(body.getText()) + " palavras · ~" + NotepadText.minutes(body.getText()) + " min" + (t[1] > 0 ? " · ☑ " + t[0] + "/" + t[1] : "") + (saved[0].isEmpty() ? "" : " · " + saved[0]));
-            passages.getChildren().clear(); Set<String> seen = new LinkedHashSet<>();
-            for (BibleReferences.Reference r : BibleReferences.references(title.getText() + "\n" + body.getText())) if (seen.add(r.title)) passages.getChildren().add(DeskUi.button(r.title, false, () -> passage(r)));
-        };
         Runnable save = () -> {
-            String t = title.getText(), b = body.getText(); if (note[0] == 0 && t.trim().isEmpty() && b.trim().isEmpty()) return;
+            String t = title.getText(), b = source.getText(); if (note[0] == 0 && t.trim().isEmpty() && b.trim().isEmpty()) return;
             long now = System.currentTimeMillis();
             try {
                 if (note[0] == 0) note[0] = d.store.update("INSERT INTO notes(title,body,created,updated) VALUES(?,?,?,?)", t, b, now, now);
@@ -135,54 +137,100 @@ final class DeskNotes {
                 saved[0] = "Guardada às " + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(now));
             } catch (SQLException e) { d.status(e.getMessage()); }
         };
+        String[] lastRefs = {null};
+        Runnable refresh = () -> {
+            String text = source.getText(); int[] t = NotepadText.tasks(text);
+            info.setText(NotepadText.words(text) + " palavras · ~" + NotepadText.minutes(text) + " min" + (t[1] > 0 ? " · ☑ " + t[0] + "/" + t[1] : "") + (saved[0].isEmpty() ? "" : " · " + saved[0]));
+            Set<String> seen = new LinkedHashSet<>(); List<BibleReferences.Reference> found = new ArrayList<>();
+            for (BibleReferences.Reference r : BibleReferences.references(title.getText() + "\n" + NotepadText.plain(text))) if (seen.add(r.title)) found.add(r);
+            String key = String.join("|", seen); if (key.equals(lastRefs[0])) return; lastRefs[0] = key;
+            passages.getChildren().clear();
+            if (!found.isEmpty()) passages.getChildren().add(DeskUi.muted("Passagens nesta nota:"));
+            for (BibleReferences.Reference r : found) { Button b = DeskUi.button(r.title, false, () -> DeskPassage.show(d, r)); b.setGraphic(DeskUi.icon("book", 14)); passages.getChildren().add(b); }
+        };
+        DeskNotesBridge bridge = new DeskNotesBridge(markup -> { fromPage[0] = true; source.setText(markup); fromPage[0] = false; save.run(); refresh.run(); });
+        page.setUserData(bridge); // the page only holds a weak reference
+        String script = editorScript();
+        engine.getLoadWorker().stateProperty().addListener((o, a, st) -> {
+            if (st != javafx.concurrent.Worker.State.SUCCEEDED) return;
+            ((netscape.javascript.JSObject) engine.executeScript("window")).setMember("seeky", bridge);
+            engine.executeScript(script);
+        });
+        engine.setOnAlert(e -> DeskPassage.alert(d, e.getData()));
+        Runnable load = () -> engine.loadContent(DeskNotesHtml.editor(source.getText(), media()));
+        // Seeky IA (or a passage) changed the marks: show the note again.
+        source.textProperty().addListener((o, a, b) -> { if (!fromPage[0]) { load.run(); save.run(); refresh.run(); } });
+        PauseTransition later = new PauseTransition(Duration.millis(500));
         later.setOnFinished(e -> { save.run(); refresh.run(); });
-        body.textProperty().addListener((o, a, b) -> later.playFromStart()); title.textProperty().addListener((o, a, b) -> later.playFromStart());
-        preview.getEngine().locationProperty().addListener((o, a, url) -> { if (url != null && url.startsWith("seeky:")) { BibleReferences.Reference r = BibleReferences.lookup(url.substring(6).replace("%20", " ")); if (r != null) passage(r); refresh.run(); } });
-        // Formatting
-        ToolBar tools = new ToolBar();
-        Object[][] marks = {{"B", "**"}, {"I", "*"}, {"U", "__"}, {"S", "~~"}, {"Destacar", "=="}};
-        for (Object[] m : marks) { Button b = new Button((String) m[0]); b.setOnAction(e -> apply(body, NotepadText.wrap(body.getText(), body.getSelection().getStart(), body.getSelection().getEnd(), (String) m[1]))); tools.getItems().add(b); }
-        tools.getItems().add(new Separator(Orientation.VERTICAL));
-        for (int h = 1; h <= 3; h++) { final int lv = h; Button b = new Button("H" + h); b.setOnAction(e -> apply(body, NotepadText.heading(body.getText(), body.getSelection().getStart(), body.getSelection().getEnd(), lv))); tools.getItems().add(b); }
-        Object[][] prefixes = {{"• Lista", "- "}, {"1. Lista", "1. "}, {"☐ Tarefa", "[ ] "}, {"❝ Citação", "> "}};
-        for (Object[] p : prefixes) { Button b = new Button((String) p[0]); b.setOnAction(e -> apply(body, NotepadText.prefix(body.getText(), body.getSelection().getStart(), body.getSelection().getEnd(), (String) p[1]))); tools.getItems().add(b); }
-        Button table = new Button("Tabela"); table.setOnAction(e -> apply(body, NotepadText.insert(body.getText(), body.getCaretPosition(), NotepadText.table(3, 2), true)));
-        Button picture = new Button("Imagem"); picture.setOnAction(e -> insertImage(body));
-        Button verse = new Button("Passagem"); verse.setOnAction(e -> insertPassage(body));
-        tools.getItems().addAll(new Separator(Orientation.VERTICAL), table, picture, verse);
+        title.textProperty().addListener((o, a, b) -> later.playFromStart());
+        /** The latest marks straight from the page (typing saves half a second later). */
+        Runnable sync = () -> { try { Object m = engine.executeScript("window.markup ? window.markup() : null"); if (m instanceof String && !m.equals(source.getText())) { fromPage[0] = true; source.setText((String) m); fromPage[0] = false; save.run(); } } catch (Exception ignored) {} };
+        java.util.function.BiConsumer<String, String> cmd = (name, value) -> { try { ((netscape.javascript.JSObject) engine.executeScript("window")).call("cmd", name, value == null ? "" : value); } catch (Exception ignored) {} page.requestFocus(); };
+        // The toolbar: applies to what is selected, as in a word processor.
+        FlowPane tools = new FlowPane(6, 6); tools.getStyleClass().add("note-tools"); // wraps instead of hiding buttons
+        java.util.function.Function<String[], Button> tool = spec -> { Button b = new Button(spec[0]); b.setTooltip(new Tooltip(spec[1])); b.setFocusTraversable(false); b.setOnAction(e -> cmd.accept(spec[2], spec.length > 3 ? spec[3] : "")); tools.getChildren().add(b); return b; };
+        tool.apply(new String[]{"B", "Negrito (Ctrl+B)", "bold"}).setStyle("-fx-font-weight: bold;");
+        tool.apply(new String[]{"I", "Itálico (Ctrl+I)", "italic"}).setStyle("-fx-font-style: italic;");
+        tool.apply(new String[]{"U", "Sublinhado (Ctrl+U)", "underline"}).setStyle("-fx-underline: true;");
+        tool.apply(new String[]{"S", "Riscado", "strikeThrough"}).setStyle("-fx-strikethrough: true;");
+        tool.apply(new String[]{"Destacar", "Destacar a amarelo", "mark"});
+        MenuButton color = new MenuButton("Cor"); color.setFocusTraversable(false);
+        for (int i = 0; i < NotepadDoc.COLOR_KEYS.length; i++) { int c = NotepadDoc.COLOR_VALUES[i]; String hex = String.format(Locale.ROOT, "#%06x", c & 0xffffff); javafx.scene.shape.Circle dot = new javafx.scene.shape.Circle(7, javafx.scene.paint.Color.web(hex)); MenuItem m = new MenuItem(NotepadDoc.COLOR_NAMES[i], dot); m.setOnAction(e -> cmd.accept("color", hex)); color.getItems().add(m); }
+        MenuItem noColor = new MenuItem("Sem cor"); noColor.setOnAction(e -> cmd.accept("color", DeskThemes.hex(DeskThemes.current.ink))); color.getItems().add(noColor);
+        tools.getChildren().addAll(color, gap());
+        tool.apply(new String[]{"Texto", "Texto normal", "block", "p"});
+        for (int h = 1; h <= 3; h++) tool.apply(new String[]{"H" + h, "Título " + h, "block", "h" + h});
+        tools.getChildren().add(gap());
+        tool.apply(new String[]{"• Lista", "Lista com pontos", "list", "ul"});
+        tool.apply(new String[]{"1. Lista", "Lista numerada", "list", "ol"});
+        tool.apply(new String[]{"☐ Tarefa", "Lista de tarefas (clique na caixa para marcar)", "list", "task"});
+        tool.apply(new String[]{"❝ Citação", "Citação", "block", "blockquote"});
+        tools.getChildren().add(gap());
+        tool.apply(new String[]{"⇤", "Alinhar à esquerda", "justifyLeft"});
+        tool.apply(new String[]{"≡", "Centrar", "justifyCenter"});
+        tool.apply(new String[]{"⇥", "Alinhar à direita", "justifyRight"});
+        tool.apply(new String[]{"→", "Aumentar o recuo", "indent"});
+        tool.apply(new String[]{"←", "Diminuir o recuo", "outdent"});
+        tools.getChildren().add(gap());
+        Button table = new Button("Tabela"); table.setFocusTraversable(false); table.setOnAction(e -> cmd.accept("html", "<table><tr><th>Coluna 1</th><th>Coluna 2</th><th>Coluna 3</th></tr><tr><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr></table><p><br></p>"));
+        Button line = new Button("Linha"); line.setFocusTraversable(false); line.setOnAction(e -> cmd.accept("insertHorizontalRule", ""));
+        Button picture = new Button("Imagem"); picture.setFocusTraversable(false); picture.setOnAction(e -> insertImage(cmd));
+        Button verse = new Button("Passagem"); verse.setFocusTraversable(false); verse.setOnAction(e -> insertPassage(cmd));
+        tools.getChildren().addAll(table, line, picture, verse);
         // Actions
-        Button back = new Button(); back.setGraphic(DeskUi.icon("back", 20)); back.getStyleClass().add("round"); back.setOnAction(e -> { later.stop(); save.run(); d.open("notes"); });
+        Button back = new Button(); back.setGraphic(DeskUi.icon("back", 20)); back.getStyleClass().add("round"); back.setOnAction(e -> { later.stop(); sync.run(); save.run(); d.open("notes"); });
         MenuButton more = new MenuButton("Mais");
-        MenuItem word = new MenuItem("Exportar Word (.docx)"); word.setOnAction(e -> export(title.getText(), body.getText(), "docx"));
-        MenuItem pdf = new MenuItem("Exportar PDF"); pdf.setOnAction(e -> export(title.getText(), body.getText(), "pdf"));
-        MenuItem md = new MenuItem("Exportar Markdown (.md)"); md.setOnAction(e -> export(title.getText(), body.getText(), "md"));
-        MenuItem listen = new MenuItem("Ouvir a nota"); listen.setOnAction(e -> DeskSpeech.toggle(d, NotepadText.plain(title.getText() + "\n" + body.getText())));
-        MenuItem pin = new MenuItem("Fixar / desafixar"); pin.setOnAction(e -> { save.run(); try { d.store.update("UPDATE notes SET pinned=1-pinned WHERE id=?", note[0]); } catch (SQLException ignored) {} });
-        MenuItem folder = new MenuItem("Mover para pasta…"); folder.setOnAction(e -> { save.run(); String f = DeskUi.ask("Pasta", "Nome da pasta (vazio para nenhuma)", ""); try { d.store.update("UPDATE notes SET folder=? WHERE id=?", f == null ? "" : f, note[0]); } catch (SQLException ignored) {} });
+        MenuItem word = new MenuItem("Exportar Word (.docx)"); word.setOnAction(e -> { sync.run(); export(title.getText(), source.getText(), "docx"); });
+        MenuItem pdf = new MenuItem("Exportar PDF"); pdf.setOnAction(e -> { sync.run(); export(title.getText(), source.getText(), "pdf"); });
+        MenuItem md = new MenuItem("Exportar Markdown (.md)"); md.setOnAction(e -> { sync.run(); export(title.getText(), source.getText(), "md"); });
+        MenuItem listen = new MenuItem("Ouvir a nota"); listen.setOnAction(e -> { sync.run(); DeskSpeech.toggle(d, NotepadText.plain(title.getText() + "\n" + source.getText())); });
+        MenuItem pin = new MenuItem("Fixar / desafixar"); pin.setOnAction(e -> { sync.run(); save.run(); try { d.store.update("UPDATE notes SET pinned=1-pinned WHERE id=?", note[0]); } catch (SQLException ignored) {} });
+        MenuItem folder = new MenuItem("Mover para pasta…"); folder.setOnAction(e -> { sync.run(); save.run(); String f = DeskUi.ask("Pasta", "Nome da pasta (vazio para nenhuma)", ""); try { d.store.update("UPDATE notes SET folder=? WHERE id=?", f == null ? "" : f, note[0]); } catch (SQLException ignored) {} });
         MenuItem delete = new MenuItem("Apagar"); delete.setOnAction(e -> { if (note[0] != 0 && DeskUi.confirm("Apagar esta nota?", "Não pode ser desfeito.")) { try { d.store.update("DELETE FROM notes WHERE id=?", note[0]); DeskSync.deleted(d.store, note[0]); } catch (SQLException ignored) {} later.stop(); d.open("notes"); } });
         more.getItems().addAll(word, pdf, md, new SeparatorMenuItem(), listen, pin, folder, new SeparatorMenuItem(), delete);
-        Button ai = new Button("Seeky IA", DeskUi.icon("sparkle", 18)); ai.getStyleClass().add("primary"); ai.setOnAction(e -> DeskAi.menu(d, body, title));
+        Button ai = new Button("Seeky IA", DeskUi.icon("sparkle", 18)); ai.getStyleClass().add("primary"); ai.setOnAction(e -> { sync.run(); DeskAi.menu(d, source, title, ai); });
         HBox top = DeskUi.row(back, title, ai, more); HBox.setHgrow(title, Priority.ALWAYS);
-        SplitPane split = new SplitPane(body, preview); split.setDividerPositions(0.5); VBox.setVgrow(split, Priority.ALWAYS);
-        VBox page = new VBox(10, top, tools, split, passages, info); page.setPadding(new javafx.geometry.Insets(18, 22, 14, 22)); page.getStyleClass().add("page");
-        d.show(page); refresh.run(); body.requestFocus();
+        VBox card = new VBox(page); card.getStyleClass().add("note-page"); VBox.setVgrow(card, Priority.ALWAYS);
+        VBox view = new VBox(10, top, tools, card, passages, info); view.setPadding(new javafx.geometry.Insets(18, 22, 14, 22)); view.getStyleClass().add("page");
+        d.show(view); load.run(); refresh.run();
+        javafx.application.Platform.runLater(() -> { if (title0.isEmpty() && body0.isEmpty()) title.requestFocus(); else page.requestFocus(); });
     }
-    static void apply(TextArea body, NotepadText.Edit e) { if (e == null) return; body.setText(e.text); body.selectRange(Math.min(e.start, e.text.length()), Math.min(e.end, e.text.length())); body.requestFocus(); }
-    void passage(BibleReferences.Reference r) {
-        String text = ""; try { text = d.store.passage(d.store.bible(), r).replaceAll("\\[\\d+\\] ", ""); } catch (SQLException ignored) {}
-        DeskUi.info(r.title, text.isEmpty() ? "Importe uma Bíblia (Bíblia → Importar) para ler o texto desta passagem." : text);
-    }
-    void insertPassage(TextArea body) {
+    void passage(BibleReferences.Reference r) { DeskPassage.show(d, r); }
+    static Region gap() { Region r = new Region(); r.setPrefWidth(8); return r; }
+    void insertPassage(java.util.function.BiConsumer<String, String> cmd) {
         String q = DeskUi.ask("Inserir passagem", "Por exemplo: João 3:16-18 ou Salmo 23", ""); if (q == null) return;
         BibleReferences.Reference r = BibleReferences.lookup(q); if (r == null) { DeskUi.info("Passagem não reconhecida", "Escreva o livro, o capítulo e o versículo."); return; }
         String text = ""; try { text = d.store.passage(d.store.bible(), r).replaceAll("\\[\\d+\\] ", ""); } catch (SQLException ignored) {}
-        apply(body, NotepadText.insert(body.getText(), body.getCaretPosition(), text.isEmpty() ? "> " + r.title : NotepadText.passage(r.title, text, ""), true));
+        String html = "<blockquote>" + DeskNotesHtml.esc(r.title) + "</blockquote>" + (text.isEmpty() ? "" : "<blockquote>«" + DeskNotesHtml.esc(text.trim().replaceAll("\\s+", " ")) + "»</blockquote>") + "<p><br></p>";
+        cmd.accept("html", html);
     }
-    void insertImage(TextArea body) {
+    void insertImage(java.util.function.BiConsumer<String, String> cmd) {
         FileChooser fc = new FileChooser(); fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imagens", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.bmp"));
         File f = fc.showOpenDialog(d.stage); if (f == null) return;
-        try { String ext = f.getName().replaceFirst(".*\\.", "").toLowerCase(Locale.ROOT); String name = "img_" + System.currentTimeMillis() + "." + ext; Files.copy(f.toPath(), new File(media(), name).toPath()); apply(body, NotepadText.insert(body.getText(), body.getCaretPosition(), "![Imagem](note-img:" + name + ")", true)); }
-        catch (IOException e) { DeskUi.info("Não foi possível usar a imagem", e.getMessage()); }
+        try {
+            String ext = f.getName().replaceFirst(".*\\.", "").toLowerCase(Locale.ROOT); String name = "img_" + System.currentTimeMillis() + "." + ext; File copy = new File(media(), name); Files.copy(f.toPath(), copy.toPath());
+            cmd.accept("html", "<p><img data-ref=\"" + name + "\" data-label=\"Imagem\" src=\"" + copy.toURI() + "\" alt=\"Imagem\"></p><p><br></p>");
+        } catch (IOException e) { DeskUi.info("Não foi possível usar a imagem", e.getMessage()); }
     }
     void export(String title, String body, String kind) {
         String name = NotepadText.title(title, body).replaceAll("[\\\\/:*?\"<>|]", " ").trim();

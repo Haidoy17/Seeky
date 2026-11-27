@@ -1,5 +1,26 @@
 # Registo de alterações
 
+## 5.57.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: notas numa só página.** A página de marcas (`**`, `#`, `- `…) e a pré-visualização ao lado
+  deram lugar a uma página única onde se escreve e se vê logo a nota final: títulos, negrito, itálico,
+  sublinhado, riscado, destaque, cores, listas, tarefas (clique na caixa), citações, alinhamento, recuo,
+  tabelas, linhas, imagens e passagens. A nota continua guardada no mesmo formato, por isso fica igual no
+  telemóvel, no Word e no PDF (teste de ida e volta no autoteste). Colar cola só o texto.
+- **Windows: passagens bíblicas numa janela**, sem ir à Bíblia: nas notas (marcadas enquanto escreve),
+  nos livros EPUB/Word/TXT e **nos PDF** — o Seeky lê o texto de cada página com a posição de cada letra e
+  põe uma marca clicável por cima de cada passagem (como no telemóvel). A janela mostra os versículos
+  numerados, com *Copiar* e *Abrir na Bíblia*. Antes, nos livros, as passagens com acentos (João) não
+  abriam porque o endereço do link vinha codificado.
+- **Windows: barra de rolagem visível** à direita de listas, páginas, livros e notas (mais larga, com cor
+  do tema, realçada ao passar o rato).
+- **Windows: Sair do Seeky** nas Definições (no topo e no fim): fecha a janela, o botão Flash, o ícone
+  junto ao relógio e a leitura em voz alta.
+- **Windows: Reiniciar agora depois de actualizar** corrigido: o Seeky novo abre logo com
+  `--after=<processo antigo>` e espera que o antigo feche de verdade (antes esperava 2 s fixos; se o
+  antigo ainda estivesse a fechar, o novo entregava-se a ele e nada abria). Ensaiado no Windows real (CI).
+- Android: só o número da versão e as Novidades.
+
 ## 5.56.0 — 2026-11-27 (Android e Windows)
 
 - **Windows: ouvir o livro seguido.** *Ouvir* lê a página inteira do PDF (ou o capítulo do EPUB/Word/TXT)

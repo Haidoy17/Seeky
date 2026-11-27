@@ -1,3 +1,13 @@
+## Seeky 5.57.0
+
+Instale **Seeky_5.57.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.57.0.
+
+- Windows: notas numa só página — escreve e já vê a nota final.
+- Windows: clique numa passagem bíblica nas notas, nos livros ou num PDF para a ler numa janela.
+- Windows: barra de rolagem visível; *Sair do Seeky* nas Definições; *Reiniciar agora* depois de
+  actualizar volta a abrir o Seeky.
+
 ## Seeky 5.56.0
 
 Instale **Seeky_5.56.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

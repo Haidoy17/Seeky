@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008300,
-  "versionName": "5.56.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.56.0.apk",
-  "sha256": "a3049123e99a3898189752a82a6e4784e1bc6afd347ca1d962f844e9610fb621",
-  "bytes": 14018279,
-  "notes": "Windows: Ouvir lê a página inteira e passa sozinho à seguinte; na Música um clique selecciona e o duplo clique toca, lista e leitor mais leves."
+  "versionCode": 5008400,
+  "versionName": "5.57.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.57.0.apk",
+  "sha256": "b6b1c3e0dfeed1295f6305f5915348015db714269f4281c185ee8e44aef11200",
+  "bytes": 14019114,
+  "notes": "Windows: notas numa só página; passagens bíblicas numa janela nas notas, livros e PDF; barra de rolagem visível; Sair do Seeky; Reiniciar agora corrigido."
 }
