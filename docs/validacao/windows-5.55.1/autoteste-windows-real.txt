@@ -1,0 +1,7 @@
+Windows Server 2025 (GitHub Actions, execução 45965819207), Seeky actualizado de 5.45.0 para 5.55.1:
+PASS vers�o 5.55.1
+  edge: 321 vozes naturais (por ex. Microsoft Duarte Online (Natural) - Portuguese (Portugal))
+PASS 30 verifica��es do Seeky Desktop
+Edge fechado depois do autoteste
+PASS vers�o 5.45.0
+Capturas: 28
