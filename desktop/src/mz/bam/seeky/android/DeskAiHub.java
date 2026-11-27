@@ -23,7 +23,7 @@ import java.util.*;
 final class DeskAiHub {
     final DeskMain d;
     String tab = "Perguntar";
-    static final String[] TABS = {"Perguntar", "Resumir livro", "Plano de estudo"};
+    static final String[] TABS = {"Perguntar", "Encontrar passagem", "Resumir livro", "Plano de estudo"};
     final List<File> docs = new ArrayList<>();
     final Map<String, String> texts = new HashMap<>();
     final List<SeekyAiCore.Message> history = new ArrayList<>();
@@ -47,6 +47,7 @@ final class DeskAiHub {
         if (!DeskAi.ready(d.store))
             page.getChildren().add(DeskUi.card(DeskUi.heading("Ligue primeiro a Seeky IA"), DeskUi.text("A Seeky IA usa a sua chave gratuita do Google Gemini. Só é enviado à Google o texto necessário para cada pedido."), DeskUi.button("Ligar a IA", true, () -> DeskAi.settings(d))));
         switch (tab) {
+            case "Encontrar passagem": page.getChildren().add(findView()); break;
             case "Resumir livro": page.getChildren().add(summaryView()); break;
             case "Plano de estudo": page.getChildren().add(planView()); break;
             default: page.getChildren().add(askView());
@@ -187,6 +188,41 @@ final class DeskAiHub {
             history.add(new SeekyAiCore.Message("user", q)); history.add(new SeekyAiCore.Message("assistant", r[0]));
             while (history.size() > 12) { history.remove(0); history.remove(0); }
             chat.add(new String[]{"assistant", r[0], r[1]}); d.open("ai");
+        });
+    }
+
+    // ============================================================ encontrar passagem (5.60)
+    String findQuery = ""; List<BibleReferences.Reference> foundLocal = new ArrayList<>(), foundAi = new ArrayList<>(); boolean finding;
+    /** Opens this tab with these words and searches (from the Flash). */
+    void findPassage(String words) { tab = "Encontrar passagem"; findQuery = words; foundLocal.clear(); foundAi.clear(); d.open("ai"); runFind(words); }
+    Node findView() {
+        VBox box = new VBox(12);
+        TextArea input = new TextArea(findQuery); input.setWrapText(true); input.setPrefRowCount(2); input.setPromptText("Escreva o que se lembra da passagem, mesmo por palavras suas: por exemplo «da sua plenitude nos tem dado graça sobre graça» ou «o versículo em que Jesus chora»");
+        Button go = DeskUi.button(finding ? "A procurar…" : "Encontrar a passagem", true, () -> runFind(input.getText())); go.setDisable(finding); go.setGraphic(DeskUi.icon("search", 16));
+        input.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ENTER && !e.isShiftDown()) { e.consume(); runFind(input.getText()); } });
+        box.getChildren().add(DeskUi.card(DeskUi.heading("Encontrar passagem"), DeskUi.muted("O Seeky procura as palavras na Bíblia do computador (noutras traduções e por outra ordem também). Quando não chega, a Seeky IA percebe o que quer dizer e indica a passagem; o texto mostrado é sempre o da sua Bíblia."), input, DeskUi.row(go, DeskUi.grow())));
+        if (d.store.bible() == 0) box.getChildren().add(DeskUi.card(DeskUi.heading("Importe primeiro uma Bíblia"), DeskUi.text("Para mostrar o texto correcto, o Seeky usa a Bíblia do computador."), DeskUi.button("Ir para a Bíblia", true, () -> d.open("bible"))));
+        if (!foundLocal.isEmpty()) { box.getChildren().add(DeskUi.heading("Na sua Bíblia")); for (BibleReferences.Reference r : foundLocal) box.getChildren().add(DeskFindPassage.card(d, r, "pelas palavras")); }
+        if (!foundAi.isEmpty()) { box.getChildren().add(DeskUi.heading("Sugestões da Seeky IA")); for (BibleReferences.Reference r : foundAi) box.getChildren().add(DeskFindPassage.card(d, r, "Seeky IA")); }
+        if (!findQuery.isEmpty() && !finding && foundLocal.isEmpty() && foundAi.isEmpty()) box.getChildren().add(DeskUi.card(DeskUi.text("Não encontrei esta passagem. Escreva mais palavras do versículo ou ligue a Seeky IA para a procurar pelo sentido.")));
+        return box;
+    }
+    void runFind(String raw) {
+        String words = raw == null ? "" : raw.trim(); if (words.length() < 3 || finding) return;
+        findQuery = words; foundLocal.clear(); foundAi.clear();
+        BibleReferences.Reference typed = BibleReferences.lookup(words);
+        if (typed != null) { foundLocal.add(typed); d.open("ai"); return; }
+        finding = true; d.open("ai");
+        d.run("A procurar a passagem…", () -> DeskFindPassage.local(d, words, 3), hits -> {
+            for (BibleFinder.Hit h : hits) { BibleReferences.Reference r = h.reference(); if (r != null) foundLocal.add(r); }
+            if (BibleFinder.confident(hits) && hits.get(0).score >= 0.8 || !DeskAi.ready(d.store)) { finding = false; if (tab.equals("Encontrar passagem")) d.open("ai"); return; }
+            d.run("A Seeky IA está a procurar a passagem…", () -> { try { return DeskFindPassage.ai(d, words); } finally { finding = false; } }, refs -> {
+                String n = SeekyAiModels.takeNotice(); if (!n.isEmpty()) d.status(n);
+                Set<String> have = new HashSet<>(); for (BibleReferences.Reference r : foundLocal) have.add(r.title);
+                for (BibleReferences.Reference r : refs) if (!have.contains(r.title)) foundAi.add(r);
+                if (refs.isEmpty() && foundLocal.isEmpty()) d.status("A Seeky IA não reconheceu a passagem.");
+                if (tab.equals("Encontrar passagem")) d.open("ai");
+            });
         });
     }
 

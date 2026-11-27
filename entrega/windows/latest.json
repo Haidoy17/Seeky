@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008600,
-  "versionName": "5.59.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.59.0-app.zip",
-  "sha256": "81765e94da03a1f245cf64dc4b915dd51374427b85ea3c48b7eebf3ac7494d31",
-  "bytes": 9400781,
+  "versionCode": 5008700,
+  "versionName": "5.60.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.60.0-app.zip",
+  "sha256": "1db7474e49dc52681a969d76063409413dc102cfded6e0107fa5138e469aa739",
+  "bytes": 9416314,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Procurar dentro do livro aberto (Ctrl+F) com as palavras realçadas; respostas da Seeky IA formatadas, sem ##, asteriscos nem [T1]."
+  "notes": "Encontrar a passagem a partir de um trecho no Flash, na Bíblia e na Seeky IA; a Bíblia abre com o versículo marcado."
 }

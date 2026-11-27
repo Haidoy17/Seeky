@@ -207,6 +207,7 @@ final class DeskFlash {
                 if (m.equals("folders")) out.addAll(walk(q, cat, token));
                 else {
                     if (m.equals("full") && !q.isEmpty()) out.addAll(seeky(q, cat));
+                    else if (!q.isEmpty() && cat.equals("Tudo")) out.addAll(passages(q)); // 5.60: a phrase of a verse, in the quick mode too
                     for (DeskFlashIndex.Hit h : index.search(q, cat, q.isEmpty() ? 25 : 60)) out.add(file(new File(h.path), h.category, h.size, h.modified));
                     if (index.built() == 0) note = indexing ? "A preparar o índice…" : "Índice vazio";
                 }
@@ -240,19 +241,32 @@ final class DeskFlash {
         if (cat.equals("Tudo") || cat.equals("Áudio") || cat.equals("Vídeos"))
             for (DeskLibrary.Track t : DeskLibrary.tracks(d.store, cat.equals("Vídeos") ? DeskLibrary.VIDEO : DeskLibrary.AUDIO, "title LIKE ? OR artist LIKE ? OR album LIKE ?", Arrays.asList(like, like, like), "plays DESC,title", 6))
                 out.add(new Result(cat.equals("Vídeos") ? "video" : "music", t.title, (t.artist.isEmpty() ? "" : t.artist + " · ") + (cat.equals("Vídeos") ? "Vídeo" : "Música"), new File(t.path), () -> { d.bringToFront(); d.media.play(Collections.singletonList(t), 0); }));
-        if (cat.equals("Tudo")) {
-            long bible = d.store.bible();
-            BibleReferences.Reference ref = BibleReferences.lookup(q);
-            if (bible > 0 && ref != null) { String text = d.store.passage(bible, ref).replaceAll("\\[\\d+\\] ", ""); if (!text.isEmpty()) out.add(0, new Result("book", ref.title, text.length() > 90 ? text.substring(0, 90) + "…" : text, null, () -> { d.bringToFront(); d.bible.book = ref.book; d.bible.chapter = ref.chapter; d.store.put("bible_book", ref.book); d.store.put("bible_chapter", ref.chapter + ""); d.open("bible"); })); }
-            else if (bible > 0 && q.length() >= 3)
-                for (Object[] r : d.store.rows("SELECT book,chapter,verse,text FROM verses WHERE bible=? AND text LIKE ? LIMIT 5", bible, like)) {
-                    String b = r[0] + ""; int c = ((Number) r[1]).intValue(); String t = r[3] + "";
-                    out.add(new Result("book", b + " " + c + ":" + r[2], t.length() > 90 ? t.substring(0, 90) + "…" : t, null, () -> { d.bringToFront(); d.bible.book = b; d.bible.chapter = c; d.store.put("bible_book", b); d.store.put("bible_chapter", c + ""); d.open("bible"); }));
-                }
-        }
+        if (cat.equals("Tudo")) out.addAll(passages(q));
         return out;
     }
     /** "Pastas": walks the folders now (finds what the index does not know yet). */
+    /** Passages: a reference (João 3:16), a phrase of a verse (5.60) or, failing that, verses with these words. */
+    List<Result> passages(String q) throws SQLException {
+        List<Result> out = new ArrayList<>(); String like = "%" + q + "%";
+            long bible = d.store.bible();
+            BibleReferences.Reference ref = BibleReferences.lookup(q);
+            if (bible > 0 && ref != null) { String text = DeskFindPassage.text(d, ref); if (!text.isEmpty()) out.add(new Result("book", ref.title, text.length() > 90 ? text.substring(0, 90) + "…" : text, null, () -> { d.bringToFront(); DeskPassage.show(d, ref); })); }
+            else if (bible > 0 && BibleFinder.looksLikeWords(q)) {
+                // 5.60: a remembered phrase finds its verse (other translations and word orders too); a click shows it.
+                List<BibleFinder.Hit> hits = DeskFindPassage.local(d, q, 3); int at = 0;
+                for (BibleFinder.Hit h : hits) {
+                    BibleReferences.Reference r = h.reference(); if (r == null) continue; String t = h.text;
+                    out.add(at++, new Result("book", h.title() + (at == 1 && BibleFinder.confident(hits) ? " · passagem encontrada" : ""), t.length() > 110 ? t.substring(0, 110) + "…" : t, null, () -> { d.bringToFront(); DeskPassage.show(d, r); }));
+                }
+                if (DeskAi.ready(d.store)) out.add(at, new Result("sparkle", "Perguntar à Seeky IA que passagem é", "«" + (q.length() > 70 ? q.substring(0, 70) + "…" : q) + "» · por palavras suas também", null, () -> { d.bringToFront(); d.ai.findPassage(q); }));
+            }
+            else if (bible > 0 && q.length() >= 3)
+                for (Object[] r : d.store.rows("SELECT book,chapter,verse,text FROM verses WHERE bible=? AND text LIKE ? LIMIT 5", bible, like)) {
+                    String b = r[0] + ""; int c = ((Number) r[1]).intValue(); String t = r[3] + ""; BibleReferences.Reference ref2 = BibleReferences.lookup(b + " " + c + ":" + r[2]);
+                    out.add(new Result("book", b + " " + c + ":" + r[2], t.length() > 90 ? t.substring(0, 90) + "…" : t, null, () -> { d.bringToFront(); if (ref2 != null) DeskPassage.show(d, ref2); }));
+                }
+        return out;
+    }
     List<Result> walk(String q, String cat, int token) {
         List<Result> out = new ArrayList<>(); String[] words = Rules.normalize(q).split("\\s+"); long deadline = System.currentTimeMillis() + 15000;
         for (File root : DeskFlashIndex.roots(d.store)) {

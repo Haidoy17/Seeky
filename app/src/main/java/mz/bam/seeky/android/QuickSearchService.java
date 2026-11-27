@@ -149,6 +149,7 @@ AppLock.touch();transitioning=true;Motion.leave(window,()->{if(dead)return;trans
     }
     void launchApp(Catalog.Entry e){if(e!=null&&!MediaFormats.kind(e.name,e.mime).equals("external")){Intent reader=new Intent(this,ReaderActivity.class).setDataAndType(android.net.Uri.parse(e.uri),MediaFormats.mime(e.name,e.mime)).putExtra("name",e.name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);try{startActivity(reader);return;}catch(Exception ignored){}}Intent i=new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);if(e!=null)i.putExtra("quick_uri",e.uri);try{startActivity(i);}catch(Exception ex){Toast.makeText(this,"Abra o Seeky pela notificação.",Toast.LENGTH_LONG).show();}}
     void search(String q){
+        FlashPassages.update(this,panelView,q,intent->collapse(()->{try{startActivity(intent);}catch(Exception e){AppDiagnostics.record(this,"flash-passage",e);}}));
         final String category=quickCategory;final boolean deep=directMode;final boolean flash=prefs.getBoolean("flash_mode",true)&&!deep;final long began=SystemClock.elapsedRealtime();final int request=++serial;if(signal!=null)signal.cancel();final CancellationSignal token=new CancellationSignal();signal=token;
         searches.submit(job->{
             LinkedHashMap<String,Catalog.Entry> matches=new LinkedHashMap<>();

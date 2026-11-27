@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008600,
-  "versionName": "5.59.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.59.0.apk",
-  "sha256": "dd4392737e2011705670f923d5a0c943953a55be0d49d9a06f5bc1705d3f9cda",
-  "bytes": 14019731,
-  "notes": "Windows: procurar dentro do livro aberto (Ctrl+F) com as palavras realçadas; respostas da Seeky IA formatadas, sem ##, asteriscos nem [T1]."
+  "versionCode": 5008700,
+  "versionName": "5.60.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.60.0.apk",
+  "sha256": "2786fb752284f17c11255da9e3c7a3e2660f409a56d2002585a882caa457a772",
+  "bytes": 14030970,
+  "notes": "Encontrar a passagem a partir de um trecho no Flash (João 1:16 por «graça sobre graça»), com o capítulo inteiro e o versículo marcado; a Seeky IA encontra a passagem por palavras suas."
 }

@@ -214,6 +214,9 @@ final class DeskSelfTest {
                 check(verses == 10 && s.count("SELECT COUNT(*) FROM titles WHERE bible=?", mb) == 4 && s.count("SELECT COUNT(*) FROM comments") == 3
                     && s.rows("SELECT text FROM comments WHERE chapter=1 AND verse=1").get(0)[0].toString().equals("No princípio: o início de tudo o que existe.\nDeus é o Criador.")
                     && s.rows("SELECT text FROM titles WHERE book='Génesis' AND verse=26").get(0)[0].equals("A criação do ser humano"), "Bíblia MyBible com títulos e comentários");
+                // 5.60: um trecho (por outras palavras) encontra o versículo na Bíblia do computador.
+            { BibleFinder.forget(); BibleFinder f = DeskFindPassage.finder(s); List<BibleFinder.Hit> h = f == null ? Collections.emptyList() : f.find("Deus disse que houvesse luz e houve luz", 3);
+              check(!h.isEmpty() && h.get(0).title().equals("Génesis 1:3") && BibleFinder.confident(h) && !h.get(0).text.contains("<i>") && BibleFinder.aiAnswer("1. Génesis 1:3").get(0).title.equals("Génesis 1:3"), "encontrar a passagem por um trecho" + (h.isEmpty() ? "" : ": " + h.get(0).title())); }
                 // Música: etiquetas ID3 e MP4, pastas, mais ouvidas.
                 File songs = new File(home, "Musica"); songs.mkdirs(); new File(songs, "Album").mkdirs();
                 mp3(new File(songs, "Album"), "01.mp3", "Grande é o Senhor", "Coro Seeky", "Louvores", "2019", "(83)", "1/10");

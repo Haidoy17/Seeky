@@ -1,3 +1,12 @@
+## Seeky 5.60.0
+
+Instale **Seeky_5.60.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.60.0.
+
+- Flash: escreva um trecho de um versículo e o Seeky diz qual é (livro, capítulo e versículo); toque para
+  o ler, com o capítulo inteiro e o versículo marcado.
+- Seeky IA: encontra a passagem a partir de palavras suas e mostra o texto da sua Bíblia.
+
 ## Seeky 5.59.0
 
 Instale **Seeky_5.59.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

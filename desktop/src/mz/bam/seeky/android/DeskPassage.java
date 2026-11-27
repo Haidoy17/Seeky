@@ -63,12 +63,15 @@ final class DeskPassage {
         flow.setPrefWidth(530);
         dlg.getDialogPane().setContent(scroll);
         ButtonType copy = new ButtonType("Copiar", ButtonBar.ButtonData.LEFT), open = new ButtonType("Abrir na Bíblia", ButtonBar.ButtonData.OTHER), close = new ButtonType("Fechar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        if (!verses.isEmpty()) dlg.getDialogPane().getButtonTypes().addAll(copy, open);
+        ButtonType listen = new ButtonType("Ouvir", ButtonBar.ButtonData.LEFT), note = new ButtonType("Nota", ButtonBar.ButtonData.LEFT);
+        if (!verses.isEmpty()) dlg.getDialogPane().getButtonTypes().addAll(copy, listen, note, open);
         dlg.getDialogPane().getButtonTypes().add(close);
         String text = r.title + (version.isEmpty() ? "" : " (" + version + ")") + "\n" + plain;
         dlg.setResultConverter(b -> {
             if (b == copy) { javafx.scene.input.ClipboardContent c = new javafx.scene.input.ClipboardContent(); c.putString(text); javafx.scene.input.Clipboard.getSystemClipboard().setContent(c); d.status("Passagem copiada."); }
-            else if (b == open) { d.bible.book = r.book; d.bible.chapter = r.parts.isEmpty() ? r.chapter : r.parts.get(0).chapter; d.open("bible"); }
+            else if (b == open) DeskFindPassage.openInBible(d, r);
+            else if (b == listen) DeskSpeech.say(d, r.title + ". " + plain);
+            else if (b == note) d.notes.newWith(r.title, "> " + r.title + "\n> «" + plain + "»\n\n");
             return b;
         });
         return dlg;

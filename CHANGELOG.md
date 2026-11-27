@@ -1,5 +1,21 @@
 # Registo de alterações
 
+## 5.60.0 — 2026-11-27 (Android e Windows)
+
+- **Encontrar a passagem a partir de um trecho** (Android e Windows). Escreva no **Flash** o que se lembra
+  — «da sua plenitude nos tem dado graça sobre graça» — e aparece **João 1:16**, com o texto da sua
+  Bíblia; um toque/clique abre a janela da passagem com as opções (copiar, ouvir, guardar, nota, comparar…)
+  e a leitura completa: no telemóvel *Capítulo inteiro*, no computador *Abrir na Bíblia*, com o versículo
+  **marcado e trazido à vista**. Novo `BibleFinder` (partilhado): índice das palavras de cada versículo,
+  sem acentos, maiúsculas, plurais nem palavras pequenas, com mais peso às palavras raras — encontra o
+  versículo noutra tradução ou com as palavras noutra ordem.
+- **Seeky IA encontra a passagem por palavras simples**: quando as palavras não chegam, a Seeky IA diz o
+  livro, o capítulo e o versículo, e o texto mostrado é sempre o da Bíblia do aparelho (a escrita correcta).
+  Android: *Estudar com Seeky › Encontrar passagem*, *Consultar passagem* (aceita um trecho) e
+  *Perguntar à Seeky IA que passagem é* no Flash. Windows: separador *Seeky IA › Encontrar passagem*, a
+  mesma linha no Flash e a procura da Bíblia.
+- Windows: a janela da passagem ganhou *Ouvir* e *Nota*; o Flash mostra passagens também no modo rápido.
+
 ## 5.59.0 — 2026-11-27 (Android e Windows)
 
 - **Windows: procurar dentro do livro aberto** (PDF, EPUB, Word, TXT…): botão da lupa ou **Ctrl+F**. Todas
