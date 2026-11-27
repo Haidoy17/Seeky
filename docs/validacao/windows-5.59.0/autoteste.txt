@@ -1,0 +1,39 @@
+PASS versão 5.59.0
+PASS referências bíblicas
+PASS formato das notas
+PASS exportar Word
+PASS exportar PDF
+PASS importar Bíblia CSV (versículo vazio saltado)
+PASS ler passagem
+PASS guardar nota
+PASS Bíblia MyBible com títulos e comentários
+PASS etiquetas das músicas (ID3 e M4A)
+PASS biblioteca de música (pastas, álbuns, mais ouvidas)
+PASS livros: importar pasta e capas (EPUB, PDF)
+PASS Flash: índice e pesquisa (4)
+PASS notas do telemóvel (.seekynotes)
+PASS marcações nos livros
+PASS estudos: cartões e perguntas da IA, revisão espaçada
+PASS seeky ia: vários documentos e plano de estudo num curso
+PASS estudos: juntar com o telemóvel (mais recente, apagadas)
+PASS áudio: MP3 com etiquetas e vozes Piper verificadas
+  edge-ponte: página=true host=404 código=404 fala=true fim=true vozes=2 pt-PT-RaquelNeural / Raquel · Português (Portugal)
+PASS áudio: vozes naturais do Edge (ponte local) e Azure para gravar
+PASS áudio: texto preparado para a voz
+PASS estudos: cursos com módulos e disciplinas
+  ligado: recusa=true código=true 1.ª=true 2.ª=true calma=true envio=true receber=true esquecido=true
+PASS Seeky ligado (emparelhar, sincronizar, ficheiros)
+PASS jogo da Bíblia (10 perguntas)
+PASS temas do telemóvel
+PASS foco (Pomodoro)
+PASS modelo Gemini gemini-3.5-flash-lite
+PASS ler livro TXT
+PASS PDFBox presente
+PASS JavaFX Media presente
+PASS passagens no PDF com o sítio na página: 2
+PASS passagens lidas como no telemóvel: Leia Salmos capítulo 13, versículo 40 hoje.
+PASS marcar texto num PDF
+PASS Edge: página seguinte em fila e parágrafo lido
+PASS passagens para o editor de notas
+PASS parar a leitura não passa à página seguinte
+PASS 36 verificações do Seeky Desktop

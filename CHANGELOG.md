@@ -1,5 +1,19 @@
 # Registo de alterações
 
+## 5.59.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: procurar dentro do livro aberto** (PDF, EPUB, Word, TXT…): botão da lupa ou **Ctrl+F**. Todas
+  as páginas/capítulos são procurados em segundo plano (sem contar acentos nem maiúsculas), os resultados
+  aparecem com a página e as palavras à volta; um clique vai lá com as palavras realçadas (no PDF por cima
+  da página, nos outros no texto) e a página desloca-se até ao resultado; Enter / Shift+Enter: seguinte /
+  anterior.
+- **Windows: respostas da Seeky IA arrumadas.** Já não aparecem `##`, `-`, `*` nem as etiquetas `[T1]`:
+  títulos, listas com marcas, negrito e itálico formatados, citações, passagens clicáveis (abrem a janela da
+  passagem) e "conhecimento geral" discreto. Vale para *Explicar/Resumir/Perguntas* nos livros, a IA nas
+  notas, a conversa da Seeky IA, o resumo do livro inteiro e o plano de estudo; *Copiar* copia o texto limpo e
+  o que vai para as notas já não leva as etiquetas.
+- Android: só o número da versão e as Novidades.
+
 ## 5.58.0 — 2026-11-27 (Android e Windows)
 
 - **Windows: passagens lidas como no telemóvel.** O texto passa pela mesma preparação do Android

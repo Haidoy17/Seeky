@@ -68,10 +68,8 @@ final class DeskAi {
         final String sent = source;
         d.run("O Seeky está a escrever…", () -> new SeekyAiClient().ask(SeekyAiCore.GEMINI, key(d.store), sent, NotepadText.title(title.getText(), text), Collections.emptyList(), NotepadAiText.prompt(a.key, extra, false), false, new SeekyAiClient.Call()).text, answer -> {
             String switched = SeekyAiModels.takeNotice(); if (!switched.isEmpty()) d.status(switched);
-            String clean = NotepadAiText.clean(answer);
-            Alert show = new Alert(Alert.AlertType.CONFIRMATION, clean, new ButtonType(a.replace ? "Substituir" : "Inserir na nota", ButtonBar.ButtonData.OK_DONE), ButtonType.CANCEL);
-            show.setHeaderText(a.label); show.setTitle("Seeky IA"); show.getDialogPane().setPrefWidth(620); DeskUi.style(show.getDialogPane());
-            show.showAndWait().filter(b -> b.getButtonData() == ButtonBar.ButtonData.OK_DONE).ifPresent(b -> {
+            String clean = DeskRich.tidy(answer); ButtonType ok = new ButtonType(a.replace ? "Substituir" : "Inserir na nota", ButtonBar.ButtonData.OK_DONE);
+            DeskRich.show(d, a.label, clean, ok, new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE)).filter(b -> b == ok).ifPresent(b -> {
                 if (!body.getText().equals(text)) { body.appendText("\n\n" + clean); return; }
                 if (a.replace && part) body.setText(text.substring(0, s) + clean + text.substring(e)); else body.setText(NotepadAiText.apply(a, text, clean, false));
             });

@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.58", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.59", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("search", "Procurar dentro do livro no computador", "No Seeky para Windows: Ctrl+F num PDF, EPUB, Word ou TXT aberto mostra todos os resultados com a página e realça as palavras", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.action("sparkle", "Respostas da IA arrumadas no computador", "No Seeky para Windows: títulos, listas e negrito formatados, sem ##, asteriscos nem [T1], também ao guardar nas notas", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.58");
         panel.action("speaker", "Leitura no computador como no telemóvel", "No Seeky para Windows: as passagens são lidas como «Salmos capítulo 13, versículo 40»; o parágrafo lido fica realçado e seguido; a página seguinte começa sem pausa", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
         panel.action("book", "Livros no computador", "No Seeky para Windows: o livro fica aberto quando muda de ecrã (Voltar à leitura), marcações com cores nos PDF e uma estante mais leve", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
         panel.section("Da 5.57");

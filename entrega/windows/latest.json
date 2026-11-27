@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008500,
-  "versionName": "5.58.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.58.0-app.zip",
-  "sha256": "ab9b74d6a84b50172e48373be664aa9e50ca8d5448b9b838cbecfeec9bf99ae3",
-  "bytes": 9379243,
+  "versionCode": 5008600,
+  "versionName": "5.59.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.59.0-app.zip",
+  "sha256": "81765e94da03a1f245cf64dc4b915dd51374427b85ea3c48b7eebf3ac7494d31",
+  "bytes": 9400781,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Passagens lidas como no telemóvel; leitura sem pausas entre páginas e com o parágrafo realçado; o livro fica aberto (Voltar à leitura); marcações nos PDF; estante mais leve."
+  "notes": "Procurar dentro do livro aberto (Ctrl+F) com as palavras realçadas; respostas da Seeky IA formatadas, sem ##, asteriscos nem [T1]."
 }
