@@ -62,26 +62,30 @@ final class DeskMedia {
     String currentPath() { return index >= 0 && index < queue.size() ? queue.get(index).path : ""; }
     boolean isVideo() { return player != null && index >= 0 && index < queue.size() && DeskLibrary.accepts(DeskLibrary.VIDEO, queue.get(index).path); }
 
-    /** The bar at the bottom of Música and Vídeos (null while nothing was played). */
-    boolean barShown;
-    Node bar() {
-        barShown = !queue.isEmpty();
-        if (queue.isEmpty()) return null;
+    /** The bar at the bottom of Música and Vídeos, hidden while nothing was played. 5.56: one bar that is redrawn
+     *  in place (shuffle, repeat, lyrics), instead of building the whole screen again. */
+    final VBox barBox = new VBox(10);
+    /** Told when the track changes, so the list shows which one is playing (set by the screen shown). */
+    Runnable changed;
+    Node bar() { fillBar(); return barBox; }
+    void fillBar() {
+        boolean shown = !queue.isEmpty(); barBox.setVisible(shown); barBox.setManaged(shown);
+        if (!barBox.getStyleClass().contains("now-playing")) { barBox.getStyleClass().add("now-playing"); barBox.setPadding(new javafx.geometry.Insets(10, 16, 10, 16)); }
+        if (!shown) { barBox.getChildren().clear(); return; }
         seek.setMaxWidth(Double.MAX_VALUE); HBox.setHgrow(seek, Priority.ALWAYS); volume.setPrefWidth(110);
         VBox words = new VBox(1, now, who); words.setMinWidth(120); words.setPrefWidth(260); words.setMaxWidth(320);
-        Button lyrics = DeskUi.iconButton("lyrics", "Letra", () -> { lyricsOpen = !lyricsOpen; d.open(d.current); });
+        Button lyrics = DeskUi.iconButton("lyrics", "Letra", () -> { lyricsOpen = !lyricsOpen; fillBar(); });
         Button queueB = DeskUi.iconButton("queue", "Fila", this::showQueue);
         int s = skipSeconds();
-        Button mix = DeskUi.iconButton("shuffle", shuffle ? "Aleatório: ligado" : "Aleatório: desligado", () -> { shuffle = !shuffle; d.store.put("media_shuffle", shuffle ? "1" : "0"); d.status(shuffle ? "Aleatório ligado" : "Aleatório desligado"); d.open(d.current); });
-        Button again = DeskUi.iconButton(repeat == 2 ? "repeat1" : "repeat", repeat == 0 ? "Repetir: desligado" : repeat == 1 ? "Repetir: tudo" : "Repetir: esta faixa", () -> { repeat = (repeat + 1) % 3; d.store.put("media_repeat", "" + repeat); d.status(repeat == 0 ? "Repetir desligado" : repeat == 1 ? "Repetir tudo" : "Repetir esta faixa"); d.open(d.current); });
+        Button mix = DeskUi.iconButton("shuffle", shuffle ? "Aleatório: ligado" : "Aleatório: desligado", () -> { shuffle = !shuffle; d.store.put("media_shuffle", shuffle ? "1" : "0"); d.status(shuffle ? "Aleatório ligado" : "Aleatório desligado"); fillBar(); });
+        Button again = DeskUi.iconButton(repeat == 2 ? "repeat1" : "repeat", repeat == 0 ? "Repetir: desligado" : repeat == 1 ? "Repetir: tudo" : "Repetir: esta faixa", () -> { repeat = (repeat + 1) % 3; d.store.put("media_repeat", "" + repeat); d.status(repeat == 0 ? "Repetir desligado" : repeat == 1 ? "Repetir tudo" : "Repetir esta faixa"); fillBar(); });
         if (shuffle) mix.getStyleClass().add("on"); if (repeat > 0) again.getStyleClass().add("on");
         Button back = DeskUi.iconButton("rewind", "Recuar " + s + " s", () -> jump(-1)), fwd = DeskUi.iconButton("forward", "Avançar " + s + " s", () -> jump(1));
         HBox controls = DeskUi.row(mix, DeskUi.iconButton("prev", "Anterior", this::previous), back, play, fwd, DeskUi.iconButton("next", "Seguinte", this::next), again);
         HBox row = new HBox(14, words, controls, new VBox(2, seek, time), DeskUi.icon("speaker", 18), volume, queueB, lyrics); row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         HBox.setHgrow(row.getChildren().get(2), Priority.ALWAYS);
-        VBox bar = new VBox(10, row); bar.getStyleClass().add("now-playing"); bar.setPadding(new javafx.geometry.Insets(10, 16, 10, 16));
-        if (lyricsOpen) { lyricsView.setPrefHeight(220); bar.getChildren().add(0, new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics), DeskUi.button("Editar letra", false, this::editLyrics)), lyricsView)); }
-        return bar;
+        barBox.getChildren().setAll(row);
+        if (lyricsOpen) { lyricsView.setPrefHeight(220); barBox.getChildren().add(0, new VBox(6, DeskUi.row(DeskUi.heading("Letra"), DeskUi.grow(), DeskUi.button("Procurar letra", false, this::findLyrics), DeskUi.button("Editar letra", false, this::editLyrics)), lyricsView)); }
     }
     /** The video, above the list in Vídeos. */
     Node videoCard() { video.fitWidthProperty().unbind(); VBox box = DeskUi.card(video); box.setAlignment(javafx.geometry.Pos.CENTER); return box; }
@@ -91,6 +95,9 @@ final class DeskMedia {
     }
 
     void play(List<DeskLibrary.Track> tracks, int at) { queue.clear(); queue.addAll(tracks); history.clear(); refreshList(); start(at); }
+    /** Several chosen tracks, in their order, right after the one playing. */
+    void playNext(List<DeskLibrary.Track> ts) { if (ts.isEmpty()) return; if (queue.isEmpty()) { play(ts, 0); return; } queue.addAll(Math.min(queue.size(), index + 1), ts); refreshList(); d.status(ts.size() == 1 ? "A seguir: " + ts.get(0).title : ts.size() + " músicas a seguir"); }
+    void enqueue(List<DeskLibrary.Track> ts) { if (ts.isEmpty()) return; if (queue.isEmpty()) { play(ts, 0); return; } queue.addAll(ts); refreshList(); d.status(ts.size() == 1 ? "Na fila: " + ts.get(0).title : ts.size() + " músicas na fila"); }
     void playNext(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(Math.min(queue.size(), index + 1), t); refreshList(); d.status("A seguir: " + t.title); }
     void enqueue(DeskLibrary.Track t) { if (queue.isEmpty()) { play(Collections.singletonList(t), 0); return; } queue.add(t); refreshList(); d.status("Na fila: " + t.title); }
     /** Files opened from Ficheiros. */
@@ -113,16 +120,19 @@ final class DeskMedia {
             player.setOnError(() -> d.status("Não foi possível tocar " + f.getName() + ": " + player.getError().getMessage()));
             player.play(); play.setGraphic(DeskUi.icon("pause", 20));
             refreshList(); loadLyrics(f);
-            if (isVideo() && (d.current.equals("music") || d.current.equals("videos"))) d.open("videos");
-            else if (d.current.equals("music") && !barShown) d.open("music");
+            if (isVideo() && (d.current.equals("music") || d.current.equals("videos"))) { if (!d.current.equals("videos") || !video.isVisible() || video.getScene() == null) d.open("videos"); }
+            fillBar(); if (changed != null) changed.run();
         } catch (Exception e) { d.status("Formato não suportado: " + f.getName() + ". Use MP3, M4A, WAV ou MP4, ou abra-o com o Windows."); }
     }
     void count() { if (!counted && index >= 0 && index < queue.size()) { counted = true; DeskLibrary.played(d.store, queue.get(index).path); } }
     void toggle() { if (player == null) { if (!queue.isEmpty()) start(Math.max(0, index)); return; } if (player.getStatus() == MediaPlayer.Status.PLAYING) { player.pause(); play.setGraphic(DeskUi.icon("play", 20)); } else { player.play(); play.setGraphic(DeskUi.icon("pause", 20)); } }
     void stop() { if (player != null) { player.stop(); player.dispose(); player = null; } }
     static String clock(Duration t) { if (t == null || t.isUnknown()) return "0:00"; long s = (long) t.toSeconds(); return s / 60 + ":" + String.format(Locale.ROOT, "%02d", s % 60); }
+    long lastTick = -1;
     void tick(Duration t) {
         if (player == null) return; Duration total = player.getTotalDuration();
+        // 5.56: the clock moves many times a second; redraw a few times a second only (lighter while music plays).
+        long step = (long) (t.toMillis() / 250); if (step == lastTick) return; lastTick = step;
         if (!counted && t.toSeconds() >= 30) count();
         time.setText(clock(t) + " / " + clock(total)); if (!seeking && total != null && total.toMillis() > 0) seek.setValue(t.toMillis() / total.toMillis());
         long ms = (long) t.toMillis(); int line = -1; for (int i = 0; i < lyricTimes.size(); i++) if (lyricTimes.get(i)[0] <= ms) line = i;

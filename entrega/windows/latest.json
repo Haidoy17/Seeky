@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008210,
-  "versionName": "5.55.1",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.55.1-app.zip",
-  "sha256": "bd229b950105e47f73c960723de9bbd3a1fa767d3a262ef67ccf8e8122571f24",
-  "bytes": 9333875,
+  "versionCode": 5008300,
+  "versionName": "5.56.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.56.0-app.zip",
+  "sha256": "88eecf66dea582fabd37a4ecb96ccd8d53754536816205a0a9ddfc699d102697",
+  "bytes": 9339453,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Leitura em voz alta mais fluida nos livros: deixa de parar no fim de cada frase (vozes do Edge e Piper)."
+  "notes": "Ouvir lê a página inteira e passa sozinho à seguinte; na Música um clique selecciona e o duplo clique toca; lista e leitor mais leves."
 }

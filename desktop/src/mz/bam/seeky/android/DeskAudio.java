@@ -47,7 +47,7 @@ final class DeskAudio {
         rate.valueProperty().addListener((o, a, b) -> d.store.put("voice_rate", String.valueOf(b.intValue())));
         box.getChildren().addAll(DeskUi.heading("Leitura em voz alta e áudio"),
             DeskUi.muted("A voz escolhida lê os livros, a Bíblia e as notas, e grava capítulos em MP3 (menu de cada livro › Gravar em MP3). As vozes naturais do Edge são as mesmas da leitura em voz alta do Microsoft Edge."),
-            DeskUi.row(voice, DeskUi.muted("Velocidade"), rate, DeskUi.button("Experimentar", false, () -> DeskSpeech.say(d, sample(d)))), edgeState);
+            DeskUi.row(voice, DeskUi.muted("Velocidade"), rate, DeskUi.button("Experimentar", false, () -> DeskSpeech.say(d, sample(d)))), edgeState, onward(d));
         box.getChildren().addAll(new Separator(), azure(d));
         // Vozes naturais Piper
         VBox natural = new VBox(8);
@@ -85,6 +85,11 @@ final class DeskAudio {
             DeskUi.muted("O Edge só toca as vozes; para as gravar em MP3 a Microsoft oferece as mesmas vozes no Azure Speech. Crie um recurso Speech gratuito (500 000 caracteres por mês) em portal.azure.com e cole aqui a chave. A chave fica protegida pelo Windows e só é enviada à Microsoft com o texto a gravar."),
             DeskUi.row(region, key, save, forget), state);
         return box;
+    }
+    /** 5.56: Ouvir reads a page and turns to the next one by itself, to the end of the book. */
+    static CheckBox onward(DeskMain d) {
+        CheckBox c = new CheckBox("Ao ouvir um livro, passar sozinho à página seguinte quando acabar a leitura da página");
+        c.setSelected(DeskReader.continuous(d)); c.setWrapText(true); c.setOnAction(e -> d.store.put("read_continue", c.isSelected() ? "1" : "0")); return c;
     }
     static String sample(DeskMain d) {
         if ("edge".equals(d.store.get("voice_engine", ""))) { String l = d.store.get("edge_lang", "pt"); if (l.startsWith("en")) return "Hello! This is Seeky reading aloud with a natural Edge voice."; if (l.startsWith("es")) return "¡Hola! Este es Seeky leyendo con una voz natural."; if (l.startsWith("fr")) return "Bonjour ! C'est Seeky qui lit avec une voix naturelle."; }

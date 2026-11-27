@@ -55,8 +55,10 @@ perdem ao actualizar nem ao desinstalar.
 - **Música** e **Vídeos**, como no telemóvel: pastas adicionadas, Início (adicionadas recentemente, mais
   ouvidas hoje/semana/mês/sempre, ouvidas recentemente, favoritas), Faixas, Álbuns, Artistas, Pastas,
   Géneros e Anos; fila e letras sincronizadas (.lrc ou LRCLIB). Toca MP3, M4A/AAC, WAV, AIFF e MP4
-  (H.264); os outros vídeos abrem no leitor do Windows.
-- **Leitura em voz alta** com as vozes do Windows.
+  (H.264); os outros vídeos abrem no leitor do Windows. Um clique selecciona (Ctrl/Shift para várias),
+  duplo clique ou Enter toca; *Tocar*, *Tocar a seguir* e *Adicionar à fila* para as seleccionadas.
+- **Leitura em voz alta** com as vozes do Windows, do Edge ou Piper; *Ouvir* lê a página (ou o capítulo)
+  inteira e passa sozinho à seguinte até ao fim do livro (pode desligar-se em Definições).
 
 ## Actualizações para os dois
 

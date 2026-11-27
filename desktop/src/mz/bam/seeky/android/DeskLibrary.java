@@ -167,15 +167,30 @@ final class DeskLibrary {
         Map<Object, List<Track>> owners = new IdentityHashMap<>(); Set<Object> showPlays = Collections.newSetFromMap(new IdentityHashMap<>());
         list.setCellFactory(v -> new Cell(owners, showPlays));
         Runnable fill = () -> fill(list, owners, showPlays, info);
-        search.textProperty().addListener((o, a, b) -> { query = b; fill.run(); });
+        // 5.56: one click selects (Ctrl/Shift for several), a double click or Enter plays; search waits for a pause in typing.
+        list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        list.setOnKeyPressed(e -> { if (e.getCode() == javafx.scene.input.KeyCode.ENTER) { Object o = list.getSelectionModel().getSelectedItem(); if (o instanceof Track) playFrom(list, owners, (Track) o); } });
+        javafx.animation.PauseTransition typing = new javafx.animation.PauseTransition(javafx.util.Duration.millis(220)); typing.setOnFinished(e -> fill.run());
+        search.textProperty().addListener((o, a, b) -> { query = b; typing.playFromStart(); });
+        Label chosen = DeskUi.muted(""); HBox selection = DeskUi.row(chosen, DeskUi.grow(),
+            DeskUi.button("Tocar", true, () -> { List<Track> sel = selected(list, null); if (!sel.isEmpty()) d.media.play(sel, 0); }),
+            DeskUi.button("Tocar a seguir", false, () -> d.media.playNext(selected(list, null))),
+            DeskUi.button("Adicionar à fila", false, () -> d.media.enqueue(selected(list, null))),
+            DeskUi.button("Limpar selecção", false, () -> list.getSelectionModel().clearSelection()));
+        selection.getStyleClass().add("selection-row"); selection.setVisible(false); selection.setManaged(false);
+        list.getSelectionModel().getSelectedItems().addListener((javafx.collections.ListChangeListener<Object>) c -> {
+            int n = selected(list, null).size(); selection.setVisible(n > 0); selection.setManaged(n > 0);
+            chosen.setText(n == 0 ? "" : (n == 1 ? (video() ? "1 vídeo seleccionado" : "1 música seleccionada") : n + (video() ? " vídeos seleccionados" : " músicas seleccionadas")) + " · duplo clique toca");
+        });
+        d.media.changed = list::refresh;
         page.getChildren().addAll(head, tabScroll);
         if (groupValue != null || special != null) {
             String title = groupValue != null ? groupLabel : special.equals("recent") ? (video() ? "Adicionados recentemente" : "Adicionadas recentemente") : special.equals("history") ? (video() ? "Vistos recentemente" : "Ouvidas recentemente") : (video() ? "Mais vistos" : "Mais ouvidas");
             page.getChildren().add(DeskUi.row(DeskUi.iconButton("back", "Voltar", () -> { groupValue = null; special = null; d.open(kind.equals(AUDIO) ? "music" : "videos"); }), DeskUi.heading(title), DeskUi.grow(), DeskUi.button(video() ? "Ver tudo" : "Tocar tudo", false, () -> playAll(list))));
         }
         if (video() && d.media.isVideo()) page.getChildren().add(d.media.videoCard());
-        page.getChildren().addAll(info, list);
-        Node bar = d.media.bar(); if (bar != null) page.getChildren().add(bar);
+        page.getChildren().addAll(info, selection, list);
+        page.getChildren().add(d.media.bar());
         fill.run();
         if (folders().isEmpty() && !scanning) countEmpty(list);
         else rescan(false);
@@ -242,10 +257,40 @@ final class DeskLibrary {
     String count(int n) { return video() ? n + (n == 1 ? " vídeo" : " vídeos") : n + (n == 1 ? " música" : " músicas"); }
     void reopen() { d.open(kind.equals(AUDIO) ? "music" : "videos"); }
 
+    /** The selected tracks in list order; with {@code t} not among them, just {@code t}. */
+    static List<Track> selected(ListView<Object> list, Track t) {
+        List<Track> out = new ArrayList<>(); for (Object o : list.getItems()) if (o instanceof Track && list.getSelectionModel().getSelectedItems().contains(o)) out.add((Track) o);
+        if (t != null && !out.contains(t)) return Collections.singletonList(t);
+        return out;
+    }
+    /** Plays {@code t}: with several selected, those; otherwise from it in the list it came from (its section). */
+    void playFrom(ListView<Object> list, Map<Object, List<Track>> owners, Track t) {
+        List<Track> sel = selected(list, t);
+        if (sel.size() > 1) { d.media.play(sel, sel.indexOf(t)); return; }
+        List<Track> owner = owners.getOrDefault(t, Collections.singletonList(t)); d.media.play(owner, Math.max(0, owner.indexOf(t)));
+    }
     /** One row: a track, a group (album, artist…), a section heading or the periods. */
     final class Cell extends ListCell<Object> {
         final Map<Object, List<Track>> owners; final Set<Object> showPlays;
         Cell(Map<Object, List<Track>> owners, Set<Object> showPlays) { this.owners = owners; this.showPlays = showPlays; }
+        // 5.56: a track row is built once per cell and only its words change when scrolling (much lighter in long lists).
+        HBox trackRow; StackPane trackBadge; Label trackTitle, trackSub, trackPlays; Button trackFav; ContextMenu trackMenu; String badgeIcon = "";
+        Track track() { Object o = getItem(); return o instanceof Track ? (Track) o : null; }
+        void buildTrack() {
+            trackBadge = new StackPane(); trackBadge.getStyleClass().add("badge"); trackBadge.setMinSize(40, 40); trackBadge.setMaxSize(40, 40);
+            trackTitle = DeskUi.heading(""); trackTitle.setWrapText(false); trackSub = DeskUi.muted(""); trackPlays = DeskUi.muted("");
+            VBox words = new VBox(2, trackTitle, trackSub); HBox.setHgrow(words, Priority.ALWAYS); words.setMinWidth(0);
+            trackFav = new Button("♡"); trackFav.getStyleClass().add("heart"); trackFav.setTooltip(new Tooltip(video() ? "Favorito" : "Favorita"));
+            trackFav.setOnAction(e -> { Track t = track(); if (t == null) return; t.favorite = !t.favorite; try { d.store.update("UPDATE tracks SET favorite=? WHERE path=?", t.favorite ? 1 : 0, t.path); } catch (SQLException ignored) {} trackFav.setText(t.favorite ? "♥" : "♡"); });
+            trackRow = new HBox(14, trackBadge, words, trackPlays, trackFav); trackRow.setAlignment(Pos.CENTER_LEFT);
+            MenuItem play = new MenuItem("Tocar"); play.setOnAction(e -> { Track t = track(); if (t != null) playFrom(getListView(), owners, t); });
+            MenuItem next = new MenuItem("Tocar a seguir"); next.setOnAction(e -> { Track t = track(); if (t != null) d.media.playNext(selected(getListView(), t)); });
+            MenuItem queue = new MenuItem("Adicionar à fila"); queue.setOnAction(e -> { Track t = track(); if (t != null) d.media.enqueue(selected(getListView(), t)); });
+            MenuItem folder = new MenuItem("Abrir a pasta"); folder.setOnAction(e -> { Track t = track(); if (t != null) DeskFiles.system(new File(t.path).getParentFile()); });
+            MenuItem external = new MenuItem("Abrir no Windows"); external.setOnAction(e -> { Track t = track(); if (t != null) DeskFiles.system(new File(t.path)); });
+            MenuItem remove = new MenuItem("Remover da biblioteca"); remove.setOnAction(e -> { List<Track> gone = new ArrayList<>(selected(getListView(), track())); ListView<Object> lv = getListView(); for (Track t : gone) { try { d.store.update("DELETE FROM tracks WHERE path=?", t.path); } catch (SQLException ignored) {} lv.getItems().remove(t); } });
+            trackMenu = new ContextMenu(play, next, queue, new SeparatorMenuItem(), folder, external, remove);
+        }
         @Override protected void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty); setText(null); getStyleClass().removeAll("section-cell", "track-cell", "playing");
             if (empty || item == null) { setGraphic(null); setOnMouseClicked(null); setContextMenu(null); return; }
@@ -271,22 +316,14 @@ final class DeskLibrary {
             Track t = (Track) item; boolean current = t.path.equals(d.media.currentPath());
             String sub = video() ? (t.album.isEmpty() ? "" : t.album) + (t.year > 0 ? " · " + t.year : "") : (t.artist.isEmpty() ? "Artista desconhecido" : t.artist) + (t.album.isEmpty() ? "" : " · " + t.album) + (t.year > 0 ? " · " + t.year : "");
             if (!playable(t.path)) sub += " · abre no leitor do Windows";
-            Label title = DeskUi.heading(t.title); title.setWrapText(false);
-            VBox words = new VBox(2, title, DeskUi.muted(sub)); HBox.setHgrow(words, Priority.ALWAYS); words.setMinWidth(0);
-            HBox row = new HBox(14, badge(current ? "play" : video() ? "video" : "music"), words); row.setAlignment(Pos.CENTER_LEFT);
-            if (showPlays.contains(t) && t.plays > 0) row.getChildren().add(DeskUi.muted(t.plays + (t.plays == 1 ? " vez" : " vezes")));
-            Button fav = new Button(t.favorite ? "♥" : "♡"); fav.getStyleClass().add("heart"); fav.setTooltip(new Tooltip(t.favorite ? (video() ? "Tirar dos favoritos" : "Tirar das favoritas") : "Favorita"));
-            fav.setOnAction(e -> { t.favorite = !t.favorite; try { d.store.update("UPDATE tracks SET favorite=? WHERE path=?", t.favorite ? 1 : 0, t.path); } catch (SQLException ignored) {} fav.setText(t.favorite ? "♥" : "♡"); });
-            row.getChildren().add(fav);
-            setGraphic(row); getStyleClass().add("track-cell"); if (current) getStyleClass().add("playing");
-            List<Track> owner = owners.getOrDefault(t, Collections.singletonList(t));
-            setOnMouseClicked(e -> { if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) d.media.play(owner, Math.max(0, owner.indexOf(t))); });
-            MenuItem next = new MenuItem("Tocar a seguir"); next.setOnAction(e -> d.media.playNext(t));
-            MenuItem queue = new MenuItem("Adicionar à fila"); queue.setOnAction(e -> d.media.enqueue(t));
-            MenuItem folder = new MenuItem("Abrir a pasta"); folder.setOnAction(e -> DeskFiles.system(new File(t.path).getParentFile()));
-            MenuItem external = new MenuItem("Abrir no Windows"); external.setOnAction(e -> DeskFiles.system(new File(t.path)));
-            MenuItem remove = new MenuItem("Remover da biblioteca"); remove.setOnAction(e -> { try { d.store.update("DELETE FROM tracks WHERE path=?", t.path); } catch (SQLException ignored) {} getListView().getItems().remove(t); });
-            setContextMenu(new ContextMenu(next, queue, new SeparatorMenuItem(), folder, external, remove));
+            if (trackRow == null) buildTrack();
+            String icon = current ? "play" : video() ? "video" : "music"; if (!icon.equals(badgeIcon)) { trackBadge.getChildren().setAll(DeskUi.icon(icon, 20)); badgeIcon = icon; }
+            trackTitle.setText(t.title); trackSub.setText(sub);
+            boolean plays = showPlays.contains(t) && t.plays > 0; trackPlays.setText(plays ? t.plays + (t.plays == 1 ? " vez" : " vezes") : ""); trackPlays.setVisible(plays); trackPlays.setManaged(plays);
+            trackFav.setText(t.favorite ? "♥" : "♡");
+            setGraphic(trackRow); getStyleClass().add("track-cell"); if (current) getStyleClass().add("playing");
+            setOnMouseClicked(e -> { if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY && e.getClickCount() == 2) { Track now = track(); if (now != null) playFrom(getListView(), owners, now); } });
+            setContextMenu(trackMenu);
         }
     }
     static Node badge(String icon) { StackPane b = new StackPane(DeskUi.icon(icon, 20)); b.getStyleClass().add("badge"); b.setMinSize(40, 40); b.setMaxSize(40, 40); return b; }

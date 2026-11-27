@@ -251,6 +251,8 @@ final class DeskSelfTest {
             File txt = new File(home, "livro.txt"); Files.write(txt.toPath(), "Capítulo um.\n\nTexto do livro.".getBytes(StandardCharsets.UTF_8)); check(DeskReader.chapters(txt).texts.size() == 1, "ler livro TXT");
             Class.forName("org.apache.pdfbox.pdmodel.PDDocument"); check(true, "PDFBox presente");
             Class.forName("javafx.scene.media.MediaPlayer"); check(true, "JavaFX Media presente");
+            // 5.56: parar a leitura (ou começar outra) muda a geração, por isso a página seguinte só vem quando a leitura acaba sozinha.
+            { int g = DeskSpeech.generation; DeskSpeech.stop(); int g2 = DeskSpeech.generation; DeskSpeech.stop(); check(g2 == g + 1 && DeskSpeech.generation == g + 2 && !DeskSpeech.busy(), "parar a leitura não passa à página seguinte"); }
         } catch (Throwable e) { e.printStackTrace(System.out); check(false, "erro: " + e); }
         System.out.println((ok ? "PASS " : "FAIL ") + checks + " verificações do Seeky Desktop");
         return ok;

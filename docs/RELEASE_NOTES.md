@@ -1,3 +1,12 @@
+## Seeky 5.56.0
+
+Instale **Seeky_5.56.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.56.0.
+
+- Windows: *Ouvir* lê a página inteira e passa sozinho à página seguinte, até ao fim do livro.
+- Windows: na Música, um clique selecciona e o duplo clique toca; seleccionar várias com Ctrl ou Shift;
+  lista e leitor mais leves.
+
 ## Seeky 5.55.1
 
 No computador, o Seeky para Windows actualiza-se sozinho para a 5.55.1.

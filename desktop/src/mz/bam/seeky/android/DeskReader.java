@@ -206,7 +206,7 @@ final class DeskReader {
         if (!f.isFile()) { DeskUi.info("Livro indisponível", f.getPath()); return; }
         String name = f.getName().toLowerCase(Locale.ROOT);
         int pos = at; if (pos < 0) { pos = 0; try { pos = (int) d.store.count("SELECT position FROM books WHERE path=?", f.getPath()); } catch (SQLException ignored) {} }
-        final int start = pos;
+        final int start = pos; DeskSpeech.stop(); // a new book: the one being read aloud stops
         if (name.endsWith(".pdf")) d.run("A abrir " + f.getName() + "…", () -> PDDocument.load(f), doc -> pdf(f, doc, start));
         else d.run("A abrir " + f.getName() + "…", () -> chapters(f), book -> text(f, book, start, mark));
     }
@@ -221,6 +221,33 @@ final class DeskReader {
         HBox row = DeskUi.row(back, t); row.getChildren().addAll(extra);
         row.getChildren().addAll(DeskUi.iconButton("back", "Anterior", prev), where, nextButton(next), DeskUi.iconButton("speaker", "Ouvir", listen));
         return row;
+    }
+    // ---- 5.56 · ouvir o livro seguido ----
+    /** Whether reading aloud turns to the next page (or chapter) by itself when one ends (Definições → Vozes). */
+    static boolean continuous(DeskMain d) { return !"0".equals(d.store.get("read_continue", "1")); }
+    /** Ouvir: stops if reading; otherwise reads from the page shown. */
+    void listen(int[] at, int total, String unit, java.util.function.IntFunction<String> textOf, java.util.function.IntConsumer show) {
+        if (DeskSpeech.busy()) { DeskSpeech.stop(); d.status("Leitura parada."); return; }
+        readFrom(at[0], total, unit, textOf, show, 0);
+    }
+    /** Reads page {@code p}; when it ends by itself, shows the next page and reads it, to the end of the book. */
+    void readFrom(int p, int total, String unit, java.util.function.IntFunction<String> textOf, java.util.function.IntConsumer show, int blanks) {
+        DeskSpeech.stop(); final int gen = DeskSpeech.generation;
+        d.run(null, () -> { String t = textOf.apply(p); return t == null ? "" : t; }, text -> {
+            if (DeskSpeech.generation != gen) return; // stopped meanwhile
+            boolean on = continuous(d), more = p + 1 < total;
+            if (text.trim().isEmpty()) { // a page with no text (an image): skip it, but not forever
+                if (on && more && blanks < 20) { show.accept(p + 1); readFrom(p + 1, total, unit, textOf, show, blanks + 1); }
+                else d.status("Esta " + unit + " não tem texto que o Seeky consiga ler.");
+                return;
+            }
+            DeskSpeech.say(d, text, () -> {
+                if (!continuous(d)) { d.status("Fim da " + unit + "."); return; }
+                if (!more) { d.status("Chegou ao fim do livro."); return; }
+                show.accept(p + 1); readFrom(p + 1, total, unit, textOf, show, 0);
+            });
+            d.status("A ler a " + unit + " " + (p + 1) + " de " + total + (on && more ? " · passa sozinho à seguinte" : "") + " (toque em Ouvir para parar)");
+        });
     }
     static Button nextButton(Runnable next) { Button b = DeskUi.iconButton("back", "Seguinte", next); b.getGraphic().setRotate(180); return b; }
     Button noteButton(String title, java.util.function.Supplier<String> where) { return DeskUi.iconButton("note", "Nota deste livro", () -> d.notes.newWith(title + " — " + where.get(), "> " + title + " · " + where.get() + "\n\n")); }
@@ -296,7 +323,8 @@ final class DeskReader {
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw.run(); } }, next = () -> { if (at[0] < pages - 1) { at[0]++; draw.run(); } };
         Slider zoomBar = new Slider(0.6, 3, zoom[0]); zoomBar.setPrefWidth(120); zoomBar.setTooltip(new Tooltip("Zoom")); zoomBar.valueChangingProperty().addListener((o, a, b) -> { if (!b) { zoom[0] = zoomBar.getValue(); draw.run(); } });
         java.util.function.Supplier<String> place = () -> "página " + (at[0] + 1);
-        HBox top = bar(title, where, prev, next, () -> DeskSpeech.toggle(d, pageText[0]), zoomBar, markPage, DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
+        java.util.function.IntFunction<String> textOf = p -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setStartPage(p + 1); s.setEndPage(p + 1); synchronized (doc) { return s.getText(doc); } } catch (Exception e) { return ""; } };
+        HBox top = bar(title, where, prev, next, () -> listen(at, pages, "página", textOf, p -> { at[0] = p; draw.run(); }), zoomBar, markPage, DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
         top.getChildren().addAll(aiMenu(title, place, () -> pageText[0], () -> ""), noteButton(title, place));
         VBox page = new VBox(10, top, scroll); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         page.setOnKeyPressed(e -> { switch (e.getCode()) { case RIGHT: case PAGE_DOWN: next.run(); break; case LEFT: case PAGE_UP: prev.run(); break; default: } });
@@ -401,7 +429,7 @@ final class DeskReader {
         toc.setOnAction(e -> { int i = toc.getSelectionModel().getSelectedIndex(); if (i >= 0 && i != at[0]) { at[0] = i; draw[0].run(); } });
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw[0].run(); } }, next = () -> { if (at[0] < book.texts.size() - 1) { at[0]++; draw[0].run(); } };
         java.util.function.Supplier<String> place = () -> book.names.get(at[0]);
-        HBox top = bar(book.title, where, prev, next, () -> DeskSpeech.toggle(d, book.texts.get(at[0])), toc);
+        HBox top = bar(book.title, where, prev, next, () -> listen(at, book.texts.size(), book.texts.size() == 1 ? "página" : "parte", i -> book.texts.get(i), i -> { at[0] = i; draw[0].run(); }), toc);
         top.getChildren().addAll(aiMenu(book.title, place, () -> book.texts.get(at[0]), () -> selected[0]), noteButton(book.title, place), DeskUi.iconButton("export", "Gravar em MP3", () -> DeskAudio.exportBook(d, f)));
         VBox page = new VBox(10, top, holder); page.setPadding(new javafx.geometry.Insets(14, 18, 10, 18)); page.getStyleClass().add("page");
         d.show(page);

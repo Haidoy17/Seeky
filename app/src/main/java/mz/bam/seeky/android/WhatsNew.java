@@ -23,8 +23,11 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.55", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.56", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "Ouvir o livro seguido no computador", "No Seeky para Windows, Ouvir lê a página inteira e passa sozinho à seguinte até ao fim do livro, como já faz no telemóvel", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.action("audio", "Música mais leve no computador", "No Seeky para Windows: um clique selecciona a música (Ctrl ou Shift para várias), duplo clique toca, e a lista fica mais leve", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.55");
         panel.action("speaker", "Leitura em voz alta sem travar", "Em PDF, Word e EPUB pode deslizar a página enquanto ouve: o Seeky deixa de a puxar para a frase lida e mostra Voltar à leitura", false, () -> PlusUi.toast(a, "Abra um livro e toque em Ouvir."));
         panel.action("forward30", "Saltar 10, 15 ou 30 segundos", "Na Música › Mais: escolha quanto recuam e avançam os botões do leitor e da notificação", false, () -> PlusUi.toast(a, "Música › Mais › Saltar."));
         panel.action("sparkle", "Seeky IA mais fácil", "Usa primeiro os modelos Gemini mais recentes e, num pico de uso, passa sozinho a outro. Quando o serviço Seeky IA estiver ligado, funciona sem chave", false, () -> PlusUi.toast(a, "Estudos › Estudar com Seeky."));
