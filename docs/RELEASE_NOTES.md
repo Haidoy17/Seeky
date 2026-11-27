@@ -1,3 +1,9 @@
+## Seeky 5.55.1
+
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.55.1.
+
+- Leitura em voz alta mais fluida nos livros: deixa de parar no fim de cada frase (vozes do Edge e Piper).
+
 ## Seeky 5.55.0
 
 Instale **Seeky_5.55.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

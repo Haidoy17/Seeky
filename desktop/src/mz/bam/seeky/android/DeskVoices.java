@@ -111,7 +111,7 @@ final class DeskVoices {
     // ---------------------------------------------------------------- falar
     /** Piper writes raw 16-bit mono PCM for all the text (one paragraph per line). */
     static Process piper(Voice v, int rate) throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(piperExe().getAbsolutePath(), "--model", v.model().getAbsolutePath(), "--config", v.config().getAbsolutePath(), "--output_raw", "--length_scale", String.format(Locale.ROOT, "%.2f", lengthScale(rate)), "--sentence_silence", "0.35");
+        ProcessBuilder pb = new ProcessBuilder(piperExe().getAbsolutePath(), "--model", v.model().getAbsolutePath(), "--config", v.config().getAbsolutePath(), "--output_raw", "--length_scale", String.format(Locale.ROOT, "%.2f", lengthScale(rate)), "--sentence_silence", "0.2");
         pb.directory(piperExe().getParentFile()); pb.redirectError(ProcessBuilder.Redirect.DISCARD);
         return pb.start();
     }
@@ -128,8 +128,16 @@ final class DeskVoices {
         Thread play = new Thread(() -> {
             javax.sound.sampled.AudioFormat f = new javax.sound.sampled.AudioFormat(sr, 16, 1, true, false);
             try (InputStream in = p.getInputStream(); javax.sound.sampled.SourceDataLine line = javax.sound.sampled.AudioSystem.getSourceDataLine(f)) {
-                line.open(f, sr); line.start(); byte[] b = new byte[4096];
-                for (int n; (n = in.read(b)) > 0; ) { if (!p.isAlive() && n <= 0) break; line.write(b, 0, n - (n & 1)); }
+                // 5.56: a 4-second sound buffer, filled with about one second before playing starts, so the gap
+                // while Piper makes the next sentence is covered and reading does not stop at each full stop.
+                line.open(f, sr * 2 * 4); byte[] b = new byte[8192]; boolean started = false; int odd = -1;
+                for (int n; (n = in.read(b)) > 0; ) {
+                    int len = n; if (odd >= 0) { byte[] t = new byte[n + 1]; t[0] = (byte) odd; System.arraycopy(b, 0, t, 1, n); b = t; len = n + 1; odd = -1; }
+                    if ((len & 1) == 1) { odd = b[len - 1] & 0xff; len--; }
+                    line.write(b, 0, len); if (b.length != 8192) b = new byte[8192];
+                    if (!started && line.getBufferSize() - line.available() >= sr * 2) { line.start(); started = true; }
+                }
+                if (!started) line.start();
                 if (p.isAlive() || p.exitValue() == 0) line.drain();
             } catch (Exception ignored) {} finally { done.run(); }
         }, "seeky-piper-out");

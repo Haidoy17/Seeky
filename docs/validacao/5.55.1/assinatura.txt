@@ -1,0 +1,5 @@
+Verifies
+Signer #1 certificate SHA-256 digest: 98ce323b08c5ccd02eae3c651423e68269e8d1ce0e0baf9a48efada560ce0e05
+versionCode 5008210 · versionName 5.55.1
+SHA-256 do APK: dd15735d2ae14dd54bfaaec71ad61506f3294c3d41c69a433df1b5500e3dcb47
+Android: só o número da versão. Testes: núcleo OK; Presentation5190Test + Link549Test + Updates5201Test OK (14).
