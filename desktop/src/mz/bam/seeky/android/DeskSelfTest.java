@@ -321,6 +321,18 @@ final class DeskSelfTest {
                   boolean inside = !pg.hits.isEmpty(); for (DeskPdfPassages.Hit hit : pg.hits) for (double[] b : hit.boxes) inside &= b[0] >= 0 && b[2] <= w && b[1] >= 0 && b[3] <= h && b[2] > b[0] && b[3] > b[1];
                   check(pg.hits.size() == 2 && pg.hits.get(0).ref.title.equals("João 3:16") && pg.hits.get(1).ref.title.equals("Romanos 8:28") && inside && pg.text.contains("João 3:16"), "passagens no PDF com o sítio na página: " + pg.hits.size());
               } }
+            // 5.61: um PDF lido como texto corrido (sem parar no fim de cada linha), número da página fora.
+            { String page = "12\nO evangelho é poder de Deus para salva-\nção de todo aquele que crê. Mas o justo\nviverá pela fé.\n\nNovo parágrafo que con-\ntinua na página\n13\n";
+              String flow = DeskReader.pdfForVoice(page); String[] said = DeskSpeech.prepare(flow, "pt-PT").trim().split("\n");
+              check(flow.equals("O evangelho é poder de Deus para salvação de todo aquele que crê. Mas o justo viverá pela fé.\n\nNovo parágrafo que continua na página") && said.length == 2
+                  && DeskReader.lastSentenceEnd("Uma frase acabada. Outra que continua") == 18 && DeskReader.lastSentenceEnd("Disse: «Vem.» Depois") == 13 && DeskReader.lastSentenceEnd("sem fim") == -1, "PDF lido como texto corrido" + (said.length == 2 ? "" : ": " + flow)); }
+            { File lp = new File(home, "longo.pdf"); String para = "A fé é a certeza das coisas que se esperam e a convicção dos factos que se não vêem, porque pela fé os antigos alcançaram bom testemunho e entenderam que os mundos foram criados pela palavra de Deus, de maneira que aquilo que se vê não foi feito do que é aparente.";
+              try (OutputStream o = new FileOutputStream(lp)) { DeskPdf.note("Longo", "# Longo\n" + para + "\n\nSegundo parágrafo curto.", home, o); }
+              try (org.apache.pdfbox.pdmodel.PDDocument pd = org.apache.pdfbox.pdmodel.PDDocument.load(lp)) {
+                  org.apache.pdfbox.text.PDFTextStripper st = new org.apache.pdfbox.text.PDFTextStripper(); st.setSortByPosition(true); st.setParagraphEnd(st.getLineSeparator());
+                  String raw = st.getText(pd), flow = DeskReader.pdfForVoice(raw); int lines = raw.split("\n").length;
+                  check(lines > 4 && flow.contains(para) && flow.trim().split("\n\n").length >= 2, "PDF real: o parágrafo partido em " + lines + " linhas é lido de uma vez");
+              } }
             // 5.58: passagens ditas como no telemóvel (não como horas) e um parágrafo por linha (para o realce do que se lê).
             { String said = DeskSpeech.prepare("Leia Salmos 13:40 hoje.\n\n  Depois João 3:16.", "pt-PT"); String[] lines = said.trim().split("\n");
               check(lines.length == 2 && said.contains("capítulo 13") && said.contains("versículo 40") && !said.contains("13:40") && said.contains("capítulo 3"), "passagens lidas como no telemóvel: " + lines[0]); }

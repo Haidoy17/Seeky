@@ -120,7 +120,17 @@ final class DeskAudio {
         if (f.getName().toLowerCase(Locale.ROOT).endsWith(".pdf")) {
             try (org.apache.pdfbox.pdmodel.PDDocument doc = org.apache.pdfbox.pdmodel.PDDocument.load(f, org.apache.pdfbox.io.MemoryUsageSetting.setupTempFileOnly())) {
                 org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); int pages = doc.getNumberOfPages();
-                for (int from = 1; from <= pages; from += 10) { int to = Math.min(pages, from + 9); s.setStartPage(from); s.setEndPage(to); out.add(new Part(from == to ? "Página " + from : "Páginas " + from + "–" + to, s.getText(doc))); }
+                s.setSortByPosition(true); s.setParagraphEnd(s.getLineSeparator());
+                // 5.61: the pages as flowing text (lines and pages joined inside a sentence), so the MP3 does not stop at each line.
+                for (int from = 1; from <= pages; from += 10) {
+                    int to = Math.min(pages, from + 9); StringBuilder text = new StringBuilder();
+                    for (int pg = from; pg <= to; pg++) {
+                        s.setStartPage(pg); s.setEndPage(pg); String t = DeskReader.pdfForVoice(s.getText(doc)).trim(); if (t.isEmpty()) continue;
+                        if (text.length() > 0) text.append(DeskReader.lastSentenceEnd(text.toString()) == text.length() ? "\n\n" : " ");
+                        text.append(t);
+                    }
+                    out.add(new Part(from == to ? "Página " + from : "Páginas " + from + "–" + to, text.toString()));
+                }
             }
         } else { DeskReader.Book b = DeskReader.chapters(f); for (int i = 0; i < b.texts.size(); i++) out.add(new Part(b.names.get(i), b.texts.get(i))); }
         return out;

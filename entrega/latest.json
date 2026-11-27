@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008700,
-  "versionName": "5.60.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.60.0.apk",
-  "sha256": "2786fb752284f17c11255da9e3c7a3e2660f409a56d2002585a882caa457a772",
-  "bytes": 14030970,
-  "notes": "Encontrar a passagem a partir de um trecho no Flash (João 1:16 por «graça sobre graça»), com o capítulo inteiro e o versículo marcado; a Seeky IA encontra a passagem por palavras suas."
+  "versionCode": 5008800,
+  "versionName": "5.61.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.61.0.apk",
+  "sha256": "4c59e1877f1dc8112afd271ddf99aa6fc0f188e68aa99cfa008e76832c29f337",
+  "bytes": 14031550,
+  "notes": "Windows: os PDF são lidos como texto corrido, sem parar no fim de cada linha nem entre páginas."
 }
