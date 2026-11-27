@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008700,
-  "versionName": "5.60.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.60.0-app.zip",
-  "sha256": "1db7474e49dc52681a969d76063409413dc102cfded6e0107fa5138e469aa739",
-  "bytes": 9416314,
+  "versionCode": 5008800,
+  "versionName": "5.61.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.61.0-app.zip",
+  "sha256": "d0841dc7cef1866ea9d3f23f1bf75a6cd98a5aa31bf8c48f3c8d7d65624126af",
+  "bytes": 9418956,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Encontrar a passagem a partir de um trecho no Flash, na Bíblia e na Seeky IA; a Bíblia abre com o versículo marcado."
+  "notes": "PDF lido como texto corrido: sem parar no fim de cada linha nem entre páginas, e sem ler o número da página."
 }

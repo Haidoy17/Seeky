@@ -1,0 +1,3 @@
+d0841dc7cef1866ea9d3f23f1bf75a6cd98a5aa31bf8c48f3c8d7d65624126af  entrega/windows/Seeky-Desktop-5.61.0-app.zip
+0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe  entrega/windows/Seeky-Setup-5.45.0-x64.exe
+f25273e062d2e35f9c3a0ae766094669bdb78e6cdae43261340b2fde9c62159c  entrega/windows/latest.json

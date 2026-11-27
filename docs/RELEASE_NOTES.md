@@ -1,3 +1,10 @@
+## Seeky 5.61.0
+
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.61.0 (APK com o mesmo número).
+
+- Windows: os PDF são lidos como texto corrido, sem parar no fim de cada linha nem entre páginas, e sem
+  ler o número da página.
+
 ## Seeky 5.60.0
 
 Instale **Seeky_5.60.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

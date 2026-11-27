@@ -254,11 +254,41 @@ final class DeskReader {
     void listen(int[] at, int total, String unit, java.util.function.IntFunction<String> textOf, java.util.function.IntConsumer show) { listen(at, total, unit, textOf, show, null); }
     void listen(int[] at, int total, String unit, java.util.function.IntFunction<String> textOf, java.util.function.IntConsumer show, java.util.function.BiConsumer<Integer, Integer> para) {
         if (DeskSpeech.busy()) { DeskSpeech.stop(); d.status("Leitura parada."); if (para != null) para.accept(-1, -1); return; }
-        reading = new Reading(total, unit, textOf, show, para); reading.start(at[0], 0);
+        reading = new Reading(total, unit, textOf, show, para); reading.flow = para == null; reading.start(at[0], 0);
     }
     Reading reading;
     /** Set by the PDF page: selects these words with the mouse (screenshots and checks). */
     java.util.function.Predicate<String> demoSelect = w -> false;
+    /**
+     * 5.61 · A PDF page as flowing text: a PDF breaks every line, even in the middle of a sentence, and reading
+     * line by line made the voice stop and sound robotic at each one. The lines of a paragraph are joined (words
+     * cut with a hyphen at the end of a line too), paragraphs stay apart, and the page number alone on the first or
+     * last line is left out.
+     */
+    static String pdfForVoice(String raw) {
+        if (raw == null) return "";
+        List<String> lines = new ArrayList<>(Arrays.asList(raw.replace("\r", "").split("\n", -1)));
+        java.util.function.Predicate<String> pageNumber = l -> l.trim().matches("(?i)(p[áa]gina\\s+)?(\\d{1,4}|[ivxlcdm]{1,7})(\\s*(/|de|of)\\s*\\d{1,4})?");
+        for (int k = 0; k < 2; k++) {
+            while (!lines.isEmpty() && lines.get(0).trim().isEmpty()) lines.remove(0);
+            while (!lines.isEmpty() && lines.get(lines.size() - 1).trim().isEmpty()) lines.remove(lines.size() - 1);
+            if (!lines.isEmpty() && pageNumber.test(lines.get(0))) lines.remove(0);
+            if (!lines.isEmpty() && pageNumber.test(lines.get(lines.size() - 1))) lines.remove(lines.size() - 1);
+        }
+        String t = String.join("\n", lines).replaceAll("(\\p{Ll})[-\u00ad]\\n[ \\t]*(\\p{Ll})", "$1$2");
+        return SpeechText.prepare(t).text;
+    }
+    /** Where the last full sentence of a text ends (after its full stop and closing quotes), or -1. */
+    static int lastSentenceEnd(String t) {
+        for (int i = t.length() - 1; i >= 0; i--) {
+            char c = t.charAt(i);
+            if (c == '.' || c == '!' || c == '?' || c == '…') {
+                int end = i + 1; while (end < t.length() && "\"'»”’)]".indexOf(t.charAt(end)) >= 0) end++;
+                if (end >= t.length() || Character.isWhitespace(t.charAt(end))) return end;
+            }
+        }
+        return -1;
+    }
     /** Set by the book shown: searches it (screenshots and checks). */
     java.util.function.Consumer<String> demoSearch = q -> {};
     /**
@@ -269,19 +299,29 @@ final class DeskReader {
     final class Reading {
         final int total; final String unit; final java.util.function.IntFunction<String> textOf; final java.util.function.IntConsumer show; final java.util.function.BiConsumer<Integer, Integer> para;
         int gen, ahead = -1, nextIndex = -1; String nextText;
+        /** 5.61 (PDF): the sentence that goes on to the next page is read with that page, in one go. */
+        boolean flow; String carry = ""; int carryFor = -1;
+        String shape(int p, String raw) {
+            String joined = (carryFor == p && !carry.isEmpty() ? carry + " " : "") + raw.trim(); carry = ""; carryFor = -1;
+            if (!flow || p + 1 >= total || !continuous(d)) return joined;
+            int cut = lastSentenceEnd(joined);
+            if (cut <= 0 || joined.length() - cut > 600 || joined.substring(cut).trim().isEmpty()) return joined;
+            carry = joined.substring(cut).trim(); carryFor = p + 1; return joined.substring(0, cut);
+        }
         Reading(int total, String unit, java.util.function.IntFunction<String> textOf, java.util.function.IntConsumer show, java.util.function.BiConsumer<Integer, Integer> para) { this.total = total; this.unit = unit; this.textOf = textOf; this.show = show; this.para = para; }
         String textAt(int p) { try { String t = textOf.apply(p); return t == null ? "" : t; } catch (RuntimeException e) { return ""; } }
-        void start(int p, int blanks) {
-            DeskSpeech.stop(); final int g = DeskSpeech.generation; gen = g; ahead = -1; nextIndex = -1; nextText = null;
+        void start(int p, int blanks) { start(p, blanks, false); }
+        void start(int p, int blanks, boolean keepCarry) {
+            DeskSpeech.stop(); final int g = DeskSpeech.generation; gen = g; ahead = -1; nextIndex = -1; nextText = null; if (!keepCarry) { carry = ""; carryFor = -1; }
             d.run(null, () -> textAt(p), text -> {
                 if (DeskSpeech.generation != g) return; // stopped meanwhile
                 boolean on = continuous(d), more = p + 1 < total;
                 if (text.trim().isEmpty()) { // a page with no text (an image): skip it, but not forever
-                    if (on && more && blanks < 20) { show.accept(p + 1); start(p + 1, blanks + 1); }
+                    if (on && more && blanks < 20) { show.accept(p + 1); start(p + 1, blanks + 1, true); }
                     else d.status("Esta " + unit + " não tem texto que o Seeky consiga ler.");
                     return;
                 }
-                speak(p, text);
+                speak(p, shape(p, text));
             });
         }
         void speak(int p, String text) {
@@ -293,8 +333,9 @@ final class DeskReader {
         void prefetch(int q) {
             if (!continuous(d) || q >= total) return; final int g = gen;
             d.run(null, () -> textAt(q), text -> {
-                if (DeskSpeech.generation != g || text.trim().isEmpty()) return;
-                if (DeskSpeech.queue(d, text, () -> ended(q), n -> paragraph(q, n))) ahead = q; else { nextIndex = q; nextText = text; }
+                if (DeskSpeech.generation != g || text.trim().isEmpty() && !(carryFor == q && !carry.isEmpty())) return;
+                String shaped = shape(q, text);
+                if (DeskSpeech.queue(d, shaped, () -> ended(q), n -> paragraph(q, n))) ahead = q; else { nextIndex = q; nextText = shaped; }
             });
         }
         void ended(int p) {
@@ -304,7 +345,7 @@ final class DeskReader {
             show.accept(p + 1);
             if (ahead == p + 1) { d.status("A ler a " + unit + " " + (p + 2) + " de " + total + " (toque em Ouvir para parar)"); prefetch(p + 2); return; }
             if (nextIndex == p + 1 && nextText != null) { String t = nextText; nextText = null; nextIndex = -1; speak(p + 1, t); return; }
-            start(p + 1, 0);
+            start(p + 1, 0, true);
         }
         void paragraph(int p, int n) { if (para != null) para.accept(p, n); }
     }
@@ -408,7 +449,7 @@ final class DeskReader {
         Runnable prev = () -> { if (at[0] > 0) { at[0]--; draw.run(); } }, next = () -> { if (at[0] < pages - 1) { at[0]++; draw.run(); } };
         Slider zoomBar = new Slider(0.6, 3, zoom[0]); zoomBar.setPrefWidth(120); zoomBar.setTooltip(new Tooltip("Zoom")); zoomBar.valueChangingProperty().addListener((o, a, b) -> { if (!b) { zoom[0] = zoomBar.getValue(); draw.run(); } });
         java.util.function.Supplier<String> place = () -> "página " + (at[0] + 1);
-        java.util.function.IntFunction<String> textOf = p -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setSortByPosition(true); s.setStartPage(p + 1); s.setEndPage(p + 1); synchronized (doc) { return s.getText(doc); } } catch (Exception e) { return ""; } };
+        java.util.function.IntFunction<String> textOf = p -> { try { org.apache.pdfbox.text.PDFTextStripper s = new org.apache.pdfbox.text.PDFTextStripper(); s.setSortByPosition(true); s.setParagraphEnd(s.getLineSeparator()); s.setStartPage(p + 1); s.setEndPage(p + 1); String t; synchronized (doc) { t = s.getText(doc); } return pdfForVoice(t); } catch (Exception e) { return ""; } };
         // Selecting with the mouse: drag over the words (double click: one word); then colour, note, copy, listen, explain.
         int[] sel = {-1, -1};
         Runnable clearSel = () -> { sel[0] = sel[1] = -1; selLayer.getChildren().clear(); selBar.setVisible(false); };

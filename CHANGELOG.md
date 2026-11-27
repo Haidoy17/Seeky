@@ -1,5 +1,17 @@
 # Registo de alterações
 
+## 5.61.0 — 2026-11-27 (Windows; Android só o número)
+
+- **Windows: PDF lido sem travar e com voz natural.** Um PDF quebra cada linha, mesmo a meio de uma frase,
+  e desde a 5.58 o texto ia para a voz linha a linha — a voz parava no fim de cada linha e recomeçava com
+  entoação de início de frase (soava robótica). Agora a página é texto corrido: as linhas de um parágrafo
+  juntam-se (palavras cortadas com hífen no fim da linha também), os parágrafos continuam separados
+  (PDFBox com fim de parágrafo) e o número da página sozinho no início ou no fim não é lido.
+- **Sem paragem entre páginas:** a frase que continua na página seguinte passa a ser lida de uma vez com
+  essa página, em vez de ser cortada a meio.
+- O mesmo na gravação em MP3 de um PDF.
+- Android: só o número da versão e as Novidades.
+
 ## 5.60.0 — 2026-11-27 (Android e Windows)
 
 - **Encontrar a passagem a partir de um trecho** (Android e Windows). Escreva no **Flash** o que se lembra

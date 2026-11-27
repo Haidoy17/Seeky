@@ -23,8 +23,10 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.60", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.61", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "PDF lido sem travar no computador", "No Seeky para Windows: a voz lê o PDF como texto corrido, sem parar no fim de cada linha nem entre páginas, e sem dizer o número da página", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.60");
         panel.action("search", "Encontrar a passagem por um trecho", "No Flash, escreva o que se lembra («da sua plenitude nos tem dado graça sobre graça»): aparece João 1:16; toque para a ler, com Capítulo inteiro e o versículo marcado", false, () -> BibleFind.ask(a));
         panel.action("sparkle", "Seeky IA encontra a passagem", "Por palavras suas, a Seeky IA diz o livro, o capítulo e o versículo e mostra o texto da sua Bíblia (Estudar com Seeky › Encontrar passagem)", false, () -> BibleFind.ask(a));
         panel.section("Da 5.59");
