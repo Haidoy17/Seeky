@@ -96,9 +96,13 @@
 .focus-bar { -fx-background-color: -seeky-raised; -fx-background-radius: 8; -fx-border-color: -seeky-line; -fx-border-radius: 8; }
 .focus-bar-today { -fx-background-color: -seeky-accent; -fx-background-radius: 8; }
 /* Barras de deslocamento finas, na cor do tema. */
+/* 5.57: a scroll bar you can see and grab, at the right edge of every list and page */
 .root-pane .scroll-bar, .dialog-pane .scroll-bar { -fx-background-color: transparent; -fx-padding: 2; }
-.root-pane .scroll-bar .thumb, .dialog-pane .scroll-bar .thumb { -fx-background-color: -seeky-line; -fx-background-radius: 6; }
-.root-pane .scroll-bar .thumb:hover, .root-pane .scroll-bar .thumb:pressed { -fx-background-color: -seeky-muted; }
+.root-pane .scroll-bar:vertical, .dialog-pane .scroll-bar:vertical { -fx-pref-width: 14; -fx-min-width: 14; }
+.root-pane .scroll-bar:horizontal, .dialog-pane .scroll-bar:horizontal { -fx-pref-height: 14; -fx-min-height: 14; }
+.root-pane .scroll-bar .track, .dialog-pane .scroll-bar .track { -fx-background-color: -seeky-raised; -fx-background-radius: 7; -fx-border-color: transparent; }
+.root-pane .scroll-bar .thumb, .dialog-pane .scroll-bar .thumb { -fx-background-color: -seeky-muted; -fx-background-radius: 6; -fx-opacity: 0.75; }
+.root-pane .scroll-bar .thumb:hover, .root-pane .scroll-bar .thumb:pressed, .dialog-pane .scroll-bar .thumb:hover, .dialog-pane .scroll-bar .thumb:pressed { -fx-background-color: -seeky-accent; -fx-opacity: 1; }
 .root-pane .scroll-bar .increment-button, .root-pane .scroll-bar .decrement-button, .dialog-pane .scroll-bar .increment-button, .dialog-pane .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
 .root-pane .scroll-bar .increment-arrow, .root-pane .scroll-bar .decrement-arrow, .dialog-pane .scroll-bar .increment-arrow, .dialog-pane .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
 .root-pane .scroll-pane > .corner { -fx-background-color: transparent; }
@@ -130,9 +134,9 @@
 .now-playing { -fx-background-color: -seeky-surface; -fx-background-radius: 18; -fx-border-color: -seeky-line; -fx-border-radius: 18; }
 .root-pane .hyperlink.link { -fx-text-fill: -seeky-accent; -fx-border-color: transparent; }
 /* Livros: estante de madeira, capas, grelha e lista. */
-.bookcase { -fx-background-color: linear-gradient(to bottom, #4a2f1a, #3b2414); -fx-background-radius: 16; -fx-padding: 4 0 18 0; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.45), 24, 0, 0, 4); }
+.bookcase { -fx-background-color: linear-gradient(to bottom, #4a2f1a, #3b2414); -fx-background-radius: 16; -fx-padding: 4 0 18 0; }
 .plank { -fx-background-color: linear-gradient(to bottom, #b9824a, #8a5a2e 60%, #5e3b1c); -fx-background-radius: 3; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 5); }
-.shelf-book { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 10, 0, 3, 2); }
+.shelf-book { -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0, 3, 2); }
 .cover { -fx-background-radius: 5; }
 .cover-badge { -fx-background-color: rgba(0,0,0,0.65); -fx-text-fill: white !important; -fx-background-radius: 8; -fx-padding: 1 6; -fx-font-size: 11px; -fx-font-weight: bold; }
 .root-pane .progress-bar.thin .bar { -fx-background-insets: 0; -fx-padding: 2; }
@@ -180,3 +184,16 @@
 .dialog-pane.seeky-dialog > .button-bar > .container { -fx-padding: 6 18 10 18; }
 .dialog-pane.seeky-dialog .button { -fx-background-color: -seeky-raised; -fx-text-fill: -seeky-ink; -fx-background-radius: 12; -fx-padding: 8 16; }
 .dialog-pane.seeky-dialog .button:default { -fx-background-color: -seeky-accent; -fx-text-fill: -seeky-on-accent; -fx-font-weight: bold; }
+
+/* 5.57: the note is one page, written in place */
+.root-pane .note-page { -fx-background-color: -seeky-surface; -fx-background-radius: 16; -fx-border-color: -seeky-line; -fx-border-radius: 16; -fx-padding: 4; }
+.root-pane .note-tools { -fx-background-color: transparent; -fx-padding: 0; }
+.root-pane .note-tools .button, .root-pane .note-tools .menu-button { -fx-padding: 5 10; }
+.root-pane .pdf-passage { -fx-background-color: derive(-seeky-accent, 20%); -fx-opacity: 0.28; -fx-background-radius: 4; -fx-border-color: transparent transparent -seeky-accent transparent; -fx-border-width: 0 0 3 0; }
+.root-pane .pdf-passage:hover { -fx-opacity: 0.5; }
+/* 5.58: words marked and selected on a PDF page */
+.root-pane .pdf-mark { -fx-opacity: 0.42; -fx-background-radius: 3; }
+.root-pane .pdf-mark:hover { -fx-opacity: 0.6; }
+.root-pane .pdf-select { -fx-background-color: -seeky-accent; -fx-opacity: 0.3; -fx-background-radius: 2; }
+.root-pane .resume-card { -fx-background-color: -seeky-raised; }
+.root-pane .nav-item.resume { -fx-background-color: derive(-seeky-accent, -55%); -fx-text-fill: -seeky-ink; }

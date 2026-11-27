@@ -1,8 +1,8 @@
 {
-  "versionCode": 5008300,
-  "versionName": "5.56.0",
-  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.56.0.apk",
-  "sha256": "a3049123e99a3898189752a82a6e4784e1bc6afd347ca1d962f844e9610fb621",
-  "bytes": 14018279,
-  "notes": "Windows: Ouvir lê a página inteira e passa sozinho à seguinte; na Música um clique selecciona e o duplo clique toca, lista e leitor mais leves."
+  "versionCode": 5008500,
+  "versionName": "5.58.0",
+  "apk": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/Seeky_5.58.0.apk",
+  "sha256": "e0f9d969419d899d71bcf6e70d97b2ddd39cef7bacdf503b8bb6920e48c4eecf",
+  "bytes": 14019335,
+  "notes": "Windows: passagens lidas como no telemóvel; leitura sem pausas entre páginas e com o parágrafo realçado; o livro fica aberto (Voltar à leitura); marcações nos PDF; estante mais leve."
 }

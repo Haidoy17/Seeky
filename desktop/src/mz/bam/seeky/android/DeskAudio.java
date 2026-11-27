@@ -180,7 +180,9 @@ final class DeskAudio {
                 File tmp = DeskStore.folder("tmp-audio"); int count = z - a + 1, made = 0; double seconds = 0;
                 for (int i = a; i <= z; i++) {
                     if (cancel.get()) break;
-                    Part p = list.get(i); String text = p.text == null ? "" : p.text.trim(); int n = i - a;
+                    Part p = list.get(i); int n = i - a;
+                    // 5.58: passages and numbers said as on the phone ("Salmos capítulo 13, versículo 40").
+                    String text = DeskSpeech.prepare(p.text == null ? "" : p.text, edgeVoice != null ? edgeVoice.lang : natural != null && natural.id.length() >= 5 ? natural.id.substring(0, 5).replace('_', '-') : "pt-PT").trim();
                     if (text.length() < 2) continue;
                     final int step = n; Platform.runLater(() -> { line.setText("Capítulo " + (step + 1) + " de " + count + " · " + p.name + " · a gerar a voz"); bar.setProgress((double) step / count); });
                     if (edgeVoice != null) {

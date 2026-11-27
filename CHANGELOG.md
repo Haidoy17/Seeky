@@ -1,5 +1,47 @@
 # Registo de alterações
 
+## 5.58.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: passagens lidas como no telemóvel.** O texto passa pela mesma preparação do Android
+  (`SpeechText.forVoice`): "Salmos 13:40" é lido "Salmos capítulo 13, versículo 40" (antes a voz dizia
+  "13 horas e 40 minutos"); também na gravação em MP3.
+- **Windows: leitura sem paragens entre páginas e com o parágrafo realçado.** Enquanto uma página é lida, a
+  seguinte já está preparada e (com o Edge ou as vozes do Windows) entregue à voz, por isso virar a página
+  não faz pausa. O Edge recebe partes maiores (até ~2400 letras) e diz que parágrafo está a ler; nos livros
+  EPUB/Word/TXT esse parágrafo fica realçado e a página acompanha-o; ao deslizar, o acompanhamento pára
+  10 s e aparece *Voltar à leitura* (como no telemóvel). As vozes do Windows passam a ser uma só leitura
+  contínua, parágrafo a parágrafo.
+- **Windows: o livro fica aberto.** Ao ir para outro ecrã e voltar a Livros, o livro aparece onde estava;
+  *Voltar à leitura* no menu lateral e na estante (com *Fechar o livro*); o PDF anterior é fechado ao abrir
+  outro (antes ficava aberto em memória).
+- **Windows: marcações nos PDF.** Arraste sobre o texto da página (duplo clique: uma palavra) e escolha a
+  cor, *Nota*, *Copiar*, *Ouvir* ou *Explicar*; as marcações aparecem pintadas por cima da página e abrem com
+  um clique; *Marcar página* continua para a página inteira; Esc limpa e Ctrl+C copia a selecção.
+- **Windows: estante mais leve.** Cada prateleira (e cada capa na grelha e na lista) é desenhada uma vez e
+  guardada como imagem enquanto desliza; saiu a sombra interior que cobria a estante inteira.
+- Android: só o número da versão e as Novidades.
+
+## 5.57.0 — 2026-11-27 (Android e Windows)
+
+- **Windows: notas numa só página.** A página de marcas (`**`, `#`, `- `…) e a pré-visualização ao lado
+  deram lugar a uma página única onde se escreve e se vê logo a nota final: títulos, negrito, itálico,
+  sublinhado, riscado, destaque, cores, listas, tarefas (clique na caixa), citações, alinhamento, recuo,
+  tabelas, linhas, imagens e passagens. A nota continua guardada no mesmo formato, por isso fica igual no
+  telemóvel, no Word e no PDF (teste de ida e volta no autoteste). Colar cola só o texto.
+- **Windows: passagens bíblicas numa janela**, sem ir à Bíblia: nas notas (marcadas enquanto escreve),
+  nos livros EPUB/Word/TXT e **nos PDF** — o Seeky lê o texto de cada página com a posição de cada letra e
+  põe uma marca clicável por cima de cada passagem (como no telemóvel). A janela mostra os versículos
+  numerados, com *Copiar* e *Abrir na Bíblia*. Antes, nos livros, as passagens com acentos (João) não
+  abriam porque o endereço do link vinha codificado.
+- **Windows: barra de rolagem visível** à direita de listas, páginas, livros e notas (mais larga, com cor
+  do tema, realçada ao passar o rato).
+- **Windows: Sair do Seeky** nas Definições (no topo e no fim): fecha a janela, o botão Flash, o ícone
+  junto ao relógio e a leitura em voz alta.
+- **Windows: Reiniciar agora depois de actualizar** corrigido: o Seeky novo abre logo com
+  `--after=<processo antigo>` e espera que o antigo feche de verdade (antes esperava 2 s fixos; se o
+  antigo ainda estivesse a fechar, o novo entregava-se a ele e nada abria). Ensaiado no Windows real (CI).
+- Android: só o número da versão e as Novidades.
+
 ## 5.56.0 — 2026-11-27 (Android e Windows)
 
 - **Windows: ouvir o livro seguido.** *Ouvir* lê a página inteira do PDF (ou o capítulo do EPUB/Word/TXT)

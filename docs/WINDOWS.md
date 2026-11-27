@@ -32,8 +32,8 @@ perdem ao actualizar nem ao desinstalar.
   espaçada, Perguntas, Agenda, Progresso e Seeky IA para criar cartões e perguntas; sincroniza com o
   telemóvel.
 - **Jogo da Bíblia**: Fácil, Médio, Difícil e Lendário, 60 s por pergunta, recordes.
-- **Bloco de notas**: o mesmo formato do Android (títulos, negrito, itálico, sublinhado, riscado, destaque,
-  cores, listas, tarefas, citações, tabelas, imagens), pré-visualização, passagens tocáveis, exportar
+- **Bloco de notas** numa só página (escreve e vê logo a nota final), no mesmo formato do Android (títulos, negrito, itálico, sublinhado, riscado, destaque,
+  cores, listas, tarefas, citações, tabelas, imagens), passagens tocáveis, exportar
   Word (.docx), PDF e Markdown, ouvir, pastas, fixar e **Seeky IA** (Gemini, chave protegida pelo Windows).
 - **Livros**: Estante, Grelha ou Lista, com capas; importar livros ou uma pasta com as subpastas; PDF
   (página a página, zoom), EPUB, Word, FB2, MOBI, AZW3, ODT, RTF, MHTML, CBZ e TXT, com o ponto onde parou;
@@ -57,6 +57,11 @@ perdem ao actualizar nem ao desinstalar.
   Géneros e Anos; fila e letras sincronizadas (.lrc ou LRCLIB). Toca MP3, M4A/AAC, WAV, AIFF e MP4
   (H.264); os outros vídeos abrem no leitor do Windows. Um clique selecciona (Ctrl/Shift para várias),
   duplo clique ou Enter toca; *Tocar*, *Tocar a seguir* e *Adicionar à fila* para as seleccionadas.
+- **Passagens bíblicas** (João 3:16…) nas notas, nos livros e nos PDF: um clique mostra o texto numa
+  janela, com *Copiar* e *Abrir na Bíblia*.
+- **Livros**: o livro fica aberto ao mudar de ecrã (*Voltar à leitura*); nos PDF, arrastar sobre o texto
+  para marcar com cores, nota, copiar, ouvir ou explicar.
+- **Sair do Seeky** nas Definições fecha tudo (janela, Flash e ícone junto ao relógio).
 - **Leitura em voz alta** com as vozes do Windows, do Edge ou Piper; *Ouvir* lê a página (ou o capítulo)
   inteira e passa sozinho à seguinte até ao fim do livro (pode desligar-se em Definições).
 

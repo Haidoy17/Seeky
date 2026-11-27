@@ -1,3 +1,23 @@
+## Seeky 5.58.0
+
+Instale **Seeky_5.58.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.58.0.
+
+- Windows: as passagens são lidas como «Salmos capítulo 13, versículo 40»; a página seguinte começa sem
+  pausa; o parágrafo lido fica realçado.
+- Windows: o livro fica aberto quando muda de ecrã (*Voltar à leitura*); marcações com cores nos PDF;
+  estante mais leve.
+
+## Seeky 5.57.0
+
+Instale **Seeky_5.57.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).
+No computador, o Seeky para Windows actualiza-se sozinho para a 5.57.0.
+
+- Windows: notas numa só página — escreve e já vê a nota final.
+- Windows: clique numa passagem bíblica nas notas, nos livros ou num PDF para a ler numa janela.
+- Windows: barra de rolagem visível; *Sair do Seeky* nas Definições; *Reiniciar agora* depois de
+  actualizar volta a abrir o Seeky.
+
 ## Seeky 5.56.0
 
 Instale **Seeky_5.56.0.apk** por cima do Seeky actual (ou actualize dentro da aplicação).

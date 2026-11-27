@@ -33,6 +33,18 @@ public final class DeskMain extends Application {
     final VBox nav = new VBox(4);
     final Map<String, Button> navButtons = new LinkedHashMap<>();
     String current = "";
+    final Button resume = new Button("Voltar à leitura");
+    /** Marks a module as the one shown (a book opened from the Flash, a mark or the start screen is in Livros). */
+    void selectNav(String id) {
+        current = id; for (Map.Entry<String, Button> e : navButtons.entrySet()) e.getValue().getStyleClass().remove("selected");
+        Button b = navButtons.get(id); if (b != null) b.getStyleClass().add("selected"); resumeButton();
+    }
+    /** Shows "Voltar à leitura" in the side bar while a book is open and another screen is shown. */
+    void resumeButton() {
+        boolean show = reader.openView != null && !(current.equals("reader") && reader.inBook);
+        resume.setVisible(show); resume.setManaged(show);
+        if (show) { resume.setText("Voltar à leitura"); resume.setTooltip(new Tooltip(reader.openTitle)); }
+    }
     DeskBible bible; DeskStudy study; DeskNotes notes; DeskReader reader; DeskFiles files; DeskMedia media; DeskFocus focus; DeskLibrary music, videos; DeskFlash flash; DeskSync sync; DeskStudies studies; DeskAiHub ai;
 
 
@@ -49,6 +61,9 @@ public final class DeskMain extends Application {
         item("home", "Início", "home"); item("bible", "Bíblia", "book"); item("study", "Estudo bíblico", "study"); item("studies", "Estudos", "course"); item("ai", "Seeky IA", "sparkle"); item("game", "Jogo da Bíblia", "game");
         item("notes", "Bloco de notas", "note"); item("reader", "Livros", "reader"); item("focus", "Foco", "timer"); item("files", "Ficheiros", "folder"); item("music", "Música", "music"); item("videos", "Vídeos", "video"); item("phone", "Telemóvel", "phone");
         Region gap = new Region(); VBox.setVgrow(gap, Priority.ALWAYS); nav.getChildren().add(gap);
+        // 5.58: a book left open in Livros: back to it from any screen, as on the phone.
+        resume.getStyleClass().addAll("nav-item", "resume"); resume.setMaxWidth(Double.MAX_VALUE); resume.setAlignment(Pos.CENTER_LEFT); resume.setGraphicTextGap(12); resume.setGraphic(DeskUi.icon("book", 20));
+        resume.setOnAction(e -> { reader.inBook = true; open("reader"); }); resume.setVisible(false); resume.setManaged(false); nav.getChildren().add(resume);
         item("settings", "Definições", "settings");
         // Avisos discretos no canto (sem barra de estado): aparecem e desaparecem sozinhos.
         status.getStyleClass().add("toast"); status.setPadding(new Insets(9, 16, 9, 16)); status.setWrapText(true); status.setMaxWidth(420);
@@ -86,7 +101,7 @@ public final class DeskMain extends Application {
         if ("1".equals(store.get("maximized", "0"))) window.maximize();
         stage.setOnHidden(e -> store.put("maximized", window.maximized ? "1" : "0"));
         String shots = getParameters().getNamed().get("screenshots");
-        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "marks", "focus", "files", "music", "music-player", "music-albums", "videos", "flash", "phone", "settings", "settings-voices", "dialog"))); return; }
+        if (shots != null) { demo(); screenshots(new java.io.File(shots), new ArrayList<>(Arrays.asList("home", "bible", "study", "game", "notes", "studies", "studies-courses", "studies-course", "studies-subject", "ai", "ai-plan", "reader", "reader-grid", "reader-list", "book", "book-pdf", "passage", "reader-resume", "marks", "focus", "files", "music", "music-player", "music-albums", "videos", "flash", "phone", "settings", "settings-voices", "dialog"))); return; }
         worker.execute(() -> DeskUpdates.check(this, false));
     }
     /** Example content for the build's screenshots only (a few verses written for the test, one note). */
@@ -125,7 +140,8 @@ public final class DeskMain extends Application {
                 java.io.File shelf = DeskStore.folder("exemplo/livros"); List<java.io.File> books = new ArrayList<>();
                 Object[][] demoBooks = {{"Confissões", 0x6b2f3f}, {"O peregrino", 0x2f4f6b}, {"Cartas de esperança", 0x7a5a2f}, {"Graça abundante", 0x2f5d50}, {"A cidade de Deus", 0x3f4b7a}, {"Mere christianity", 0x5b3a6b}, {"Salmos para cada dia", 0x4a6b3a}};
                 for (int i = 0; i < demoBooks.length; i++) books.add(DeskSelfTest.epub(shelf, "livro" + i + ".epub", (String) demoBooks[i][0], (Integer) demoBooks[i][1]));
-                java.io.File pdf = new java.io.File(shelf, "Estudo de Romanos.pdf"); try (java.io.OutputStream o = new java.io.FileOutputStream(pdf)) { DeskPdf.note("Estudo de Romanos", "# Estudo de Romanos\nCapítulo 1 a 8: a justiça de Deus.", shelf, o); } books.add(pdf);
+                java.io.File pdf = new java.io.File(shelf, "Estudo de Romanos.pdf"); try (java.io.OutputStream o = new java.io.FileOutputStream(pdf)) { DeskPdf.note("Estudo de Romanos", "# Estudo de Romanos\nCapítulo 1 a 8: a justiça de Deus.\n\nO evangelho é poder de Deus para salvação (Romanos 1:16). Todos pecaram, como diz Romanos 3:23, mas somos justificados pela fé.\n\nSabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus (Romanos 8:28). Compare com João 3:16 e Efésios 2:8-9.", shelf, o); }
+                DeskMarks.add(store, pdf.getPath(), "Estudo de Romanos", 0, "Página 1", "somos justificados pela fé", DeskMarks.COLORS[1], "A base de tudo"); books.add(pdf);
                 DeskReader.importBooks(store, books);
                 store.update("UPDATE books SET position=3,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 3600000, books.get(1).getPath());
                 store.update("UPDATE books SET position=8,total=10,opened=? WHERE path=?", System.currentTimeMillis() - 7200000, books.get(3).getPath());
@@ -162,6 +178,9 @@ public final class DeskMain extends Application {
         String id = left.remove(0);
         javafx.scene.control.Alert[] shown = {null};
         if (id.equals("dialog")) { javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.NONE, "A versão 5.55.0 já está no computador. Os seus dados ficam como estão.", new javafx.scene.control.ButtonType("Reiniciar agora", javafx.scene.control.ButtonBar.ButtonData.OK_DONE), new javafx.scene.control.ButtonType("Mais tarde", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE)); a.setTitle("Seeky"); a.setHeaderText("Actualização pronta · Seeky 5.55.0"); DeskUi.style(a.getDialogPane()); a.show(); shown[0] = a; }
+        else if (id.equals("book-pdf")) { java.io.File pdf = new java.io.File(DeskStore.folder("exemplo/livros"), "Estudo de Romanos.pdf"); reader.open(pdf, 0, 0); javafx.animation.PauseTransition sel = new javafx.animation.PauseTransition(javafx.util.Duration.millis(1100)); sel.setOnFinished(e -> System.out.println("seleccionar no PDF: " + reader.demoSelect.test("Sabemos que todas as coisas contribuem"))); sel.play(); }
+        else if (id.equals("reader-resume")) { reader.inBook = false; open("reader"); }
+        else if (id.equals("passage")) { javafx.scene.control.Alert a = DeskPassage.dialog(this, BibleReferences.lookup("Génesis 1:1-3")); a.show(); shown[0] = a; }
         else if (id.equals("flash")) { flash.open(""); flash.input.setText("relat"); }
         else if (id.equals("book")) reader.open(demoBook, 0, 0);
         else if (id.startsWith("reader-")) { store.put("books_mode", id.endsWith("grid") ? "1" : "2"); open("reader"); store.put("books_mode", "0"); }
@@ -210,6 +229,7 @@ public final class DeskMain extends Application {
             default: id = "home"; view = home();
         }
         current = id; store.put("last", id);
+        resumeButton();
         for (Map.Entry<String, Button> e : navButtons.entrySet()) e.getValue().getStyleClass().remove("selected");
         Button b = navButtons.get(id); if (b != null) b.getStyleClass().add("selected");
         show(view);

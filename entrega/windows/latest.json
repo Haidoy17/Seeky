@@ -1,10 +1,10 @@
 {
-  "versionCode": 5008300,
-  "versionName": "5.56.0",
-  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.56.0-app.zip",
-  "sha256": "88eecf66dea582fabd37a4ecb96ccd8d53754536816205a0a9ddfc699d102697",
-  "bytes": 9339453,
+  "versionCode": 5008500,
+  "versionName": "5.58.0",
+  "app": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Desktop-5.58.0-app.zip",
+  "sha256": "ab9b74d6a84b50172e48373be664aa9e50ca8d5448b9b838cbecfeec9bf99ae3",
+  "bytes": 9379243,
   "installer": "https://raw.githubusercontent.com/Haidoy17/Seeky/main/entrega/windows/Seeky-Setup-5.45.0-x64.exe",
   "installerSha256": "0038732f097fd086d1997a2dad0376d909b16d791a3bd548497cc8edc56367fe",
-  "notes": "Ouvir lê a página inteira e passa sozinho à seguinte; na Música um clique selecciona e o duplo clique toca; lista e leitor mais leves."
+  "notes": "Passagens lidas como no telemóvel; leitura sem pausas entre páginas e com o parágrafo realçado; o livro fica aberto (Voltar à leitura); marcações nos PDF; estante mais leve."
 }

@@ -23,8 +23,14 @@ final class WhatsNew {
     }
 
     static void show(MainActivity a) {
-        UiPanel panel = new UiPanel(a, "Novidades da 5.56", "Toque numa novidade para a experimentar", "star");
+        UiPanel panel = new UiPanel(a, "Novidades da 5.58", "Toque numa novidade para a experimentar", "star");
         panel.section("Nesta versão");
+        panel.action("speaker", "Leitura no computador como no telemóvel", "No Seeky para Windows: as passagens são lidas como «Salmos capítulo 13, versículo 40»; o parágrafo lido fica realçado e seguido; a página seguinte começa sem pausa", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.action("book", "Livros no computador", "No Seeky para Windows: o livro fica aberto quando muda de ecrã (Voltar à leitura), marcações com cores nos PDF e uma estante mais leve", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.57");
+        panel.action("note", "Notas numa só página no computador", "No Seeky para Windows: escreve e já vê a nota final, com títulos, listas, tarefas e cores, sem a página de marcas ao lado", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.action("book", "Passagens em janela no computador", "No Seeky para Windows: clique numa passagem (João 3:16) nas notas, nos livros ou num PDF e leia-a logo, sem ir à Bíblia", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
+        panel.section("Da 5.56");
         panel.action("speaker", "Ouvir o livro seguido no computador", "No Seeky para Windows, Ouvir lê a página inteira e passa sozinho à seguinte até ao fim do livro, como já faz no telemóvel", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
         panel.action("audio", "Música mais leve no computador", "No Seeky para Windows: um clique selecciona a música (Ctrl ou Shift para várias), duplo clique toca, e a lista fica mais leve", false, () -> PlusUi.toast(a, "Esta novidade é do Seeky para Windows."));
         panel.section("Da 5.55");
